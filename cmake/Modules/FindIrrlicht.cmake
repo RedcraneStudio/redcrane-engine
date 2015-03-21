@@ -1,0 +1,5 @@
+find_library(Irrlicht_LIBRARY Irrlicht)
+find_path(Irrlicht_INCLUDE_DIR irrlicht.h PATH_SUFFIXES irrlicht)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Irrlicht Irrlicht_LIBRARY Irrlicht_INCLUDE_DIR)
