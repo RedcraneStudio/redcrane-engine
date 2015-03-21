@@ -2,20 +2,8 @@
  * Copyright (C) 2014 Luke San Antonio
  * All rights reserved.
  */
+#include "scoped_drop.hpp"
 #include "irrlicht.h"
-
-struct Scoped_Device_Drop
-{
-  inline Scoped_Device_Drop(irr::IrrlichtDevice* d) noexcept : d_(d) {}
-  ~Scoped_Device_Drop() noexcept;
-private:
-  irr::IrrlichtDevice* d_;
-};
-
-Scoped_Device_Drop::~Scoped_Device_Drop() noexcept
-{
-  d_->drop();
-}
 
 int main(int argc, char** argv)
 {
@@ -31,7 +19,7 @@ int main(int argc, char** argv)
   auto device = irr::createDevice(irr::video::EDT_OPENGL,
                                   irrc::dimension2d<u32>(1000, 1000), 16,
                                   false, false, false, 0);
-  Scoped_Device_Drop scoped_device_drop{device};
+  auto scoped_device_drop = survive::make_scoped_drop(device);
 
   device->setWindowCaption(L"Survival Games");
 
