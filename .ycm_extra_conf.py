@@ -46,7 +46,7 @@ flags = [
 '-I',
 'src/',
 '-I',
-'/usr/include/irrlicht',
+'/usr/include/GLFW/'
 ]
 
 
