@@ -48,7 +48,9 @@ flags = [
 '-I',
 'src/',
 '-I',
-'/usr/include/GLFW/'
+'/usr/include/GLFW/',
+'-I',
+'gl/include'
 ]
 
 

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <vector>
+#include "glad/glad.h"
 #include "glfw3.h"
 #include "glm/glm.hpp"
 
@@ -98,4 +99,37 @@ Command_Options parse_command_line(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+  auto options = parse_command_line(argc - 1, argv+1);
+
+  // Should be run the testing whatchamacallit?
+  if(options.test)
+  {
+    int result = Catch::Session().run(1, argv);
+    if(result)
+    {
+      return EXIT_FAILURE;
+    }
+  }
+
+  if(!glfwInit())
+    return EXIT_FAILURE;
+
+  auto window = glfwCreateWindow(1000, 1000, "Hello World", NULL, NULL);
+  if(!window)
+  {
+    glfwTerminate();
+    return EXIT_FAILURE;
+  }
+
+  glfwMakeContextCurrent(window);
+  gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+  while(!glfwWindowShouldClose(window))
+  {
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  glfwTerminate();
+  return 0;
 }
