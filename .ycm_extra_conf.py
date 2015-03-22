@@ -44,6 +44,8 @@ flags = [
 '-x',
 'c++',
 '-I',
+'.',
+'-I',
 'src/',
 '-I',
 '/usr/include/GLFW/'
