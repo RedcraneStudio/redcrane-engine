@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include <fstream>
 #include <sstream>
+#include "../common/log.h"
 
 namespace survive
 {
@@ -13,7 +14,7 @@ namespace survive
     auto mesh = Mesh{};
 
     auto line = std::string{};
-    while(!std::getline(stream, line).eof())
+    while(!std::getline(stream, line).eof() && stream.good())
     {
       if(line.size() == 0) continue;
       if(line[0] == '#') continue;
@@ -43,7 +44,14 @@ namespace survive
   }
   Mesh Mesh::from_file(std::string file) noexcept
   {
-    return Mesh::from_stream(std::ifstream(file));
+    std::ifstream stream{file};
+    if(!stream.good())
+    {
+      log_w("File stream from '%' not good", file);
+      return Mesh{};
+    }
+
+    return Mesh::from_stream(std::move(stream));
   }
 }
 
