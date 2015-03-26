@@ -1,3 +1,7 @@
+
+# Copyright (C) 2014 Luke San Antonio
+# All rights reserved.
+
 cmake_minimum_required(VERSION 3.1)
 project(Survival_Games VERSION 0.0 LANGUAGES C CXX)
 
