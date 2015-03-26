@@ -6,77 +6,21 @@
 #include <sstream>
 #include <cstdlib>
 #include <vector>
+
+#include "common/log.h"
+
+#include "gfx/mesh.h"
+#include "gfx/program.h"
+#include "gfx/pipeline.h"
+
 #include "glad/glad.h"
 #include "glfw3.h"
+
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
-
-struct Mesh
-{
-  std::vector<glm::vec3> vertices;
-  std::vector<std::tuple<int, int, int> > faces;
-};
-
-Mesh load_mesh(std::istream&& file) noexcept
-{
-  auto mesh = Mesh{};
-
-  auto line = std::string{};
-  while(!std::getline(file, line).eof())
-  {
-    if(line.size() == 0) continue;
-    if(line[0] == '#') continue;
-
-    std::istringstream stream{line};
-
-    auto c = char{};
-    stream >> c;
-
-    if(c == 'v')
-    {
-      glm::vec3 v;
-      stream >> v.x >> v.y >> v.z;
-      mesh.vertices.push_back(v);
-    }
-    else if(c == 'f')
-    {
-      int f, s, t;
-      stream >> f >> s >> t;
-      mesh.faces.emplace_back(f, s, t);
-    }
-    else continue;
-  }
-
-  return mesh;
-}
-
-Mesh load_mesh_from_file(std::string const& file) noexcept
-{
-  std::ifstream stream{file};
-  return load_mesh(std::move(stream));
-}
-Mesh load_mesh_from_data(std::string const& data) noexcept
-{
-  std::istringstream stream{data};;
-  return load_mesh(std::move(stream));
-}
-
-TEST_CASE(".obj mesh is loaded", "[load_mesh]")
-{
-  std::string data =
-  "v -10.0 10.0 0.0\n"
-  "v -10.0 -10.0 0.0\n"
-  "v 10.0 10.0 0.0\n"
-  "v 10.0 -10.0 0.0\n"
-  "f 2 4 3\n"
-  "f 1 2 3\n";
-
-  auto mesh = load_mesh_from_data(data);
-  REQUIRE(mesh.vertices.size() == 4);
-  REQUIRE(mesh.faces.size() == 2);
-}
 
 struct Command_Options
 {
@@ -97,8 +41,15 @@ Command_Options parse_command_line(int argc, char** argv)
   return opt;
 }
 
+
 int main(int argc, char** argv)
 {
+  using namespace survive;
+
+  // Initialize logger.
+  Scoped_Log_Init log_init_raii_lock{};
+
+  // Parse command line arguments.
   auto options = parse_command_line(argc - 1, argv+1);
 
   // Should be run the testing whatchamacallit?
@@ -111,6 +62,7 @@ int main(int argc, char** argv)
     }
   }
 
+  // Init glfw.
   if(!glfwInit())
     return EXIT_FAILURE;
 
@@ -121,13 +73,91 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
+  // Init context + load gl functions.
   glfwMakeContextCurrent(window);
   gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
+  // Log glfw version.
+  log_i("Initialized GLFW %", glfwGetVersionString());
+
+  int maj = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
+  int min = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
+  int rev = glfwGetWindowAttrib(window, GLFW_CONTEXT_REVISION);
+
+  // Log GL profile.
+  log_i("OpenGL core profile %.%.%", maj, min, rev);
+
+  // Initialize the graphics pipeline.
+  auto pipeline = gfx::Pipeline{};
+
+  // Load a shader program.
+  auto shader_program = gfx::Program::from_files("assets/main.vs",
+                                                 "assets/main.fs");
+  // Prepare a mesh for rendering.
+  auto mesh = pipeline.prepare_mesh(Mesh::from_file("assets/origin.obj"));
+
+  int fps = 0;
+  int time = glfwGetTime();
+
+  // Set up some pre-rendering state.
+  glClearColor(.75, .34, .50, 1.0);
+  glClearDepth(1);
+
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
+
+  // Use our shader.
+  shader_program.use();
+
+  float deg = -5;
   while(!glfwWindowShouldClose(window))
   {
+    ++fps;
+
+    // Create our matrix.
+
+    //glm::mat4 view = glm::lookAt(glm::vec3(0, 10, 0), glm::vec3(0, 0, 0),
+                                 //glm::vec3(0, 0, 1));
+    //glm::mat4 perspective = glm::frustum(-1, 1, -1, 1, -1, 1);
+    //glm::mat4 perspective = glm::ortho(-1, 1, -1, 1, -1, 1);
+    glm::mat4 view(1.0);
+    view = glm::lookAt(glm::vec3(0, 0, 15), glm::vec3(0, 0, 0),
+                       glm::vec3(0, 1, 0));
+    glm::mat4 perspective(1.0);
+    perspective = glm::perspective(45., 1., .01, 30.);
+
+    auto model = glm::mat4(1.0);
+
+    // rotate 90 degrees ccw
+    //model = glm::translate(model, glm::vec3(0, cam_height, 0));
+    model = glm::rotate(model, -3.14159f / 2.0f, glm::vec3(0, 1, 0));
+    model = glm::rotate(model, deg, glm::vec3(0, 1, 0));
+    //model = glm::translate(model, glm::vec3(0, 0, 0));
+    //model = glm::translate(model, glm::vec3(0, 0, 7));
+    model = glm::scale(model, glm::vec3(5));
+
+    deg += .001;
+
+    glm::mat4 mvp = perspective * view * model;
+
+    // Set the matrix in the program.
+    // TODO this seems bad, change this.
+    shader_program.set_uniform_mat4("mvp", mvp);
+
+    // Clear the screen and render.
+    pipeline.clear();
+    pipeline.render_pipeline_mesh(mesh);
+
+    // Show it on screen.
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    if(int(glfwGetTime()) != time)
+    {
+      time = glfwGetTime();
+      log_d("fps: %", fps);
+      fps = 0;
+    }
   }
 
   glfwTerminate();

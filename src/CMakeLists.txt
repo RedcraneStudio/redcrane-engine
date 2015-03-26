@@ -1,9 +1,14 @@
-add_executable(survive main.cpp)
 
-target_link_libraries(survive survival_games_gl)
+# Copyright (C) 2014 Luke San Antonio
+# All rights reserved.
+
+include_directories(${CMAKE_SOURCE_DIR})
+
+find_package(LibUV REQUIRED)
+add_subdirectory(common)
 
 find_package(GLFW REQUIRED)
-target_link_libraries(survive ${GLFW_LIBRARY})
-target_include_directories(survive PUBLIC ${GLFW_INCLUDE_DIR})
+add_subdirectory(gfx)
 
-target_include_directories(survive PUBLIC ${CMAKE_SOURCE_DIR})
+add_executable(survive main.cpp)
+target_link_libraries(survive gfxlib)
