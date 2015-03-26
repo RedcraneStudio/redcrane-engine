@@ -19,6 +19,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "uv.h"
+
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
 
@@ -41,10 +43,11 @@ Command_Options parse_command_line(int argc, char** argv)
   return opt;
 }
 
-
 int main(int argc, char** argv)
 {
   using namespace survive;
+
+  uv_chdir("assets/");
 
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
@@ -91,10 +94,10 @@ int main(int argc, char** argv)
   auto pipeline = gfx::Pipeline{};
 
   // Load a shader program.
-  auto shader_program = gfx::Program::from_files("assets/main.vs",
-                                                 "assets/main.fs");
+  auto shader_program = gfx::Program::from_files("shader/diffuse/vertex",
+                                                 "shader/diffuse/fragment");
   // Prepare a mesh for rendering.
-  auto mesh = pipeline.prepare_mesh(Mesh::from_file("assets/origin.obj"));
+  auto mesh = pipeline.prepare_mesh(Mesh::from_file("obj/plane.obj"));
 
   int fps = 0;
   int time = glfwGetTime();
