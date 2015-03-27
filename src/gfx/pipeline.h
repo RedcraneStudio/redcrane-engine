@@ -14,7 +14,9 @@ namespace survive
       Mesh mesh;
 
       GLuint vao;
-      GLuint vertex_buffer;
+      GLuint vertice_buffer;
+      GLuint normals_buffer;
+      GLuint tex_coords_buffer;
       GLuint face_index_buffer;
     };
 

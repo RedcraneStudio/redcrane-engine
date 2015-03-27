@@ -9,6 +9,25 @@ namespace survive
 {
   namespace gfx
   {
+    namespace
+    {
+      template <class T>
+      void init_array_buffer(GLuint attrib,
+                             std::vector<T> const& buf,
+                             GLuint& buf_value,
+                             GLint size, GLenum type,
+                             bool normalized) noexcept
+      {
+        glGenBuffers(1, &buf_value);
+        glBindBuffer(GL_ARRAY_BUFFER, buf_value);
+        glBufferData(GL_ARRAY_BUFFER, buf.size() * sizeof(T),
+                     &buf[0], GL_STATIC_DRAW);
+        glVertexAttribPointer(attrib, size, type, normalized, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glEnableVertexAttribArray(attrib);
+      }
+    }
+
     /*!
      * Swallow a mesh for our own purposes.
      */
@@ -23,22 +42,27 @@ namespace survive
       glGenVertexArrays(1, &pipemesh.vao);
       glBindVertexArray(pipemesh.vao);
 
-      glGenBuffers(1, &pipemesh.vertex_buffer);
-      glBindBuffer(GL_ARRAY_BUFFER, pipemesh.vertex_buffer);
-      glBufferData(GL_ARRAY_BUFFER,
-                   pipemesh.mesh.vertices.size() * sizeof(glm::vec3),
-                   &pipemesh.mesh.vertices[0][0], GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-      glEnableVertexAttribArray(0);
+      // Initialize the vertices.
+      init_array_buffer(0, pipemesh.mesh.vertices, pipemesh.vertice_buffer,
+                        3, GL_FLOAT, GL_FALSE);
+      // Initialize normals.
+      if(pipemesh.mesh.normals.size())
+      {
+        init_array_buffer(1, pipemesh.mesh.normals, pipemesh.normals_buffer,
+                          3, GL_FLOAT, GL_TRUE);
+      }
+      // Initialize texture coordinates.
+      if(pipemesh.mesh.tex_coords.size())
+      {
+        init_array_buffer(2, pipemesh.mesh.tex_coords,
+                          pipemesh.tex_coords_buffer, 2, GL_FLOAT, GL_FALSE);
+      }
 
       glGenBuffers(1, &pipemesh.face_index_buffer);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pipemesh.face_index_buffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                   pipemesh.mesh.faces.size() * sizeof(glm::ivec3),
-                   &pipemesh.mesh.faces[0][0],
-                   GL_STATIC_DRAW);
+                   pipemesh.mesh.faces.size() * sizeof(GLuint),
+                   &pipemesh.mesh.faces[0], GL_STATIC_DRAW);
 
       glBindVertexArray(0);
 
@@ -80,7 +104,9 @@ namespace survive
     // Uninitialize a mesh as far as opengl is concerned *unprepare it*.
     void Pipeline::uninit_pipeline_mesh_(Pipeline_Mesh& mesh) noexcept
     {
-      glDeleteBuffers(1, &mesh.vertex_buffer);
+      glDeleteBuffers(1, &mesh.vertice_buffer);
+      glDeleteBuffers(1, &mesh.normals_buffer);
+      glDeleteBuffers(1, &mesh.tex_coords_buffer);
       glDeleteBuffers(1, &mesh.face_index_buffer);
       glDeleteVertexArrays(1, &mesh.vao);
     }
