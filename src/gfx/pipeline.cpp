@@ -36,7 +36,7 @@ namespace survive
       // Make a "pipeline mesh" or rather something that will store some
       // useful things about the mesh for the purposes of rendering it with
       // opengl.
-      auto pipemesh = Pipeline_Mesh{std::move(mesh)};
+      auto pipemesh = Pipeline_Mesh{std::move(mesh), 0,0,0,0,0};
 
       // Initialize the vao and buffer and such.
       glGenVertexArrays(1, &pipemesh.vao);
