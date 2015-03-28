@@ -103,7 +103,7 @@ int main(int argc, char** argv)
   int time = glfwGetTime();
 
   // Set up some pre-rendering state.
-  glClearColor(.75, .34, .50, 1.0);
+  glClearColor(0.509, .694, .737, 1.0);
   glClearDepth(1);
 
   glEnable(GL_DEPTH_TEST);
