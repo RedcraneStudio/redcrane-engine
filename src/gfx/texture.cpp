@@ -126,6 +126,19 @@ namespace survive
     pitch = tex.pitch;
     format = tex.format;
   }
+  Texture& Texture::operator=(Texture&& tex) noexcept
+  {
+    w = tex.w;
+    h = tex.h;
+
+    data = tex.data;
+    tex.data = nullptr;
+
+    pitch = tex.pitch;
+    format = tex.format;
+
+    return *this;
+  }
   Texture::~Texture() noexcept
   {
     if(data) delete[] data;

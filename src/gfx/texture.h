@@ -26,6 +26,9 @@ namespace survive
     Texture(Texture&&) noexcept;
     ~Texture() noexcept;
 
+    Texture& operator=(Texture const&) noexcept = delete;
+    Texture& operator=(Texture&&) noexcept;
+
     static Texture from_png_file(std::string filename) noexcept;
   };
 }
