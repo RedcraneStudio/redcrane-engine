@@ -77,23 +77,36 @@ namespace survive
 
     auto format = png_get_color_type(png_ptr, info_ptr);
 
-    auto bytes_per_pixel = int{};
+    auto bytes_per_pixel = 4;
+    auto png_bytes_per_pixel = int{};
     if(format == PNG_COLOR_TYPE_RGB)
     {
-      bytes_per_pixel = 3;
-      texture.format = Texture_Format::RGB;
+      png_bytes_per_pixel = 3;
     }
     else if(format == PNG_COLOR_TYPE_RGBA)
     {
-      bytes_per_pixel = 4;
-      texture.format = Texture_Format::RGBA;
+      png_bytes_per_pixel = 4;
     }
+    texture.format = Texture_Format::RGBA;
+
     texture.data = new uint8_t[texture.w * texture.h * bytes_per_pixel];
     texture.pitch = texture.w * bytes_per_pixel;
     for(int i = 0; i < texture.h; ++i)
     {
-      std::memcpy(texture.data + texture.pitch * i, *(png_data + i),
-                  texture.pitch);
+      for(int j = 0; j < texture.w; ++j)
+      {
+        auto pos = texture.data + texture.pitch * i + j * bytes_per_pixel;
+
+        auto dst_ptr = *(png_data + i);
+        dst_ptr += j * png_bytes_per_pixel;
+
+        std::memcpy(pos, dst_ptr, png_bytes_per_pixel);
+        if(format == PNG_COLOR_TYPE_RGB)
+        {
+          // We don't have an alpha value, so fill in full opacity.
+          pos[3] = 0xff;
+        }
+      }
     }
 
     // We copied the data, so just forget about png now.
