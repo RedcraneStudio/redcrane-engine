@@ -102,6 +102,13 @@ namespace survive
       // Always succeeds for now.
       return true;
     }
+    bool Program::set_uniform_int(std::string str, int i) noexcept
+    {
+      auto loc = glGetUniformLocation(prog_, str.data());
+      glUniform1i(loc, i);
+
+      return true;
+    }
     Program::~Program() noexcept
     {
 #ifndef SURVIVE_RELEASE_BUILD
