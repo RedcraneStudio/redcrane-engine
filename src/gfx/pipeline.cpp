@@ -101,6 +101,55 @@ namespace survive
       // Unbind vao?
       //glBindVertexArray(0);
     }
+
+    Pipeline_Texture* Pipeline::prepare_texture(Texture&& texture) noexcept
+    {
+      auto pipetex = Pipeline_Texture{std::move(texture), 0};
+
+      glGenTextures(1, &pipetex.tex_id);
+
+      // Allow for different texture units.
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, pipetex.tex_id);
+
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pipetex.texture.w,
+                   pipetex.texture.h, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                   pipetex.texture.data);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+      textures_.push_back(std::move(pipetex));
+      return &textures_.back();
+    }
+    Texture Pipeline::remove_texture(Pipeline_Texture& texture) noexcept
+    {
+      using std::begin; using std::end;
+      auto new_end = std::remove_if(begin(textures_), end(textures_),
+      [&texture](auto const& val)
+      {
+        // Check to see which element the pointer is pointing to.
+        return &texture == &val;
+      });
+
+      // First uninitialize the vao and buffers.
+      uninit_pipeline_texture_(texture);
+
+      // Capture that mesh!
+      Texture old_texture_data = std::move(texture.texture);
+      // Remove it from our vector.
+      textures_.erase(new_end, end(textures_));
+
+      // Move the original mesh out.
+      return std::move(old_texture_data);
+    }
+
     // Uninitialize a mesh as far as opengl is concerned *unprepare it*.
     void Pipeline::uninit_pipeline_mesh_(Pipeline_Mesh& mesh) noexcept
     {
@@ -109,6 +158,10 @@ namespace survive
       glDeleteBuffers(1, &mesh.tex_coords_buffer);
       glDeleteBuffers(1, &mesh.face_index_buffer);
       glDeleteVertexArrays(1, &mesh.vao);
+    }
+    void Pipeline::uninit_pipeline_texture_(Pipeline_Texture& texture) noexcept
+    {
+      glDeleteTextures(1, &texture.tex_id);
     }
   }
 }

@@ -3,7 +3,9 @@
 layout(location = 0) out vec4 diffuse;
 layout(location = 0) in vec2 uv;
 
+uniform sampler2D tex;
+
 void main()
 {
-  diffuse = vec4(uv.xy, 0x00, 0xff);
+  diffuse = texture(tex, uv);
 }

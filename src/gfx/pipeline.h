@@ -5,6 +5,7 @@
 #pragma once
 #include "glad/glad.h"
 #include "mesh.h"
+#include "texture.h"
 namespace survive
 {
   namespace gfx
@@ -20,6 +21,13 @@ namespace survive
       GLuint face_index_buffer;
     };
 
+    struct Pipeline_Texture
+    {
+      Texture texture;
+
+      GLuint tex_id;
+    };
+
     struct Pipeline
     {
       /*!
@@ -33,14 +41,19 @@ namespace survive
 
       void render_pipeline_mesh(Pipeline_Mesh* mesh) noexcept;
 
+      Pipeline_Texture* prepare_texture(Texture&& texture) noexcept;
+      Texture remove_texture(Pipeline_Texture& texture) noexcept;
+
       inline void clear() noexcept;
       inline void clear_color() noexcept;
       inline void clear_depth() noexcept;
 
     private:
       void uninit_pipeline_mesh_(Pipeline_Mesh& mesh) noexcept;
+      void uninit_pipeline_texture_(Pipeline_Texture& texture) noexcept;
 
       std::vector<Pipeline_Mesh> mesh_;
+      std::vector<Pipeline_Texture> textures_;
     };
 
     inline void Pipeline::clear() noexcept
