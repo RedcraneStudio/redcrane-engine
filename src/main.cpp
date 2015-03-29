@@ -10,7 +10,7 @@
 #include "common/log.h"
 
 #include "gfx/program.h"
-#include "gfx/pipeline.h"
+#include "gfx/gl/pipeline.h"
 
 #include "texture.h"
 #include "mesh.h"
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
   // Initialize the graphics pipeline.
-  auto pipeline = gfx::Pipeline{};
+  auto pipeline = gfx::gl::Pipeline{};
 
   // Load a shader program.
   auto shader_program = gfx::Program::from_files("shader/diffuse/vertex",

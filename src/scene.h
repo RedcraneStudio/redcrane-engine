@@ -6,7 +6,7 @@
 #include <memory>
 #include "mesh.h"
 #include "texture.h"
-#include "gfx/pipeline.h"
+#include "gfx/gl/pipeline.h"
 #include <glm/glm.hpp>
 namespace survive
 {
@@ -15,7 +15,7 @@ namespace survive
     std::unique_ptr<Mesh> mesh;
     std::unique_ptr<Texture> texture;
 
-    gfx::Pipeline_Mesh* prepared;
+    gfx::gl::Pipeline_Mesh* prepared;
 
     glm::mat4 model;
 
