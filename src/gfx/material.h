@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <memory>
-#include "color.h"
+#include "../color.h"
 #include "program.h"
 namespace survive
 {

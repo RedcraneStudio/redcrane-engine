@@ -4,8 +4,8 @@
  */
 #pragma once
 #include <memory>
-#include "gfx/mesh.h"
-#include "gfx/texture.h"
+#include "mesh.h"
+#include "texture.h"
 #include "gfx/pipeline.h"
 #include <glm/glm.hpp>
 namespace survive

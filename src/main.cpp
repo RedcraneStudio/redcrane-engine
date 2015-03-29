@@ -9,10 +9,11 @@
 
 #include "common/log.h"
 
-#include "gfx/mesh.h"
 #include "gfx/program.h"
 #include "gfx/pipeline.h"
-#include "gfx/texture.h"
+
+#include "texture.h"
+#include "mesh.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"

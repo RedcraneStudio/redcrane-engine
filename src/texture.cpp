@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "texture.h"
-#include "../common/log.h"
+#include "common/log.h"
 #include <cstring>
 #include <png.h>
 namespace survive

@@ -2,8 +2,7 @@
 # Copyright (C) 2014 Luke San Antonio
 # All rights reserved.
 
-add_library(gfxlib STATIC mesh.cpp pipeline.cpp program.cpp texture.cpp
-                          material.cpp)
+add_library(gfxlib STATIC pipeline.cpp program.cpp material.cpp)
 
 target_link_libraries(gfxlib survival_games_gl)
 

@@ -4,8 +4,8 @@
  */
 #pragma once
 #include "glad/glad.h"
-#include "mesh.h"
-#include "texture.h"
+#include "../mesh.h"
+#include "../texture.h"
 namespace survive
 {
   namespace gfx
