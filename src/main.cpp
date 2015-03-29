@@ -12,6 +12,7 @@
 #include "gfx/mesh.h"
 #include "gfx/program.h"
 #include "gfx/pipeline.h"
+#include "gfx/texture.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -99,6 +100,9 @@ int main(int argc, char** argv)
   // Prepare a mesh for rendering.
   auto mesh = pipeline.prepare_mesh(Mesh::from_file("obj/plane.obj"));
 
+  auto tex =
+      pipeline.prepare_texture(Texture::from_png_file("tex/cracked_soil.png"));
+
   int fps = 0;
   int time = glfwGetTime();
 
@@ -111,6 +115,8 @@ int main(int argc, char** argv)
 
   // Use our shader.
   shader_program.use();
+
+  shader_program.set_uniform_int("tex", 0);
 
   float deg = -5;
   while(!glfwWindowShouldClose(window))
