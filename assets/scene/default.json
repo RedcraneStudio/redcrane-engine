@@ -1,0 +1,5 @@
+{
+  "mesh": "obj/plane.obj",
+  "texture": "tex/cracked_soil.png",
+  "translation": { "y": -1 }
+}
