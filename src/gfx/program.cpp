@@ -93,21 +93,42 @@ namespace survive
     {
       glUseProgram(prog_);
     }
-    bool Program::set_uniform_mat4(std::string n, glm::mat4 const& m) noexcept
+    GLint Program::get_uniform_location(std::string n) noexcept
     {
-      // Cache this
-      auto loc = glGetUniformLocation(prog_, n.data());
+      return glGetUniformLocation(prog_, n.data());
+    }
+    bool Program::set_uniform_mat4(GLint loc, glm::mat4 const& m) noexcept
+    {
       glUniformMatrix4fv(loc, 1, GL_FALSE, &m[0][0]);
 
       // Always succeeds for now.
       return true;
     }
-    bool Program::set_uniform_int(std::string str, int i) noexcept
+    bool Program::set_uniform_int(GLint loc, int i) noexcept
     {
-      auto loc = glGetUniformLocation(prog_, str.data());
       glUniform1i(loc, i);
 
       return true;
+    }
+    Program::Program(Program&& p1) noexcept
+                     : vshade_(p1.vshade_), fshade_(p1.fshade_),
+                       prog_(p1.prog_)
+    {
+      p1.vshade_ = 0;
+      p1.fshade_ = 0;
+      p1.prog_ = 0;
+    }
+    Program& Program::operator=(Program&& p1) noexcept
+    {
+      vshade_ = p1.vshade_;
+      fshade_ = p1.fshade_;
+      prog_ = p1.prog_;
+
+      p1.vshade_ = 0;
+      p1.fshade_ = 0;
+      p1.prog_ = 0;
+
+      return *this;
     }
     Program::~Program() noexcept
     {

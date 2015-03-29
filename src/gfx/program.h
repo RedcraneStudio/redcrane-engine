@@ -15,13 +15,17 @@ namespace survive
     {
       void use() noexcept;
 
-      bool set_uniform_mat4(std::string str, glm::mat4 const& m) noexcept;
-      bool set_uniform_int(std::string str, int i) noexcept;
+      GLint get_uniform_location(std::string n) noexcept;
+
+      bool set_uniform_mat4(GLint loc, glm::mat4 const& m) noexcept;
+      bool set_uniform_int(GLint loc, int i) noexcept;
 
       static Program from_contents(std::string v, std::string f) noexcept;
       static Program from_streams(std::istream&& v, std::istream&& f) noexcept;
       static Program from_files(std::string v, std::string f) noexcept;
 
+      Program(Program&&) noexcept;
+      Program& operator=(Program&&) noexcept;
       ~Program() noexcept;
 
       std::string name;

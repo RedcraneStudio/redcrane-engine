@@ -116,7 +116,10 @@ int main(int argc, char** argv)
   // Use our shader.
   shader_program.use();
 
-  shader_program.set_uniform_int("tex", 0);
+  auto tex_loc = shader_program.get_uniform_location("tex");
+  shader_program.set_uniform_int(tex_loc, 0);
+
+  auto mvp_loc = shader_program.get_uniform_location("mvp");
 
   float deg = -5;
   while(!glfwWindowShouldClose(window))
@@ -151,7 +154,7 @@ int main(int argc, char** argv)
 
     // Set the matrix in the program.
     // TODO this seems bad, change this.
-    shader_program.set_uniform_mat4("mvp", mvp);
+    shader_program.set_uniform_mat4(mvp_loc, mvp);
 
     // Clear the screen and render.
     pipeline.clear();
