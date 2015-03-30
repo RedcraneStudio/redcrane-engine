@@ -7,7 +7,6 @@
 #include <istream>
 #include <string>
 #include <vector>
-#include "glad/glad.h"
 namespace survive
 {
   struct Mesh
@@ -15,7 +14,7 @@ namespace survive
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> tex_coords;
-    std::vector<GLuint> faces;
+    std::vector<unsigned int> faces;
 
     static Mesh from_contents(std::string str) noexcept;
     static Mesh from_stream(std::istream&& s) noexcept;
