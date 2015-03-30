@@ -11,5 +11,5 @@ add_subdirectory(common)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
-add_executable(survive main.cpp mesh.cpp scene.cpp texture.cpp)
+add_executable(survive main.cpp mesh.cpp scene.cpp texture.cpp maybe_owned.cpp)
 target_link_libraries(survive gfxlib)
