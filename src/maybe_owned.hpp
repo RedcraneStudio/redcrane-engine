@@ -119,7 +119,7 @@ namespace survive
     owned_ = false;
     T&& old_t = std::move(*ptr_);
     ptr_ = nullptr;
-    return old_t;
+    return std::move(old_t);
   }
 
   template <class T>
