@@ -9,8 +9,19 @@ namespace survive
   template <class T>
   struct Maybe_Owned
   {
+    template <class... Args>
+    Maybe_Owned(Args&&... args) noexcept;
+
     Maybe_Owned(T&& t) noexcept;
     Maybe_Owned(T* t = nullptr) noexcept;
+
+    template <class R>
+    Maybe_Owned(Maybe_Owned<R>&&) noexcept;
+    Maybe_Owned(Maybe_Owned const&) noexcept = delete;
+
+    template <class R>
+    Maybe_Owned& operator=(Maybe_Owned<R>&&) noexcept;
+    Maybe_Owned& operator=(Maybe_Owned const&&) noexcept = delete;
 
     ~Maybe_Owned() noexcept;
 
@@ -38,11 +49,14 @@ namespace survive
   };
 
   template <class T>
+  template <class... Args>
+  Maybe_Owned<T>::Maybe_Owned(Args&&... args) noexcept
+    : owned_(true), ptr_(new T{std::forward<Args>(args)...}) {}
+
+  template <class T>
   Maybe_Owned<T>::Maybe_Owned(T&& t) noexcept
-                              : owned_(true),
-                                ptr_(new T(std::move(t)))
-  {
-  }
+    : owned_(true), ptr_(new T(std::move(t))) {}
+
   template <class T>
   Maybe_Owned<T>::Maybe_Owned(T* t) noexcept : owned_(false), ptr_(t) {}
 
@@ -50,6 +64,29 @@ namespace survive
   Maybe_Owned<T>::~Maybe_Owned() noexcept
   {
     if(owned_) delete ptr_;
+  }
+
+  template <class T>
+  template <class R>
+  Maybe_Owned<T>::Maybe_Owned(Maybe_Owned<R>&& mo1) noexcept
+    : owned_(mo1.owned_), ptr_(mo1.ptr_)
+  {
+    mo1.owned_ = false;
+    // We don't need to null the pointer since setting the owned value to false
+    // should suffice in preventing this other maybe-owned from deleting its
+    // pointer. Nonetheless:
+    mo1.ptr_ = nullptr;
+  }
+
+  template <class T>
+  template <class R>
+  Maybe_Owned<T>& Maybe_Owned<T>::operator=(Maybe_Owned<R>&& mo1) noexcept
+  {
+    owned_ = mo1.owned_;
+    ptr_ = mo1.ptr_;
+
+    mo1.owned_ = false;
+    mo1.ptr_ = nullptr;
   }
 
   template <class T>

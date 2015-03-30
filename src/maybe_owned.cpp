@@ -5,10 +5,10 @@
 #include "maybe_owned.hpp"
 #include "catch/catch.hpp"
 
+using namespace survive;
+
 TEST_CASE("Constructed to null", "[Maybe_Owned]")
 {
-  using namespace survive;
-
   Maybe_Owned<int> i;
   REQUIRE(i.is_owned() == false);
   REQUIRE(i.is_pointer() == true);
@@ -32,4 +32,28 @@ TEST_CASE("Constructed to null", "[Maybe_Owned]")
       REQUIRE(*i == *i.get());
     }
   }
+}
+TEST_CASE("Destruction when owned", "[Maybe_Owned]")
+{
+  struct Is_Destructed
+  {
+    Is_Destructed(bool* is) noexcept : is(is) { *is = false; }
+    ~Is_Destructed() noexcept { *is = true; }
+
+    bool* is;
+  };
+
+  bool is_destructed;
+  {
+    auto ptr = Maybe_Owned<Is_Destructed>{&is_destructed};
+  }
+  REQUIRE(is_destructed == true);
+
+  auto destructed = std::make_unique<Is_Destructed>(&is_destructed);
+  {
+    // Construct a maybe owned that *doesn't* own it's ptr.
+    auto ptr = Maybe_Owned<Is_Destructed>{destructed.get()};
+  }
+  REQUIRE(is_destructed == false);
+
 }
