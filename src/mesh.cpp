@@ -240,5 +240,5 @@ TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
 
   auto mesh = Mesh::from_stream(std::istringstream{data});
   REQUIRE(mesh.vertices.size() == 4);
-  REQUIRE(mesh.faces.size() == 2);
+  REQUIRE(mesh.faces.size() == 6);
 }
