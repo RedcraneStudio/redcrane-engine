@@ -28,6 +28,41 @@ namespace survive
           glBindBuffer(GL_ARRAY_BUFFER, 0);
           glEnableVertexAttribArray(attrib);
         }
+
+        template <class T>
+        struct Matches_Pointer
+        {
+          Matches_Pointer(T const* t) noexcept : ptr_(t) {}
+
+          inline bool operator()(T const& t) const noexcept
+          {
+            return ptr_ == &t;
+          }
+          inline bool operator()(std::shared_ptr<T> const& t) const noexcept
+          {
+            return ptr_ == t.get();
+          }
+
+          T const* ptr_;
+        };
+
+        template <class T>
+        inline Matches_Pointer<T> make_pointer_match(T const* t) noexcept
+        {
+          return Matches_Pointer<T>{t};
+        }
+      }
+
+      Pipeline::~Pipeline() noexcept
+      {
+        for(auto& mesh : mesh_)
+        {
+          uninit_pipeline_mesh_(mesh);
+        }
+        for(auto& tex : textures_)
+        {
+          uninit_pipeline_texture_(*tex.get());
+        }
       }
 
       /*!
@@ -77,26 +112,24 @@ namespace survive
       }
       Mesh Pipeline::remove_mesh(Mesh& mesh) noexcept
       {
-        using std::begin; using std::end;
-        auto new_end = std::remove_if(begin(mesh_), end(mesh_),
-        [&mesh](auto& val)
-        {
-          // Check to see which element the pointer is pointing to.
-          return &mesh == &val.mesh;
-        });
+        auto prepared_mesh = find_prepared_(mesh);
 
-        if(new_end != end(mesh_))
+        if(!prepared_mesh)
         {
           log_w("Mesh is not prepared so will not be removed");
           return Mesh{};
         }
 
         // First uninitialize the vao and buffers.
-        uninit_pipeline_mesh_(*new_end);
+        uninit_pipeline_mesh_(*prepared_mesh);
 
         // Capture that mesh!
-        Mesh&& old_mesh = std::move(mesh);
+        Mesh&& old_mesh = std::move(prepared_mesh->mesh);;
+
         // Remove it from our vector.
+        using std::begin; using std::end;
+        auto new_end = std::find_if(begin(mesh_), end(mesh_),
+                                    make_pointer_match(prepared_mesh));
         mesh_.erase(new_end, end(mesh_));
 
         // Move the original mesh out.
@@ -104,14 +137,9 @@ namespace survive
       }
       bool Pipeline::render_mesh(Mesh& mesh) noexcept
       {
-        using std::begin; using std::end;
-        auto prepared_mesh = std::find_if(begin(mesh_), end(mesh_),
-        [&](auto const& val)
-        {
-          return &val.mesh == &mesh;
-        });
+        auto prepared_mesh = find_prepared_(mesh);
 
-        if(prepared_mesh == end(mesh_))
+        if(!prepared_mesh)
         {
           log_w("Mesh is not prepared so it will not be rendered");
           return false;
@@ -122,10 +150,9 @@ namespace survive
                        GL_UNSIGNED_INT, 0);
         return true;
       }
-#if 0
-      Pipeline_Texture* Pipeline::prepare_texture(Texture&& texture) noexcept
+      Texture* Pipeline::prepare_texture(Texture&& texture) noexcept
       {
-        auto pipetex = Pipeline_Texture{std::move(texture), 0};
+        auto pipetex = Prepared_Texture{std::move(texture), 0};
 
         glGenTextures(1, &pipetex.tex_id);
 
@@ -146,31 +173,54 @@ namespace survive
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
-        textures_.push_back(std::move(pipetex));
-        return &textures_.back();
+        textures_.push_back(
+                       std::make_shared<Prepared_Texture>(std::move(pipetex)));
+        return &textures_.back()->texture;
       }
-      Texture Pipeline::remove_texture(Pipeline_Texture& texture) noexcept
+      Texture Pipeline::remove_texture(Texture& texture) noexcept
       {
-        using std::begin; using std::end;
-        auto new_end = std::remove_if(begin(textures_), end(textures_),
-        [&texture](auto const& val)
+        auto prepared_tex = find_prepared_(texture);
+
+        // If we don't own this texture.
+        if(!prepared_tex)
         {
-          // Check to see which element the pointer is pointing to.
-          return &texture == &val;
-        });
+          // Welp, this is :/ awk.
+          log_w("Texture is not prepared so it cannot be removed.");
+          return Texture{};
+        }
 
         // First uninitialize the vao and buffers.
-        uninit_pipeline_texture_(texture);
+        uninit_pipeline_texture_(*prepared_tex);
 
         // Capture that mesh!
-        Texture old_texture_data = std::move(texture.texture);
-        // Remove it from our vector.
+        Texture old_texture = std::move(prepared_tex->texture);
+
+        // Remove that pointer from our vector.
+        using std::begin; using std::end;
+        auto new_end = std::remove_if(begin(textures_), end(textures_),
+                                      make_pointer_match(prepared_tex));
         textures_.erase(new_end, end(textures_));
 
         // Move the original mesh out.
-        return std::move(old_texture_data);
+        return std::move(old_texture);
       }
-#endif
+
+      bool Pipeline::set_texture(Texture& tex, GLuint i) noexcept
+      {
+        glActiveTexture(GL_TEXTURE0 + i);
+
+        auto prepared_tex = find_prepared_(tex);
+        if(!prepared_tex)
+        {
+          log_w("Texture is not prepared and will therefore not be set to a "
+                "texture unit.");
+          return false;
+        }
+
+        glBindTexture(GL_TEXTURE_2D, prepared_tex->tex_id);
+        return true;
+      }
+
       // Uninitialize a mesh as far as opengl is concerned *unprepare it*.
       void Pipeline::uninit_pipeline_mesh_(Prepared_Mesh& mesh) noexcept
       {
@@ -180,12 +230,35 @@ namespace survive
         glDeleteBuffers(1, &mesh.face_index_buffer);
         glDeleteVertexArrays(1, &mesh.vao);
       }
-#if 0
-      void Pipeline::uninit_pipeline_texture_(Pipeline_Texture& texture) noexcept
+      void Pipeline::uninit_pipeline_texture_(Prepared_Texture& tex) noexcept
       {
-        glDeleteTextures(1, &texture.tex_id);
+        glDeleteTextures(1, &tex.tex_id);
       }
-#endif
+
+      Prepared_Mesh* Pipeline::find_prepared_(Mesh& m) noexcept
+      {
+        using std::begin; using std::end;
+        auto mesh_find = std::find_if(begin(mesh_), end(mesh_),
+        [&](auto const& val)
+        {
+          return &m == &val.mesh;
+        });
+
+        if(mesh_find == end(mesh_)) return nullptr;
+        return &*mesh_find;
+      }
+      Prepared_Texture* Pipeline::find_prepared_(Texture& t) noexcept
+      {
+        using std::begin; using std::end;
+        auto tex_find = std::find_if(begin(textures_), end(textures_),
+        [&](auto const& val)
+        {
+          return &t == &val->texture;
+        });
+
+        if(tex_find == end(textures_)) return nullptr;
+        return tex_find->get();
+      }
     }
   }
 }
