@@ -5,7 +5,6 @@
 function(add_data target all_or_nah)
   add_custom_target(${target} ${all_or_nah})
 
-  message(STATUS "${ARGN}")
   foreach(filename ${ARGN})
     add_custom_command(TARGET ${target} COMMAND ${CMAKE_COMMAND}
                        ARGS -E copy_if_different
