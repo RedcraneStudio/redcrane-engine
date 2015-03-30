@@ -12,7 +12,7 @@ namespace survive
   {
     namespace gl
     {
-      struct Pipeline_Mesh
+      struct Prepared_Mesh
       {
         Mesh mesh;
 
@@ -23,39 +23,24 @@ namespace survive
         GLuint face_index_buffer;
       };
 
-      struct Pipeline_Texture
-      {
-        Texture texture;
-
-        GLuint tex_id;
-      };
-
       struct Pipeline
       {
         /*!
-         * \brief Swallow a mesh for our own purposes.
-         *
-         * \returns The returned pointer is valid as long as the instance that
-         * created it. It is not to be deleted or otherwise uninitialized.
+         * \brief Swallow a mesh for this instances own purposes.
          */
-        Pipeline_Mesh* prepare_mesh(Mesh&& mesh) noexcept;
-        Mesh remove_mesh(Pipeline_Mesh& mesh) noexcept;
+        Mesh* prepare_mesh(Mesh&& mesh) noexcept;
+        Mesh remove_mesh(Mesh& mesh) noexcept;
 
-        void render_pipeline_mesh(Pipeline_Mesh* mesh) noexcept;
-
-        Pipeline_Texture* prepare_texture(Texture&& texture) noexcept;
-        Texture remove_texture(Pipeline_Texture& texture) noexcept;
+        bool render_mesh(Mesh& mesh) noexcept;
 
         inline void clear() noexcept;
         inline void clear_color() noexcept;
         inline void clear_depth() noexcept;
 
       private:
-        void uninit_pipeline_mesh_(Pipeline_Mesh& mesh) noexcept;
-        void uninit_pipeline_texture_(Pipeline_Texture& texture) noexcept;
+        void uninit_pipeline_mesh_(Prepared_Mesh& mesh) noexcept;
 
-        std::vector<Pipeline_Mesh> mesh_;
-        std::vector<Pipeline_Texture> textures_;
+        std::vector<Prepared_Mesh> mesh_;
       };
 
       inline void Pipeline::clear() noexcept

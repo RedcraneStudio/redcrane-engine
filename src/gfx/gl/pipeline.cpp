@@ -33,12 +33,12 @@ namespace survive
       /*!
        * Swallow a mesh for our own purposes.
        */
-      Pipeline_Mesh* Pipeline::prepare_mesh(Mesh&& mesh) noexcept
+      Mesh* Pipeline::prepare_mesh(Mesh&& mesh) noexcept
       {
-        // Make a "pipeline mesh" or rather something that will store some
+        // Make a "prepared mesh" or rather something that will store some
         // useful things about the mesh for the purposes of rendering it with
         // opengl.
-        auto pipemesh = Pipeline_Mesh{std::move(mesh), 0,0,0,0,0};
+        auto pipemesh = Prepared_Mesh{std::move(mesh), 0,0,0,0,0};
 
         // Initialize the vao and buffer and such.
         glGenVertexArrays(1, &pipemesh.vao);
@@ -71,39 +71,58 @@ namespace survive
         // Move *that* into the vector.
         mesh_.push_back(std::move(pipemesh));
 
-        // Now that we have a permanent spot for it. Give it to the client.
-        return &mesh_.back();
+        // Now that we have a permanent spot for it. Give it back to the
+        // client.
+        return &mesh_.back().mesh;
       }
-      Mesh Pipeline::remove_mesh(Pipeline_Mesh& mesh) noexcept
+      Mesh Pipeline::remove_mesh(Mesh& mesh) noexcept
       {
         using std::begin; using std::end;
         auto new_end = std::remove_if(begin(mesh_), end(mesh_),
         [&mesh](auto& val)
         {
           // Check to see which element the pointer is pointing to.
-          return &mesh == &val;
+          return &mesh == &val.mesh;
         });
 
+        if(new_end != end(mesh_))
+        {
+          log_w("Mesh is not prepared so will not be removed");
+          return Mesh{};
+        }
+
         // First uninitialize the vao and buffers.
-        uninit_pipeline_mesh_(mesh);
+        uninit_pipeline_mesh_(*new_end);
 
         // Capture that mesh!
-        Mesh&& old_mesh_data = std::move(mesh.mesh);
+        Mesh&& old_mesh = std::move(mesh);
         // Remove it from our vector.
         mesh_.erase(new_end, end(mesh_));
 
         // Move the original mesh out.
-        return old_mesh_data;
+        return old_mesh;
       }
-      void Pipeline::render_pipeline_mesh(Pipeline_Mesh* mesh) noexcept
+      bool Pipeline::render_mesh(Mesh& mesh) noexcept
       {
-        glBindVertexArray(mesh->vao);
-        glDrawElements(GL_TRIANGLES, mesh->mesh.faces.size() * 3,
-                       GL_UNSIGNED_INT, 0);
-        // Unbind vao?
-        //glBindVertexArray(0);
-      }
+        using std::begin; using std::end;
+        auto prepared_mesh = std::find_if(begin(mesh_), end(mesh_),
+        [&](auto const& val)
+        {
+          return &val.mesh == &mesh;
+        });
 
+        if(prepared_mesh == end(mesh_))
+        {
+          log_w("Mesh is not prepared so it will not be rendered");
+          return false;
+        }
+
+        glBindVertexArray(prepared_mesh->vao);
+        glDrawElements(GL_TRIANGLES, prepared_mesh->mesh.faces.size() * 3,
+                       GL_UNSIGNED_INT, 0);
+        return true;
+      }
+#if 0
       Pipeline_Texture* Pipeline::prepare_texture(Texture&& texture) noexcept
       {
         auto pipetex = Pipeline_Texture{std::move(texture), 0};
@@ -151,9 +170,9 @@ namespace survive
         // Move the original mesh out.
         return std::move(old_texture_data);
       }
-
+#endif
       // Uninitialize a mesh as far as opengl is concerned *unprepare it*.
-      void Pipeline::uninit_pipeline_mesh_(Pipeline_Mesh& mesh) noexcept
+      void Pipeline::uninit_pipeline_mesh_(Prepared_Mesh& mesh) noexcept
       {
         glDeleteBuffers(1, &mesh.vertice_buffer);
         glDeleteBuffers(1, &mesh.normals_buffer);
@@ -161,10 +180,12 @@ namespace survive
         glDeleteBuffers(1, &mesh.face_index_buffer);
         glDeleteVertexArrays(1, &mesh.vao);
       }
+#if 0
       void Pipeline::uninit_pipeline_texture_(Pipeline_Texture& texture) noexcept
       {
         glDeleteTextures(1, &texture.tex_id);
       }
+#endif
     }
   }
 }

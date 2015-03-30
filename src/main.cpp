@@ -100,10 +100,10 @@ int main(int argc, char** argv)
                                                  "shader/diffuse/fragment");
   // Prepare a mesh for rendering.
   auto mesh = pipeline.prepare_mesh(Mesh::from_file("obj/plane.obj"));
-
+#if 0
   auto tex =
       pipeline.prepare_texture(Texture::from_png_file("tex/cracked_soil.png"));
-
+#endif
   int fps = 0;
   int time = glfwGetTime();
 
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 
     // Clear the screen and render.
     pipeline.clear();
-    pipeline.render_pipeline_mesh(mesh);
+    pipeline.render_mesh(*mesh);
 
     // Show it on screen.
     glfwSwapBuffers(window);
