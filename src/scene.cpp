@@ -19,9 +19,9 @@ namespace survive
   }
 
   template <class T>
-  SceneNode load_scene(T const& doc) noexcept
+  Scene_Node load_scene(T const& doc) noexcept
   {
-    auto node = SceneNode{};
+    auto node = Scene_Node{};
 
     if_has_member(doc, "mesh", [&](auto const& val)
     {
@@ -43,13 +43,13 @@ namespace survive
     return node;
   }
 
-  SceneNode load_scene(std::string fn) noexcept
+  Scene_Node load_scene(std::string fn) noexcept
   {
     auto doc = load_json(fn);
     return load_scene(doc);
   }
 
-  void prepare_scene(gfx::Pipeline& pipeline, SceneNode& scene) noexcept
+  void prepare_scene(gfx::Pipeline& pipeline, Scene_Node& scene) noexcept
   {
     // For each node in the scene, prepare it's mesh.
     // But only prepare the mesh if it's owned by the node itself.
@@ -68,7 +68,7 @@ namespace survive
     }
   }
 
-  void remove_scene(gfx::Pipeline& pipeline, SceneNode& scene) noexcept
+  void remove_scene(gfx::Pipeline& pipeline, Scene_Node& scene) noexcept
   {
     if(scene.mesh.is_pointer())
     {
