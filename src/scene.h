@@ -6,21 +6,23 @@
 #include <memory>
 #include "mesh.h"
 #include "texture.h"
-#include "gfx/gl/pipeline.h"
+#include "maybe_owned.hpp"
+#include "gfx/pipeline.h"
 #include <glm/glm.hpp>
 namespace survive
 {
   struct SceneNode
   {
-    std::unique_ptr<Mesh> mesh;
-    std::unique_ptr<Texture> texture;
-
-    gfx::gl::Pipeline_Mesh* prepared;
+    // Add a maybe-owned pointer to a mesh.
+    Maybe_Owned<Mesh> mesh;
+    //std::unique_ptr<Texture> texture;
 
     glm::mat4 model;
 
     std::vector<std::unique_ptr<SceneNode> > children_;
   };
 
+  void prepare_scene(gfx::Pipeline& pipeline, SceneNode& scene) noexcept;
+  void remove_scene(gfx::Pipeline& pipeline, SceneNode& scene) noexcept;
   SceneNode load_scene(std::string fn) noexcept;
 }

@@ -26,13 +26,15 @@ namespace survive
     if_has_member(doc, "mesh", [&](auto const& val)
     {
       auto mesh = Mesh::from_file(val.GetString());
-      node.mesh = std::make_unique<Mesh>(std::move(mesh));
+      node.mesh.set_owned(std::move(mesh));
     });
+#if 0
     if_has_member(doc, "texture", [&](auto const& val)
     {
       auto texture = Texture::from_png_file(val.GetString());
       node.texture = std::make_unique<Texture>(std::move(texture));
     });
+#endif
     if_has_member(doc, "translation", [&](auto const& val)
     {
       node.model = load_translation(val);
@@ -45,5 +47,36 @@ namespace survive
   {
     auto doc = load_json(fn);
     return load_scene(doc);
+  }
+
+  void prepare_scene(gfx::Pipeline& pipeline, SceneNode& scene) noexcept
+  {
+    // For each node in the scene, prepare it's mesh.
+    // But only prepare the mesh if it's owned by the node itself.
+    // Ez Pz
+
+    // Do ourselves.
+    if(scene.mesh.is_owned())
+    {
+      scene.mesh.set_pointer(pipeline.prepare_mesh(scene.mesh.unwrap()));
+    }
+
+    // Then all of our children.
+    for(auto& child : scene.children_)
+    {
+      prepare_scene(pipeline, *child);
+    }
+  }
+
+  void remove_scene(gfx::Pipeline& pipeline, SceneNode& scene) noexcept
+  {
+    if(scene.mesh.is_pointer())
+    {
+      scene.mesh.set_owned(pipeline.remove_mesh(*scene.mesh));
+    }
+    for(auto& child : scene.children_)
+    {
+      remove_scene(pipeline, *child);
+    }
   }
 }
