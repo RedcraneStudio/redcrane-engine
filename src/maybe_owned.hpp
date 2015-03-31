@@ -6,14 +6,31 @@
 #include <utility> // for std::move
 namespace survive
 {
+  template <class T> struct Maybe_Owned;
+
+  template <class T, class... Args>
+  Maybe_Owned<T> make_maybe_owned(Args&&... args) noexcept
+  {
+    return Maybe_Owned<T>(new T(std::forward<Args>(args)...), true);
+  }
+
   template <class T>
   struct Maybe_Owned
   {
     template <class... Args>
     Maybe_Owned(Args&&... args) noexcept;
 
-    Maybe_Owned(T&& t) noexcept;
-    Maybe_Owned(T* t = nullptr) noexcept;
+    explicit Maybe_Owned(T&& t) noexcept;
+
+    /*!
+     * \brief Construct the maybe owned with a borrowed/unowned ptr.
+     *
+     * \note If you are using this constructor to initialize a maybe owned
+     * of type base with a new pointer to a derived instance, make sure to
+     * set the second parameter to true. Better yet use make_maybe_owned
+     * declared above!
+     */
+    /* implicit */ Maybe_Owned(T* t = nullptr, bool owned = false) noexcept;
 
     template <class R>
     Maybe_Owned(Maybe_Owned<R>&&) noexcept;
@@ -26,7 +43,12 @@ namespace survive
     ~Maybe_Owned() noexcept;
 
     void set_owned(T&& t) noexcept;
-    void set_pointer(T* t) noexcept;
+    void set_owned(T const& t) noexcept;
+    void set_owned(T* t) noexcept;
+    void set_pointer(T* t, bool owned = false) noexcept;
+
+    template <class R, class... Args>
+    void emplace_owned(Args&&... args) noexcept;
 
     T const* get() const noexcept;
     T* get() noexcept;
@@ -58,7 +80,7 @@ namespace survive
     : owned_(true), ptr_(new T(std::move(t))) {}
 
   template <class T>
-  Maybe_Owned<T>::Maybe_Owned(T* t) noexcept : owned_(false), ptr_(t) {}
+  Maybe_Owned<T>::Maybe_Owned(T* t, bool o) noexcept : owned_(o), ptr_(t) {}
 
   template <class T>
   Maybe_Owned<T>::~Maybe_Owned() noexcept
@@ -96,10 +118,30 @@ namespace survive
     ptr_ = new T(std::move(t));
   }
   template <class T>
-  void Maybe_Owned<T>::set_pointer(T* t) noexcept
+  void Maybe_Owned<T>::set_owned(T const& t) noexcept
   {
-    owned_ = false;
+    owned_ = true;
+    ptr_ = new T(t);
+  }
+  template <class T>
+  void Maybe_Owned<T>::set_owned(T* t) noexcept
+  {
+    owned_ = true;
     ptr_ = t;
+  }
+  template <class T>
+  void Maybe_Owned<T>::set_pointer(T* t, bool o) noexcept
+  {
+    owned_ = o;
+    ptr_ = t;
+  }
+
+  template <class T>
+  template <class R, class... Args>
+  void Maybe_Owned<T>::emplace_owned(Args&&... args) noexcept
+  {
+    owned_ = true;
+    ptr_ = new R(std::forward<Args>(args)...);
   }
 
   template <class T>
