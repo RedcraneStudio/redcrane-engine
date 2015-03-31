@@ -10,7 +10,7 @@
 #include "common/log.h"
 
 #include "gfx/program.h"
-#include "gfx/gl/pipeline.h"
+#include "gfx/gl/factory.h"
 
 #include "texture.h"
 #include "mesh.h"
@@ -92,18 +92,17 @@ int main(int argc, char** argv)
   // Log GL profile.
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
-  // Initialize the graphics pipeline.
-  auto pipeline = gfx::gl::Pipeline{};
+  // Make an OpenGL factory.
+  auto factory = gfx::gl::Factory{};
 
   // Load a shader program.
   auto shader_program = gfx::Program::from_files("shader/diffuse/vertex",
                                                  "shader/diffuse/fragment");
   // Prepare a mesh for rendering.
-  auto mesh = pipeline.prepare_mesh(Mesh::from_file("obj/plane.obj"));
-#if 0
+  auto mesh = factory.prepare_mesh(Mesh::from_file("obj/plane.obj"));
   auto tex =
-      pipeline.prepare_texture(Texture::from_png_file("tex/cracked_soil.png"));
-#endif
+      factory.prepare_texture(Texture::from_png_file("tex/cracked_soil.png"));
+
   int fps = 0;
   int time = glfwGetTime();
 
@@ -119,6 +118,7 @@ int main(int argc, char** argv)
 
   auto tex_loc = shader_program.get_uniform_location("tex");
   shader_program.set_uniform_int(tex_loc, 0);
+  tex->bind(0);
 
   auto mvp_loc = shader_program.get_uniform_location("mvp");
 
@@ -158,8 +158,8 @@ int main(int argc, char** argv)
     shader_program.set_uniform_mat4(mvp_loc, mvp);
 
     // Clear the screen and render.
-    pipeline.clear();
-    pipeline.render_mesh(*mesh);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mesh->render();
 
     // Show it on screen.
     glfwSwapBuffers(window);

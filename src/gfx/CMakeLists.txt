@@ -2,7 +2,9 @@
 # Copyright (C) 2014 Luke San Antonio
 # All rights reserved.
 
-add_library(gfxlib STATIC gl/pipeline.cpp program.cpp material.cpp)
+set(SURVIVE_GFX_GL_SOURCES gl/factory.cpp gl/prep_mesh.cpp gl/prep_tex.cpp)
+add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES} program.cpp material.cpp
+                          prepared_mesh.cpp prepared_texture.cpp)
 
 target_link_libraries(gfxlib survival_games_gl)
 
