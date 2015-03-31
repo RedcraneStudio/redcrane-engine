@@ -3,9 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include <memory>
-#include "../prepared_mesh.h"
-#include "../prepared_texture.h"
+#include "../ifactory.h"
 namespace survive
 {
   namespace gfx
@@ -16,7 +14,7 @@ namespace survive
     }
   }
 
-  struct gfx::gl::Factory
+  struct gfx::gl::Factory : public IFactory
   {
     std::unique_ptr<Prepared_Mesh> prepare_mesh(Mesh&& mesh) noexcept;
     std::unique_ptr<Prepared_Texture> prepare_texture(Texture&& tex) noexcept;
