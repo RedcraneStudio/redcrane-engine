@@ -116,9 +116,13 @@ namespace survive
   template <class T>
   T&& Maybe_Owned<T>::unwrap() noexcept
   {
-    owned_ = false;
     T&& old_t = std::move(*ptr_);
+    if(owned_)
+    {
+      delete ptr_;
+    }
     ptr_ = nullptr;
+    owned_ = false;
     return std::move(old_t);
   }
 
