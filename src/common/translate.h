@@ -73,6 +73,12 @@ namespace survive
   }
 
   template <class... Args>
+  std::string format_str(std::string str, Args&&... args) noexcept
+  {
+    return format(str, 0, "", std::forward<Args>(args)...);
+  }
+
+  template <class... Args>
   std::string translate(std::string str, Args&&... args) noexcept
   {
     return format(get_lang().dict.at(str), 0, "", std::forward<Args>(args)...);
