@@ -24,13 +24,12 @@ namespace survive
     std::FILE* fd;
   };
 
-  rapidjson::Document load_json(std::string const& fn) noexcept
+  rapidjson::Document load_json(std::string const& fn)
   {
     auto file = File_Wrapper{fn.c_str(), "r"};
     if(!file.fd)
     {
-      log_w("Failed to load file '%'", fn);
-      return rapidjson::Document{};
+      throw Bad_File{fn};
     }
 
     constexpr int BUFFER_SIZE = 50;
@@ -42,9 +41,8 @@ namespace survive
 
     if(doc.HasParseError())
     {
-      log_w("Error in json in file '%', Error at position: %. %",
-            fn, std::to_string(doc.GetErrorOffset()),
-            rapidjson::GetParseError_En(doc.GetParseError()));
+      throw Bad_Asset{fn, doc.GetErrorOffset(),
+                      rapidjson::GetParseError_En(doc.GetParseError())};
     }
 
     return doc;

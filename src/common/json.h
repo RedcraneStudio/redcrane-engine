@@ -10,7 +10,19 @@
 #include "rapidjson/document.h"
 namespace survive
 {
-  rapidjson::Document load_json(std::string const& filename) noexcept;
+  struct Bad_File
+  {
+    std::string filename;
+  };
+
+  struct Bad_Asset
+  {
+    std::string filename;
+    std::size_t error_offset;
+    std::string diagnostic;
+  };
+
+  rapidjson::Document load_json(std::string const& filename);
 
   bool has_json_members(rapidjson::Value const&,
                         std::vector<std::string> const&) noexcept;
