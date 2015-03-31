@@ -11,5 +11,8 @@ add_subdirectory(common)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
+find_package(Boost REQUIRED COMPONENTS filesystem)
+add_subdirectory(assets)
+
 add_executable(survive main.cpp mesh.cpp texture.cpp maybe_owned.cpp)
 target_link_libraries(survive gfxlib)
