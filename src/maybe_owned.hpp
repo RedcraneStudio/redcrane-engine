@@ -118,6 +118,8 @@ namespace survive
   {
     owned_ = true;
     ptr_ = ptr.release();
+
+    return *this;
   }
 
   template <class T>
@@ -129,6 +131,8 @@ namespace survive
 
     mo1.owned_ = false;
     mo1.ptr_ = nullptr;
+
+    return *this;
   }
 
   template <class T>
