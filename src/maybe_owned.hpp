@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <memory>
 #include <utility> // for std::move
 namespace survive
 {
@@ -31,6 +32,9 @@ namespace survive
      * declared above!
      */
     /* implicit */ Maybe_Owned(T* t = nullptr, bool owned = false) noexcept;
+
+    template <class R>
+    Maybe_Owned(std::unique_ptr<R> ptr) noexcept;
 
     template <class R>
     Maybe_Owned(Maybe_Owned<R>&&) noexcept;
@@ -81,6 +85,11 @@ namespace survive
 
   template <class T>
   Maybe_Owned<T>::Maybe_Owned(T* t, bool o) noexcept : owned_(o), ptr_(t) {}
+
+  template <class T>
+  template <class R>
+  Maybe_Owned<T>::Maybe_Owned(std::unique_ptr<R> ptr) noexcept
+    : owned_(true), ptr_(ptr.release()) {}
 
   template <class T>
   Maybe_Owned<T>::~Maybe_Owned() noexcept
