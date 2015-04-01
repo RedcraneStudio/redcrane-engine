@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #include "diffuse_material.h"
+#include "programs.h"
 namespace survive
 {
   namespace gfx
@@ -11,17 +12,20 @@ namespace survive
     {
       // Use the 
       Diffuse_Material::Diffuse_Material() noexcept
-        : prog_(Program::from_files("shader/diffuse/vertex",
-                                    "shader/diffuse/fragment"))
-      { }
+        : prog_(load_program("shader/diffuse/decl.json"))
+      {
+        diffuse_color_loc_ = prog_->get_uniform_location("diffuse");
+      }
       void Diffuse_Material::use() const noexcept
       {
         if(diffuse_color_changed_)
         {
-          // TODO: Set diffuse color uniform.
+          glUniform3f(diffuse_color_loc_, diffuse_color_.r / (float) 0xff,
+                      diffuse_color_.g / (float) 0xff,
+                      diffuse_color_.b / (float) 0xff);
         }
 
-        prog_.use();
+        prog_->use();
       }
     }
   }
