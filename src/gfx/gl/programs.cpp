@@ -33,6 +33,7 @@ namespace survive
           auto fs = std::string{doc["fshade"].GetString()};
 
           ret = std::make_shared<Program>(Program::from_files(vs, fs));
+          ret->name = decl;
           progs.push_back(ret);
         }
         else
