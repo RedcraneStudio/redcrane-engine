@@ -10,7 +10,7 @@
 #include "common/log.h"
 
 #include "gfx/gl/program.h"
-#include "gfx/gl/factory.h"
+#include "gfx/gl/driver.h"
 
 #include "texture.h"
 #include "mesh.h"
@@ -92,8 +92,8 @@ int main(int argc, char** argv)
   // Log GL profile.
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
-  // Make an OpenGL factory.
-  auto factory = gfx::gl::Factory{};
+  // Make an OpenGL driver.
+  auto driver = gfx::gl::Driver{};
 
   // Load a shader program.
 #if 0
@@ -101,9 +101,9 @@ int main(int argc, char** argv)
                                                  "shader/diffuse/fragment");
 #endif
   // Prepare a mesh for rendering.
-  auto mesh = factory.prepare_mesh(Mesh::from_file("obj/plane.obj"));
+  auto mesh = driver.prepare_mesh(Mesh::from_file("obj/plane.obj"));
   auto tex =
-      factory.prepare_texture(Texture::from_png_file("tex/cracked_soil.png"));
+        driver.prepare_texture(Texture::from_png_file("tex/cracked_soil.png"));
 
   int fps = 0;
   int time = glfwGetTime();
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 #endif
 
     // Clear the screen and render.
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    driver.clear();
     mesh->render();
 
     // Show it on screen.
@@ -192,7 +192,7 @@ int main()
 {
   using namespace survive;
 
-  auto factory = gfx::gl::Factory{"OpenGL 4.5"};
+  auto driver = gfx::gl::Driver{"OpenGL 4.5"};
   auto scene_data = gfx::make_isometric_scene(factory, ...);
 
   auto scene_root = load_scene("scene/main.json");
@@ -200,7 +200,7 @@ int main()
 
   while(window)
   {
-    factory.clear();
+    driver.clear();
 
     scene_root.render(scene_data);
     // Expanded view of ^

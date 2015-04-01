@@ -7,7 +7,7 @@
 #include <string>
 #include <memory>
 
-#include "../gfx/ifactory.h"
+#include "../gfx/idriver.h"
 #include "asset.h"
 
 namespace survive { namespace assets
@@ -23,5 +23,5 @@ namespace survive { namespace assets
    * \sa game::get_asset for searching the result of this function.
    */
   assets::Vector load(std::vector<std::string> const& assets,
-                      gfx::IFactory& fact) noexcept;
+                      gfx::IDriver& fact) noexcept;
 } }

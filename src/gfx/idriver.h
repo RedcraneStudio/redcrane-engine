@@ -10,14 +10,18 @@ namespace survive
 {
   namespace gfx
   {
-    struct IFactory
+    struct IDriver
     {
-      virtual ~IFactory() noexcept {}
+      virtual ~IDriver() noexcept {}
 
       virtual std::unique_ptr<Prepared_Mesh>
         prepare_mesh(Mesh&& mesh) noexcept = 0;
       virtual std::unique_ptr<Prepared_Texture>
         prepare_texture(Texture&& tex) noexcept = 0;
+
+      virtual void clear() noexcept = 0;
+      virtual void clear_color() noexcept = 0;
+      virtual void clear_depth() noexcept = 0;
     };
   }
 }

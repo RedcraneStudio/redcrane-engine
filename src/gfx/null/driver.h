@@ -3,22 +3,26 @@
  * All rights reserved.
  */
 #pragma once
-#include "../ifactory.h"
+#include "../idriver.h"
 namespace survive
 {
   namespace gfx
   {
     namespace null
     {
-      struct Factory;
+      struct Driver;
     }
   }
 
-  struct gfx::null::Factory : public IFactory
+  struct gfx::null::Driver : public IDriver
   {
     std::unique_ptr<Prepared_Mesh>
       prepare_mesh(Mesh&& mesh) noexcept override;
     std::unique_ptr<Prepared_Texture>
       prepare_texture(Texture&& tex) noexcept override;
+
+    void clear() noexcept override {}
+    void clear_color() noexcept override {}
+    void clear_depth() noexcept override {}
   };
 }

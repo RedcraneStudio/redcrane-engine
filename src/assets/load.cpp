@@ -91,7 +91,7 @@ namespace survive { namespace assets
     }
   }
   assets::Vector load(std::vector<std::string> const& assets,
-                      gfx::IFactory& fact) noexcept
+                      gfx::IDriver& fact) noexcept
   {
     auto ret = std::vector<std::shared_ptr<Asset> >{};
 
