@@ -2,8 +2,9 @@
 # Copyright (C) 2014 Luke San Antonio
 # All rights reserved.
 
-set(SURVIVE_GFX_GL_SOURCES gl/factory.cpp gl/prep_mesh.cpp gl/prep_tex.cpp)
-add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES} program.cpp material.cpp
+set(SURVIVE_GFX_GL_SOURCES gl/factory.cpp gl/prep_mesh.cpp gl/prep_tex.cpp
+                           gl/diffuse_material.cpp)
+add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES} program.cpp
                           null/factory.cpp prepared_mesh.cpp
                           prepared_texture.cpp)
 
