@@ -27,5 +27,6 @@ namespace survive
       glm::mat4 view_;
     };
 
+    Scene make_isometric_scene() noexcept;
   }
 }
