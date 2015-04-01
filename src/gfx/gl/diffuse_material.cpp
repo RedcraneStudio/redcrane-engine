@@ -10,7 +10,6 @@ namespace survive
   {
     namespace gl
     {
-      // Use the 
       Diffuse_Material::Diffuse_Material() noexcept
         : prog_(load_program("shader/diffuse/decl.json"))
       {
