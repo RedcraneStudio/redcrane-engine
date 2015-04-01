@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "diffuse_material.h"
-#include "programs.h"
+#include "program_cache.h"
 namespace survive
 {
   namespace gfx
