@@ -34,7 +34,7 @@ namespace survive
     /* implicit */ Maybe_Owned(T* t = nullptr, bool owned = false) noexcept;
 
     template <class R>
-    Maybe_Owned(std::unique_ptr<R> ptr) noexcept;
+    Maybe_Owned(std::unique_ptr<R>) noexcept;
 
     template <class R>
     Maybe_Owned(Maybe_Owned<R>&&) noexcept;
