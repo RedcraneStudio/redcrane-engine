@@ -12,6 +12,8 @@
 #include "gfx/gl/program.h"
 #include "gfx/gl/driver.h"
 
+#include "gfx/scene.h"
+
 #include "texture.h"
 #include "mesh.h"
 
@@ -100,6 +102,13 @@ int main(int argc, char** argv)
   auto shader_program = gfx::Program::from_files("shader/diffuse/vertex",
                                                  "shader/diffuse/fragment");
 #endif
+
+  // Load the scene data for an isometric view
+  auto scene_data = gfx::make_isometric_scene();
+
+  // auto scene = load_scene("scene/default.json");
+  // prepare_scene(driver);
+
   // Prepare a mesh for rendering.
   auto mesh = driver.prepare_mesh(Mesh::from_file("obj/plane.obj"));
   auto tex =
