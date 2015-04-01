@@ -17,8 +17,8 @@ namespace survive
     }
     void object_render(Object const& obj) noexcept
     {
-      obj.material->use();
-      obj.mesh->render();
+      if(obj.material) obj.material->use();
+      if(obj.mesh) obj.mesh->render();
     }
   }
 }
