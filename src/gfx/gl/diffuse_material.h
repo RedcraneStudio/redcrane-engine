@@ -22,6 +22,9 @@ namespace survive
   {
     Diffuse_Material() noexcept;
     void use() const noexcept override;
+
+    void diffuse_color(Color const& c) noexcept;
+    Color const& diffuse_color() const noexcept;
   private:
     mutable std::shared_ptr<Program> prog_;
 

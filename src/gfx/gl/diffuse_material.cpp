@@ -27,6 +27,19 @@ namespace survive
 
         prog_->use();
       }
+
+      void Diffuse_Material::diffuse_color(Color const& c) noexcept
+      {
+        if(c != diffuse_color_)
+        {
+          diffuse_color_changed_ = true;
+          diffuse_color_ = c;
+        }
+      }
+      Color const& Diffuse_Material::diffuse_color() const noexcept
+      {
+        return diffuse_color_;
+      }
     }
   }
 }
