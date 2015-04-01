@@ -9,7 +9,7 @@
 
 #include "common/log.h"
 
-#include "gfx/program.h"
+#include "gfx/gl/program.h"
 #include "gfx/gl/factory.h"
 
 #include "texture.h"
@@ -96,8 +96,10 @@ int main(int argc, char** argv)
   auto factory = gfx::gl::Factory{};
 
   // Load a shader program.
+#if 0
   auto shader_program = gfx::Program::from_files("shader/diffuse/vertex",
                                                  "shader/diffuse/fragment");
+#endif
   // Prepare a mesh for rendering.
   auto mesh = factory.prepare_mesh(Mesh::from_file("obj/plane.obj"));
   auto tex =
@@ -114,13 +116,19 @@ int main(int argc, char** argv)
   glDepthFunc(GL_LEQUAL);
 
   // Use our shader.
+#if 0
   shader_program.use();
+#endif
 
+#if 0
   auto tex_loc = shader_program.get_uniform_location("tex");
   shader_program.set_uniform_int(tex_loc, 0);
+#endif
   tex->bind(0);
 
+#if 0
   auto mvp_loc = shader_program.get_uniform_location("mvp");
+#endif
 
   float deg = -5;
   while(!glfwWindowShouldClose(window))
@@ -155,7 +163,9 @@ int main(int argc, char** argv)
 
     // Set the matrix in the program.
     // TODO this seems bad, change this.
+#if 0
     shader_program.set_uniform_mat4(mvp_loc, mvp);
+#endif
 
     // Clear the screen and render.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
