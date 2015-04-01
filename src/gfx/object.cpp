@@ -15,7 +15,7 @@ namespace survive
       ret.material = load_material(mat);
       return ret;
     }
-    void object_render(Object const& obj) noexcept
+    void render_object(Object const& obj) noexcept
     {
       if(obj.material) obj.material->use();
       if(obj.mesh) obj.mesh->render();
