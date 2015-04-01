@@ -19,7 +19,8 @@ namespace survive
       void set_view(glm::mat4 const& view) noexcept = 0;
     };
 
-    std::unique_ptr<IMaterial> load_material(std::string const&) noexcept
+    inline std::unique_ptr<IMaterial>
+    load_material(std::string const&) noexcept
     {
       return {nullptr};
     }
