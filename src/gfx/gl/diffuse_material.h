@@ -28,7 +28,7 @@ namespace survive
   private:
     mutable std::shared_ptr<Program> prog_;
 
-    bool diffuse_color_changed_;
+    mutable bool diffuse_color_changed_;
     GLint diffuse_color_loc_;
     Color diffuse_color_;
   };
