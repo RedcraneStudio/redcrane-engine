@@ -41,6 +41,9 @@ namespace survive
     Maybe_Owned(Maybe_Owned const&) noexcept = delete;
 
     template <class R>
+    Maybe_Owned& operator=(std::unique_ptr<R>) noexcept;
+
+    template <class R>
     Maybe_Owned& operator=(Maybe_Owned<R>&&) noexcept;
     Maybe_Owned& operator=(Maybe_Owned const&&) noexcept = delete;
 
@@ -107,6 +110,14 @@ namespace survive
     // should suffice in preventing this other maybe-owned from deleting its
     // pointer. Nonetheless:
     mo1.ptr_ = nullptr;
+  }
+
+  template <class T>
+  template <class R>
+  Maybe_Owned<T>& Maybe_Owned<T>::operator=(std::unique_ptr<R> ptr) noexcept
+  {
+    owned_ = true;
+    ptr_ = ptr.release();
   }
 
   template <class T>
