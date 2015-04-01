@@ -16,12 +16,25 @@ namespace survive
     void sanitize_observers() noexcept;
 
     std::vector<T*> observers_;
+  private:
+    virtual void on_observer_add_(T*) const noexcept {}
   };
 
   template <class T>
   void Observer_Subject<T>::register_observer(T& obs) noexcept
   {
-    observers_.push_back(&obs);
+    using std::begin; using std::end;
+    auto obj_find = std::find_if(begin(observers_), end(observers_),
+    [&](auto const& val)
+    {
+      val == &obs;
+    });
+    // Make sure the observer isn't already in the vector.
+    if(obj_find == end(observers_))
+    {
+      observers_.push_back(&obs);
+      on_observer_add_(&obs);
+    }
   }
   template <class T>
   void Observer_Subject<T>::unregister_observer(T& obs) noexcept
