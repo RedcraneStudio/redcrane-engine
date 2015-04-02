@@ -25,7 +25,9 @@ namespace survive
         static Program from_files(std::string v, std::string f) noexcept;
 
         Program(Program&&) noexcept;
+        Program(Program const&) noexcept = delete;
         Program& operator=(Program&&) noexcept;
+        Program& operator=(Program const&) noexcept = delete;
         ~Program() noexcept;
 
         std::string name;
