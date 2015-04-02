@@ -27,7 +27,7 @@ namespace survive
     auto obj_find = std::find_if(begin(observers_), end(observers_),
     [&](auto const& val)
     {
-      val == &obs;
+      return val == &obs;
     });
     // Make sure the observer isn't already in the vector.
     if(obj_find == end(observers_))
@@ -44,7 +44,7 @@ namespace survive
     auto obj_find = std::find_if(begin(observers_), end(observers_),
     [&](auto const& val)
     {
-      val == &obs;
+      return val == &obs;
     });
     // If it's valid, remove it.
     if(obj_find != end(observers_))
