@@ -21,6 +21,6 @@ namespace survive
     Object create_object(gfx::IDriver& driver, std::string obj,
                          std::string mat) noexcept;
 
-    void render_object(Object const&) noexcept;
+    void render_object(Object const&, glm::mat4 model) noexcept;
   }
 }

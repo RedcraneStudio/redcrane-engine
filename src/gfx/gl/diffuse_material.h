@@ -21,7 +21,7 @@ namespace survive
   struct gfx::gl::Diffuse_Material : public IMaterial
   {
     Diffuse_Material() noexcept;
-    void use() const noexcept override;
+    void use(glm::mat4 const&) const noexcept override;
 
     void diffuse_color(Color const& c) noexcept;
     Color const& diffuse_color() const noexcept;
@@ -33,6 +33,7 @@ namespace survive
 
     GLint projection_matrix_loc_;
     GLint view_matrix_loc_;
+    GLint model_matrix_loc_;
 
     mutable bool diffuse_color_changed_;
     GLint diffuse_color_loc_;

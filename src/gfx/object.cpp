@@ -15,9 +15,9 @@ namespace survive
       ret.material = load_material(mat);
       return ret;
     }
-    void render_object(Object const& obj) noexcept
+    void render_object(Object const& obj, glm::mat4 model) noexcept
     {
-      if(obj.material) obj.material->use();
+      if(obj.material) obj.material->use(model);
       if(obj.mesh) obj.mesh->render();
     }
   }

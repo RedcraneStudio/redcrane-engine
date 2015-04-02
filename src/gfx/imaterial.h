@@ -13,7 +13,10 @@ namespace survive
     struct IMaterial : public IScene_Observer
     {
       virtual ~IMaterial() noexcept {}
-      virtual void use() const noexcept = 0;
+      // Accepting a matrix (model) seems incredibly out of place. Then again
+      // it is the material after all that stores the program. Could it be
+      // the material should hold another name, as it is more encompassing.
+      virtual void use(glm::mat4 const&) const noexcept = 0;
 
       void set_projection(glm::mat4 const& proj) noexcept = 0;
       void set_view(glm::mat4 const& view) noexcept = 0;

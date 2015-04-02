@@ -66,13 +66,25 @@ namespace survive
     }
   }
 
-  void render_scene(Scene_Node& scene) noexcept
+  void Scene_Node::render() const noexcept
   {
-    render_object(scene.obj);
+    render_object(obj, model);
 
-    for(auto const& child : scene.children)
+    for(auto const& child : children)
     {
-      render_scene(*child);
+      child->render_with_model_(model);
+    }
+  }
+  void Scene_Node::render_with_model_(glm::mat4 const& par_mod) const noexcept
+  {
+    // "cause you don't understand bb, bumbumbumbumbum" ~ Selah Sue
+    auto this_world = par_mod * model;
+    // TODO Cache this ^
+    render_object(obj, this_world);
+
+    for(auto const& child : children)
+    {
+      child->render_with_model_(this_world);
     }
   }
 }

@@ -20,6 +20,10 @@ namespace survive
     glm::mat4 model;
 
     std::vector<std::unique_ptr<Scene_Node> > children;
+
+    void render() const noexcept;
+  private:
+    void render_with_model_(glm::mat4 const& parent_model) const noexcept;
   };
 
   /*!
@@ -28,8 +32,6 @@ namespace survive
    * A null driver can be used to "unprepare" the whole scene.
    */
   void prepare_scene(Scene_Node&, gfx::IDriver&) noexcept;
-
-  void render_scene(Scene_Node& scene) noexcept;
 
   Scene_Node load_scene(std::string fn, gfx::IDriver&) noexcept;
 }
