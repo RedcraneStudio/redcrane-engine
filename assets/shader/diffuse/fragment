@@ -1,11 +1,16 @@
 #version 440
 
-layout(location = 0) out vec4 diffuse;
+layout(location = 0) out vec4 diffuse_out;
 layout(location = 0) in vec2 uv;
 
+uniform vec3 dif;
 uniform sampler2D tex;
 
 void main()
 {
-  diffuse = texture(tex, uv);
+  diffuse_out = texture(tex, uv);
+  diffuse_out.r *= dif.r;
+  diffuse_out.g *= dif.g;
+  diffuse_out.b *= dif.b;
+  diffuse_out.a = 1.0;
 }

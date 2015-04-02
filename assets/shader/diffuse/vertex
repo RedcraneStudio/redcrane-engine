@@ -5,10 +5,12 @@ layout(location = 2) in vec2 uv_in;
 
 layout(location = 0) out vec2 uv_out;
 
-uniform mat4 mvp;
+uniform mat4 proj;
+uniform mat4 view;
+uniform mat4 model;
 
 void main()
 {
-  gl_Position = mvp * vec4(vertex, 1.0);
+  gl_Position = proj * view * model * vec4(vertex, 1.0);
   uv_out = uv_in;
 }
