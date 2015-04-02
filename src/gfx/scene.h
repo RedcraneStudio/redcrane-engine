@@ -15,11 +15,11 @@ namespace survive
      */
     struct Scene : public Observer_Subject<IScene_Observer>
     {
-      inline glm::mat4 const& projection_matrix() const noexcept;
-      inline void projection_matrix(glm::mat4 const& p) noexcept;
+      glm::mat4 const& projection_matrix() const noexcept;
+      void projection_matrix(glm::mat4 const& p) noexcept;
 
-      inline glm::mat4 const& view_matrix() const noexcept;
-      inline void view_matrix(glm::mat4 const& v) noexcept;
+      glm::mat4 const& view_matrix() const noexcept;
+      void view_matrix(glm::mat4 const& v) noexcept;
     private:
       void on_observer_add_(IScene_Observer* obs) const noexcept override;
 
