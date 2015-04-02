@@ -22,6 +22,16 @@ namespace survive
         return std::make_unique<Prep_Tex>(std::move(tex));
       }
 
+      void Driver::clear_color_value(Color const& c) noexcept
+      {
+        glClearColor(c.r / (float) 0xff, c.g / (float) 0xff,
+                     c.b / (float) 0xff, 1.0);
+      }
+      void Driver::clear_depth_value(float f) noexcept
+      {
+        glClearDepth(f);
+      }
+
       void Driver::clear() noexcept
       {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

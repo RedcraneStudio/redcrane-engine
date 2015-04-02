@@ -21,6 +21,9 @@ namespace survive
     std::unique_ptr<Prepared_Texture>
       prepare_texture(Texture&& tex) noexcept override;
 
+    void clear_color_value(Color const&) noexcept override {}
+    void clear_depth_value(float) noexcept override {}
+
     void clear() noexcept override {}
     void clear_color() noexcept override {}
     void clear_depth() noexcept override {}

@@ -4,6 +4,7 @@
  */
 #pragma once
 #include <memory>
+#include "../color.h"
 #include "prepared_mesh.h"
 #include "prepared_texture.h"
 namespace survive
@@ -18,6 +19,9 @@ namespace survive
         prepare_mesh(Mesh&& mesh) noexcept = 0;
       virtual std::unique_ptr<Prepared_Texture>
         prepare_texture(Texture&& tex) noexcept = 0;
+
+      virtual void clear_color_value(Color const& color) noexcept;
+      virtual void clear_depth_value(float val) noexcept;
 
       virtual void clear() noexcept = 0;
       virtual void clear_color() noexcept = 0;
