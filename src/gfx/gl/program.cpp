@@ -127,7 +127,7 @@ namespace survive
         glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
         if(static_cast<GLuint>(current_program) == program)
         {
-          log_w("% (Shader program) destructed while in use;"
+          log_w("'%' (Shader program) destructed while in use; "
                 "Removing binding", name);
           glUseProgram(0);
         }
