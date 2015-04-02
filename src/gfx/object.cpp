@@ -12,7 +12,7 @@ namespace survive
     {
       auto ret = Object{};
       ret.mesh = driver.prepare_mesh(Mesh::from_file(obj));
-      ret.material = load_material(mat);
+      ret.material = load_material(driver, mat);
       return ret;
     }
     void render_object(Object const& obj, glm::mat4 model) noexcept

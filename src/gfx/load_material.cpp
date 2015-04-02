@@ -18,7 +18,8 @@ namespace survive
               (uint8_t) doc["b"].GetInt()};
     }
 
-    std::unique_ptr<IMaterial> load_material(std::string const& s) noexcept
+    std::unique_ptr<IMaterial> load_material(gfx::IDriver& driver,
+                                             std::string const& s) noexcept
     {
       auto doc = load_json(s);
       auto mat_type = std::string{doc["type"].GetString()};

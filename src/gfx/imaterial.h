@@ -6,6 +6,7 @@
 #include <string>
 #include <memory>
 #include "iscene_observer.h"
+#include "idriver.h"
 namespace survive
 {
   namespace gfx
@@ -22,6 +23,7 @@ namespace survive
       void set_view(glm::mat4 const& view) noexcept = 0;
     };
 
-    std::unique_ptr<IMaterial> load_material(std::string const&) noexcept;
+    std::unique_ptr<IMaterial> load_material(gfx::IDriver&,
+                                             std::string const&) noexcept;
   }
 }

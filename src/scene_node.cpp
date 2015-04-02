@@ -31,7 +31,7 @@ namespace survive
     });
     if_has_member(doc, "material", [&](auto const& val)
     {
-      node.obj.material = gfx::load_material(val.GetString());
+      node.obj.material = gfx::load_material(driver, val.GetString());
     });
     if_has_member(doc, "translation", [&](auto const& val)
     {
