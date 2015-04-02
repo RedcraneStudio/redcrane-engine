@@ -15,6 +15,9 @@ namespace survive
       {
         diffuse_color_loc_ = prog_->get_uniform_location("diffuse");
         diffuse_color_changed_ = true;
+
+        projection_matrix_loc_ = prog_->get_uniform_location("proj");
+        view_matrix_loc_ = prog_->get_uniform_location("view");
       }
       void Diffuse_Material::use() const noexcept
       {
@@ -40,6 +43,14 @@ namespace survive
       Color const& Diffuse_Material::diffuse_color() const noexcept
       {
         return diffuse_color_;
+      }
+      void Diffuse_Material::set_projection(glm::mat4 const& proj) noexcept
+      {
+        glUniformMatrix4fv(projection_matrix_loc_, 1, GL_FALSE, &proj[0][0]);
+      }
+      void Diffuse_Material::set_view(glm::mat4 const& view) noexcept
+      {
+        glUniformMatrix4fv(view_matrix_loc_, 1, GL_FALSE, &view[0][0]);
       }
     }
   }

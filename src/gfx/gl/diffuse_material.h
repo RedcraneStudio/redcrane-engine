@@ -25,8 +25,14 @@ namespace survive
 
     void diffuse_color(Color const& c) noexcept;
     Color const& diffuse_color() const noexcept;
+
+    void set_projection(glm::mat4 const& proj) noexcept override;
+    void set_view(glm::mat4 const& view) noexcept override;
   private:
     mutable std::shared_ptr<Program> prog_;
+
+    GLint projection_matrix_loc_;
+    GLint view_matrix_loc_;
 
     mutable bool diffuse_color_changed_;
     GLint diffuse_color_loc_;
