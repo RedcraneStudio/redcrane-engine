@@ -20,8 +20,8 @@ namespace survive
       virtual std::unique_ptr<Prepared_Texture>
         prepare_texture(Texture&& tex) noexcept = 0;
 
-      virtual void clear_color_value(Color const& color) noexcept;
-      virtual void clear_depth_value(float val) noexcept;
+      virtual void clear_color_value(Color const& color) noexcept = 0;
+      virtual void clear_depth_value(float val) noexcept = 0;
 
       virtual void clear() noexcept = 0;
       virtual void clear_color() noexcept = 0;
