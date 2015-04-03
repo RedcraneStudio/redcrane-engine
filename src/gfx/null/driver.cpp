@@ -13,7 +13,8 @@ namespace strat
       {
         Prep_Mesh(Mesh&& mesh) noexcept : Prepared_Mesh(std::move(mesh)) {}
         inline ~Prep_Mesh() noexcept { uninit(); }
-        inline void render_() const noexcept override {}
+        inline void bind_() const noexcept override {}
+        inline void draw_() const noexcept override {}
         inline void uninit_() noexcept override {}
       };
 

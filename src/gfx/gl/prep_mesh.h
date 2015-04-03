@@ -24,7 +24,8 @@ namespace strat
         GLuint face_index_buffer;
 
       private:
-        void render_() const noexcept override;
+        void bind_() const noexcept override;
+        void draw_() const noexcept override;
         void uninit_() noexcept override;
       };
     }

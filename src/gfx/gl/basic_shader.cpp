@@ -52,7 +52,8 @@ namespace strat
       {
         // Basic_Shader and the (prepared_)mesh are officially coupled, they
         // depend on each other's implementation.
-        mesh.render();
+        mesh.bind();
+        mesh.draw();
       }
     }
   }

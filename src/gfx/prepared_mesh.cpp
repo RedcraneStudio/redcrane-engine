@@ -29,13 +29,17 @@ namespace strat
         usable_ = false;
       }
     }
-    void Prepared_Mesh::render() const noexcept
+    void Prepared_Mesh::bind() const noexcept
     {
-      if(usable_) render_();
+      if(usable_) bind_();
+    }
+    void Prepared_Mesh::draw() const noexcept
+    {
+      if(usable_) draw_();
 #ifndef SURVIVE_RELEASE_BUILD
       else
       {
-        log_w("Disregarding attempt to render mesh that isn't usable");
+        log_w("Disregarding attempt to draw mesh that isn't usable");
       }
 #endif
     }

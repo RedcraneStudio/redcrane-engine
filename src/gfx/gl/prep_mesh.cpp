@@ -60,9 +60,12 @@ namespace strat
         glBindVertexArray(0);
       }
 
-      void Prep_Mesh::render_() const noexcept
+      void Prep_Mesh::bind_() const noexcept
       {
         glBindVertexArray(vao);
+      }
+      void Prep_Mesh::draw_() const noexcept
+      {
         glDrawElements(GL_TRIANGLES, mesh().faces.size() * 3,
                        GL_UNSIGNED_INT, 0);
       }

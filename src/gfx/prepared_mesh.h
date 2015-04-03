@@ -17,13 +17,15 @@ namespace strat
       Mesh const& mesh() const noexcept;
 
       Mesh&& unwrap() noexcept;
-      void render() const noexcept;
+      void bind() const noexcept;
+      void draw() const noexcept;
     protected:
       void uninit() noexcept;
     private:
       Mesh mesh_;
       bool usable_ = true;
-      virtual void render_() const noexcept = 0;
+      virtual void bind_() const noexcept = 0;
+      virtual void draw_() const noexcept = 0;
 
       // Must be called in the deriving class's destructor.
       virtual void uninit_() noexcept = 0;
