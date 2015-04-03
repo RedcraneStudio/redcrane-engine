@@ -9,7 +9,6 @@
 #include "gfx/object.h"
 #include "gfx/idriver.h"
 #include "gfx/scene.h"
-#include "maybe_owned.hpp"
 namespace strat
 {
   struct Scene_Node

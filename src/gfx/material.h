@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <memory>
-#include "../color.h"
+#include "../common/color.h"
 #include "prepared_texture.h"
 #include "idriver.h"
 namespace strat
