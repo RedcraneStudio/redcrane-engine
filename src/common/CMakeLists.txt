@@ -1,5 +1,5 @@
 
-# Copyright (C) 2014 Luke San Antonio
+# Copyright (C) 2015 Luke San Antonio
 # All rights reserved.
 
 add_library(commonlib STATIC log.cpp translate.cpp json.cpp)
