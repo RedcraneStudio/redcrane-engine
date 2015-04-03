@@ -10,7 +10,7 @@
 #include "../gfx/idriver.h"
 #include "asset.h"
 
-namespace survive { namespace assets
+namespace strat { namespace assets
 {
   /*!
    * \brief Filters the list of pathnames and loads them into an asset

@@ -6,7 +6,7 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
-namespace survive
+namespace strat
 {
   struct Lang
   {

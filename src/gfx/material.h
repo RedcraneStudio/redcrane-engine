@@ -7,7 +7,7 @@
 #include "../color.h"
 #include "prepared_texture.h"
 #include "idriver.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

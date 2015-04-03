@@ -7,7 +7,7 @@
 #include "common/log.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "gfx/gl/basic_shader.h"
-namespace survive
+namespace strat
 {
   template <class T>
   glm::mat4 load_translation(T const& doc) noexcept

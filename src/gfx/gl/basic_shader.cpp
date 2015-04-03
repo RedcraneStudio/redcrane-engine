@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "basic_shader.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

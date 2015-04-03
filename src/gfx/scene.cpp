@@ -4,7 +4,7 @@
  */
 #include "scene.h"
 #include <glm/gtc/matrix_transform.hpp>
-namespace survive
+namespace strat
 {
   namespace gfx
   {

@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "rapidjson/document.h"
-namespace survive
+namespace strat
 {
   struct Bad_File
   {

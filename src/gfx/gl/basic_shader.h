@@ -4,7 +4,7 @@
  */
 #include "../ishader.h"
 #include "program.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

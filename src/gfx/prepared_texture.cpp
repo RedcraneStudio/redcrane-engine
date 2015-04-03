@@ -4,7 +4,7 @@
  */
 #include "prepared_texture.h"
 #include "../common/log.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

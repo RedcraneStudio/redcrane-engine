@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include "prepared_mesh.h"
 #include "iscene_observer.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

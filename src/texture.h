@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 #include <cstdint>
-namespace survive
+namespace strat
 {
   enum class Texture_Format
   {

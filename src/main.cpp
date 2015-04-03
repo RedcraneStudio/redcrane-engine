@@ -50,7 +50,7 @@ Command_Options parse_command_line(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-  using namespace survive;
+  using namespace strat;
 
   set_log_level(Log_Severity::Debug);
 
@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 #if 0
 int main()
 {
-  using namespace survive;
+  using namespace strat;
 
   auto driver = gfx::gl::Driver{"OpenGL 4.5"};
   auto scene_data = gfx::make_isometric_scene(factory, ...);

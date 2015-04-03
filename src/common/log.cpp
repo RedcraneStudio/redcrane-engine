@@ -7,7 +7,7 @@
 #include <ctime>
 #include <cstring>
 #include <uv.h>
-namespace survive
+namespace strat
 {
   Scoped_Log_Init::Scoped_Log_Init() noexcept
   {

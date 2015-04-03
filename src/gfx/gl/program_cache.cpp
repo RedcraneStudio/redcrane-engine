@@ -7,7 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include "../../common/json.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

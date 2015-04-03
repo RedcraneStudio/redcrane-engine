@@ -7,7 +7,7 @@
 #include "../color.h"
 #include "prepared_mesh.h"
 #include "prepared_texture.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

@@ -7,7 +7,7 @@
 #include <istream>
 #include <string>
 #include <vector>
-namespace survive
+namespace strat
 {
   struct Mesh
   {

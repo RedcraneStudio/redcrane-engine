@@ -6,7 +6,7 @@
 #include "common/log.h"
 #include <cstring>
 #include <png.h>
-namespace survive
+namespace strat
 {
   void error_fn(void* usr_data) noexcept
   {}

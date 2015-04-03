@@ -10,7 +10,7 @@
 #include "gfx/idriver.h"
 #include "gfx/scene.h"
 #include "maybe_owned.hpp"
-namespace survive
+namespace strat
 {
   struct Scene_Node
   {

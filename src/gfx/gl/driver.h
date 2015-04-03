@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../idriver.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

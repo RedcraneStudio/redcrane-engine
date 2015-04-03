@@ -5,7 +5,7 @@
 #include "material.h"
 #include "../common/json.h"
 #include "prepared_texture.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

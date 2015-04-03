@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "prep_tex.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

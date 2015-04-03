@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <cstdint>
-namespace survive
+namespace strat
 {
   struct Color
   {

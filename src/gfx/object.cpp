@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "object.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include "../../common/log.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

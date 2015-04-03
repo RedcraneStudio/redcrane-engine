@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include "iscene_observer.h"
 #include "../common/observer_subject.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

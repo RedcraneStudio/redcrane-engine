@@ -5,7 +5,7 @@
 #pragma once
 #include "../prepared_texture.h"
 #include "glad/glad.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

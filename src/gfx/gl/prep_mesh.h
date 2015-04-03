@@ -5,7 +5,7 @@
 #pragma once
 #include "../prepared_mesh.h"
 #include "glad/glad.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

@@ -6,7 +6,7 @@
 #pragma once
 #include <memory>
 #include "program.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

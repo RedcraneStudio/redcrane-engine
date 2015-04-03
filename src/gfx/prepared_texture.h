@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../texture.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

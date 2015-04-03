@@ -10,7 +10,7 @@
 
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/error/en.h"
-namespace survive
+namespace strat
 {
   struct File_Wrapper
   {

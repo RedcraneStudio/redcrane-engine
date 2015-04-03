@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "translate.h"
-namespace survive
+namespace strat
 {
   Lang language_;
 

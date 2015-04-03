@@ -7,7 +7,7 @@
 #include "../common/log.h"
 
 #include <boost/filesystem.hpp>
-namespace survive { namespace assets
+namespace strat { namespace assets
 {
   namespace fs = boost::filesystem;
 

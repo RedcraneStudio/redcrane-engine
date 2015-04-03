@@ -5,7 +5,7 @@
 #include "driver.h"
 #include "prep_mesh.h"
 #include "prep_tex.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

@@ -9,7 +9,7 @@
 #include <algorithm>
 #include "common/log.h"
 
-namespace survive
+namespace strat
 {
   namespace
   {
@@ -203,7 +203,7 @@ namespace survive
 
 TEST_CASE("Face index string is properly parsed", "[struct Face]")
 {
-  using namespace survive;
+  using namespace strat;
 
   auto f = parse_face("6");
   REQUIRE(f.vertex == 6);
@@ -228,7 +228,7 @@ TEST_CASE("Face index string is properly parsed", "[struct Face]")
 
 TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
 {
-  using namespace survive;
+  using namespace strat;
 
   std::string data =
   "v -10.0 10.0 0.0\n"

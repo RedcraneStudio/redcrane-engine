@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 #include <algorithm>
-namespace survive
+namespace strat
 {
   template <class T>
   struct Observer_Subject

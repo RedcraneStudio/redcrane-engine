@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../mesh.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

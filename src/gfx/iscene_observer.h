@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <glm/glm.hpp>
-namespace survive
+namespace strat
 {
   namespace gfx
   {

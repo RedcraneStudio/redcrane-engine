@@ -9,7 +9,7 @@
 #include "material.h"
 #include "idriver.h"
 #include "ishader.h"
-namespace survive
+namespace strat
 {
   namespace gfx
   {

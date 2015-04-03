@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 
 #include <istream>
-namespace survive
+namespace strat
 {
   namespace gfx
   {

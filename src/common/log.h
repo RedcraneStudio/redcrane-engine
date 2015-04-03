@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 #include "translate.h"
-namespace survive
+namespace strat
 {
   struct Scoped_Log_Init
   {
