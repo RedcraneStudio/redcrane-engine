@@ -2,6 +2,7 @@
  * Copyright (C) 2014 Luke San Antonio
  * All rights reserved.
  */
+// NOT COMPILED DON'T USE
 #pragma once
 #include <memory>
 #include "program.h"

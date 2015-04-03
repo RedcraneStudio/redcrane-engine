@@ -14,6 +14,9 @@ namespace survive
   {
     namespace gl
     {
+      // Kind of a leaky abstraction since we need to set uniforms with
+      // standard opengl functions, it's useful though in simply managing
+      // resources and such.
       struct Program
       {
         void use() noexcept;

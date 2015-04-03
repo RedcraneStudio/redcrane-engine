@@ -6,7 +6,7 @@
 #include "common/json.h"
 #include "common/log.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include "gfx/imaterial.h"
+#include "gfx/gl/basic_shader.h"
 namespace survive
 {
   template <class T>
@@ -20,31 +20,44 @@ namespace survive
   }
 
   template <class T>
-  Scene_Node load_scene(T const& doc, gfx::IDriver& driver) noexcept
+  Scene_Node load_scene(T const& doc, gfx::IDriver& driver,
+                        gfx::Scene scene_data) noexcept
   {
     auto node = Scene_Node{};
 
+    // This is dependent on OpenGL, so we need to offload this work to the
+    // driver!
+    node.obj.shader = std::make_shared<gfx::gl::Basic_Shader>();
+    node.obj.shader->use();
+    // Tell the scene data about our new shader so we get updates when the
+    // scene changes.
+    scene_data.register_observer(*node.obj.shader);
+
+    // Load the mesh with a filename, then prepare it with the driver.
     if_has_member(doc, "mesh", [&](auto const& val)
     {
       auto mesh = Mesh::from_file(val.GetString());
       node.obj.mesh = driver.prepare_mesh(std::move(mesh));
     });
+    // Load some basic properties of the material.
     if_has_member(doc, "material", [&](auto const& val)
     {
       node.obj.material = gfx::load_material(driver, val.GetString());
     });
+    // Load an initial translation if it exists.
     if_has_member(doc, "translation", [&](auto const& val)
     {
-      node.model = load_translation(val);
+      node.obj.model_matrix = load_translation(val);
     });
 
     return node;
   }
 
-  Scene_Node load_scene(std::string fn, gfx::IDriver& d) noexcept
+  Scene_Node load_scene(std::string fn, gfx::IDriver& d,
+                       gfx::Scene& s) noexcept
   {
     auto doc = load_json(fn);
-    return load_scene(doc, d);
+    return load_scene(doc, d, s);
   }
 
   void prepare_scene(Scene_Node& scene, gfx::IDriver& driver) noexcept
@@ -68,17 +81,17 @@ namespace survive
 
   void Scene_Node::render() const noexcept
   {
-    render_object(obj, model);
+    render_object(obj);
 
     for(auto const& child : children)
     {
-      child->render_with_model_(model);
+      child->render_with_model_(*obj.model_matrix);
     }
   }
   void Scene_Node::render_with_model_(glm::mat4 const& par_mod) const noexcept
   {
     // "cause you don't understand bb, bumbumbumbumbum" ~ Selah Sue
-    auto this_world = par_mod * model;
+    auto this_world = par_mod * *obj.model_matrix;
     // TODO Cache this ^
     render_object(obj, this_world);
 

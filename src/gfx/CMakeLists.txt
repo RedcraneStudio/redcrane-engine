@@ -3,12 +3,11 @@
 # All rights reserved.
 
 set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/prep_mesh.cpp gl/prep_tex.cpp
-                           gl/diffuse_material.cpp gl/program.cpp
-                           gl/program_cache.cpp)
+                           gl/basic_shader.cpp gl/program.cpp)
 add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES}
                           null/driver.cpp prepared_mesh.cpp
-                          prepared_texture.cpp scene.cpp object.cpp
-                          load_material.cpp)
+                          material.cpp prepared_texture.cpp scene.cpp
+                          object.cpp)
 
 target_link_libraries(gfxlib survival_games_gl)
 

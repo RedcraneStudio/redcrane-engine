@@ -1,4 +1,0 @@
-{
-  "vshade": "shader/diffuse/vertex",
-  "fshade": "shader/diffuse/fragment"
-}

@@ -8,6 +8,7 @@
 #include <string>
 #include "gfx/object.h"
 #include "gfx/idriver.h"
+#include "gfx/scene.h"
 #include "maybe_owned.hpp"
 namespace survive
 {
@@ -17,7 +18,6 @@ namespace survive
     // material. Meaning an object may have a material and no mesh. Then, each
     // child could lack a mesh making this one the active one for all of them.
     gfx::Object obj;
-    glm::mat4 model;
 
     std::vector<std::unique_ptr<Scene_Node> > children;
 
@@ -33,5 +33,5 @@ namespace survive
    */
   void prepare_scene(Scene_Node&, gfx::IDriver&) noexcept;
 
-  Scene_Node load_scene(std::string fn, gfx::IDriver&) noexcept;
+  Scene_Node load_scene(std::string fn, gfx::IDriver&, gfx::Scene&) noexcept;
 }

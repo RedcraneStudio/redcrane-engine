@@ -1,5 +1,4 @@
 {
-  "type": "diffuse",
-  "color": { "r": 125, "g": 0, "b": 23 },
+  "diffuse": { "r": 125, "g": 0, "b": 23 },
   "texture": "tex/cracked_soil.png"
 }
