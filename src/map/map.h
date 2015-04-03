@@ -22,15 +22,22 @@ namespace strat
     W
   };
 
-  struct Structure
+  struct AABB
   {
-    virtual int depth() const noexcept;
-    virtual int height() const noexcept;
-    virtual int width() const noexcept;
+    int depth;
+    int height;
+    int width;
+  };
 
-    virtual Orient orientation() const noexcept;
+  struct IStructure
+  {
+    virtual ~IStructure() noexcept {}
 
-    virtual int style_id() const noexcept;
-    virtual int mesh_id() const noexcept;
+    virtual AABB aabb() const noexcept = 0;
+
+    virtual Orient orientation() const noexcept = 0;
+
+    virtual int style_id() const noexcept = 0;
+    virtual int mesh_id() const noexcept = 0;
   };
 }
