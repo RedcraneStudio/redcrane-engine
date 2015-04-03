@@ -7,6 +7,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 find_package(LibPNG REQUIRED)
 find_package(LibUV REQUIRED)
 add_subdirectory(common)
+add_subdirectory(io)
 
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
