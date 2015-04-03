@@ -69,6 +69,7 @@ namespace strat
     uv_loop_init(&loop_);
     // Initialize the network pipe.
     net::init_pipe(pipe_, &loop_, bind_ip, bind_port);
+    pipe_.user_data = this;
     pipe_.read_cb = post_net_buffer;
 
     // Initialize the address that will be written to.
