@@ -18,4 +18,9 @@ namespace strat
     }
     return terrain;
   }
+  Structure_Instance::
+  Structure_Instance(IStructure* s, Orient o) noexcept
+    : structure_type(s), orientation(o) {}
+  Structure_Instance::Structure_Instance(Structure_Instance const& s) noexcept
+    : structure_type(s.structure_type), orientation(s.orientation) {}
 }
