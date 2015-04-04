@@ -28,7 +28,7 @@ namespace strat
   {
     virtual ~IStructure() noexcept {}
 
-    virtual AABB<float> aabb() const noexcept = 0;
+    virtual AABB aabb() const noexcept = 0;
 
     virtual int style_id() const noexcept = 0;
     virtual int mesh_id() const noexcept = 0;

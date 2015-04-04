@@ -3,13 +3,15 @@
  * All rights reserved.
  */
 #pragma once
+#include <glm/glm.hpp>
 namespace strat
 {
-  template <class T>
   struct AABB
   {
-    T depth;
-    T height;
-    T width;
+    float depth;
+    float height;
+    float width;
+
+    glm::vec3 min;
   };
 }
