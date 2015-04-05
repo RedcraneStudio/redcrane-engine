@@ -197,7 +197,34 @@ namespace strat
 
     return Mesh::from_stream(std::move(stream));
   }
+
+  AABB generate_aabb(Mesh const& mesh) noexcept
+  {
+    glm::vec3 min;
+    glm::vec3 max;
+
+    for(auto const& coord : mesh.vertices)
+    {
+      min.x = std::min(min.x, coord.x);
+      min.y = std::min(min.y, coord.y);
+      min.z = std::min(min.z, coord.z);
+
+      max.x = std::max(max.x, coord.x);
+      max.y = std::max(max.y, coord.y);
+      max.z = std::max(max.z, coord.z);
+    }
+
+    auto aabb = AABB{};
+    aabb.width = std::abs(max.x - min.x);
+    aabb.height = std::abs(max.y - min.y);
+    aabb.depth = std::abs(max.z - min.z);
+
+    aabb.min = min;
+
+    return aabb;
+  }
 }
+
 
 #include "catch/catch.hpp"
 

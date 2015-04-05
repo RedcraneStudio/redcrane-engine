@@ -7,6 +7,7 @@
 #include <istream>
 #include <string>
 #include <vector>
+#include "common/aabb.h"
 namespace strat
 {
   struct Mesh
@@ -23,4 +24,6 @@ namespace strat
   private:
     Mesh() noexcept = default;
   };
+
+  AABB generate_aabb(Mesh const& mesh) noexcept;
 }
