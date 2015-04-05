@@ -15,5 +15,6 @@ add_subdirectory(gfx)
 find_package(Boost REQUIRED COMPONENTS filesystem)
 add_subdirectory(assets)
 
-add_executable(strat main.cpp mesh.cpp texture.cpp scene_node.cpp)
+add_executable(strat main.cpp mesh.cpp texture.cpp scene_node.cpp
+                     mesh_container.cpp)
 target_link_libraries(strat gfxlib)
