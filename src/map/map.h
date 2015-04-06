@@ -7,6 +7,7 @@
 #include <vector>
 #include "../common/aabb.h"
 #include "../mesh_container.h"
+#include "../gfx/material.h"
 namespace strat
 {
   struct Terrain
@@ -31,6 +32,7 @@ namespace strat
 
     virtual AABB aabb() const noexcept = 0;
 
+    virtual gfx::Material mat() const noexcept = 0;
     virtual mesh_id_t mesh_id() const noexcept = 0;
   };
 
