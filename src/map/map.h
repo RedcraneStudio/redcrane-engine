@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include "../common/aabb.h"
+#include "../mesh_container.h"
 namespace strat
 {
   struct Terrain
@@ -30,8 +31,7 @@ namespace strat
 
     virtual AABB aabb() const noexcept = 0;
 
-    virtual int style_id() const noexcept = 0;
-    virtual int mesh_id() const noexcept = 0;
+    virtual mesh_id_t mesh_id() const noexcept = 0;
   };
 
   struct Structure_Instance
