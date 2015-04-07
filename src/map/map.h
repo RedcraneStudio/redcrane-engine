@@ -14,6 +14,9 @@ namespace strat
   {
     // Let's use a tile based system, for now. The integer represents altitude.
     std::vector< std::vector<int> > altitude;
+
+    int w;
+    int h;
   };
 
   Terrain make_flat_terrain(int alt, int w, int h);

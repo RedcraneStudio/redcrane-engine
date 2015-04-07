@@ -16,6 +16,10 @@ namespace strat
         terrain.altitude.back().push_back(alt);
       }
     }
+
+    terrain.w = w;
+    terrain.h = h;
+
     return terrain;
   }
   Structure_Instance::
