@@ -21,7 +21,6 @@ namespace strat
     static Mesh from_stream(std::istream&& s) noexcept;
     static Mesh from_file(std::string f) noexcept;
 
-  private:
     Mesh() noexcept = default;
   };
 
