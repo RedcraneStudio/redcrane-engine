@@ -6,6 +6,7 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include "template_utility.hpp"
 namespace strat
 {
   struct Lang
@@ -15,15 +16,6 @@ namespace strat
 
   void set_lang(Lang const& lang) noexcept;
   Lang get_lang() noexcept;
-
-  template <int N, typename... Params>
-  struct pack_element
-  {
-    using type = typename std::tuple_element<N, std::tuple<Params...> >::type;
-  };
-
-  template <int N, typename... Params>
-  using pack_element_t = typename pack_element<N, Params...>::type;
 
   inline std::string to_string_helper(std::string str) noexcept { return str; }
 
