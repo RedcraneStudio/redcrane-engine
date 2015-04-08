@@ -7,75 +7,65 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
-#include "common/log.h"
+#include "log.h"
 
 namespace strat
 {
-  namespace
+  bool operator<(Face const& f1, Face const& f2) noexcept
   {
-    struct Face
+    if(f1.vertex == f2.vertex)
     {
-      unsigned int vertex;
-      unsigned int normal;
-      unsigned int tex_coord;
-    };
-
-    bool operator<(Face const& f1, Face const& f2) noexcept
-    {
-      if(f1.vertex == f2.vertex)
+      if(f1.normal == f2.normal)
       {
-        if(f1.normal == f2.normal)
-        {
-          return f1.tex_coord < f2.tex_coord;
-        }
-        else return f1.normal < f2.normal;
+        return f1.tex_coord < f2.tex_coord;
       }
-      else return f1.vertex < f2.vertex;
+      else return f1.normal < f2.normal;
     }
-    bool operator==(Face const& f1, Face const& f2) noexcept
+    else return f1.vertex < f2.vertex;
+  }
+  bool operator==(Face const& f1, Face const& f2) noexcept
+  {
+    return f1.vertex == f2.vertex && f1.normal == f2.normal &&
+           f1.tex_coord == f2.tex_coord;
+  }
+
+  Face parse_face(std::string str) noexcept
+  {
+    // str could be "2" or "2/1" or "2//4" or "2/1/4"
+    Face f{0, 0, 0};
+
+    std::istringstream stream{str};
+
+    std::string vert_str;
+    std::getline(stream, vert_str, '/');
+
+    std::string tex_str;
+    std::getline(stream, tex_str, '/');
+
+    std::string norm_str;
+    std::getline(stream, norm_str, '/');
+
+    try
     {
-      return f1.vertex == f2.vertex && f1.normal == f2.normal &&
-             f1.tex_coord == f2.tex_coord;
-    }
-
-    Face parse_face(std::string str) noexcept
+      if(!vert_str.empty()) f.vertex = std::stoi(vert_str);
+    } catch(...) {}
+    try
     {
-      // str could be "2" or "2/1" or "2//4" or "2/1/4"
-      Face f{0, 0, 0};
-
-      std::istringstream stream{str};
-
-      std::string vert_str;
-      std::getline(stream, vert_str, '/');
-
-      std::string tex_str;
-      std::getline(stream, tex_str, '/');
-
-      std::string norm_str;
-      std::getline(stream, norm_str, '/');
-
-      try
-      {
-        if(!vert_str.empty()) f.vertex = std::stoi(vert_str);
-      } catch(...) {}
-      try
-      {
-        if(!tex_str.empty()) f.tex_coord = std::stoi(tex_str);
-      } catch(...) {}
-      try
-      {
-        if(!norm_str.empty()) f.normal = std::stoi(norm_str);
-      } catch(...) {}
-
-      return f;
-    }
-
-    glm::vec3 parse_vec3(std::istream& stream) noexcept
+      if(!tex_str.empty()) f.tex_coord = std::stoi(tex_str);
+    } catch(...) {}
+    try
     {
-      glm::vec3 t;
-      stream >> t.x >> t.y >> t.z;
-      return t;
-    }
+      if(!norm_str.empty()) f.normal = std::stoi(norm_str);
+    } catch(...) {}
+
+    return f;
+  }
+
+  glm::vec3 parse_vec3(std::istream& stream) noexcept
+  {
+    glm::vec3 t;
+    stream >> t.x >> t.y >> t.z;
+    return t;
   }
 
   Mesh Mesh::from_contents(std::string str) noexcept
@@ -223,49 +213,4 @@ namespace strat
 
     return aabb;
   }
-}
-
-
-#include "catch/catch.hpp"
-
-TEST_CASE("Face index string is properly parsed", "[struct Face]")
-{
-  using namespace strat;
-
-  auto f = parse_face("6");
-  REQUIRE(f.vertex == 6);
-  REQUIRE(f.tex_coord == 0);
-  REQUIRE(f.normal == 0);
-
-  f = parse_face("5//2");
-  REQUIRE(f.vertex == 5);
-  REQUIRE(f.tex_coord == 0);
-  REQUIRE(f.normal == 2);
-
-  f = parse_face("7/1/5");
-  REQUIRE(f.vertex == 7);
-  REQUIRE(f.tex_coord == 1);
-  REQUIRE(f.normal == 5);
-
-  f = parse_face("9/8");
-  REQUIRE(f.vertex == 9);
-  REQUIRE(f.tex_coord == 8);
-  REQUIRE(f.normal == 0);
-}
-
-TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
-{
-  using namespace strat;
-
-  std::string data =
-  "v -10.0 10.0 0.0\n"
-  "v -10.0 -10.0 0.0\n"
-  "v 10.0 10.0 0.0\n"
-  "v 10.0 -10.0 0.0\n"
-  "f 2 4 3\n"
-  "f 1 2 3\n";
-
-  auto mesh = Mesh::from_stream(std::istringstream{data});
-  REQUIRE(mesh.vertices.size() == 4);
-  REQUIRE(mesh.faces.size() == 6);
 }

@@ -5,9 +5,9 @@
 #pragma once
 #include <string>
 #include "mesh.h"
-#include "gfx/prepared_mesh.h"
-#include "gfx/idriver.h"
-#include "common/ID_Map.hpp"
+#include "../gfx/prepared_mesh.h"
+#include "../gfx/idriver.h"
+#include "ID_Map.hpp"
 namespace strat
 {
   using mesh_id_t = int;

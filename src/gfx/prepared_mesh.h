@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../mesh.h"
+#include "../common/mesh.h"
 namespace strat
 {
   namespace gfx

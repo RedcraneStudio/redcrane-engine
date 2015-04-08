@@ -7,9 +7,20 @@
 #include <istream>
 #include <string>
 #include <vector>
-#include "common/aabb.h"
+#include "aabb.h"
 namespace strat
 {
+  struct Face
+  {
+    unsigned int vertex;
+    unsigned int normal;
+    unsigned int tex_coord;
+  };
+  bool operator<(Face const& f1, Face const& f2) noexcept;
+  bool operator==(Face const& f1, Face const& f2) noexcept;
+  Face parse_face(std::string str) noexcept;
+  glm::vec3 parse_vec3(std::istream& stream) noexcept;
+
   struct Mesh
   {
     std::vector<glm::vec3> vertices;

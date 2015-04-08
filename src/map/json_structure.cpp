@@ -4,7 +4,7 @@
  */
 #include "json_structure.h"
 #include "../common/json.h"
-#include "../mesh.h"
+#include "../common/mesh.h"
 namespace strat
 {
   Json_Structure::Json_Structure(gfx::IDriver& driver,

@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 #include "../common/aabb.h"
-#include "../mesh_container.h"
+#include "../common/mesh_container.h"
 #include "../gfx/material.h"
 namespace strat
 {

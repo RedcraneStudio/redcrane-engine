@@ -16,7 +16,7 @@
 #include "scene_node.h"
 
 #include "texture.h"
-#include "mesh.h"
+#include "common/mesh.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -31,19 +31,14 @@
 
 struct Command_Options
 {
-  bool test = false;
 };
 
-Command_Options parse_command_line(int argc, char** argv)
+Command_Options parse_command_line(int argc, char**)
 {
   Command_Options opt;
   for(int i = 0; i < argc; ++i)
   {
-    auto option = argv[i];
-    if(strcmp(option, "--test") == 0)
-    {
-      opt.test = true;
-    }
+    //auto option = argv[i];
   }
   return opt;
 }
@@ -61,16 +56,6 @@ int main(int argc, char** argv)
 
   // Parse command line arguments.
   auto options = parse_command_line(argc - 1, argv+1);
-
-  // Should be run the testing whatchamacallit?
-  if(options.test)
-  {
-    int result = Catch::Session().run(1, argv);
-    if(result)
-    {
-      return EXIT_FAILURE;
-    }
-  }
 
   // Init glfw.
   if(!glfwInit())
