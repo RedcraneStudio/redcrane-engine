@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <iterator>
 namespace strat
 {
   namespace detail
@@ -23,6 +24,11 @@ namespace strat
     template <class T>
     struct Grid_Iterator
     {
+      using value_type = Grid_Pt<T>;
+      using pointer = value_type*;
+      using reference = value_type&;
+      using iterator_category = std::bidirectional_iterator_tag;
+
       Grid_Iterator() noexcept;
       Grid_Iterator(T max_rows, T max_cols, T cur_row, T cur_col) noexcept;
 
@@ -35,6 +41,7 @@ namespace strat
       Grid_Iterator operator--(int) noexcept;
 
       bool operator==(Grid_Iterator<T> const& rhs) const noexcept;
+      bool operator!=(Grid_Iterator<T> const& rhs) const noexcept;
     private:
       T max_rows_ = 0;
       T max_cols_ = 0;
@@ -100,6 +107,12 @@ namespace strat
     {
       return max_rows_ == rhs.max_rows_ && max_cols_ == rhs.max_cols_ &&
              pt_ == rhs.pt_;
+    }
+    template <class T>
+    bool Grid_Iterator<T>::
+    operator!=(Grid_Iterator<T> const& rhs) const noexcept
+    {
+      return !(*this == rhs);
     }
 
     template <class T>
