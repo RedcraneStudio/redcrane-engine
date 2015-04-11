@@ -20,6 +20,8 @@ namespace strat
   };
 
   Terrain make_flat_terrain(int alt, int w, int h);
+  Mesh make_terrain_mesh(Terrain const& t, double scale_fac = .01,
+                         double flat_fac = 1) noexcept;
 
   enum class Orient
   {
