@@ -50,7 +50,7 @@ namespace strat
     {
       auto ret = Scene{};
       ret.projection_matrix(glm::ortho(-10.0, 10.0, -10.0, 10.0, 0.1, 100.0));
-      ret.view_matrix(glm::lookAt(glm::vec3(-5.0, 10, -5.0),
+      ret.view_matrix(glm::lookAt(glm::vec3(5.0, 10, 5.0),
                                   glm::vec3(0.0, 0.0, 0.0),
                                   glm::vec3(0.0, 1.0, 0.0)));
       return ret;
