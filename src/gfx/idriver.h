@@ -5,8 +5,8 @@
 #pragma once
 #include <memory>
 #include "../common/color.h"
-#include "../common/mesh.h" // TODO: Fix this weird tree structure?
-#include "../texture.h"
+#include "mesh.h"
+#include "texture.h"
 #include "material.h"
 #include "camera.h"
 namespace strat

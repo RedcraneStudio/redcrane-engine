@@ -7,7 +7,7 @@
 #include <vector>
 #include "../common/aabb.h"
 #include "../gfx/material.h"
-#include "../common/mesh.h"
+#include "../gfx/mesh.h"
 namespace strat
 {
   struct Terrain

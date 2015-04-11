@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
-#include "log.h"
+#include "../common/log.h"
 
 namespace strat
 {

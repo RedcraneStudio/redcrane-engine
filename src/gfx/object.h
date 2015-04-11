@@ -6,7 +6,7 @@
 #include <memory>
 #include <boost/optional.hpp>
 #include "../common/maybe_owned.hpp"
-#include "../common/mesh.h"
+#include "mesh.h"
 #include "material.h"
 #include "idriver.h"
 namespace strat

@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 
-#include "../common/mesh.h"
+#include "../gfx/mesh.h"
 
 #define CATCH_CONFIG_MAIN
 #include "catch/catch.hpp"

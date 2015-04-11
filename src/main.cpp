@@ -13,10 +13,9 @@
 #include "gfx/gl/driver.h"
 #include "gfx/camera.h"
 #include "gfx/object.h"
-#include "scene_node.h"
-
-#include "texture.h"
-#include "common/mesh.h"
+#include "gfx/scene_node.h"
+#include "gfx/texture.h"
+#include "gfx/mesh.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -90,7 +89,7 @@ int main(int argc, char** argv)
   driver.use_camera(cam);
 
   // Load our root scene node from json
-  auto scene_root = load_scene("scene/default.json");
+  auto scene_root = gfx::load_scene("scene/default.json");
   prepare_scene(driver, scene_root);
 
   int fps = 0;

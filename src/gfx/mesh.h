@@ -7,7 +7,7 @@
 #include <istream>
 #include <string>
 #include <vector>
-#include "aabb.h"
+#include "../common/aabb.h"
 namespace strat
 {
   struct Face

@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "glad/glad.h"
-#include "../../common/mesh.h"
+#include "../mesh.h"
 namespace strat
 {
   namespace gfx

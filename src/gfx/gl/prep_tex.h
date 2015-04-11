@@ -3,8 +3,8 @@
  * All rights reserved.
  */
 #pragma once
-#include "../../texture.h"
 #include "glad/glad.h"
+#include "../texture.h"
 namespace strat
 {
   namespace gfx

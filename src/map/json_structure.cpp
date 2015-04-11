@@ -4,7 +4,7 @@
  */
 #include "json_structure.h"
 #include "../common/json.h"
-#include "../common/mesh.h"
+#include "../gfx/mesh.h"
 namespace strat
 {
   Json_Structure::Json_Structure(std::string fn) noexcept
