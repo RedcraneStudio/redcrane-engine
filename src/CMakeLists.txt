@@ -12,8 +12,8 @@ add_subdirectory(io)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
-add_subdirectory(assets)
+#find_package(Boost REQUIRED COMPONENTS filesystem)
+#add_subdirectory(assets)
 
 add_executable(strat main.cpp texture.cpp scene_node.cpp map/map.cpp
                      map/json_structure.cpp)

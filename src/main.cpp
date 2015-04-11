@@ -11,8 +11,8 @@
 #include "common/log.h"
 
 #include "gfx/gl/driver.h"
+#include "gfx/camera.h"
 #include "gfx/object.h"
-#include "gfx/scene.h"
 #include "scene_node.h"
 
 #include "texture.h"
@@ -86,10 +86,12 @@ int main(int argc, char** argv)
   auto driver = gfx::gl::Driver{};
 
   // Load the scene data for an isometric view
-  auto scene_data = gfx::make_isometric_scene();
+  auto cam = gfx::make_isometric_camera();
+  driver.use_camera(cam);
 
   // Load our root scene node from json
-  auto scene_root = load_scene("scene/default.json", driver, scene_data);
+  auto scene_root = load_scene("scene/default.json");
+  prepare_scene(driver, scene_root);
 
   int fps = 0;
   int time = glfwGetTime();
@@ -118,7 +120,7 @@ int main(int argc, char** argv)
 
     // Clear the screen and render.
     driver.clear();
-    scene_root.render();
+    render_scene(driver, scene_root);
 
     // Show it on screen.
     glfwSwapBuffers(window);

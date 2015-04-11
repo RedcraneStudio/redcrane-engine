@@ -3,10 +3,11 @@
  * All rights reserved.
  */
 #pragma once
+#include <string>
 #include <memory>
 #include "../common/color.h"
-#include "prepared_texture.h"
-#include "idriver.h"
+#include "../common/maybe_owned.hpp"
+#include "../texture.h"
 namespace strat
 {
   namespace gfx
@@ -14,9 +15,9 @@ namespace strat
     struct Material
     {
       Color diffuse_color;
-      std::shared_ptr<Prepared_Texture> texture;
+      Maybe_Owned<Texture> texture;
     };
 
-    Material load_material(gfx::IDriver&, std::string const&) noexcept;
+    Material load_material(std::string const&) noexcept;
   }
 }

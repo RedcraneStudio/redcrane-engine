@@ -14,12 +14,25 @@ namespace strat
     }
   }
 
-  struct gfx::null::Driver : public IDriver
+  struct gfx::null::Driver : public gfx::IDriver
   {
-    std::unique_ptr<Prepared_Mesh>
-      prepare_mesh(Mesh&& mesh) noexcept override;
-    std::unique_ptr<Prepared_Texture>
-      prepare_texture(Texture&& tex) noexcept override;
+    void prepare_mesh(Mesh&) noexcept override {}
+    void remove_mesh(Mesh&) noexcept override {}
+    void render_mesh(Mesh const&) noexcept override {}
+
+    void prepare_texture(Texture&) noexcept override {}
+    void remove_texture(Texture&) noexcept override {}
+    void bind_texture(Texture const&, unsigned int) noexcept override {}
+
+    void prepare_material(Material&) noexcept override {}
+    void remove_material(Material&) noexcept override {}
+    void bind_material(Material const&) noexcept override {}
+
+    void prepare_camera(Camera&) noexcept override {}
+    void remove_camera(Camera&) noexcept override {}
+    void use_camera(Camera const&) noexcept override {}
+
+    void set_model(glm::mat4 const&) noexcept override {}
 
     void clear_color_value(Color const&) noexcept override {}
     void clear_depth_value(float) noexcept override {}

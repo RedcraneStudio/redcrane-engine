@@ -5,29 +5,31 @@
 #pragma once
 #include <memory>
 #include <boost/optional.hpp>
-#include "prepared_mesh.h"
+#include "../common/maybe_owned.hpp"
+#include "../common/mesh.h"
 #include "material.h"
 #include "idriver.h"
-#include "ishader.h"
 namespace strat
 {
   namespace gfx
   {
     struct Object
     {
-      std::shared_ptr<Prepared_Mesh> mesh;
+      Object() noexcept;
 
-      std::shared_ptr<IShader> shader;
-      boost::optional<Material> material;
+      Maybe_Owned<Mesh> mesh;
+      Maybe_Owned<Material> material;
 
       // Used when a model isn't provided.
-      boost::optional<glm::mat4> model_matrix;
+      glm::mat4 model_matrix;
     };
 
-    Object create_object(gfx::IDriver& d, std::string o,
-                         std::string m) noexcept;
+    Object create_object(std::string o, std::string m) noexcept;
 
-    void render_object(Object const&, glm::mat4 model) noexcept;
-    void render_object(Object const&) noexcept;
+    void prepare_object(IDriver& d, Object& o) noexcept;
+    void remove_object(IDriver& d, Object& o) noexcept;
+
+    void render_object(IDriver& d, Object const&, glm::mat4 model) noexcept;
+    void render_object(IDriver& d, Object const&) noexcept;
   }
 }

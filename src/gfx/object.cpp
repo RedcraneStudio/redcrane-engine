@@ -7,38 +7,34 @@ namespace strat
 {
   namespace gfx
   {
-    Object create_object(gfx::IDriver& driver, std::string obj,
-                         std::string mat) noexcept
+    Object::Object() noexcept : model_matrix(1.0) {}
+    Object create_object(std::string obj, std::string mat) noexcept
     {
       auto ret = Object{};
-      ret.mesh = driver.prepare_mesh(Mesh::from_file(obj));
-      //ret.material = load_material(driver, mat);
+      ret.mesh = Maybe_Owned<Mesh>(Mesh::from_file(obj));
+      ret.material = Maybe_Owned<Material>(load_material(mat));
       return ret;
     }
-    void render_object(Object const& obj, glm::mat4 model) noexcept
+    void prepare_object(IDriver& d, Object& o) noexcept
     {
-      if(obj.shader)
-      {
-        obj.shader->set_model(model);
-        if(obj.material)
-        {
-          obj.shader->set_material(*obj.material);
-        }
-        obj.shader->use();
-        if(obj.mesh)
-        {
-          obj.shader->render(*obj.mesh);
-        }
-      }
+      if(o.mesh) d.prepare_mesh(*o.mesh);
+      if(o.material) d.prepare_material(*o.material);
     }
-    void render_object(Object const& obj) noexcept
+    void remove_object(IDriver& d, Object& o) noexcept
     {
-      auto model = glm::mat4(1.0);
-      if(obj.model_matrix)
-      {
-        model = *obj.model_matrix;
-      }
-      render_object(obj, model);
+      if(o.mesh) d.remove_mesh(*o.mesh);
+      if(o.material) d.remove_material(*o.material);
+    }
+
+    void render_object(IDriver& d, Object const& o, glm::mat4 m) noexcept
+    {
+      if(o.material) d.bind_material(*o.material);
+      d.set_model(m);
+      if(o.mesh) d.render_mesh(*o.mesh);
+    }
+    void render_object(IDriver& d, Object const& o) noexcept
+    {
+      render_object(d, o, o.model_matrix);
     }
   }
 }

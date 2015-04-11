@@ -20,29 +20,21 @@ namespace strat
   }
 
   template <class T>
-  Scene_Node load_scene(T const& doc, gfx::IDriver& driver,
-                        gfx::Scene scene_data) noexcept
+  Scene_Node load_scene(T const& doc) noexcept
   {
     auto node = Scene_Node{};
-
-    // This is dependent on OpenGL, so we need to offload this work to the
-    // driver!
-    node.obj.shader = std::make_shared<gfx::gl::Basic_Shader>();
-    node.obj.shader->use();
-    // Tell the scene data about our new shader so we get updates when the
-    // scene changes.
-    scene_data.register_observer(*node.obj.shader);
 
     // Load the mesh with a filename, then prepare it with the driver.
     if_has_member(doc, "mesh", [&](auto const& val)
     {
       auto mesh = Mesh::from_file(val.GetString());
-      node.obj.mesh = driver.prepare_mesh(std::move(mesh));
+      node.obj.mesh = Maybe_Owned<Mesh>(std::move(mesh));
     });
     // Load some basic properties of the material.
     if_has_member(doc, "material", [&](auto const& val)
     {
-      node.obj.material = gfx::load_material(driver, val.GetString());
+      auto mat = gfx::load_material(val.GetString());
+      node.obj.material = Maybe_Owned<gfx::Material>(std::move(mat));
     });
     // Load an initial translation if it exists.
     if_has_member(doc, "translation", [&](auto const& val)
@@ -53,51 +45,50 @@ namespace strat
     return node;
   }
 
-  Scene_Node load_scene(std::string fn, gfx::IDriver& d,
-                       gfx::Scene& s) noexcept
+  Scene_Node load_scene(std::string fn) noexcept
   {
     auto doc = load_json(fn);
-    return load_scene(doc, d, s);
+    return load_scene(doc);
   }
 
-  void prepare_scene(Scene_Node& scene, gfx::IDriver& driver) noexcept
+  void prepare_scene(gfx::IDriver& d, Scene_Node& sn) noexcept
   {
-    // Do ourselves, then our children.
-    if(scene.obj.mesh)
+    prepare_object(d, sn.obj);
+    for(auto& child : sn.children)
     {
-      // Unprepare the mesh from what is likely a null driver and prepare it
-      // for whatever the driver we got supports.
-      scene.obj.mesh = driver.prepare_mesh(scene.obj.mesh->unwrap());
+      prepare_scene(d, *child);
     }
+  }
+  void remove_scene(gfx::IDriver& d, Scene_Node& sn) noexcept
+  {
+    remove_object(d, sn.obj);
+    for(auto& child : sn.children)
+    {
+      remove_scene(d, *child);
+    }
+  }
+
+  void render_scene_with_model(gfx::IDriver& d, Scene_Node const& scene,
+                               glm::mat4 const& par_mod) noexcept
+  {
+    // "cause you don't understand bb, bumbumbumbumbum" ~ Selah Sue
+    auto this_world = par_mod * scene.obj.model_matrix;
+    // TODO Cache this ^
+
+    render_object(d, scene.obj, this_world);
 
     for(auto const& child : scene.children)
     {
-      if(child)
-      {
-        prepare_scene(*child, driver);
-      }
+      render_scene_with_model(d, scene, this_world);
     }
   }
-
-  void Scene_Node::render() const noexcept
+  void render_scene(gfx::IDriver& d, Scene_Node const& scene) noexcept
   {
-    render_object(obj);
+    render_object(d, scene.obj);
 
-    for(auto const& child : children)
+    for(auto const& child : scene.children)
     {
-      child->render_with_model_(*obj.model_matrix);
-    }
-  }
-  void Scene_Node::render_with_model_(glm::mat4 const& par_mod) const noexcept
-  {
-    // "cause you don't understand bb, bumbumbumbumbum" ~ Selah Sue
-    auto this_world = par_mod * *obj.model_matrix;
-    // TODO Cache this ^
-    render_object(obj, this_world);
-
-    for(auto const& child : children)
-    {
-      child->render_with_model_(this_world);
+      render_scene_with_model(d, *child, scene.obj.model_matrix);
     }
   }
 }

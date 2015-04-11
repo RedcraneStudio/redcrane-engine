@@ -9,8 +9,7 @@ namespace strat
   {
     namespace gl
     {
-      Prep_Tex::Prep_Tex(Texture&& tex) noexcept
-        : Prepared_Texture(std::move(tex))
+      Prep_Tex::Prep_Tex(Texture& tex) noexcept
       {
         glGenTextures(1, &tex_id);
 
@@ -18,8 +17,8 @@ namespace strat
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex_id);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture().w, texture().h, 0,
-                     GL_RGBA, GL_UNSIGNED_BYTE, texture().data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex.w, tex.h, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, tex.data);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -30,15 +29,28 @@ namespace strat
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
       }
+      Prep_Tex::~Prep_Tex() noexcept
+      {
+        glDeleteTextures(1, &tex_id);
+      }
 
-      void Prep_Tex::bind_(unsigned int loc) const noexcept
+      Prep_Tex::Prep_Tex(Prep_Tex&& t) noexcept : tex_id(t.tex_id)
+      {
+        t.tex_id = 0;
+      }
+      Prep_Tex& Prep_Tex::operator=(Prep_Tex&& t) noexcept
+      {
+        tex_id = t.tex_id;
+        t.tex_id = 0;
+
+        return *this;
+      }
+
+      // Binds *this* texture to a given texture unit spot.
+      void Prep_Tex::bind(unsigned int loc) const noexcept
       {
         glActiveTexture(GL_TEXTURE0 + loc);
         glBindTexture(GL_TEXTURE_2D, tex_id);
-      }
-      void Prep_Tex::uninit_() noexcept
-      {
-        glDeleteTextures(1, &tex_id);
       }
     }
   }

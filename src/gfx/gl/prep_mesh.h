@@ -3,19 +3,21 @@
  * All rights reserved.
  */
 #pragma once
-#include "../prepared_mesh.h"
 #include "glad/glad.h"
+#include "../../common/mesh.h"
 namespace strat
 {
   namespace gfx
   {
     namespace gl
     {
-      struct Prep_Mesh : public Prepared_Mesh
+      struct Prep_Mesh
       {
-        Prep_Mesh(Mesh&&) noexcept;
-        // It's required by the base class that we do this.
-        ~Prep_Mesh() noexcept { uninit(); }
+        Prep_Mesh(Mesh&) noexcept;
+        ~Prep_Mesh() noexcept;
+
+        Prep_Mesh(Prep_Mesh&&) noexcept;
+        Prep_Mesh& operator=(Prep_Mesh&&) noexcept;
 
         GLuint vao;
         GLuint vertice_buffer;
@@ -23,10 +25,10 @@ namespace strat
         GLuint tex_coords_buffer;
         GLuint face_index_buffer;
 
-      private:
-        void bind_() const noexcept override;
-        void draw_() const noexcept override;
-        void uninit_() noexcept override;
+        GLsizei num_faces;
+
+        void bind() const noexcept;
+        void draw() const noexcept;
       };
     }
   }

@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../prepared_texture.h"
+#include "../../texture.h"
 #include "glad/glad.h"
 namespace strat
 {
@@ -11,16 +11,17 @@ namespace strat
   {
     namespace gl
     {
-      struct Prep_Tex : public Prepared_Texture
+      struct Prep_Tex
       {
-        Prep_Tex(Texture&&) noexcept;
-        // It's required by the base class that we do this.
-        ~Prep_Tex() noexcept { uninit(); }
+        Prep_Tex(Texture& tex) noexcept;
+        ~Prep_Tex() noexcept;
+
+        Prep_Tex(Prep_Tex&&) noexcept;
+        Prep_Tex& operator=(Prep_Tex&&) noexcept;
 
         GLuint tex_id;
-      private:
-        void bind_(unsigned int loc) const noexcept override;
-        void uninit_() noexcept override;
+
+        void bind(unsigned int loc) const noexcept;
       };
     }
   }

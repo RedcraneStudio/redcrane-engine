@@ -4,10 +4,8 @@
 
 set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/prep_mesh.cpp gl/prep_tex.cpp
                            gl/basic_shader.cpp gl/program.cpp)
-add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES}
-                          null/driver.cpp prepared_mesh.cpp
-                          material.cpp prepared_texture.cpp scene.cpp
-                          object.cpp)
+add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES} null/driver.cpp
+                          material.cpp object.cpp camera.cpp)
 
 target_link_libraries(gfxlib survival_games_gl)
 

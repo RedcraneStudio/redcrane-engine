@@ -8,7 +8,6 @@
 #include <string>
 #include "gfx/object.h"
 #include "gfx/idriver.h"
-#include "gfx/scene.h"
 namespace strat
 {
   struct Scene_Node
@@ -19,18 +18,12 @@ namespace strat
     gfx::Object obj;
 
     std::vector<std::unique_ptr<Scene_Node> > children;
-
-    void render() const noexcept;
-  private:
-    void render_with_model_(glm::mat4 const& parent_model) const noexcept;
   };
 
-  /*!
-   * \brief Prepares the scene using a given driver.
-   *
-   * A null driver can be used to "unprepare" the whole scene.
-   */
-  void prepare_scene(Scene_Node&, gfx::IDriver&) noexcept;
+  Scene_Node load_scene(std::string fn) noexcept;
 
-  Scene_Node load_scene(std::string fn, gfx::IDriver&, gfx::Scene&) noexcept;
+  void prepare_scene(gfx::IDriver&, Scene_Node&) noexcept;
+  void remove_scene(gfx::IDriver&, Scene_Node&) noexcept;
+
+  void render_scene(gfx::IDriver&, Scene_Node const& scene) noexcept;
 }

@@ -41,5 +41,7 @@ namespace strat
 
     glm::mat4 camera_view_matrix(Camera const& cam) noexcept;
     glm::mat4 camera_proj_matrix(Camera const& cam) noexcept;
+
+    Camera make_isometric_camera() noexcept;
   }
 }

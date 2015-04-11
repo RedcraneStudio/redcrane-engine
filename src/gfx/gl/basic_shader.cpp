@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #include "basic_shader.h"
+#include "glad/glad.h"
 namespace strat
 {
   namespace gfx
@@ -33,27 +34,18 @@ namespace strat
         glUniformMatrix4fv(model_loc_, 1, GL_FALSE, &model[0][0]);
       }
 
-      void Basic_Shader::set_material(Material const& mat) noexcept
+      void Basic_Shader::set_texture(unsigned int tex) noexcept
       {
-        // Set diffuse color.
-        glUniform3f(diffuse_loc_, mat.diffuse_color.r / (float) 0xff,
-                    mat.diffuse_color.g / (float) 0xff,
-                    mat.diffuse_color.b / (float) 0xff);
-
-        // Bind texture and notify the shader program of that location.
-        mat.texture->bind(0);
-        glUniform1i(sampler_loc_, 0);
+        glUniform1i(sampler_loc_, tex);
+      }
+      void Basic_Shader::set_diffuse(Color const& c) noexcept
+      {
+        glUniform3f(diffuse_loc_, c.r / (float) 0xff, c.g / (float) 0xff,
+                    c.b / (float) 0xff);
       }
       void Basic_Shader::use() noexcept
       {
         prog_.use();
-      }
-      void Basic_Shader::render(Prepared_Mesh const& mesh) noexcept
-      {
-        // Basic_Shader and the (prepared_)mesh are officially coupled, they
-        // depend on each other's implementation.
-        mesh.bind();
-        mesh.draw();
       }
     }
   }

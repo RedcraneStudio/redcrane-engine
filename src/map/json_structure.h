@@ -9,15 +9,15 @@ namespace strat
 {
   struct Json_Structure : public IStructure
   {
-    Json_Structure(gfx::IDriver&, std::string, Mesh_Container&) noexcept;
+    Json_Structure(std::string) noexcept;
 
     AABB aabb() const noexcept override;
 
-    gfx::Material mat() const noexcept override;
-    mesh_id_t mesh_id() const noexcept override;
+    //gfx::Material mat() const noexcept override;
+    //mesh_id_t mesh_id() const noexcept override;
   private:
-    mesh_id_t mesh_id_;
-    gfx::Material mat_;
+    //mesh_id_t mesh_id_;
+    //gfx::Material mat_;
     AABB aabb_;
   };
 }
