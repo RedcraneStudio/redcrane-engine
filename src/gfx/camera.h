@@ -15,7 +15,7 @@ namespace strat
 
     struct Perspective_Cam_Params
     {
-      float fov, aspect, width, height, near, far;
+      float fov, aspect, near, far;
     };
 
     struct Ortho_Cam_Params
@@ -34,9 +34,12 @@ namespace strat
       };
 
       // Camera position, orientation and lookpos.
-      glm::vec3 pos;
+      glm::vec3 eye;
       glm::vec3 look;
       glm::vec3 up;
     };
+
+    glm::mat4 camera_view_matrix(Camera const& cam) noexcept;
+    glm::mat4 camera_proj_matrix(Camera const& cam) noexcept;
   }
 }
