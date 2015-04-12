@@ -102,7 +102,7 @@ int main(int argc, char** argv)
   driver.prepare_material(mat);
 
   // Load our cursor
-  auto cursor = gfx::create_object("obj/house.obj", "mat/house.json");
+  auto cursor = gfx::load_object("obj/house.obj", "mat/house.json");
   prepare_object(driver, cursor);
 
   driver.bind_material(*cursor.material);

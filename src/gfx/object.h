@@ -24,7 +24,7 @@ namespace strat
       glm::mat4 model_matrix;
     };
 
-    Object create_object(std::string o, std::string m) noexcept;
+    Object load_object(std::string o, std::string m) noexcept;
 
     void prepare_object(IDriver& d, Object& o) noexcept;
     void remove_object(IDriver& d, Object& o) noexcept;

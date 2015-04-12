@@ -8,7 +8,7 @@ namespace strat
   namespace gfx
   {
     Object::Object() noexcept : model_matrix(1.0) {}
-    Object create_object(std::string obj, std::string mat) noexcept
+    Object load_object(std::string obj, std::string mat) noexcept
     {
       auto ret = Object{};
       ret.mesh = Maybe_Owned<Mesh>(Mesh::from_file(obj));
