@@ -32,7 +32,7 @@ namespace strat
     static Mesh from_stream(std::istream&& s) noexcept;
     static Mesh from_file(std::string f) noexcept;
 
-    Mesh() noexcept = default;
+    Mesh() = default;
   };
 
   AABB generate_aabb(Mesh const& mesh) noexcept;
