@@ -11,13 +11,11 @@ namespace strat
   {
     auto doc = load_json(fn);
 
-    //mesh_id_ = mc.load(doc["mesh"].GetString());
-    //aabb_ = generate_aabb(*mc.mesh(mesh_id_));
-
-    //mat_ = gfx::load_material(driver, doc["material"].GetString());
+    obj_ = gfx::load_object(doc["mesh"].GetString(),
+                            doc["material"].GetString());
+    aabb_ = generate_aabb(*obj_.mesh);
   }
   AABB Json_Structure::aabb() const noexcept { return aabb_; }
 
-  //gfx::Material Json_Structure::mat() const noexcept { return mat_; }
-  //int Json_Structure::mesh_id() const noexcept { return mesh_id_; }
+  gfx::Object const& Json_Structure::obj() const noexcept { return obj_; }
 }

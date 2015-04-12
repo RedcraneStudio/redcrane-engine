@@ -8,9 +8,9 @@
 #include "../common/aabb.h"
 #include "../gfx/material.h"
 #include "../gfx/mesh.h"
+#include "../gfx/object.h"
 namespace strat
-{
-  struct Terrain
+{ struct Terrain
   {
     // Let's use a tile based system, for now. The integer represents altitude.
     std::vector< std::vector<int> > altitude;
@@ -37,8 +37,7 @@ namespace strat
 
     virtual AABB aabb() const noexcept = 0;
 
-    //virtual gfx::Material mat() const noexcept = 0;
-    //virtual gfx::Mesh mesh() const noexcept = 0;
+    virtual gfx::Object const& obj() const noexcept = 0;
   };
 
   struct Structure_Instance

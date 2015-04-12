@@ -13,11 +13,9 @@ namespace strat
 
     AABB aabb() const noexcept override;
 
-    //gfx::Material mat() const noexcept override;
-    //mesh_id_t mesh_id() const noexcept override;
+    gfx::Object const& obj() const noexcept override;
   private:
-    //mesh_id_t mesh_id_;
-    //gfx::Material mat_;
+    gfx::Object obj_;
     AABB aabb_;
   };
 }
