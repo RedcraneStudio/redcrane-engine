@@ -39,6 +39,8 @@ namespace strat
     void remove_camera(Camera& cam) noexcept override;
     void use_camera(Camera const& cam) noexcept override;
 
+    void set_projection(glm::mat4 const& p) noexcept override;
+    void set_view(glm::mat4 const& v) noexcept override;
     void set_model(glm::mat4 const&) noexcept override;
 
     void clear_color_value(Color const&) noexcept override;

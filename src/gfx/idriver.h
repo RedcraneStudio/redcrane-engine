@@ -33,6 +33,8 @@ namespace strat
       virtual void remove_camera(Camera& cam) noexcept = 0;
       virtual void use_camera(Camera const& cam) noexcept = 0;
 
+      virtual void set_projection(glm::mat4 const&) noexcept = 0;
+      virtual void set_view(glm::mat4 const&) noexcept = 0;
       virtual void set_model(glm::mat4 const&) noexcept = 0;
 
       virtual void clear_color_value(Color const& color) noexcept = 0;

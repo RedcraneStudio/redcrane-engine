@@ -97,6 +97,14 @@ namespace strat
         shader_.set_projection(camera_proj_matrix(cam));
       }
 
+      void Driver::set_projection(glm::mat4 const& p) noexcept
+      {
+        shader_.set_projection(p);
+      }
+      void Driver::set_view(glm::mat4 const& v) noexcept
+      {
+        shader_.set_view(v);
+      }
       void Driver::set_model(glm::mat4 const& m) noexcept
       {
         shader_.set_model(m);
