@@ -26,6 +26,17 @@ namespace strat
 
     Object load_object(std::string o, std::string m) noexcept;
 
+
+    // Generates a new separate object but pointing to the other object's
+    // mesh and material. No reference counting is being done so this operation
+    // can be considered somewhat unsafe.
+    Object share_object_keep_ownership(Object& obj) noexcept;
+    // Generates a separate object while owning the other object's mesh and
+    // material. The other object is updated to point to what *the returned*
+    // object *now owns*. This means the other object being destructed will
+    // not delete the mesh and material.
+    Object share_object_move_ownership(Object& obj) noexcept;
+
     void prepare_object(IDriver& d, Object& o) noexcept;
     void remove_object(IDriver& d, Object& o) noexcept;
 
