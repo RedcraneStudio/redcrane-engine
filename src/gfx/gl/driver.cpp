@@ -17,6 +17,10 @@ namespace strat
         // lifetime of our driver.
         shader_.use();
       }
+      Driver::~Driver() noexcept
+      {
+        glUseProgram(0);
+      }
       void Driver::prepare_mesh(Mesh& mesh) noexcept
       {
         if(meshs_.find(&mesh) == meshs_.end())

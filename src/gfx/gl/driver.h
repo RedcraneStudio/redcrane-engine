@@ -21,6 +21,7 @@ namespace strat
   struct gfx::gl::Driver : public gfx::IDriver
   {
     Driver() noexcept;
+    ~Driver() noexcept;
 
     void prepare_mesh(Mesh& mesh) noexcept override;
     void remove_mesh(Mesh& mesh) noexcept override;
