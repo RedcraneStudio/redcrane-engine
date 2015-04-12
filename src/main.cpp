@@ -18,6 +18,7 @@
 #include "gfx/mesh.h"
 
 #include "map/map.h"
+#include "map/json_structure.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -101,11 +102,9 @@ int main(int argc, char** argv)
   mat.texture = Maybe_Owned<Texture>(Texture::from_png_file("tex/grass.png"));
   driver.prepare_material(mat);
 
-  // Load our cursor
-  auto cursor = gfx::load_object("obj/house.obj", "mat/house.json");
-  prepare_object(driver, cursor);
-
-  driver.bind_material(*cursor.material);
+  // Load our house structure
+  auto house_struct = Json_Structure{"structure/house.json"};
+  house_struct.prepare(driver);
 
   int fps = 0;
   int time = glfwGetTime();
@@ -132,13 +131,12 @@ int main(int argc, char** argv)
     // Show it on screen.
     glfwPollEvents();
 
-
     double x, y;
     glfwGetCursorPos(window, &x, &y);
 
     if(x < 0 || x > 1000.0 || y < 0 || y > 1000.0)
     {
-      cursor.model_matrix = glm::mat4(1.0);
+      house_struct.set_model(glm::mat4(1.0));
     }
     else
     {
@@ -152,9 +150,11 @@ int main(int argc, char** argv)
                                 glm::vec4(0.0, 0.0, 1000.0, 1000.0));
 
       // We have our position, render a small cube there.
-      cursor.model_matrix = glm::translate(glm::mat4(1.0), val);
+      house_struct.set_model(glm::translate(glm::mat4(1.0), val));
     }
-    render_object(driver, cursor);
+    house_struct.render(driver);
+
+    glfwSwapBuffers(window);
 
     if(int(glfwGetTime()) != time)
     {
@@ -162,8 +162,6 @@ int main(int argc, char** argv)
       log_d("fps: %", fps);
       fps = 0;
     }
-
-    glfwSwapBuffers(window);
   }
   }
   glfwTerminate();
