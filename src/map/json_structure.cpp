@@ -26,10 +26,6 @@ namespace strat
   {
     prepare_object(driver, obj_);
   }
-  void Json_Structure::render(gfx::IDriver& driver) noexcept
-  {
-    render_object(driver, obj_);
-  }
   void Json_Structure::set_model(glm::mat4 const& m) noexcept
   {
     obj_.model_matrix = m * gen_model_();

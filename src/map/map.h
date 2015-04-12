@@ -40,7 +40,6 @@ namespace strat
 
     virtual gfx::Object const& obj() const noexcept = 0;
     virtual void prepare(gfx::IDriver&) noexcept = 0;
-    virtual void render(gfx::IDriver&) noexcept = 0;
 
     virtual void set_model(glm::mat4 const&) noexcept = 0;
   };
