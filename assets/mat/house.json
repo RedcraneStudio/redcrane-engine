@@ -1,4 +1,4 @@
 {
-  "diffuse": { "r": 33, "g": 33, "b": 33 },
+  "diffuse": { "r": 255, "g": 255, "b": 255 },
   "texture": "tex/cracked_soil.png"
 }
