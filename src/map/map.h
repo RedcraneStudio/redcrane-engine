@@ -9,6 +9,7 @@
 #include "../gfx/material.h"
 #include "../gfx/mesh.h"
 #include "../gfx/object.h"
+#include "../gfx/idriver.h"
 namespace strat
 { struct Terrain
   {
@@ -38,6 +39,10 @@ namespace strat
     virtual AABB aabb() const noexcept = 0;
 
     virtual gfx::Object const& obj() const noexcept = 0;
+    virtual void prepare(gfx::IDriver&) noexcept = 0;
+    virtual void render(gfx::IDriver&) noexcept = 0;
+
+    virtual void set_model(glm::mat4 const&) noexcept = 0;
   };
 
   struct Structure_Instance

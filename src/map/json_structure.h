@@ -14,7 +14,12 @@ namespace strat
     AABB aabb() const noexcept override;
 
     gfx::Object const& obj() const noexcept override;
+    void prepare(gfx::IDriver&) noexcept override;
+    void render(gfx::IDriver&) noexcept override;
+
+    void set_model(glm::mat4 const&) noexcept override;
   private:
+    glm::mat4 gen_model_() const noexcept;
     gfx::Object obj_;
     AABB aabb_;
   };
