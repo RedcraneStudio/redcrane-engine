@@ -17,6 +17,8 @@
 #include "gfx/texture.h"
 #include "gfx/mesh.h"
 
+#include "map/map.h"
+
 #include "glad/glad.h"
 #include "glfw3.h"
 
@@ -82,16 +84,28 @@ int main(int argc, char** argv)
   // Log GL profile.
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
+  {
   // Make an OpenGL driver.
-  auto driver = gfx::gl::Driver{};
+  gfx::gl::Driver driver{};
 
-  // Load the scene data for an isometric view
+  // Make an isometric camera.
   auto cam = gfx::make_isometric_camera();
   driver.use_camera(cam);
 
-  // Load our root scene node from json
-  auto scene_root = gfx::load_scene("scene/default.json");
-  prepare_scene(driver, scene_root);
+  // Build our main mesh using our flat terrain.
+  auto terrain_mesh = make_terrain_mesh(make_flat_terrain(0, 5, 5), .01, 1);
+  driver.prepare_mesh(terrain_mesh);
+
+  auto mat = gfx::Material{};
+  mat.diffuse_color = colors::white;
+  mat.texture = Maybe_Owned<Texture>(Texture::from_png_file("tex/grass.png"));
+  driver.prepare_material(mat);
+
+  // Load our cursor
+  auto cursor = gfx::create_object("obj/house.obj", "mat/house.json");
+  prepare_object(driver, cursor);
+
+  driver.bind_material(*cursor.material);
 
   int fps = 0;
   int time = glfwGetTime();
@@ -103,28 +117,47 @@ int main(int argc, char** argv)
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
-  float deg = -5;
-
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
 
-    // rotate 90 degrees ccw
-    auto model = glm::mat4(1.0);
-    model = glm::rotate(model, -3.14159f / 2.0f, glm::vec3(0, 1, 0));
-    model = glm::rotate(model, deg, glm::vec3(0, 1, 0));
-    model = glm::scale(model, glm::vec3(5));
-    deg += .001;
-
-    scene_root.obj.model_matrix = model;
-
     // Clear the screen and render.
     driver.clear();
-    render_scene(driver, scene_root);
+    driver.bind_material(mat);
+
+    auto model = glm::mat4(1.0f);
+    driver.set_model(model);
+    driver.render_mesh(terrain_mesh);
 
     // Show it on screen.
-    glfwSwapBuffers(window);
     glfwPollEvents();
+
+
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+
+    if(x < 0 || x > 1000.0 || y < 0 || y > 1000.0)
+    {
+      cursor.model_matrix = glm::mat4(1.0);
+    }
+    else
+    {
+      GLfloat z;
+      glReadPixels((float)x, (float) 1000.0 - y, 1, 1, GL_DEPTH_COMPONENT,
+                   GL_FLOAT, &z);
+
+      auto val = glm::unProject(glm::vec3(x, 1000.0 - y, z),
+                                camera_view_matrix(cam) * model,
+                                camera_proj_matrix(cam),
+                                glm::vec4(0.0, 0.0, 1000.0, 1000.0));
+
+      // We have our position, render a small cube there.
+      glm::vec4 val_print(val, 1.0);
+      val_print = model * val_print;
+      log_d("% % %", val_print.x, val_print.y, val_print.z);
+      cursor.model_matrix = glm::translate(glm::mat4(1.0), val);
+    }
+    render_object(driver, cursor);
 
     if(int(glfwGetTime()) != time)
     {
@@ -132,8 +165,10 @@ int main(int argc, char** argv)
       log_d("fps: %", fps);
       fps = 0;
     }
-  }
 
+    glfwSwapBuffers(window);
+  }
+  }
   glfwTerminate();
   return 0;
 }
