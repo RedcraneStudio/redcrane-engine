@@ -152,9 +152,6 @@ int main(int argc, char** argv)
                                 glm::vec4(0.0, 0.0, 1000.0, 1000.0));
 
       // We have our position, render a small cube there.
-      glm::vec4 val_print(val, 1.0);
-      val_print = model * val_print;
-      log_d("% % %", val_print.x, val_print.y, val_print.z);
       cursor.model_matrix = glm::translate(glm::mat4(1.0), val);
     }
     render_object(driver, cursor);
