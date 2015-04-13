@@ -57,16 +57,10 @@ namespace strat
     template <class R, class... Args>
     void emplace_owned(Args&&... args) noexcept;
 
-    T const* get() const noexcept;
-    T* get() noexcept;
-
+    T* get() const noexcept;
     T&& unwrap() noexcept;
-
-    T const* operator->() const noexcept;
-    T* operator->() noexcept;
-
-    T const& operator*() const noexcept;
-    T& operator*() noexcept;
+    T* operator->() const noexcept;
+    T& operator*() const noexcept;
 
     operator bool() const noexcept;
 
@@ -169,12 +163,7 @@ namespace strat
   }
 
   template <class T>
-  T const* Maybe_Owned<T>::get() const noexcept
-  {
-    return ptr_;
-  }
-  template <class T>
-  T* Maybe_Owned<T>::get() noexcept
+  T* Maybe_Owned<T>::get() const noexcept
   {
     return ptr_;
   }
@@ -193,23 +182,12 @@ namespace strat
   }
 
   template <class T>
-  T const* Maybe_Owned<T>::operator->() const noexcept
+  T* Maybe_Owned<T>::operator->() const noexcept
   {
     return ptr_;
   }
   template <class T>
-  T* Maybe_Owned<T>::operator->() noexcept
-  {
-    return ptr_;
-  }
-
-  template <class T>
-  T const& Maybe_Owned<T>::operator*() const noexcept
-  {
-    return *ptr_;
-  }
-  template <class T>
-  T& Maybe_Owned<T>::operator*() noexcept
+  T& Maybe_Owned<T>::operator*() const noexcept
   {
     return *ptr_;
   }
