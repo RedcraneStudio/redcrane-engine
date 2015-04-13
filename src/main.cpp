@@ -167,36 +167,3 @@ int main(int argc, char** argv)
   glfwTerminate();
   return 0;
 }
-
-#if 0
-int main()
-{
-  using namespace strat;
-
-  auto driver = gfx::gl::Driver{"OpenGL 4.5"};
-  auto scene_data = gfx::make_isometric_scene(factory, ...);
-
-  auto scene_root = load_scene("scene/main.json");
-  prepare_scene(factory, scene_root);
-
-  while(window)
-  {
-    driver.clear();
-
-    scene_root.render(scene_data);
-    // Expanded view of ^
-    {
-      apply_model();
-      material->use();
-      mesh->render();
-
-      for(child : children)
-      {
-        child.render(scene_data);
-      }
-    }
-
-    gfx::swap_buffers();
-  }
-}
-#endif
