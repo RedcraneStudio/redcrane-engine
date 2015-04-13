@@ -39,20 +39,23 @@ namespace strat
 
     virtual AABB aabb() const noexcept = 0;
 
-    virtual gfx::Object const& obj() const noexcept = 0;
-    virtual void prepare(gfx::IDriver&) noexcept = 0;
-
-    virtual void set_model(glm::mat4 const&) noexcept = 0;
+    /*!
+     * This function must always return the same mesh and material (points
+     * to the same object).
+     */
+    virtual gfx::Object make_obj() const noexcept = 0;
   };
 
   struct Structure_Instance
   {
-    Structure_Instance(IStructure*, Orient) noexcept;
+    Structure_Instance(IStructure&, Orient) noexcept;
     Structure_Instance(Structure_Instance const&) noexcept;
+    Structure_Instance& operator=(Structure_Instance const& i) noexcept;
 
     ~Structure_Instance() noexcept = default;
 
     const IStructure* structure_type;
-    const Orient orientation;
+    gfx::Object obj;
+    Orient orientation;
   };
 }
