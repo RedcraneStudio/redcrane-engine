@@ -42,12 +42,12 @@ namespace strat
       return new_obj;
     }
 
-    void prepare_object(IDriver& d, Object& o) noexcept
+    void prepare_object(IDriver& d, Object const& o) noexcept
     {
       if(o.mesh) d.prepare_mesh(*o.mesh);
       if(o.material) d.prepare_material(*o.material);
     }
-    void remove_object(IDriver& d, Object& o) noexcept
+    void remove_object(IDriver& d, Object const& o) noexcept
     {
       if(o.mesh) d.remove_mesh(*o.mesh);
       if(o.material) d.remove_material(*o.material);
