@@ -11,7 +11,8 @@
 #include "../gfx/object.h"
 #include "../gfx/idriver.h"
 namespace strat
-{ struct Terrain
+{
+  struct Terrain
   {
     // Let's use a tile based system, for now. The integer represents altitude.
     std::vector< std::vector<int> > altitude;
