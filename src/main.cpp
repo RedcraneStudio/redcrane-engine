@@ -19,7 +19,6 @@
 
 #include "map/map.h"
 #include "map/json_structure.h"
-
 #include "glad/glad.h"
 #include "glfw3.h"
 
@@ -94,17 +93,26 @@ int main(int argc, char** argv)
   driver.use_camera(cam);
 
   // Build our main mesh using our flat terrain.
-  auto terrain_mesh = make_terrain_mesh(make_flat_terrain(0, 5, 5), .01, 1);
-  driver.prepare_mesh(terrain_mesh);
+  auto terrain_obj = gfx::Object{};
+  terrain_obj.mesh.set_owned(
+    make_terrain_mesh(make_flat_terrain(0, 25, 25), .01, 1));
 
-  auto mat = gfx::Material{};
-  mat.diffuse_color = colors::white;
-  mat.texture = Maybe_Owned<Texture>(Texture::from_png_file("tex/grass.png"));
-  driver.prepare_material(mat);
+  terrain_obj.material.set_owned(gfx::Material{});
+  terrain_obj.material->diffuse_color = colors::white;
+  terrain_obj.material->texture.set_owned(
+    Texture::from_png_file("tex/grass.png"));
+
+  terrain_obj.model_matrix = glm::translate(glm::mat4(1.0),
+                                            glm::vec3(-12.5, 0.0, -12.5));
+
+  prepare_object(driver, terrain_obj);
 
   // Load our house structure
   auto house_struct = Json_Structure{"structure/house.json"};
-  house_struct.prepare(driver);
+  prepare_object(driver, house_struct.make_obj());
+
+  std::vector<Structure_Instance> house_instances;
+  Structure_Instance moveable_instance{house_struct, Orient::N};
 
   int fps = 0;
   int time = glfwGetTime();
@@ -116,27 +124,27 @@ int main(int argc, char** argv)
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
+  // Our quick hack to avoid splitting into multiple functions and dealing
+  // either with global variables or like a bound struct or something.
+  bool has_clicked_down = false;
+
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
 
-    // Clear the screen and render.
+    // Clear the screen and render the terrain.
     driver.clear();
-    driver.bind_material(mat);
+    render_object(driver, terrain_obj);
 
-    auto model = glm::mat4(1.0f);
-    driver.set_model(model);
-    driver.render_mesh(terrain_mesh);
-
-    // Show it on screen.
     glfwPollEvents();
 
+    // Get our mouse coordinates.
     double x, y;
     glfwGetCursorPos(window, &x, &y);
 
     if(x < 0 || x > 1000.0 || y < 0 || y > 1000.0)
     {
-      house_struct.set_model(glm::mat4(1.0));
+      moveable_instance.obj.model_matrix = glm::mat4(1.0);
     }
     else
     {
@@ -145,16 +153,42 @@ int main(int argc, char** argv)
                    GL_FLOAT, &z);
 
       auto val = glm::unProject(glm::vec3(x, 1000.0 - y, z),
-                                camera_view_matrix(cam) * model,
+                                camera_view_matrix(cam),
                                 camera_proj_matrix(cam),
                                 glm::vec4(0.0, 0.0, 1000.0, 1000.0));
 
-      // We have our position, render a small cube there.
-      house_struct.set_model(glm::translate(glm::mat4(1.0), val));
+      // We have our position, render a single house there.
+      moveable_instance.obj.model_matrix = glm::translate(glm::mat4(1.0), val);
     }
-    house_struct.render(driver);
+
+    // Move the house by however much the structure *type* requires.
+    moveable_instance.obj.model_matrix =
+      moveable_instance.obj.model_matrix *
+      house_struct.make_obj().model_matrix;
+
+    // Render our movable instance of a house.
+    render_object(driver, moveable_instance.obj);
+
+    // Render all of our other house instances.
+    for(auto const& instance : house_instances)
+    {
+      render_object(driver, instance.obj);
+    }
 
     glfwSwapBuffers(window);
+
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
+       !has_clicked_down)
+    {
+      has_clicked_down = true;
+
+      // Commit the current position of our moveable instance.
+      house_instances.push_back(moveable_instance);
+    }
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
+    {
+      has_clicked_down = false;
+    }
 
     if(int(glfwGetTime()) != time)
     {
