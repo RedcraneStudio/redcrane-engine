@@ -30,7 +30,7 @@ namespace strat
     // Generates a new separate object but pointing to the other object's
     // mesh and material. No reference counting is being done so this operation
     // can be considered somewhat unsafe.
-    Object share_object_keep_ownership(Object& obj) noexcept;
+    Object share_object_keep_ownership(Object const& obj) noexcept;
     // Generates a separate object while owning the other object's mesh and
     // material. The other object is updated to point to what *the returned*
     // object *now owns*. This means the other object being destructed will

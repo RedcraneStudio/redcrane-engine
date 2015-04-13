@@ -16,7 +16,7 @@ namespace strat
       return ret;
     }
 
-    Object share_object_keep_ownership(Object& obj) noexcept
+    Object share_object_keep_ownership(Object const& obj) noexcept
     {
       auto new_obj = Object{};
 
