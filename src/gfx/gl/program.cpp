@@ -122,7 +122,7 @@ namespace game
       }
       Program::~Program() noexcept
       {
-  #ifndef SURVIVE_RELEASE_BUILD
+  #ifndef ENGINE_RELEASE_BUILD
         GLint current_program;
         glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
         if(current_program && static_cast<GLuint>(current_program) == program)
