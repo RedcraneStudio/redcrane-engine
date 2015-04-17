@@ -5,7 +5,7 @@
 #include "../common/maybe_owned.hpp"
 #include "catch/catch.hpp"
 
-using namespace strat;
+using namespace game;
 
 TEST_CASE("Constructed to null", "[Maybe_Owned]")
 {

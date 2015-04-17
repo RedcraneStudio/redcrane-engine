@@ -5,7 +5,7 @@
 #pragma once
 #include "asset.h"
 #include "find.h"
-namespace strat { namespace assets
+namespace game { namespace assets
 {
   template <class Tag>
   using Asset_Type = typename Tag::asset_t;

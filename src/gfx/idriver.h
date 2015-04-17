@@ -9,7 +9,7 @@
 #include "texture.h"
 #include "material.h"
 #include "camera.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

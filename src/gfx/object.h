@@ -9,7 +9,7 @@
 #include "mesh.h"
 #include "material.h"
 #include "idriver.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

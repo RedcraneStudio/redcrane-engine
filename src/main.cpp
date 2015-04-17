@@ -47,7 +47,7 @@ Command_Options parse_command_line(int argc, char**)
 
 int main(int argc, char** argv)
 {
-  using namespace strat;
+  using namespace game;
 
   set_log_level(Log_Severity::Debug);
 

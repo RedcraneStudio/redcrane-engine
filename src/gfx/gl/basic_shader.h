@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include "../../common/color.h"
 #include "program.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

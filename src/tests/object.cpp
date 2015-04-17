@@ -9,8 +9,8 @@
 
 TEST_CASE("Object moving and sharing works as expected", "[struct Object]")
 {
-  using namespace strat;
-  using namespace strat::gfx;
+  using namespace game;
+  using namespace game::gfx;
 
   Object obj;
   Object other;

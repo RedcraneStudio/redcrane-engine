@@ -6,7 +6,7 @@
 #include "../common/json.h"
 #include "../gfx/mesh.h"
 #include <glm/gtc/matrix_transform.hpp>
-namespace strat
+namespace game
 {
   Json_Structure::Json_Structure(std::string fn) noexcept
   {

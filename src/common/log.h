@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 #include "translate.h"
-namespace strat
+namespace game
 {
   struct Scoped_Log_Init
   {

@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../idriver.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

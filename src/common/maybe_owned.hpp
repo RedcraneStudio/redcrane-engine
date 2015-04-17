@@ -5,7 +5,7 @@
 #pragma once
 #include <memory>
 #include <utility> // for std::move
-namespace strat
+namespace game
 {
   template <class T> struct Maybe_Owned;
 

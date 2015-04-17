@@ -4,7 +4,7 @@
  */
 #include "map.h"
 #include "../common/grid_iterator.h"
-namespace strat
+namespace game
 {
   Terrain make_flat_terrain(int alt, int w, int h)
   {

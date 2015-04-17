@@ -7,7 +7,7 @@
 #include <ctime>
 #include <cstring>
 #include <uv.h>
-namespace strat
+namespace game
 {
   Scoped_Log_Init::Scoped_Log_Init() noexcept
   {

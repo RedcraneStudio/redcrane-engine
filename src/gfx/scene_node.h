@@ -8,7 +8,7 @@
 #include <string>
 #include "object.h"
 #include "idriver.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

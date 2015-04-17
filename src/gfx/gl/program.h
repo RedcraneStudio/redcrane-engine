@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 
 #include <istream>
-namespace strat
+namespace game
 {
   namespace gfx
   {

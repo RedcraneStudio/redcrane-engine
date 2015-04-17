@@ -9,7 +9,7 @@
 #include <algorithm>
 #include "../common/log.h"
 
-namespace strat
+namespace game
 {
   bool operator<(Face const& f1, Face const& f2) noexcept
   {

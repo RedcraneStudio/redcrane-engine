@@ -6,7 +6,7 @@
 #include <uv.h>
 #include <vector>
 
-namespace strat { namespace ipc
+namespace game { namespace ipc
 {
   struct Process;
   struct Pipe

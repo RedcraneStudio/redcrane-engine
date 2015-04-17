@@ -5,7 +5,7 @@
 #pragma once
 #include "map.h"
 #include "../gfx/idriver.h"
-namespace strat
+namespace game
 {
   struct Json_Structure : public IStructure
   {

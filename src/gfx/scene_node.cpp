@@ -6,7 +6,7 @@
 #include "../common/json.h"
 #include "../common/log.h"
 #include <glm/gtc/matrix_transform.hpp>
-namespace strat
+namespace game
 {
   namespace gfx
   {

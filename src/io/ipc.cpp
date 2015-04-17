@@ -7,7 +7,7 @@
 #include <string>
 #include "common.h"
 
-namespace strat { namespace ipc
+namespace game { namespace ipc
 {
   // Pipe initialization functions.
   Pipe* create_pipe(Process* proc) noexcept

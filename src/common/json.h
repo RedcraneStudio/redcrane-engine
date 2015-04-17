@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "rapidjson/document.h"
-namespace strat
+namespace game
 {
   struct Bad_File
   {

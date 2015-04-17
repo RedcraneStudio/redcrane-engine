@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "object.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

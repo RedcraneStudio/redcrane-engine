@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "prep_mesh.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

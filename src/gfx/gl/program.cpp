@@ -6,7 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include "../../common/log.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

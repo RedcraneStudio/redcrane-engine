@@ -10,7 +10,7 @@
 #include "../gfx/mesh.h"
 #include "../gfx/object.h"
 #include "../gfx/idriver.h"
-namespace strat
+namespace game
 {
   struct Terrain
   {

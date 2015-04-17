@@ -9,7 +9,7 @@
 #include <string>
 #include <cstdint>
 
-namespace strat { namespace net
+namespace game { namespace net
 {
   // Exceptions
   struct Bind_Error

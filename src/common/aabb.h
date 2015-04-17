@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <glm/glm.hpp>
-namespace strat
+namespace game
 {
   struct AABB
   {

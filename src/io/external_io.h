@@ -11,7 +11,7 @@
 #include "../common/maybe_owned.hpp"
 #include "ipc.h"
 #include "net.h"
-namespace strat
+namespace game
 {
   /*!
    * \brief Manages and connects client code to some arbitrary io source.

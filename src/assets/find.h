@@ -9,7 +9,7 @@
 #include <algorithm>
 
 #include "asset.h"
-namespace strat { namespace assets
+namespace game { namespace assets
 {
   template <class T> inline std::shared_ptr<const T>
   find(assets::Vector const& assets, std::string name) noexcept

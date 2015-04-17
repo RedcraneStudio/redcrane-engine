@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <iterator>
-namespace strat
+namespace game
 {
   namespace detail
   {

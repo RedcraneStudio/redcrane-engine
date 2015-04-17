@@ -8,7 +8,7 @@
 #include "../common/color.h"
 #include "../common/maybe_owned.hpp"
 #include "texture.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

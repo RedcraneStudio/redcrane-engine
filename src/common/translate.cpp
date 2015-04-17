@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "translate.h"
-namespace strat
+namespace game
 {
   Lang language_;
 

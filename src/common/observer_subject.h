@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 #include <algorithm>
-namespace strat
+namespace game
 {
   template <class T>
   struct Observer_Subject

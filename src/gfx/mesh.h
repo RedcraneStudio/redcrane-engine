@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "../common/aabb.h"
-namespace strat
+namespace game
 {
   struct Face
   {

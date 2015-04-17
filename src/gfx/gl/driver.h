@@ -8,7 +8,7 @@
 #include "prep_mesh.h"
 #include "prep_tex.h"
 #include "basic_shader.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

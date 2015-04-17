@@ -10,7 +10,7 @@
 
 TEST_CASE("Face index string is properly parsed", "[struct Face]")
 {
-  using namespace strat;
+  using namespace game;
 
   auto f = parse_face("6");
   REQUIRE(f.vertex == 6);
@@ -35,7 +35,7 @@ TEST_CASE("Face index string is properly parsed", "[struct Face]")
 
 TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
 {
-  using namespace strat;
+  using namespace game;
 
   std::string data =
   "v -10.0 10.0 0.0\n"

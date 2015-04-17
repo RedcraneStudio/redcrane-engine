@@ -5,7 +5,7 @@
 #pragma once
 #include <uv.h>
 
-namespace strat
+namespace game
 {
   // libuv allocator.
   inline void alloc(uv_handle_t* handle, size_t ssize, uv_buf_t* buf)

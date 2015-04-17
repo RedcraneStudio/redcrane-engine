@@ -4,7 +4,7 @@
  */
 #include "external_io.h"
 #include "common.h"
-namespace strat
+namespace game
 {
   void post_pipe_buffer(ipc::Pipe* p) noexcept
   {

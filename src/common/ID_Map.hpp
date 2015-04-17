@@ -8,7 +8,7 @@
 #include "ID_Gen.hpp"
 #include "Cache.h"
 
-namespace strat
+namespace game
 {
   template <typename T, typename Id = uint8_t>
   struct ID_Map

@@ -9,7 +9,7 @@
 
 #include <boost/filesystem.hpp>
 
-namespace strat { namespace assets
+namespace game { namespace assets
 {
   namespace fs = boost::filesystem;
 

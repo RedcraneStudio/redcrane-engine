@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "prep_tex.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

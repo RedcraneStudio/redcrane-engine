@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include "template_utility.hpp"
-namespace strat
+namespace game
 {
   struct Lang
   {

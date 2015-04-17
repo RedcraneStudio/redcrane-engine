@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 #include <string>
-namespace strat { namespace assets
+namespace game { namespace assets
 {
   /*!
    * \brief Scans a directory for any files.

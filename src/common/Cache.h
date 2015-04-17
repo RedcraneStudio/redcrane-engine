@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 #include <tuple>
-namespace strat
+namespace game
 {
   /*!
    * \brief Implements a caching system for arbitrary pointers.

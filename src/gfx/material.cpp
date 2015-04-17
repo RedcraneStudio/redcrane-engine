@@ -4,7 +4,7 @@
  */
 #include "material.h"
 #include "../common/json.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

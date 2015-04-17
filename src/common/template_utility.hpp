@@ -5,7 +5,7 @@
 #pragma once
 #include <tuple>
 #include <type_traits>
-namespace strat
+namespace game
 {
   namespace detail
   {

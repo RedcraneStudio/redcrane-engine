@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "template_utility.hpp"
-namespace strat
+namespace game
 {
   /*!
    * \brief Move constructor, moves the cache!

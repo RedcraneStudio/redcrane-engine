@@ -8,7 +8,7 @@ add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES} null/driver.cpp
                           material.cpp object.cpp camera.cpp mesh.cpp
                           texture.cpp scene_node.cpp)
 
-target_link_libraries(gfxlib survival_games_gl)
+target_link_libraries(gfxlib engine_gl)
 
 # This is for our simple little asynchronous logging library.
 target_link_libraries(gfxlib commonlib)

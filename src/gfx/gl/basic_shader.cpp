@@ -4,7 +4,7 @@
  */
 #include "basic_shader.h"
 #include "glad/glad.h"
-namespace strat
+namespace game
 {
   namespace gfx
   {

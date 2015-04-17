@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <cstdint>
-namespace strat
+namespace game
 {
   struct Color
   {

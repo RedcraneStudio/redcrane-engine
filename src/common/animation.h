@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <functional>
-namespace strat
+namespace game
 {
   enum Anim_Repeat_Mode
   {
