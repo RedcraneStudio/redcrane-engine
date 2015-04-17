@@ -134,8 +134,8 @@ namespace game
   #endif
 
         if(program) glDeleteProgram(program);
-        if(fshade) glDeleteProgram(fshade);
-        if(vshade) glDeleteProgram(vshade);
+        if(fshade) glDeleteShader(fshade);
+        if(vshade) glDeleteShader(vshade);
       }
     }
   }
