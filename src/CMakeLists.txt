@@ -19,4 +19,7 @@ add_executable(strategy main.cpp map/map.cpp map/json_structure.cpp)
 target_link_libraries(strategy gfxlib)
 target_link_libraries(strategy commonlib)
 
+add_executable(fps main_fps.cpp)
+target_link_libraries(fps gfxlib commonlib)
+
 add_subdirectory(tests)
