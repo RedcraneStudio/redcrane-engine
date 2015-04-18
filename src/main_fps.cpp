@@ -82,13 +82,30 @@ int main(int argc, char** argv)
   // Log GL profile.
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
+  // Hide the mouse and capture it
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
   {
     // Make an OpenGL driver.
     gfx::gl::Driver driver{};
 
-    // Make an isometric camera.
-    auto cam = gfx::make_isometric_camera();
-    driver.use_camera(cam);
+    // Make an fps camera.
+    auto cam = gfx::make_fps_camera();
+    cam.fp.pos = glm::vec3(0.0f, 0.0f, 25.0f);
+
+    auto house = gfx::load_object("obj/house.obj", "mat/house.json");
+    prepare_object(driver, house);
+
+    auto house_aabb = generate_aabb(*house.mesh);
+
+    auto plane = gfx::load_object("obj/plane.obj", "mat/plane.json");
+    prepare_object(driver, plane);
+    plane.model_matrix = glm::translate(plane.model_matrix,
+                                        glm::vec3(0.0f,house_aabb.min.y,0.0f));
+    plane.model_matrix = glm::scale(plane.model_matrix,
+                                    glm::vec3(5.0f, 1.0f, 7.0f));
+    plane.model_matrix = glm::translate(plane.model_matrix,
+                                        glm::vec3(-0.5f, 0.0f, -0.5f));
 
     int fps = 0;
     int time = glfwGetTime();
@@ -105,8 +122,24 @@ int main(int argc, char** argv)
       ++fps;
       glfwPollEvents();
 
+      if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+      {
+        glfwSetWindowShouldClose(window, true);
+      }
+
+      double x, y;
+      glfwGetCursorPos(window, &x, &y);
+
+      cam.fp.pitch = y / 250.0;
+      cam.fp.yaw = x / 250.0;
+
+      driver.use_camera(cam);
+
       // Clear the screen
       driver.clear();
+
+      render_object(driver, house);
+      render_object(driver, plane);
 
       glfwSwapBuffers(window);
 
