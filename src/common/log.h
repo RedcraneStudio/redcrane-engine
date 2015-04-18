@@ -15,6 +15,7 @@ namespace game
   void init_log() noexcept;
   void uninit_log() noexcept;
   void flush_log() noexcept;
+  void flush_log_full() noexcept;
 
   enum class Log_Severity
   {

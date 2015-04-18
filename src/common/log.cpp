@@ -35,6 +35,10 @@ namespace game
   {
     uv_run(loop_, UV_RUN_NOWAIT);
   }
+  void flush_log_full() noexcept
+  {
+    uv_run(loop_, UV_RUN_DEFAULT);
+  }
 
   std::string format_time(const std::string& format)
   {
