@@ -10,7 +10,22 @@ namespace game
   {
     glm::mat4 camera_view_matrix(Camera const& cam) noexcept
     {
-      return glm::lookAt(cam.eye, cam.look, cam.up);
+      if(cam.definition == Camera_Definition::Look_At)
+      {
+        return glm::lookAt(cam.look_at.eye, cam.look_at.look, cam.look_at.up);
+      }
+      else if(cam.definition == Camera_Definition::Pitch_Yaw_Pos)
+      {
+        // Do a translation, then the rotations.
+
+        glm::mat4 ret(1.0f);
+        ret = glm::rotate(ret, cam.fp.pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+        ret = glm::rotate(ret, cam.fp.yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+        ret = glm::translate(ret, -cam.fp.pos);
+
+        return ret;
+      }
+      return glm::mat4(1.0);
     }
     glm::mat4 camera_proj_matrix(Camera const& cam) noexcept
     {
@@ -33,10 +48,26 @@ namespace game
 
       cam.projection_mode = Camera_Type::Orthographic;
       cam.ortho = Ortho_Cam_Params{-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f};
-      cam.eye = glm::vec3(5, 10, 5);
-      cam.look = glm::vec3(0, 0, 0);
-      cam.up = glm::vec3(0, 1, 0);
 
+      cam.definition = Camera_Definition::Look_At;
+      cam.look_at.eye = glm::vec3(5, 10, 5);
+      cam.look_at.look = glm::vec3(0, 0, 0);
+      cam.look_at.up = glm::vec3(0, 1, 0);
+
+      return cam;
+    }
+    Camera make_fps_camera() noexcept
+    {
+      auto cam = Camera{};
+
+      cam.projection_mode = Camera_Type::Perspective;
+      cam.perspective = Perspective_Cam_Params{glm::radians(50.0f),
+                                               1.0f, .01f, 1000.0f};
+
+      cam.definition = Camera_Definition::Pitch_Yaw_Pos;
+      cam.fp.pos = glm::vec3(0.0);
+      cam.fp.yaw = 0.0f;
+      cam.fp.pitch = 0.0f;
       return cam;
     }
   }

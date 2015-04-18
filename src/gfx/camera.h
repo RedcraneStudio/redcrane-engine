@@ -23,6 +23,25 @@ namespace game
       float left, right, bottom, top, near, far;
     };
 
+    enum class Camera_Definition
+    {
+      Look_At,
+      Pitch_Yaw_Pos
+    };
+
+    struct Eye_Look_Up
+    {
+      glm::vec3 eye;
+      glm::vec3 look;
+      glm::vec3 up;
+    };
+    struct Pitch_Yaw_Pos
+    {
+      glm::vec3 pos;
+      float pitch = 0.0;
+      float yaw = 0.0;
+    };
+
     struct Camera
     {
       // A camera also includes a perspective and orthographic mode.
@@ -34,14 +53,18 @@ namespace game
       };
 
       // Camera position, orientation and lookpos.
-      glm::vec3 eye;
-      glm::vec3 look;
-      glm::vec3 up;
+      Camera_Definition definition;
+      union
+      {
+        Eye_Look_Up look_at;
+        Pitch_Yaw_Pos fp; // stands for first-person
+      };
     };
 
     glm::mat4 camera_view_matrix(Camera const& cam) noexcept;
     glm::mat4 camera_proj_matrix(Camera const& cam) noexcept;
 
     Camera make_isometric_camera() noexcept;
+    Camera make_fps_camera() noexcept;
   }
 }
