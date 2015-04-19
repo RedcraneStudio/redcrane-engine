@@ -12,6 +12,8 @@ add_subdirectory(io)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
+add_subdirectory(fps)
+
 #find_package(Boost REQUIRED COMPONENTS filesystem)
 #add_subdirectory(assets)
 
@@ -19,7 +21,7 @@ add_executable(strategy main.cpp map/map.cpp map/json_structure.cpp)
 target_link_libraries(strategy gfxlib)
 target_link_libraries(strategy commonlib)
 
-add_executable(fps main_fps.cpp)
-target_link_libraries(fps gfxlib commonlib)
+add_executable(fps_exe main_fps.cpp)
+target_link_libraries(fps_exe gfxlib commonlib fpslib)
 
 add_subdirectory(tests)
