@@ -17,6 +17,8 @@
 #include "gfx/texture.h"
 #include "gfx/mesh.h"
 
+#include "fps/camera_controller.h"
+
 #include "glad/glad.h"
 #include "glfw3.h"
 
@@ -28,6 +30,8 @@
 
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
+
+#define PI 3.141592653589793238463
 
 struct Command_Options
 {
@@ -91,7 +95,13 @@ int main(int argc, char** argv)
 
     // Make an fps camera.
     auto cam = gfx::make_fps_camera();
-    cam.fp.pos = glm::vec3(0.0f, 0.0f, 25.0f);
+    cam.fp.pos = glm::vec3(0.0f, 0.0f, 15.0f);
+
+    auto cam_controller = fps::Camera_Controller{};
+    cam_controller.camera(cam);
+
+    cam_controller.set_yaw_limit(PI / 2);
+    cam_controller.set_pitch_limit(PI / 2);
 
     auto house = gfx::load_object("obj/house.obj", "mat/house.json");
     prepare_object(driver, house);
@@ -117,6 +127,10 @@ int main(int argc, char** argv)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
+    double prev_x, prev_y;
+    glfwPollEvents();
+    glfwGetCursorPos(window, &prev_x, &prev_y);
+
     while(!glfwWindowShouldClose(window))
     {
       ++fps;
@@ -129,9 +143,9 @@ int main(int argc, char** argv)
 
       double x, y;
       glfwGetCursorPos(window, &x, &y);
-
-      cam.fp.pitch = y / 250.0;
-      cam.fp.yaw = x / 250.0;
+      cam_controller.apply_delta_pitch(y / 250.0 - prev_y / 250.0);
+      cam_controller.apply_delta_yaw(x / 250.0 - prev_x / 250.0);
+      prev_x = x, prev_y = y;
 
       driver.use_camera(cam);
 
