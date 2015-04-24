@@ -50,7 +50,9 @@ flags = [
 '-I',
 '/usr/include/GLFW/',
 '-I',
-'gl/include'
+'gl/include',
+'-I',
+'/usr/include/bullet'
 ]
 
 

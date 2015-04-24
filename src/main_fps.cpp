@@ -7,6 +7,9 @@
 #include <cstdlib>
 #include <vector>
 #include <thread>
+#include <chrono>
+
+#include <btBulletDynamicsCommon.h>
 
 #include "common/log.h"
 
@@ -32,6 +35,35 @@
 #include "catch/catch.hpp"
 
 #define PI 3.141592653589793238463
+
+struct House_Kinematic_Motion : public btMotionState
+{
+  void getWorldTransform(btTransform &trans) const override;
+  void setWorldTransform(btTransform const& trans) override;
+
+  void move_left();
+  void move_right();
+private:
+  btVector3 pos_;
+};
+
+void House_Kinematic_Motion::getWorldTransform(btTransform &trans) const
+{
+  trans.setOrigin(pos_);
+}
+void House_Kinematic_Motion::setWorldTransform(btTransform const& trans)
+{
+  pos_ = trans.getOrigin();
+}
+
+void House_Kinematic_Motion::move_left()
+{
+  pos_.setX(pos_.getX() - .01);
+}
+void House_Kinematic_Motion::move_right()
+{
+  pos_.setX(pos_.getX() + .01);
+}
 
 struct Command_Options
 {
@@ -86,6 +118,27 @@ int main(int argc, char** argv)
   // Log GL profile.
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
+  // Initialize bullet
+
+  btDbvtBroadphase bt_broadphase;
+
+  btDefaultCollisionConfiguration bt_configuration;
+  btCollisionDispatcher bt_collision_dispatcher(&bt_configuration);
+
+  btSequentialImpulseConstraintSolver bt_constraint_solver;
+  btDiscreteDynamicsWorld bt_world(&bt_collision_dispatcher,
+                                   &bt_broadphase,
+                                   &bt_constraint_solver,
+                                   &bt_configuration);
+
+  bt_world.setGravity(btVector3(0, -9.81, 0));
+
+  btStaticPlaneShape bt_plane_shape(btVector3(0, 1, 0), -1);
+  btDefaultMotionState bt_motion_state;
+  btRigidBody bt_plane(0, &bt_motion_state, &bt_plane_shape);
+
+  bt_world.addCollisionObject(&bt_plane);
+
   // Hide the mouse and capture it
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -108,14 +161,41 @@ int main(int argc, char** argv)
 
     auto house_aabb = generate_aabb(*house.mesh);
 
+    btBoxShape bt_house_shape(btVector3(house_aabb.width / 2.f,
+                                        house_aabb.height / 2.f,
+                                        house_aabb.depth / 2.f));
+    House_Kinematic_Motion bt_house_motion_state;
+    btRigidBody bt_house_rigidbody(100,&bt_house_motion_state,&bt_house_shape);
+    bt_house_rigidbody.setCollisionFlags(
+                       btCollisionObject::CF_KINEMATIC_OBJECT);
+
+    btTransform house_transform(btMatrix3x3::getIdentity(),
+                                btVector3(0, 0, 0));
+    bt_house_motion_state.setWorldTransform(house_transform);
+
+    bt_world.addRigidBody(&bt_house_rigidbody);
+
     auto plane = gfx::load_object("obj/plane.obj", "mat/plane.json");
     prepare_object(driver, plane);
-    plane.model_matrix = glm::translate(plane.model_matrix,
-                                        glm::vec3(0.0f,house_aabb.min.y,0.0f));
     plane.model_matrix = glm::scale(plane.model_matrix,
                                     glm::vec3(5.0f, 1.0f, 7.0f));
     plane.model_matrix = glm::translate(plane.model_matrix,
+                                        glm::vec3(0.0f,-1.0f,0.0f));
+    plane.model_matrix = glm::translate(plane.model_matrix,
                                         glm::vec3(-0.5f, 0.0f, -0.5f));
+
+    auto sphere = gfx::load_object("obj/sphere.obj", "mat/plane.json");
+    prepare_object(driver, sphere);
+
+    btDefaultMotionState default_motion;
+    btCapsuleShape sphere_shape(1.0f, 1.0f);
+    btRigidBody sphere_body(50, &default_motion, &sphere_shape);
+
+    btTransform sphere_initial;
+    sphere_initial.setOrigin(btVector3(0.0f, 5.0f, 0.0f));
+    sphere_body.setWorldTransform(sphere_initial);
+
+    bt_world.addRigidBody(&sphere_body);
 
     int fps = 0;
     int time = glfwGetTime();
@@ -131,9 +211,32 @@ int main(int argc, char** argv)
     glfwPollEvents();
     glfwGetCursorPos(window, &prev_x, &prev_y);
 
+    using time_point_t =
+                   std::chrono::time_point<std::chrono::high_resolution_clock>;
+    time_point_t before = time_point_t::clock::now();
+
     while(!glfwWindowShouldClose(window))
     {
       ++fps;
+
+      if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+      {
+        bt_house_motion_state.move_left();
+      }
+      if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+      {
+        bt_house_motion_state.move_right();
+      }
+
+      auto now = time_point_t::clock::now();
+      auto diff = now - before;
+      before = now;
+
+      using std::chrono::duration_cast;
+      auto ms = duration_cast<std::chrono::milliseconds>(diff).count();
+
+      bt_world.stepSimulation(ms / 1000.0f, 6);
+
       glfwPollEvents();
 
       if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -152,8 +255,28 @@ int main(int argc, char** argv)
       // Clear the screen
       driver.clear();
 
+      btTransform transform;
+      bt_house_motion_state.getWorldTransform(transform);
+      auto orig = transform.getOrigin();
+      house.model_matrix = glm::translate(glm::mat4(1.0f),
+                                          glm::vec3(orig.x(), orig.y(),
+                                                    orig.z()));
+
+      auto y_delta_for_now = house_aabb.min.y - house_aabb.height / 2;
+
+      house.model_matrix = glm::translate(house.model_matrix,
+                                          glm::vec3(0.f,
+                                          -house_aabb.height / 2.f -
+                                          house_aabb.min.y,0.f));
+
       render_object(driver, house);
       render_object(driver, plane);
+
+      btTransform sphere_trans;
+      default_motion.getWorldTransform(sphere_trans);
+      sphere_trans.getOpenGLMatrix(&sphere.model_matrix[0][0]);
+
+      render_object(driver, sphere);
 
       glfwSwapBuffers(window);
 
