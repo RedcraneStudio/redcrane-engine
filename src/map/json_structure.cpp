@@ -17,8 +17,7 @@ namespace game
     aabb_ = generate_aabb(*obj_.mesh);
 
     // Generate a model based on the aabb.
-    obj_.model_matrix = glm::translate(glm::mat4(1.0f),
-                          glm::vec3(0.0f, 0.0f, 0.0f) - aabb_.min);
+    obj_.model_matrix = glm::translate(glm::mat4(1.0f), -aabb_.min);
   }
   AABB Json_Structure::aabb() const noexcept { return aabb_; }
 
