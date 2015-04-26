@@ -16,6 +16,8 @@ namespace game
 
   struct gfx::null::Driver : public gfx::IDriver
   {
+    void set_shader(Shader) noexcept override {}
+
     void prepare_mesh(Mesh&) noexcept override {}
     void remove_mesh(Mesh&) noexcept override {}
     void render_mesh(Mesh const&) noexcept override {}

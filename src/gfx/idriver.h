@@ -13,9 +13,16 @@ namespace game
 {
   namespace gfx
   {
+    enum class Shader
+    {
+      Standard, Hud
+    };
+
     struct IDriver
     {
       virtual ~IDriver() noexcept {}
+
+      virtual void set_shader(Shader shade) noexcept = 0;
 
       virtual void prepare_mesh(Mesh& mesh) noexcept = 0;
       virtual void remove_mesh(Mesh& mesh) noexcept = 0;

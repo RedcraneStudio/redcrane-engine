@@ -13,13 +13,27 @@ namespace game
     {
       Driver::Driver() noexcept
       {
-        // In the simple world of a single diffuse-shader, just use it for the
-        // lifetime of our driver.
-        shader_.use();
+        current_shader_ = &standard_shader_;
+        current_shader_->use();
       }
       Driver::~Driver() noexcept
       {
         glUseProgram(0);
+      }
+      void Driver::set_shader(Shader shade) noexcept
+      {
+        switch(shade)
+        {
+          case Shader::Standard:
+          {
+            current_shader_ = &standard_shader_;
+          }
+          case Shader::Hud:
+          {
+            current_shader_ = &hud_shader_;
+          }
+        }
+        current_shader_->use();
       }
       void Driver::prepare_mesh(Mesh& mesh) noexcept
       {
@@ -71,7 +85,7 @@ namespace game
           // Tell the shader/program that our texture is in location l.
           // This will need to change when we start getting adjustable
           // textures, maybe?
-          shader_.set_texture(l);
+          current_shader_->set_texture(l);
         }
       }
 
@@ -85,7 +99,7 @@ namespace game
       }
       void Driver::bind_material(Material const& mat) noexcept
       {
-        shader_.set_diffuse(mat.diffuse_color);
+        current_shader_->set_diffuse(mat.diffuse_color);
         if(mat.texture) bind_texture(*mat.texture, 0);
       }
 
@@ -93,21 +107,21 @@ namespace game
       void Driver::remove_camera(Camera&) noexcept {}
       void Driver::use_camera(Camera const& cam) noexcept
       {
-        shader_.set_view(camera_view_matrix(cam));
-        shader_.set_projection(camera_proj_matrix(cam));
+        current_shader_->set_view(camera_view_matrix(cam));
+        current_shader_->set_projection(camera_proj_matrix(cam));
       }
 
       void Driver::set_projection(glm::mat4 const& p) noexcept
       {
-        shader_.set_projection(p);
+        current_shader_->set_projection(p);
       }
       void Driver::set_view(glm::mat4 const& v) noexcept
       {
-        shader_.set_view(v);
+        current_shader_->set_view(v);
       }
       void Driver::set_model(glm::mat4 const& m) noexcept
       {
-        shader_.set_model(m);
+        current_shader_->set_model(m);
       }
       void Driver::clear_color_value(Color const& c) noexcept
       {

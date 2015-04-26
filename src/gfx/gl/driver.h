@@ -7,7 +7,9 @@
 #include "../idriver.h"
 #include "prep_mesh.h"
 #include "prep_tex.h"
-#include "basic_shader.h"
+#include "ishader.h"
+#include "hud_shader.h"
+#include "standard_shader.h"
 namespace game
 {
   namespace gfx
@@ -22,6 +24,8 @@ namespace game
   {
     Driver() noexcept;
     ~Driver() noexcept;
+
+    void set_shader(Shader shade) noexcept override;
 
     void prepare_mesh(Mesh& mesh) noexcept override;
     void remove_mesh(Mesh& mesh) noexcept override;
@@ -53,6 +57,9 @@ namespace game
     std::unordered_map<Mesh const*, Prep_Mesh> meshs_;
     std::unordered_map<Texture const*, Prep_Tex> textures_;
 
-    Basic_Shader shader_;
+    IShader* current_shader_;
+
+    Standard_Shader standard_shader_;
+    Hud_Shader hud_shader_;
   };
 }
