@@ -3,20 +3,25 @@
  * All rights reserved.
  */
 #pragma once
-#include <glm/glm.hpp>
+#include <unordered_map>
+#include <vector>
+#include "../common/volume.h"
+#include "element.h"
 namespace game { namespace ui
 {
-  struct Rect
-  {
-    glm::ivec2 pos;
-    int width, height;
-  };
-
   struct Controller
   {
     virtual ~Controller() noexcept {}
 
-    virtual void active_rect(Rect const& r) noexcept = 0;
-    virtual void clear_active() noexcept = 0;
+    void clickable_region(Volume<int> const&, Element&) noexcept;
+    void draggable_region(Volume<int> const&, Element&) noexcept;
+
+    void clear_click_regions(Element&) noexcept;
+    void clear_drag_regions(Element&) noexcept;
+  private:
+    // We'll see how this works for now. Each element has a given list of click
+    // regions and drag regions.
+    std::unordered_map<Element*, std::vector<Volume<int> > > click_;
+    std::unordered_map<Element*, std::vector<Volume<int> > > drag_;
   };
 } }
