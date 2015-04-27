@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 
   // Make an isometric camera.
   auto cam = gfx::make_isometric_camera();
-  driver.use_camera(cam);
+  use_camera(driver, cam);
 
   // Build our main mesh using our flat terrain.
   auto terrain_obj = gfx::Object{};

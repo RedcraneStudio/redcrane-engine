@@ -7,8 +7,6 @@
 #include "../common/color.h"
 #include "mesh.h"
 #include "texture.h"
-#include "material.h"
-#include "camera.h"
 namespace game
 {
   namespace gfx
@@ -32,16 +30,7 @@ namespace game
       virtual void remove_texture(Texture& tex) noexcept = 0;
       virtual void bind_texture(Texture const&, unsigned int) noexcept=0;
 
-      virtual void prepare_material(Material& mat) noexcept = 0;
-      virtual void remove_material(Material& mat) noexcept = 0;
-      virtual void bind_material(Material const& mat) noexcept = 0;
-
-      virtual void prepare_camera(Camera& cam) noexcept = 0;
-      virtual void remove_camera(Camera& cam) noexcept = 0;
-
-      // Note this function likely overwrites anything set with the
-      // set_projection and set_view functions.
-      virtual void use_camera(Camera const& cam) noexcept = 0;
+      virtual void set_diffuse(Color const&) noexcept = 0;
 
       virtual void set_projection(glm::mat4 const&) noexcept = 0;
       virtual void set_view(glm::mat4 const&) noexcept = 0;

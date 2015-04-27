@@ -11,6 +11,11 @@ namespace game
   {
     namespace gl
     {
+      // TODO, IDEA: Possibly expose this interface from the Driver. The driver
+      // retains the shader's concrete implementation though, so all that good
+      // stuff can be used still without re-exporting the interface in the
+      // driver so that it can more or less directly translate to a call to
+      // one of these functions.
       struct IShader
       {
         virtual void set_projection(glm::mat4 const&) noexcept {}

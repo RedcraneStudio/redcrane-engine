@@ -19,5 +19,10 @@ namespace game
     };
 
     Material load_material(std::string const&) noexcept;
+
+    struct IDriver;
+    void prepare_material(IDriver& driver, Material const& mat) noexcept;
+    void remove_material(IDriver& driver, Material const& mat) noexcept;
+    void bind_material(IDriver& driver, Material const& mat) noexcept;
   }
 }

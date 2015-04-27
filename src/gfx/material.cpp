@@ -4,6 +4,7 @@
  */
 #include "material.h"
 #include "../common/json.h"
+#include "idriver.h"
 namespace game
 {
   namespace gfx
@@ -33,6 +34,20 @@ namespace game
       });
 
       return ret;
+    }
+    void prepare_material(IDriver& driver, Material const& mat) noexcept
+    {
+      if(mat.texture) driver.prepare_texture(*mat.texture);
+    }
+    void remove_material(IDriver& driver, Material const& mat) noexcept
+    {
+      if(mat.texture) driver.remove_texture(*mat.texture);
+    }
+    void bind_material(IDriver& driver, Material const& mat) noexcept
+    {
+      driver.set_diffuse(mat.diffuse_color);
+      // TODO ADD **SOMETHING** TO SUPPORT MORE THAN JUST ONE FREAKIN' TEXTURE!
+      if(mat.texture) driver.bind_texture(*mat.texture, 0);
     }
   }
 }

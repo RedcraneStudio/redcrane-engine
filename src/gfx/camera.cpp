@@ -4,6 +4,7 @@
  */
 #include "camera.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include "idriver.h"
 namespace game
 {
   namespace gfx
@@ -69,6 +70,11 @@ namespace game
       cam.fp.yaw = 0.0f;
       cam.fp.pitch = 0.0f;
       return cam;
+    }
+    void use_camera(IDriver& driver, Camera const& cam) noexcept
+    {
+      driver.set_view(camera_view_matrix(cam));
+      driver.set_projection(camera_proj_matrix(cam));
     }
   }
 }

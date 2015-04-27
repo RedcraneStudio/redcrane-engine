@@ -89,26 +89,9 @@ namespace game
         }
       }
 
-      void Driver::prepare_material(Material& mat) noexcept
+      void Driver::set_diffuse(Color const& c) noexcept
       {
-        if(mat.texture) prepare_texture(*mat.texture);
-      }
-      void Driver::remove_material(Material& mat) noexcept
-      {
-        if(mat.texture) remove_texture(*mat.texture);
-      }
-      void Driver::bind_material(Material const& mat) noexcept
-      {
-        current_shader_->set_diffuse(mat.diffuse_color);
-        if(mat.texture) bind_texture(*mat.texture, 0);
-      }
-
-      void Driver::prepare_camera(Camera&) noexcept {}
-      void Driver::remove_camera(Camera&) noexcept {}
-      void Driver::use_camera(Camera const& cam) noexcept
-      {
-        current_shader_->set_view(camera_view_matrix(cam));
-        current_shader_->set_projection(camera_proj_matrix(cam));
+        current_shader_->set_diffuse(c);
       }
 
       void Driver::set_projection(glm::mat4 const& p) noexcept

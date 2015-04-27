@@ -66,5 +66,8 @@ namespace game
 
     Camera make_isometric_camera() noexcept;
     Camera make_fps_camera() noexcept;
+
+    struct IDriver;
+    void use_camera(IDriver& driver, Camera const& cam) noexcept;
   }
 }

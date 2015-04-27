@@ -45,17 +45,17 @@ namespace game
     void prepare_object(IDriver& d, Object const& o) noexcept
     {
       if(o.mesh) d.prepare_mesh(*o.mesh);
-      if(o.material) d.prepare_material(*o.material);
+      if(o.material) prepare_material(d, *o.material);
     }
     void remove_object(IDriver& d, Object const& o) noexcept
     {
       if(o.mesh) d.remove_mesh(*o.mesh);
-      if(o.material) d.remove_material(*o.material);
+      if(o.material) remove_material(d, *o.material);
     }
 
     void render_object(IDriver& d, Object const& o, glm::mat4 m) noexcept
     {
-      if(o.material) d.bind_material(*o.material);
+      if(o.material) bind_material(d, *o.material);
       d.set_model(m);
       if(o.mesh) d.render_mesh(*o.mesh);
     }

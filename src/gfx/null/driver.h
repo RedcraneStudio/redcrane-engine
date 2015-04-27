@@ -26,13 +26,7 @@ namespace game
     void remove_texture(Texture&) noexcept override {}
     void bind_texture(Texture const&, unsigned int) noexcept override {}
 
-    void prepare_material(Material&) noexcept override {}
-    void remove_material(Material&) noexcept override {}
-    void bind_material(Material const&) noexcept override {}
-
-    void prepare_camera(Camera&) noexcept override {}
-    void remove_camera(Camera&) noexcept override {}
-    void use_camera(Camera const&) noexcept override {}
+    void set_diffuse(Color const&) noexcept override {}
 
     void set_projection(glm::mat4 const&) noexcept override {}
     void set_view(glm::mat4 const&) noexcept override {}

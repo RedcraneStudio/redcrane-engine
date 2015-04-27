@@ -250,7 +250,7 @@ int main(int argc, char** argv)
       cam_controller.apply_delta_yaw(x / 250.0 - prev_x / 250.0);
       prev_x = x, prev_y = y;
 
-      driver.use_camera(cam);
+      use_camera(driver, cam);
 
       // Clear the screen
       driver.clear();
