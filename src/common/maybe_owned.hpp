@@ -19,7 +19,7 @@ namespace game
   struct Maybe_Owned
   {
     template <class... Args>
-    Maybe_Owned(Args&&... args) noexcept;
+    explicit Maybe_Owned(Args&&... args) noexcept;
 
     explicit Maybe_Owned(T&& t) noexcept;
 
