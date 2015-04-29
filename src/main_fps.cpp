@@ -17,7 +17,6 @@
 #include "gfx/camera.h"
 #include "gfx/object.h"
 #include "gfx/scene_node.h"
-#include "gfx/texture.h"
 #include "gfx/mesh.h"
 
 #include "fps/camera_controller.h"

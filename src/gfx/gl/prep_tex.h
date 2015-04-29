@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "glad/glad.h"
-#include "../texture.h"
+//#include "../texture.h"
 namespace game
 {
   namespace gfx
@@ -13,7 +13,7 @@ namespace game
     {
       struct Prep_Tex
       {
-        Prep_Tex(Texture& tex) noexcept;
+        //Prep_Tex(Texture& tex) noexcept;
         ~Prep_Tex() noexcept;
 
         Prep_Tex(Prep_Tex&&) noexcept;

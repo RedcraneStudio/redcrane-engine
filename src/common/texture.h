@@ -13,14 +13,15 @@ namespace game
     virtual ~Texture() noexcept {}
 
     inline void allocate(Vec<int> const& extents) noexcept;
-    inline void blit_data(Volume<int> const& vol, Color* data) noexcept;
+    inline void blit_data(Volume<int> const& vol,
+                          Color const* data) noexcept;
 
     inline Vec<int> allocated_extents() const noexcept;
 
   private:
     virtual void allocate_(Vec<int> const& extents) noexcept = 0;
     virtual void blit_data_(Volume<int> const& vol,
-                            Color* data) noexcept = 0;
+                            Color const* data) noexcept = 0;
     Vec<int> extents_;
   };
 
@@ -30,7 +31,7 @@ namespace game
     allocate_(extents);
   }
   inline void Texture::blit_data(Volume<int> const& vol,
-                                         Color* data) noexcept
+                                 Color const* data) noexcept
   {
     blit_data_(vol, data);
   }

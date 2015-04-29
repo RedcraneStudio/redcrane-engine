@@ -5,6 +5,7 @@
 #include "driver.h"
 #include "prep_mesh.h"
 #include "prep_tex.h"
+#include "../../common/software_texture.h"
 namespace game
 {
   namespace gfx
@@ -60,33 +61,13 @@ namespace game
         }
       }
 
-      void Driver::prepare_texture(Texture& tex) noexcept
+      std::shared_ptr<Texture> Driver::make_texture_repr() noexcept
       {
-        if(textures_.find(&tex) == textures_.end())
-        {
-          textures_.emplace(&tex, Prep_Tex(tex));
-        }
+        return std::make_shared<Software_Texture>();
       }
-      void Driver::remove_texture(Texture& tex) noexcept
+      void Driver::bind_texture(Texture&, unsigned int) noexcept
       {
-        auto tex_find = textures_.find(&tex);
-        if(tex_find != textures_.end())
-        {
-          textures_.erase(tex_find);
-        }
-      }
-      void Driver::bind_texture(Texture const& tex, unsigned int l) noexcept
-      {
-        auto tex_find = textures_.find(&tex);
-        if(tex_find != textures_.end())
-        {
-          // Bind the texture to tex unit l.
-          tex_find->second.bind(l);
-          // Tell the shader/program that our texture is in location l.
-          // This will need to change when we start getting adjustable
-          // textures, maybe?
-          current_shader_->set_texture(l);
-        }
+        // Don't do a damn thing just yet.
       }
 
       void Driver::set_diffuse(Color const& c) noexcept

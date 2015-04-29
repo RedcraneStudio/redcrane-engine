@@ -14,8 +14,10 @@
 #include "gfx/camera.h"
 #include "gfx/object.h"
 #include "gfx/scene_node.h"
-#include "gfx/texture.h"
 #include "gfx/mesh.h"
+
+#include "common/software_texture.h"
+#include "common/texture_load.h"
 
 #include "map/map.h"
 #include "map/json_structure.h"
@@ -99,8 +101,10 @@ int main(int argc, char** argv)
 
   terrain_obj.material.set_owned(gfx::Material{});
   terrain_obj.material->diffuse_color = colors::white;
-  terrain_obj.material->texture.set_owned(
-    Texture::from_png_file("tex/grass.png"));
+
+  // TODO THIS IS TOTLALY TEMPORARY
+  terrain_obj.material->texture.set_owned(new Software_Texture());
+  load_png("tex/grass.png", *terrain_obj.material->texture.get());
 
   terrain_obj.model_matrix = glm::translate(glm::mat4(1.0),
                                             glm::vec3(-12.5, 0.0, -12.5));

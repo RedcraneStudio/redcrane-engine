@@ -4,6 +4,8 @@
  */
 #include "material.h"
 #include "../common/json.h"
+#include "../common/texture_load.h"
+#include "../common/software_texture.h"
 #include "idriver.h"
 namespace game
 {
@@ -29,19 +31,12 @@ namespace game
       });
       if_has_member(doc, "texture", [&](auto const& val)
       {
-        auto texture = Texture::from_png_file(val.GetString());
-        ret.texture = Maybe_Owned<Texture>(std::move(texture));
+        // Eventually make this a composite texture.
+        ret.texture.set_owned(new Software_Texture());
+        load_png(val.GetString(), *ret.texture.get());
       });
 
       return ret;
-    }
-    void prepare_material(IDriver& driver, Material const& mat) noexcept
-    {
-      if(mat.texture) driver.prepare_texture(*mat.texture);
-    }
-    void remove_material(IDriver& driver, Material const& mat) noexcept
-    {
-      if(mat.texture) driver.remove_texture(*mat.texture);
     }
     void bind_material(IDriver& driver, Material const& mat) noexcept
     {

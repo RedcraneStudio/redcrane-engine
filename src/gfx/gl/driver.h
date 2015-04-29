@@ -31,9 +31,8 @@ namespace game
     void remove_mesh(Mesh& mesh) noexcept override;
     void render_mesh(Mesh const& mesh) noexcept override;
 
-    void prepare_texture(Texture& tex) noexcept override;
-    void remove_texture(Texture& tex) noexcept override;
-    void bind_texture(Texture const& tex, unsigned int l) noexcept override;
+    std::shared_ptr<Texture> make_texture_repr() noexcept override;
+    void bind_texture(Texture& tex, unsigned int loc) noexcept override;
 
     void set_diffuse(Color const&) noexcept override;
 
@@ -49,7 +48,7 @@ namespace game
     void clear_depth() noexcept override;
   private:
     std::unordered_map<Mesh const*, Prep_Mesh> meshs_;
-    std::unordered_map<Texture const*, Prep_Tex> textures_;
+    //std::unordered_map<Texture const*, Prep_Tex> textures_;
 
     IShader* current_shader_;
 
