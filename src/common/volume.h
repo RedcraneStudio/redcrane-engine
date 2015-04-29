@@ -70,6 +70,11 @@ namespace game
   {
     return {{0, 0}, v.x, v.y};
   }
+  template <typename T>
+  Vec<T> vol_extents(Volume<T> const& vol)
+  {
+    return {vol.width, vol.height};
+  }
 
   template <typename T>
   Volume<T> center_volume(Volume<T> parent, Vec<T> child_extents)
