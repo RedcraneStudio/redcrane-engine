@@ -5,7 +5,7 @@
 set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/prep_mesh.cpp gl/prep_tex.cpp
                            gl/standard_shader.cpp gl/program.cpp
                            gl/hud_shader.cpp)
-add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES} null/driver.cpp
+add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES}
                           material.cpp object.cpp camera.cpp mesh.cpp
                           texture.cpp scene_node.cpp)
 
