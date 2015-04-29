@@ -20,8 +20,8 @@ namespace game
     {
       auto new_obj = Object{};
 
-      new_obj.mesh.set_pointer(obj.mesh.get());
-      new_obj.material.set_pointer(obj.material.get());
+      new_obj.mesh.set_pointer(obj.mesh);
+      new_obj.material.set_pointer(obj.material);
 
       new_obj.model_matrix = obj.model_matrix;
 
@@ -34,8 +34,8 @@ namespace game
       new_obj.mesh = std::move(obj.mesh);
       new_obj.material = std::move(obj.material);
 
-      obj.mesh.set_pointer(new_obj.mesh.get());
-      obj.material.set_pointer(new_obj.material.get());
+      obj.mesh.set_pointer(new_obj.mesh);
+      obj.material.set_pointer(new_obj.material);
 
       new_obj.model_matrix = obj.model_matrix;
 

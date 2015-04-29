@@ -54,6 +54,9 @@ namespace game
     void set_owned(T* t) noexcept;
     void set_pointer(T* t, bool owned = false) noexcept;
 
+    template <class R>
+    void set_pointer(Maybe_Owned<R> const&) noexcept;
+
     template <class R, class... Args>
     void emplace_owned(Args&&... args) noexcept;
 
@@ -152,6 +155,12 @@ namespace game
   {
     owned_ = o;
     ptr_ = t;
+  }
+  template <class T>
+  template <class R>
+  void Maybe_Owned<T>::set_pointer(Maybe_Owned<R> const& mo) noexcept
+  {
+    set_pointer(mo.get(), false);
   }
 
   template <class T>
