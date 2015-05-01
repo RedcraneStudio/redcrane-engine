@@ -21,10 +21,6 @@ namespace game { namespace ui
     virtual void draw_rect(Volume<int> const&) noexcept = 0;
     virtual void fill_rect(Volume<int> const&) noexcept = 0;
 
-    virtual void set_text_size(int) noexcept = 0;
-    virtual void draw_text(std::string const&, Vec<int> const&) noexcept = 0;
-    virtual Vec<int> query_text_size(std::string const&) noexcept = 0;
-
     virtual std::shared_ptr<Texture> make_texture() noexcept = 0;
 
     inline void draw_texture(Volume<int> const& dst, Texture& tex) noexcept;
