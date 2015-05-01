@@ -6,55 +6,45 @@
 namespace game { namespace ui
 {
   template <class T>
-  inline bool View_Container<T>::dispatch_event_(SDL_Event const& e) noexcept
-  {
-    bool ret = false;
-    for(auto& child : children_)
-    {
-      ret = ret || child.view->dispatch_event(e);
-    }
-    return ret;
-  }
-
-  template <class T>
-  void View_Container<T>::push_child(Shared_View v, T l) noexcept
+  void Element_Composite<T>::push_child(Shared_Element v, T l) noexcept
   {
     children_.push_back({v, l});
   }
   template <class T>
-  void View_Container<T>::push_child(child_t c) noexcept
+  void Element_Composite<T>::push_child(child_t c) noexcept
   {
     children_.push_back(std::move(c));
   }
   template <class T>
-  void View_Container<T>::insert_child(typename child_vec_t::iterator i,
-                                       Shared_View v,
-                                       T l) noexcept
+  void Element_Composite<T>::insert_child(typename child_vec_t::iterator i,
+                                          Shared_Element v,
+                                          T l) noexcept
   {
     children_.insert(i, {v, l});
   }
   template <class T>
-  void View_Container<T>::insert_child(typename child_vec_t::const_iterator i,
-                                       Shared_View v,
-                                       T l) noexcept
+  void Element_Composite<T>::
+  insert_child(typename child_vec_t::const_iterator i, Shared_Element v,
+               T l) noexcept
   {
     children_.insert(i, {v, l});
   }
   template <class T>
-  void View_Container<T>::insert_child(typename child_vec_t::iterator i,
-                                       child_t c) noexcept
+  void Element_Composite<T>::insert_child(typename child_vec_t::iterator i,
+                                          child_t c) noexcept
   {
     children_.insert(i, std::move(c));
   }
   template <class T>
-  void View_Container<T>::insert_child(typename child_vec_t::const_iterator i,
-                                       child_t c) noexcept
+  void
+  Element_Composite<T>::insert_child(typename child_vec_t::const_iterator i,
+                                     child_t c) noexcept
   {
     children_.insert(i, std::move(c));
   }
 
   template <class T>
-  void View_Container<T>::remove_child(Shared_View v) noexcept
+  void Element_Composite<T>::remove_child(Shared_Element v) noexcept
   {
     using std::begin; using std::end;
     auto find_iter = std::find_if(begin(children_), end(children_),
@@ -68,40 +58,26 @@ namespace game { namespace ui
     }
   }
   template <class T>
-  void View_Container<T>::remove_child(typename child_vec_t::size_type
-                                       index) noexcept
+  void Element_Composite<T>::remove_child(typename child_vec_t::size_type
+                                          index) noexcept
   {
     children_.erase(children_.begin() + index);
   }
   template <class T>
-  void View_Container<T>::remove_child(typename child_vec_t::iterator
-                                       iter) noexcept
+  void Element_Composite<T>::remove_child(typename child_vec_t::iterator
+                                          iter) noexcept
   {
     children_.erase(iter);
   }
   template <class T>
-  void View_Container<T>::remove_child(typename child_vec_t::const_iterator
-                                       i) noexcept
+  void Element_Composite<T>::remove_child(typename child_vec_t::const_iterator
+                                          i) noexcept
   {
     children_.erase(i);
   }
 
-  template <class T>
-  std::vector<Shared_View> View_Container<T>::children() noexcept
-  {
-    // Not the most efficient way to do this.
-    // TODO This will be an interface change to some iterator begin/end
-    // function pair
-    auto ret = std::vector<Shared_View>{};
-    for(auto child : children_)
-    {
-      ret.push_back(child.view);
-    }
-    return ret;
-  }
-
-  template <class T> Shared_View
-  View_Container<T>::find_child_(std::string id, bool r) const noexcept
+  template <class T> Shared_Element
+  Element_Composite<T>::find_child_(std::string id, bool r) const noexcept
   {
     for(auto const& child : children_)
     {
@@ -119,8 +95,8 @@ namespace game { namespace ui
     }
     return nullptr;
   }
-  template <class T> bool View_Container<T>::
-  replace_child_(std::string id, Shared_View v, bool r) noexcept
+  template <class T> bool Element_Composite<T>::
+  replace_child_(std::string id, Shared_Element v, bool r) noexcept
   {
     for(auto& child : children_)
     {
@@ -145,20 +121,19 @@ namespace game { namespace ui
   }
 
   template <class T>
-  inline void View_Container<T>::render_() const noexcept
+  void Element_Composite<T>::render_(Renderer& r) const noexcept
   {
-    for(auto const& child : children_)
+    for(auto& child : children_)
     {
-      child.view->render();
+      child.view->render(r);
     }
   }
-
   template <class T>
-  inline void View_Container<T>::invalidate() noexcept
+  void Element_Composite<T>::activate_regions_(Controller& c) const noexcept
   {
-    for(auto const& child : children_)
+    for(auto& child : children_)
     {
-      child.view->invalidate();
+      child.view->activate_regions(c);
     }
   }
 } }

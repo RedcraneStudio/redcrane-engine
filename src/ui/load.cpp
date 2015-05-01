@@ -4,13 +4,14 @@
  */
 #include "load.h"
 #include "../common/json.h"
-#include "layouts/linear_layout.h"
-#include "layouts/side_layout.h"
-#include "layouts/grid_layout.h"
-#include "views/label.h"
-#include "views/empty.h"
-#include "views/sprite.h"
-#include "views/bar.h"
+#include "../common/texture_load.h"
+#include "elements/layouts/linear_layout.h"
+#include "elements/layouts/side_layout.h"
+#include "elements/layouts/grid_layout.h"
+#include "elements/label.h"
+#include "elements/empty.h"
+#include "elements/sprite.h"
+#include "elements/bar.h"
 namespace game { namespace ui
 {
   template <class T>
@@ -137,25 +138,28 @@ namespace game { namespace ui
       if(color_str == "white") return colors::white;
       if(color_str == "black") return colors::black;
       if(color_str == "green") return colors::green;
+      if(color_str == "red")   return colors::red;
+      if(color_str == "blue")  return colors::blue;
     }
 
     Color c;
 
-    c.red   = doc["red"].GetInt();
-    c.green = doc["green"].GetInt();
-    c.blue  = doc["blue"].GetInt();
+    c.r = doc["red"].GetInt();
+    c.g = doc["green"].GetInt();
+    c.b = doc["blue"].GetInt();
+    c.a = 0xff;
 
     return c;
   }
 
   template <class T>
-  Shared_View load_view(Game& game, T const& doc) noexcept
+  Shared_Element load_e(Load_Params p, T const& doc) noexcept
   {
-    auto view_ptr = Shared_View{};
+    auto ret_ptr = Shared_Element{};
 
     if(typeof(doc) == "linear_layout")
     {
-      Linear_Layout view{game.graphics};
+      Linear_Layout view{};
 
       view.orientation = orientof(doc);
       if_has_member(doc, "force_fill", [&view](auto const& val)
@@ -169,13 +173,13 @@ namespace game { namespace ui
         // Load the weight if provided.
         layout.weight =
                    iter->HasMember("weight") ?  (*iter)["weight"].GetInt() : 1;
-        view.push_child(load_view(game, *iter), layout);
+        view.push_child(load_e(p, *iter), layout);
       }
-      view_ptr = std::make_shared<Linear_Layout>(std::move(view));
+      ret_ptr = std::make_shared<Linear_Layout>(std::move(view));
     }
     else if(typeof(doc) == "side_layout")
     {
-      Side_Layout view{game.graphics};
+      Side_Layout view{};
 
       auto const& children = doc["children"];
       for(auto iter = children.Begin(); iter != children.End(); ++iter)
@@ -185,14 +189,14 @@ namespace game { namespace ui
         layout.padding = load_padding(*iter);
         layout.alignment = load_alignment(*iter);
 
-        view.push_child(load_view(game, *iter), layout);
+        view.push_child(load_e(p, *iter), layout);
       }
 
-      view_ptr = std::make_shared<Side_Layout>(std::move(view));
+      ret_ptr = std::make_shared<Side_Layout>(std::move(view));
     }
     else if(typeof(doc) == "grid_layout")
     {
-      Grid_Layout view{game.graphics};
+      Grid_Layout view{};
 
       if_has_member(doc, "force_fill_width", [&](auto const& val)
       {
@@ -211,14 +215,14 @@ namespace game { namespace ui
         layout.row = (*iter)["row"].GetInt();
         layout.col = (*iter)["col"].GetInt();
 
-        view.push_child(load_view(game, *iter), layout);
+        view.push_child(load_e(p, *iter), layout);
       }
 
-      view_ptr = std::make_shared<Grid_Layout>(std::move(view));
+      ret_ptr = std::make_shared<Grid_Layout>(std::move(view));
     }
     else if(typeof(doc) == "label")
     {
-      Label label{game.graphics, game.font};
+      Label label{p.font_render};
 
       label.str(doc["text"].GetString());
       label.size(doc["size"].GetInt());
@@ -226,24 +230,24 @@ namespace game { namespace ui
       label.color({0xff, 0xff, 0xff});
       if_has_member(doc, "color", [&](auto const& val)
       {
-        label.color(load_color(doc["color"]));
+        label.color(load_color(val));
       });
 
-      view_ptr = std::make_shared<Label>(std::move(label));
+      ret_ptr = std::make_shared<Label>(std::move(label));
     }
     else if(typeof(doc) == "sprite")
     {
-      auto sprite = Sprite{game.graphics};
+      auto sprite = Sprite{};
 
-      auto img = get_asset<assets::Image_Asset>(game, doc["src"].GetString());
-      sprite.src(img);
+      sprite.src(std::make_shared<Software_Texture>());
+      load_png(doc["src"].GetString(), *sprite.src().get());
       sprite.scale(doc["scale"].GetDouble());
 
-      view_ptr = std::make_shared<Sprite>(std::move(sprite));
+      ret_ptr = std::make_shared<Sprite>(std::move(sprite));
     }
     else if(typeof(doc) == "bar")
     {
-      auto bar = Bar{game.graphics};
+      auto bar = Bar{};
 
       if_has_member(doc, "max", [&bar](auto const& val)
       { bar.max(val.GetInt()); });
@@ -255,56 +259,56 @@ namespace game { namespace ui
         bar.color(load_color(val));
       });
 
-      view_ptr = std::make_shared<Bar>(std::move(bar));
+      ret_ptr = std::make_shared<Bar>(std::move(bar));
     }
     else if(typeof(doc) == "empty")
     {
-      view_ptr = std::make_shared<Empty>(game.graphics);
+      ret_ptr = std::make_shared<Empty>();
     }
     else if(typeof(doc) == "embed")
     {
-      view_ptr = load(game, doc["src"].GetString());
+      ret_ptr = load(doc["src"].GetString(), p);
       // This will use the id of the file that inherited (using embed) unless
       // there is no id given in the parent file, in which case the id in the
       // embedded file will be used.
     }
 
-    if(view_ptr)
+    if(ret_ptr)
     {
       if(doc.HasMember("id"))
       {
         // Set the id if it was in the json.
-        view_ptr->id = doc["id"].GetString();
+        ret_ptr->id = doc["id"].GetString();
       }
       if_has_member(doc, "this_background", [&](auto const& val)
       {
-        view_ptr->set_background(ui::View_Volume::This, load_color(val));
+        ret_ptr->set_background(ui::Elem_Volume::This, load_color(val));
       });
       if_has_member(doc, "parent_background", [&](auto const& val)
       {
-        view_ptr->set_background(ui::View_Volume::Parent, load_color(val));
+        ret_ptr->set_background(ui::Elem_Volume::Parent, load_color(val));
       });
       if_has_member(doc, "this_border", [&](auto const& val)
       {
-        view_ptr->set_border(ui::View_Volume::This, load_color(val));
+        ret_ptr->set_border(ui::Elem_Volume::This, load_color(val));
       });
       if_has_member(doc, "parent_border", [&](auto const& val)
       {
-        view_ptr->set_border(ui::View_Volume::Parent, load_color(val));
+        ret_ptr->set_border(ui::Elem_Volume::Parent, load_color(val));
       });
 
       if_has_member(doc, "min_size", [&](auto const& val)
       {
-        view_ptr->min_size(load_size(val));
+        ret_ptr->min_size(load_size(val));
       });
 
-      return view_ptr;
+      return ret_ptr;
     }
 
     return nullptr;
   }
-  Shared_View load(Game& g, std::string name) noexcept
+  Shared_Element load(std::string name, Load_Params p) noexcept
   {
-    return load_view(g, get_asset<assets::Json_Asset>(g, name)->json);
+    return load_e(p, load_json(name));
   }
 } }

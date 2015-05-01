@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-#include "View.h"
+#include "element.h"
 namespace game { namespace ui
 {
   struct null_layout_t {};
@@ -14,58 +14,60 @@ namespace game { namespace ui
   template <class Layout_Type>
   struct View_Child
   {
-    Shared_View view;
+    Shared_Element view;
     Layout_Type layout;
   };
 
   template <class Layout_Type>
-  struct View_Container : public View
+  struct Element_Composite : public Element
   {
-    View_Container(Graphics_Desc& g) noexcept : View(g) {}
+    virtual ~Element_Composite() {}
 
     virtual bool is_container() const noexcept { return true; }
 
     using child_t = View_Child<Layout_Type>;
     using child_vec_t = std::vector<child_t>;
 
-    inline void push_child(Shared_View,
+    inline void push_child(Shared_Element,
                            Layout_Type = Layout_Type{}) noexcept;
     inline void push_child(child_t) noexcept;
 
     inline void insert_child(typename child_vec_t::iterator,
-                             Shared_View,
+                             Shared_Element,
                              Layout_Type = Layout_Type{}) noexcept;
     inline void insert_child(typename child_vec_t::const_iterator,
-                             Shared_View,
+                             Shared_Element,
                              Layout_Type = Layout_Type{}) noexcept;
     inline void insert_child(typename child_vec_t::iterator,
                              child_t) noexcept;
     inline void insert_child(typename child_vec_t::const_iterator,
                              child_t) noexcept;
 
-    inline void remove_child(Shared_View) noexcept;
+    inline void remove_child(Shared_Element) noexcept;
     inline void remove_child(typename child_vec_t::size_type) noexcept;
     inline void remove_child(typename child_vec_t::iterator) noexcept;
     inline void remove_child(typename child_vec_t::const_iterator) noexcept;
 
-    void invalidate() noexcept override;
-
-    std::vector<Shared_View> children() noexcept override;
-
+    // We don't want any of that single child crap, so just make these
+    // functions no-ops for a while.
+    void set_child(std::weak_ptr<Element>) noexcept override {}
+    inline void remove_child() noexcept override {}
   protected:
     child_vec_t children_;
 
   private:
-    // Left to be implemented by any deriving classes.
-    // Volume<int> layout_() override;
-    // Vec<int> get_minimum_extents_() const noexcept override;
+    Shared_Element find_child_(std::string, bool) const noexcept override;
+    bool replace_child_(std::string, Shared_Element, bool) noexcept override;
 
-    inline bool dispatch_event_(SDL_Event const&) noexcept override;
+    // Left to be implemented
+    virtual Volume<int> layout_() = 0;
+    virtual Vec<int> get_minimum_extents_() const noexcept = 0;
 
-    inline void render_() const noexcept override;
-    Shared_View find_child_(std::string, bool) const noexcept override;
-    bool replace_child_(std::string, Shared_View, bool) noexcept override;
+    void render_(Renderer&) const noexcept override;
+    void activate_regions_(Controller&) const noexcept override;
   };
+
+  using Null_Element_Composite = Element_Composite<null_layout_t>;
 } }
 
-#include "View_Container_impl.hpp"
+#include "element_composite_impl.hpp"

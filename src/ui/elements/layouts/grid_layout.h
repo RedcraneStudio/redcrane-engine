@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../View_Container.h"
+#include "../../element_composite.h"
 
 #include <boost/optional.hpp>
 namespace game { namespace ui
@@ -14,10 +14,8 @@ namespace game { namespace ui
     int col = 0;
   };
 
-  struct Grid_Layout : public View_Container<Grid_Layout_Params>
+  struct Grid_Layout : public Element_Composite<Grid_Layout_Params>
   {
-    explicit Grid_Layout(Graphics_Desc& g) noexcept : View_Container(g) {}
-
     bool force_fill_width = true;
     bool force_fill_height = true;
 

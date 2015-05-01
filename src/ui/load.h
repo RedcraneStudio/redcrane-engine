@@ -4,10 +4,12 @@
  */
 #pragma once
 #include <string>
-#include "../game/Game.h"
 
 #include "cast.h"
-#include "View.h"
+#include "element.h"
+
+#include "ifont_renderer.h"
+#include "renderer.h"
 namespace game { namespace ui
 {
   struct Bad_Orientation{};
@@ -17,11 +19,17 @@ namespace game { namespace ui
     std::string align_str;
   };
 
-  Shared_View load(Game&, std::string name) noexcept;
+  struct Load_Params
+  {
+    IFont_Renderer& font_render;
+    Renderer& renderer;
+  };
+
+  Shared_Element load(std::string fn, Load_Params params) noexcept;
 
   template <typename T>
-  inline std::shared_ptr<T> load_as(Game& g, std::string name) noexcept
+  inline std::shared_ptr<T> load_as(std::string fn, Load_Params p) noexcept
   {
-    return as<T>(load(g, name));
+    return as<T>(load(fn, p));
   }
 } }

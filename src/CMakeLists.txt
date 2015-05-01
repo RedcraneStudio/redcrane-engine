@@ -17,6 +17,8 @@ add_subdirectory(fps)
 #find_package(Boost REQUIRED COMPONENTS filesystem)
 #add_subdirectory(assets)
 
+add_subdirectory(ui)
+
 add_executable(strategy main.cpp map/map.cpp map/json_structure.cpp)
 target_link_libraries(strategy gfxlib)
 target_link_libraries(strategy commonlib)

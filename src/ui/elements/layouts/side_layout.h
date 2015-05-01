@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../View_Container.h"
+#include "../../element_composite.h"
 namespace game { namespace ui
 {
   struct Padding
@@ -34,11 +34,8 @@ namespace game { namespace ui
     Alignment alignment;
   };
 
-  struct Side_Layout : View_Container<Side_Layout_Params>
+  class Side_Layout : public Element_Composite<Side_Layout_Params>
   {
-    explicit Side_Layout(Graphics_Desc& g) noexcept : View_Container(g) {}
-
-  private:
     Vec<int> get_minimum_extents_() const noexcept override;
     Volume<int> layout_() override;
   };

@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../View_Container.h"
+#include "../../element_composite.h"
 namespace game { namespace ui
 {
   struct Linear_Layout_Params
@@ -11,10 +11,8 @@ namespace game { namespace ui
     int weight = 1;
   };
 
-  struct Linear_Layout : public View_Container<Linear_Layout_Params>
+  struct Linear_Layout : public Element_Composite<Linear_Layout_Params>
   {
-    explicit Linear_Layout(Graphics_Desc& g) noexcept : View_Container(g) {}
-
     enum class Orient
     { Vertical, Horizontal };
 

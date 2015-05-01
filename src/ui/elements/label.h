@@ -3,12 +3,12 @@
  * All rights reserved.
  */
 #pragma once
-#include "../View.h"
-#include "../../game/Font_Renderer.h"
+#include "../element.h"
 
-#include "../../common/surface.h"
 #include "../../common/template_utility.hpp"
 #include "../../common/translate.h"
+
+#include "../ifont_renderer.h"
 namespace game { namespace ui
 {
   namespace detail
@@ -39,22 +39,17 @@ namespace game { namespace ui
     }
 
   }
-  struct Label : public View
+  struct Label : public Element
   {
-    Label(Graphics_Desc& g, Font_Renderer& fr) noexcept : View(g), fr_(fr)
-    {
-      args_.reset(new detail::Tuple_String_Args<>());
-    }
-
-    Volume<int> layout_() override;
+    Label(IFont_Renderer& font) noexcept : font_(&font) {}
 
     inline std::string str() const noexcept { return str_; }
     inline void str(std::string str) noexcept
     {
-      if(str_ != str)
+      if(str != str_)
       {
         str_ = str;
-        invalidate();
+        invalidate_cache_();
       }
     }
 
@@ -62,16 +57,7 @@ namespace game { namespace ui
     {
       // Add the at sign denoting the name of a string loaded from the lang
       // file.
-      name = "@" + name;
-
-      if(name != str_)
-      {
-        str_ = name;
-
-        // TODO translate the string right here and now to see if we can get
-        // away with not invalidating the cache here.
-        invalidate();
-      }
+      str("@" + name);
     }
 
     template <class... Args>
@@ -91,46 +77,58 @@ namespace game { namespace ui
       // be moved.
       args_ = std::make_unique<tuple_string_args_t>(
                                                   std::forward<Args>(args)...);
-      invalidate();
+      invalidate_cache_();
     }
 
     inline int size() const noexcept { return size_; }
     inline void size(int size) noexcept
     {
-      if(size_ != size)
+      if(size != size_)
       {
         size_ = size;
-        invalidate();
+        invalidate_cache_();
       }
     }
 
     inline Color color() const noexcept { return col_; }
     inline void color(Color col) noexcept
     {
-      if(col_ != col)
+      if(col != col_)
       {
         col_ = col;
-        invalidate();
+        invalidate_cache_();
       }
     }
 
-    inline void invalidate() noexcept override
-    { texture_cache_.reset(nullptr); }
+    inline IFont_Renderer& font_renderer() const noexcept { return *font_; }
+    inline void font_renderer(IFont_Renderer& f) noexcept
+    {
+      if(&f != font_)
+      {
+        font_ = &f;
+        invalidate_cache_();
+      }
+    }
 
   private:
+    std::string full_str_() const noexcept;
+
     std::string str_ = "";
 
     std::unique_ptr<detail::String_Args> args_;
 
+    IFont_Renderer* font_;
+    mutable std::shared_ptr<Texture> tex_;
+
     int size_ = 40;
     Color col_ = Color{};
 
-    Font_Renderer& fr_;
+    void invalidate_cache_() const noexcept;
+    void gen_cache_(Renderer&) const noexcept;
 
     Vec<int> get_minimum_extents_() const noexcept override;
-    void render_() const noexcept override;
-
-    mutable Texture_Ptr texture_cache_;
-    void gen_cache_() const noexcept;
+    Volume<int> layout_() override;
+    void render_(Renderer&) const noexcept override;
+    void activate_regions_(Controller&) const noexcept override;
   };
 } }

@@ -2,10 +2,10 @@
  * Copyright (C) 2014 Luke San Antonio
  * All rights reserved.
  */
-#include "View.h"
-#include "../common/render.h"
+#include "element.h"
 namespace game { namespace ui
 {
+#if 0
   void View::render() const noexcept
   {
     if(layed_out_ && visible_)
@@ -38,45 +38,45 @@ namespace game { namespace ui
       }
     }
   }
-
-  Vec<int> View::get_minimum_extents() const noexcept
+#endif
+  Vec<int> Element::get_minimum_extents() const noexcept
   {
     auto min = this->get_minimum_extents_();
     return {std::max(min.x, min_size_.x), std::max(min.y, min_size_.y)};
   }
 
-  void View::set_border(View_Volume vol, Color color) noexcept
+  void Element::set_border(Elem_Volume vol, Color color) noexcept
   {
     switch(vol)
     {
-      case View_Volume::This:
+      case Elem_Volume::This:
       {
         this_border_ = color;
       }
-      case View_Volume::Parent:
+      case Elem_Volume::Parent:
       {
         parent_border_ = color;
       }
     }
   }
-  boost::optional<Color> View::query_border(View_Volume v) const noexcept
+  boost::optional<Color> Element::query_border(Elem_Volume v) const noexcept
   {
     switch(v)
     {
-      case View_Volume::This:
+      case Elem_Volume::This:
       {
         return this_border_;
       }
-      case View_Volume::Parent:
+      case Elem_Volume::Parent:
       {
         return parent_border_;
       }
     }
   }
-  bool View::remove_border(View_Volume v) noexcept
+  bool Element::remove_border(Elem_Volume v) noexcept
   {
     auto& border =
-      v == View_Volume::This ?  this_border_ : parent_border_;
+      v == Elem_Volume::This ?  this_border_ : parent_border_;
 
     if(border)
     {
@@ -86,40 +86,41 @@ namespace game { namespace ui
     return false;
   }
 
-  void View::set_background(View_Volume v, Color color) noexcept
+  void Element::set_background(Elem_Volume v, Color color) noexcept
   {
     switch(v)
     {
-      case View_Volume::This:
+      case Elem_Volume::This:
       {
         this_background_ = color;
         break;
       }
-      case View_Volume::Parent:
+      case Elem_Volume::Parent:
       {
         parent_background_ = color;
         break;
       }
     }
   }
-  boost::optional<Color> View::query_background(View_Volume v) const noexcept
+  boost::optional<Color>
+  Element::query_background(Elem_Volume v) const noexcept
   {
     switch(v)
     {
-      case View_Volume::This:
+      case Elem_Volume::This:
       {
         return this_background_;
       }
-      case View_Volume::Parent:
+      case Elem_Volume::Parent:
       {
         return parent_background_;
       }
     }
   }
-  bool View::remove_background(View_Volume v) noexcept
+  bool Element::remove_background(Elem_Volume v) noexcept
   {
     auto& background =
-      v == View_Volume::This ?  this_background_ : parent_background_;
+      v == Elem_Volume::This ?  this_background_ : parent_background_;
 
     if(background)
     {
@@ -127,14 +128,5 @@ namespace game { namespace ui
       return true;
     }
     return false;
-  }
-
-  Vec<int> View::min_size() const noexcept
-  {
-    return min_size_;
-  }
-  void View::min_size(Vec<int> s) noexcept
-  {
-    min_size_ = s;
   }
 } }

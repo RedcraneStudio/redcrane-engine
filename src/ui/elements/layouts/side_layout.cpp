@@ -3,13 +3,11 @@
  * All rights reserved.
  */
 #include "side_layout.h"
-#include "../../common/center.hpp"
+#include "../../../common/center.hpp"
 namespace game { namespace ui
 {
     Vec<int> Side_Layout::get_minimum_extents_() const noexcept
     {
-      // I don't fucking know how small this thing can be minimum how am I
-      // supposed to know that loll
       return {0, 0};
     }
     Volume<int> Side_Layout::layout_()
@@ -66,5 +64,4 @@ namespace game { namespace ui
 
       return vol;
     }
-
 } }

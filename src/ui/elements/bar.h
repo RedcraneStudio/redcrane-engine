@@ -3,13 +3,11 @@
  * All rights reserved.
  */
 #pragma once
-#include "../View.h"
+#include "../element.h"
 namespace game { namespace ui
 {
-  struct Bar : public View
+  struct Bar : public Element
   {
-    Bar(Graphics_Desc& g) noexcept : View(g) {}
-
     inline void cur(int) noexcept;
     inline int cur() const noexcept;
 
@@ -26,7 +24,8 @@ namespace game { namespace ui
 
     Vec<int> get_minimum_extents_() const noexcept override;
     Volume<int> layout_() override;
-    void render_() const noexcept override;
+    void render_(Renderer&) const noexcept override;
+    void activate_regions_(Controller&) const noexcept override {}
   };
 
   inline void Bar::cur(int cur) noexcept

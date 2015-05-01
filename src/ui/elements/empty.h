@@ -3,18 +3,18 @@
  * All rights reserved.
  */
 #pragma once
-#include "../View.h"
+#include "../element.h"
 namespace game { namespace ui
 {
   /*!
    * \brief A view that simply takes up space.
    */
-  struct Empty : public View
+  struct Empty : public Element
   {
-    inline Empty(Graphics_Desc& g) : View(g) {}
     inline Vec<int> get_minimum_extents_() const noexcept override;
     inline Volume<int> layout_() override;
-    inline void render_() const noexcept override;
+    void render_(Renderer&) const noexcept override {}
+    void activate_regions_(Controller&) const noexcept override {}
   };
   inline Vec<int> Empty::get_minimum_extents_() const noexcept
   {
@@ -24,6 +24,4 @@ namespace game { namespace ui
   {
     return parent_volume();
   }
-  inline void Empty::render_() const noexcept
-  { }
 } }
