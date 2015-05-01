@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #include "controller.h"
+#include "element.h"
 namespace game { namespace ui
 {
   void Controller::clickable_region(Volume<int> const& v, Element& e) noexcept

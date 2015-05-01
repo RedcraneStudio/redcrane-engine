@@ -6,9 +6,10 @@
 #include <unordered_map>
 #include <vector>
 #include "../common/volume.h"
-#include "element.h"
 namespace game { namespace ui
 {
+  struct Element;
+
   struct Controller
   {
     virtual ~Controller() noexcept {}
