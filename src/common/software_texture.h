@@ -13,6 +13,9 @@ namespace game
     Color get_pt(Vec<int> pt) const noexcept;
     Color* get_row(int row) const noexcept;
     Color* get_data() const noexcept;
+
+    void allocate_to(Texture& t) const noexcept;
+    void blit_to(Texture& t) const noexcept;
   private:
     void allocate_(Vec<int> const& extents) noexcept override;
     void blit_data_(Volume<int> const& vol,

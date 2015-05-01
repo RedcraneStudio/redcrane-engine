@@ -21,6 +21,18 @@ namespace game
   {
     return data_;
   }
+
+  void Software_Texture::allocate_to(Texture& t) const noexcept
+  {
+    // Allocate the other texture with our bounds to prepare it for blitting.
+    t.allocate(allocated_extents());
+  }
+  void Software_Texture::blit_to(Texture& t) const noexcept
+  {
+    // Blit all of our data to the given texture.
+    t.blit_data(vol_from_extents(allocated_extents()), data_);
+  }
+
   void Software_Texture::allocate_(Vec<int> const& extents) noexcept
   {
     data_ = new Color[extents.x * extents.y];
