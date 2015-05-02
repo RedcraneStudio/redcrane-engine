@@ -4,11 +4,16 @@
  */
 #pragma once
 #include "texture.h"
+#include "maybe_owned.hpp"
 namespace game
 {
   struct Software_Texture : public Texture
   {
     virtual ~Software_Texture() noexcept;
+
+    void set_impl(Maybe_Owned<Texture> t, bool should_blit = false) noexcept;
+    Texture& get_impl() noexcept { return *impl_; }
+    Texture const& get_impl() const noexcept { return *impl_; }
 
     Color get_pt(Vec<int> pt) const noexcept;
     Color* get_row(int row) const noexcept;
@@ -22,5 +27,7 @@ namespace game
                     Color const* data) noexcept override;
 
     Color* data_;
+
+    Maybe_Owned<Texture> impl_;
   };
 }
