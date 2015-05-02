@@ -94,7 +94,7 @@ namespace game
      * Element is an offset into the vertices field of the Mesh_Data provided
      * in a previous call to prepare.
      */
-    void set_vertex(unsigned int elemnt, Vertex const&) noexcept;
+    inline void set_vertex(unsigned int elemnt, Vertex const&) noexcept;
 
     /*!
      * \brief Sets a sequence of vertices starting from a certain vertex in the
