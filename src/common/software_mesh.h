@@ -18,6 +18,9 @@ namespace game
     inline Mesh_Data& mesh_data() noexcept { return mesh_data_; }
     inline Mesh_Data const& mesh_data() const noexcept { return mesh_data_; }
 
+    inline Mesh_Data&& unwrap_mesh_data() noexcept
+    { return std::move(mesh_data_); }
+
     inline void copy_to(Mesh& m) const noexcept { m.prepare(mesh_data_); }
   private:
     Mesh_Data mesh_data_;
