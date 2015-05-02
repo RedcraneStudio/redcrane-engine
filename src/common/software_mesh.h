@@ -12,6 +12,8 @@ namespace game
    */
   struct Software_Mesh : public Mesh
   {
+    Software_Mesh() = default;
+
     virtual ~Software_Mesh() noexcept {}
 
     Software_Mesh(Software_Mesh const&) = default;
