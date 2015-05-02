@@ -20,9 +20,6 @@ TEST_CASE("Object moving and sharing works as expected", "[struct Object]")
 
   SECTION("Original object owns it's data")
   {
-    obj.mesh.set_owned(new Mesh());
-    obj.material.set_owned(new Material());
-
     SECTION("Keep ownership")
     {
       other = share_object_keep_ownership(obj);
@@ -47,7 +44,7 @@ TEST_CASE("Object moving and sharing works as expected", "[struct Object]")
   }
   SECTION("Original data doesn't own it's data")
   {
-    auto mesh_data = std::make_unique<Mesh>();
+    auto mesh_data = std::make_unique<Software_Mesh>();
     auto mat_data = std::make_unique<Material>();
 
     obj.mesh.set_pointer(mesh_data.get());

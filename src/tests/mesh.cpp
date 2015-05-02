@@ -3,7 +3,11 @@
  * All rights reserved.
  */
 
-#include "../gfx/mesh.h"
+#include "../common/mesh.h"
+#include "../common/mesh_load.h"
+#include "../common/software_mesh.h"
+
+#include <sstream>
 
 #define CATCH_CONFIG_MAIN
 #include "catch/catch.hpp"
@@ -45,7 +49,9 @@ TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
   "f 2 4 3\n"
   "f 1 2 3\n";
 
-  auto mesh = Mesh::from_stream(std::istringstream{data});
-  REQUIRE(mesh.vertices.size() == 4);
-  REQUIRE(mesh.faces.size() == 6);
+  Software_Mesh mesh;
+  std::istringstream stream{data};
+  load_obj(stream, mesh);
+  REQUIRE(mesh.mesh_data().vertices.size() == 4);
+  REQUIRE(mesh.mesh_data().elements.size() == 6);
 }
