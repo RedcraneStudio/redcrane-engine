@@ -14,6 +14,11 @@ namespace game
   {
     virtual ~Software_Mesh() noexcept {}
 
+    Software_Mesh(Software_Mesh const&) = default;
+    Software_Mesh(Software_Mesh&&) noexcept = default;
+    Software_Mesh& operator=(Software_Mesh const&) = default;
+    Software_Mesh& operator=(Software_Mesh&&) noexcept = default;
+
     /*!
      * \brief Sets the child of this mesh.
      *
