@@ -41,10 +41,10 @@ namespace game
     std::vector<Vertex> vertices;
     std::vector<unsigned int> elements;
 
-    Usage_Hint usage_hint;
-    Upload_Hint upload_hint;
+    Usage_Hint usage_hint = Usage_Hint::Draw;
+    Upload_Hint upload_hint = Upload_Hint::Dynamic;
 
-    Primitive_Type primitive;
+    Primitive_Type primitive = Primitive_Type::Triangle;
 
     // This function doesn't strictly need to be in a class member function, it
     // can be a free function, but from a Mesh::set_vertices implementation
