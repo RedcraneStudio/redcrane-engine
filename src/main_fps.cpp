@@ -17,7 +17,6 @@
 #include "gfx/camera.h"
 #include "gfx/object.h"
 #include "gfx/scene_node.h"
-#include "gfx/mesh.h"
 
 #include "fps/camera_controller.h"
 
@@ -158,7 +157,7 @@ int main(int argc, char** argv)
     auto house = gfx::load_object("obj/house.obj", "mat/house.json");
     prepare_object(driver, house);
 
-    auto house_aabb = generate_aabb(*house.mesh);
+    auto house_aabb = generate_aabb(house.mesh->mesh_data());
 
     btBoxShape bt_house_shape(btVector3(house_aabb.width / 2.f,
                                         house_aabb.height / 2.f,
