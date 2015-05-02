@@ -9,12 +9,6 @@
 #include "log.h"
 namespace game
 {
-  struct Face
-  {
-    unsigned int vertex;
-    unsigned int normal;
-    unsigned int tex_coord;
-  };
   bool operator<(Face const& f1, Face const& f2) noexcept
   {
     if(f1.vertex == f2.vertex)
@@ -80,7 +74,10 @@ namespace game
       log_w("File stream from '%' not good", file);
       return;
     }
-
+    load_obj(stream, m);
+  }
+  void load_obj(std::istream& stream, Mesh& m) noexcept
+  {
     // This mesh will store the intermediate vertices, normals, and texture
     // coordinates.
     std::vector<glm::vec3> vertices;
