@@ -4,6 +4,7 @@
  */
 #include "driver.h"
 #include "mesh.h"
+#include "texture.h"
 #include "../../common/software_texture.h"
 #include "../../common/software_mesh.h"
 namespace game
@@ -50,13 +51,16 @@ namespace game
         gl_mesh->draw();
       }
 
-      std::shared_ptr<Texture> Driver::make_texture_repr() noexcept
+      std::unique_ptr<Texture> Driver::make_texture_repr() noexcept
       {
-        return std::make_shared<Software_Texture>();
+        // build n' forget.
+        return std::make_unique<GL_Texture>();
       }
-      void Driver::bind_texture(Texture&, unsigned int) noexcept
+      void Driver::bind_texture(Texture& tex, unsigned int loc) noexcept
       {
-        // Don't do a damn thing just yet.
+        auto gl_tex = dynamic_cast<GL_Texture*>(&tex);
+        if(!gl_tex) return;
+        gl_tex->bind(loc);
       }
 
       void Driver::set_diffuse(Color const& c) noexcept

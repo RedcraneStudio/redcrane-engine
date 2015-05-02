@@ -25,7 +25,7 @@ namespace game
       virtual std::unique_ptr<Mesh> make_mesh_repr() noexcept = 0;
       virtual void render_mesh(Mesh& mesh) noexcept = 0;
 
-      virtual std::shared_ptr<Texture> make_texture_repr() noexcept = 0;
+      virtual std::unique_ptr<Texture> make_texture_repr() noexcept = 0;
       virtual void bind_texture(Texture& tex, unsigned int loc) noexcept = 0;
 
       virtual void set_diffuse(Color const&) noexcept = 0;
