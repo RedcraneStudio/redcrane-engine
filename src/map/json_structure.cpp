@@ -4,7 +4,7 @@
  */
 #include "json_structure.h"
 #include "../common/json.h"
-#include "../gfx/mesh.h"
+#include "../common/mesh.h"
 #include <glm/gtc/matrix_transform.hpp>
 namespace game
 {
@@ -14,7 +14,7 @@ namespace game
 
     obj_ = gfx::load_object(doc["mesh"].GetString(),
                             doc["material"].GetString());
-    aabb_ = generate_aabb(*obj_.mesh);
+    aabb_ = generate_aabb(obj_.mesh->mesh_data());
 
     // Generate a model based on the aabb.
     obj_.model_matrix = glm::translate(glm::mat4(1.0f), -aabb_.min);

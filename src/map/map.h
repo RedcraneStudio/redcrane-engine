@@ -7,7 +7,7 @@
 #include <vector>
 #include "../common/aabb.h"
 #include "../gfx/material.h"
-#include "../gfx/mesh.h"
+#include "../common/mesh.h"
 #include "../gfx/object.h"
 #include "../gfx/idriver.h"
 namespace game
@@ -22,8 +22,15 @@ namespace game
   };
 
   Terrain make_flat_terrain(int alt, int w, int h);
-  Mesh make_terrain_mesh(Terrain const& t, double scale_fac = .01,
-                         double flat_fac = 1) noexcept;
+
+  Mesh_Data make_terrain_mesh(Terrain const& t, double scale_fac = .01,
+                              double flat_fac = 1) noexcept;
+
+  inline void make_terrain_mesh(Mesh& m, Terrain const& t, double s = .01,
+                                double f = 1) noexcept
+  {
+    m.prepare(std::move(make_terrain_mesh(t, s, f)));
+  }
 
   enum class Orient
   {

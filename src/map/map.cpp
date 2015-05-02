@@ -23,24 +23,23 @@ namespace game
 
     return terrain;
   }
-  Mesh make_terrain_mesh(Terrain const& t, double scale_fac,
-                         double flat_fac) noexcept
+  Mesh_Data make_terrain_mesh(Terrain const& t, double scale_fac,
+                              double flat_fac) noexcept
   {
-    std::vector<glm::vec3> quad_vertices;
-    std::vector<glm::vec2> tex_coords;
+    std::array<Vertex, 4> vertices;
     std::vector<unsigned int> faces { 1, 3, 2, 0, 1, 2 };
 
-    quad_vertices.emplace_back(0.0, 0.0, 1.0);
-    quad_vertices.emplace_back(0.0, 0.0, 0.0);
-    quad_vertices.emplace_back(1.0, 0.0, 1.0);
-    quad_vertices.emplace_back(1.0, 0.0, 0.0);
+    vertices[0].position = {0.0, 0.0, 1.0};
+    vertices[1].position = {0.0, 0.0, 0.0};
+    vertices[2].position = {1.0, 0.0, 1.0};
+    vertices[3].position = {1.0, 0.0, 0.0};
 
-    tex_coords.emplace_back(0.0, 1.0);
-    tex_coords.emplace_back(0.0, 0.0);
-    tex_coords.emplace_back(1.0, 1.0);
-    tex_coords.emplace_back(1.0, 0.0);
+    vertices[0].uv = {0.0, 1.0};
+    vertices[1].uv = {0.0, 0.0};
+    vertices[2].uv = {1.0, 1.0};
+    vertices[3].uv = {1.0, 0.0};
 
-    auto mesh = Mesh{};
+    auto mesh = Mesh_Data{};
 
     // Add some amount of rectangles, then adjust their height.
     // Doesn't work when t.h or t.w == 1 or 0
@@ -49,25 +48,26 @@ namespace game
     {
       for(int j = 0; j < t.w - 1; ++j)
       {
-        for(auto vertex : quad_vertices)
+        std::array<Vertex, 4> mod_verts = vertices;
+
+        for(auto& vertex : mod_verts)
         {
-          // Insert the vertex adjusting it based on our current row / col.
-          // Z is based on terrain height value.
-          // Scale it a bit, also.
-          mesh.vertices.emplace_back((vertex.x + j) * flat_fac,
-                                     t.altitude[i][j] * scale_fac,
-                                     (vertex.z + i) * flat_fac);
+          // Scale the width and depth by flat_fac and the height by scale_fac.
+          // We also translate the squares based on their position on the grid.
+          vertex.position.x += j *= flat_fac;
+          vertex.position.y = t.altitude[i][j] * scale_fac;
+          vertex.position.z += i *= flat_fac;
         }
-        for(auto uv : tex_coords)
-        {
-          // No need to adjust texture coordinates, the texture will repeat
-          // along every quad.
-          mesh.tex_coords.push_back(uv);
-        }
+
+        using std::end;
+        // Insert the vertices.
+        mesh.vertices.insert(end(mesh.vertices), begin(mod_verts),
+                             end(mod_verts));
+
         for(auto face : faces)
         {
           // Adjust the face by our current iteration.
-          mesh.faces.push_back(face + quad_vertices.size() * iteration);
+          mesh.elements.push_back(face + vertices.size() * iteration);
         }
 
         ++iteration;
