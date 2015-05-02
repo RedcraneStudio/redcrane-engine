@@ -9,10 +9,21 @@ namespace game
 {
   template <class T> struct Maybe_Owned;
 
+  /*!
+   * Named to be consistent with make_shared and make_unique.
+   */
   template <class T, class... Args>
   Maybe_Owned<T> make_maybe_owned(Args&&... args) noexcept
   {
     return Maybe_Owned<T>(new T(std::forward<Args>(args)...), true);
+  }
+  /*!
+   * Named to contrast and stress the owned nature of the pointer passed in.
+   */
+  template <class T>
+  Maybe_Owned<T> make_owned_maybe(T* ptr) noexcept
+  {
+    return Maybe_Owned<T>(ptr, true);
   }
 
   template <class T>
@@ -29,7 +40,8 @@ namespace game
      * \note If you are using this constructor to initialize a maybe owned
      * of type base with a new pointer to a derived instance, make sure to
      * set the second parameter to true. Better yet use make_maybe_owned
-     * declared above!
+     * declared above! make_owned_maybe can also be used if the pointer
+     * cannot be constructed by the client.
      */
     /* implicit */ Maybe_Owned(T* t = nullptr, bool owned = false) noexcept;
 
