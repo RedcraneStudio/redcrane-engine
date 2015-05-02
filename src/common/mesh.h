@@ -6,6 +6,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <cstring>
+#include "aabb.h"
 namespace game
 {
   enum class Usage_Hint
@@ -111,4 +112,6 @@ namespace game
     // Just default to making a copy.
     prepare(static_cast<Mesh_Data const&>(data));
   }
+
+  AABB generate_aabb(Mesh_Data const& mesh) noexcept;
 }

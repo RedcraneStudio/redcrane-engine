@@ -4,7 +4,7 @@
 
 add_library(commonlib STATIC log.cpp translate.cpp json.cpp animation.cpp
                              texture_load.cpp software_texture.cpp
-                             texture_composite.cpp mesh_load.cpp
+                             texture_composite.cpp mesh.cpp mesh_load.cpp
                              software_mesh.cpp)
 target_link_libraries(commonlib ${LIBUV_LIBRARIES})
 
