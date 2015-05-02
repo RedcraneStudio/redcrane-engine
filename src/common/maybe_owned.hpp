@@ -26,6 +26,7 @@ namespace game
     return Maybe_Owned<T>(ptr, true);
   }
 
+  // TODO Support a custom deleter.
   template <class T>
   struct Maybe_Owned
   {
