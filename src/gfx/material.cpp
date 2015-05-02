@@ -5,7 +5,6 @@
 #include "material.h"
 #include "../common/json.h"
 #include "../common/texture_load.h"
-#include "../common/software_texture.h"
 #include "idriver.h"
 namespace game
 {
@@ -17,6 +16,11 @@ namespace game
       return {(uint8_t) doc["r"].GetInt(),
               (uint8_t) doc["g"].GetInt(),
               (uint8_t) doc["b"].GetInt()};
+    }
+
+    Material::Material() noexcept
+    {
+      texture = make_maybe_owned<Software_Texture>();
     }
 
     Material load_material(std::string const& s) noexcept
@@ -32,17 +36,23 @@ namespace game
       if_has_member(doc, "texture", [&](auto const& val)
       {
         // Eventually make this a composite texture.
-        ret.texture.set_owned(new Software_Texture());
-        load_png(val.GetString(), *ret.texture.get());
+        load_png(val.GetString(), *ret.texture);
       });
 
       return ret;
+    }
+    void prepare_material(IDriver& driver, Material& mat) noexcept
+    {
+      mat.texture->set_impl(driver.make_texture_repr(), true);
     }
     void bind_material(IDriver& driver, Material const& mat) noexcept
     {
       driver.set_diffuse(mat.diffuse_color);
       // TODO ADD **SOMETHING** TO SUPPORT MORE THAN JUST ONE FREAKIN' TEXTURE!
-      if(mat.texture) driver.bind_texture(*mat.texture, 0);
+      if(mat.texture)
+      {
+        driver.bind_texture(mat.texture->get_impl(), 0);
+      }
     }
   }
 }

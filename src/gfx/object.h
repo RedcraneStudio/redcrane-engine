@@ -37,7 +37,7 @@ namespace game
     // not delete the mesh and material.
     Object share_object_move_ownership(Object& obj) noexcept;
 
-    void prepare_object(IDriver& d, Object const& o) noexcept;
+    void prepare_object(IDriver& d, Object& o) noexcept;
 
     void render_object(IDriver& d, Object const&, glm::mat4 model) noexcept;
     void render_object(IDriver& d, Object const&) noexcept;

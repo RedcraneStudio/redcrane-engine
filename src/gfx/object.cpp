@@ -47,10 +47,11 @@ namespace game
       return new_obj;
     }
 
-    void prepare_object(IDriver& d, Object const& o) noexcept
+    void prepare_object(IDriver& d, Object& o) noexcept
     {
       // Make sure to prepare this new mesh if the software mesh is prepared.
       o.mesh->set_impl(std::move(d.make_mesh_repr()), true);
+      prepare_material(d, *o.material);
     }
 
     void render_object(IDriver& d, Object const& o, glm::mat4 m) noexcept
