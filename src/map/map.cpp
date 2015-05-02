@@ -54,9 +54,9 @@ namespace game
         {
           // Scale the width and depth by flat_fac and the height by scale_fac.
           // We also translate the squares based on their position on the grid.
-          vertex.position.x += j *= flat_fac;
+          vertex.position.x = (vertex.position.x + j) * flat_fac;
           vertex.position.y = t.altitude[i][j] * scale_fac;
-          vertex.position.z += i *= flat_fac;
+          vertex.position.z = (vertex.position.z + i) * flat_fac;
         }
 
         using std::end;
