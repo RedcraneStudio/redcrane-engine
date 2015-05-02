@@ -54,4 +54,14 @@ TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
   load_obj(stream, mesh);
   REQUIRE(mesh.mesh_data().vertices.size() == 4);
   REQUIRE(mesh.mesh_data().elements.size() == 6);
+
+  glm::vec3 pt;
+  pt = {-10.0, 10.0, 0.0};
+  REQUIRE(mesh.mesh_data().vertices[0].position == pt);
+  pt = {-10.0, -10.0, 0.0};
+  REQUIRE(mesh.mesh_data().vertices[1].position == pt);
+  pt = {10.0, 10.0, 0.0};
+  REQUIRE(mesh.mesh_data().vertices[2].position == pt);
+  pt = {10.0, -10.0, 0.0};
+  REQUIRE(mesh.mesh_data().vertices[3].position == pt);
 }
