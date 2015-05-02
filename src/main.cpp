@@ -101,9 +101,7 @@ int main(int argc, char** argv)
 
   terrain_obj.material->diffuse_color = colors::white;
 
-  // TODO THIS IS TOTLALY TEMPORARY
-  terrain_obj.material->texture.set_owned(new Software_Texture());
-  load_png("tex/grass.png", *terrain_obj.material->texture.get());
+  load_png("tex/grass.png", *terrain_obj.material->texture);
 
   terrain_obj.model_matrix = glm::translate(glm::mat4(1.0),
                                             glm::vec3(-12.5, 0.0, -12.5));
@@ -112,7 +110,12 @@ int main(int argc, char** argv)
 
   // Load our house structure
   auto house_struct = Json_Structure{"structure/house.json"};
-  prepare_object(driver, house_struct.make_obj());
+
+  // This is code smell, right here. The fact that before, we were preparing
+  // a temporary but it still worked because of the implementation of
+  // Json_Structure and the object sharing mechanism.
+  auto house_obj = house_struct.make_obj();
+  prepare_object(driver, house_obj);
 
   std::vector<Structure_Instance> house_instances;
   Structure_Instance moveable_instance{house_struct, Orient::N};
