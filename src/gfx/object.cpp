@@ -3,16 +3,21 @@
  * All rights reserved.
  */
 #include "object.h"
+#include "../common/mesh_load.h"
 namespace game
 {
   namespace gfx
   {
-    Object::Object() noexcept : model_matrix(1.0) {}
+    Object::Object() noexcept : model_matrix(1.0)
+    {
+      mesh = make_maybe_owned<Software_Mesh>();
+      material = make_maybe_owned<Material>();
+    }
     Object load_object(std::string obj, std::string mat) noexcept
     {
       auto ret = Object{};
-      ret.mesh = Maybe_Owned<Mesh>(Mesh::from_file(obj));
-      ret.material = Maybe_Owned<Material>(load_material(mat));
+      load_obj(obj, *ret.mesh);
+      *ret.material = load_material(mat);
       return ret;
     }
 
@@ -44,18 +49,15 @@ namespace game
 
     void prepare_object(IDriver& d, Object const& o) noexcept
     {
-      if(o.mesh) d.prepare_mesh(*o.mesh);
-    }
-    void remove_object(IDriver& d, Object const& o) noexcept
-    {
-      if(o.mesh) d.remove_mesh(*o.mesh);
+      // Make sure to prepare this new mesh if the software mesh is prepared.
+      o.mesh->set_impl(std::move(d.make_mesh_repr()), true);
     }
 
     void render_object(IDriver& d, Object const& o, glm::mat4 m) noexcept
     {
-      if(o.material) bind_material(d, *o.material);
+      bind_material(d, *o.material);
       d.set_model(m);
-      if(o.mesh) d.render_mesh(*o.mesh);
+      d.render_mesh(o.mesh->get_impl());
     }
     void render_object(IDriver& d, Object const& o) noexcept
     {

@@ -6,6 +6,7 @@
 #include "prep_mesh.h"
 #include "prep_tex.h"
 #include "../../common/software_texture.h"
+#include "../../common/software_mesh.h"
 namespace game
 {
   namespace gfx
@@ -36,29 +37,13 @@ namespace game
         }
         current_shader_->use();
       }
-      void Driver::prepare_mesh(Mesh& mesh) noexcept
+      std::unique_ptr<Mesh> Driver::make_mesh_repr() noexcept
       {
-        if(meshs_.find(&mesh) == meshs_.end())
-        {
-          meshs_.emplace(&mesh, Prep_Mesh(mesh));
-        }
+        // This is obviously temporary.
+        return std::make_unique<Software_Mesh>();
       }
-      void Driver::remove_mesh(Mesh& mesh) noexcept
+      void Driver::render_mesh(Mesh& mesh) noexcept
       {
-        auto mesh_find = meshs_.find(&mesh);
-        if(mesh_find != meshs_.end())
-        {
-          meshs_.erase(mesh_find);
-        }
-      }
-      void Driver::render_mesh(Mesh const& mesh) noexcept
-      {
-        auto mesh_find = meshs_.find(&mesh);
-        if(mesh_find != meshs_.end())
-        {
-          mesh_find->second.bind();
-          mesh_find->second.draw();
-        }
       }
 
       std::shared_ptr<Texture> Driver::make_texture_repr() noexcept

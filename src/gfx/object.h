@@ -6,7 +6,7 @@
 #include <memory>
 #include <boost/optional.hpp>
 #include "../common/maybe_owned.hpp"
-#include "mesh.h"
+#include "../common/software_mesh.h"
 #include "material.h"
 #include "idriver.h"
 namespace game
@@ -17,7 +17,7 @@ namespace game
     {
       Object() noexcept;
 
-      Maybe_Owned<Mesh> mesh;
+      Maybe_Owned<Software_Mesh> mesh;
       Maybe_Owned<Material> material;
 
       // Used when a model isn't provided.
@@ -38,7 +38,6 @@ namespace game
     Object share_object_move_ownership(Object& obj) noexcept;
 
     void prepare_object(IDriver& d, Object const& o) noexcept;
-    void remove_object(IDriver& d, Object const& o) noexcept;
 
     void render_object(IDriver& d, Object const&, glm::mat4 model) noexcept;
     void render_object(IDriver& d, Object const&) noexcept;

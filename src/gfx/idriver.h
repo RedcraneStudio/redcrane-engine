@@ -6,7 +6,7 @@
 #include <memory>
 #include "../common/color.h"
 #include "../common/texture.h"
-#include "mesh.h"
+#include "../common/mesh.h"
 namespace game
 {
   namespace gfx
@@ -22,9 +22,8 @@ namespace game
 
       virtual void set_shader(Shader shade) noexcept = 0;
 
-      virtual void prepare_mesh(Mesh& mesh) noexcept = 0;
-      virtual void remove_mesh(Mesh& mesh) noexcept = 0;
-      virtual void render_mesh(Mesh const& mesh) noexcept = 0;
+      virtual std::unique_ptr<Mesh> make_mesh_repr() noexcept = 0;
+      virtual void render_mesh(Mesh& mesh) noexcept = 0;
 
       virtual std::shared_ptr<Texture> make_texture_repr() noexcept = 0;
       virtual void bind_texture(Texture& tex, unsigned int loc) noexcept = 0;

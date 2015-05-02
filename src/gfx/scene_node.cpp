@@ -5,6 +5,7 @@
 #include "scene_node.h"
 #include "../common/json.h"
 #include "../common/log.h"
+#include "../common/mesh_load.h"
 #include <glm/gtc/matrix_transform.hpp>
 namespace game
 {
@@ -28,14 +29,12 @@ namespace game
       // Load the mesh with a filename, then prepare it with the driver.
       if_has_member(doc, "mesh", [&](auto const& val)
       {
-        auto mesh = Mesh::from_file(val.GetString());
-        node.obj.mesh = Maybe_Owned<Mesh>(std::move(mesh));
+        load_obj(val.GetString(), *node.obj.mesh);
       });
       // Load some basic properties of the material.
       if_has_member(doc, "material", [&](auto const& val)
       {
-        auto mat = gfx::load_material(val.GetString());
-        node.obj.material = Maybe_Owned<gfx::Material>(std::move(mat));
+        *node.obj.material = std::move(gfx::load_material(val.GetString()));
       });
       // Load an initial translation if it exists.
       if_has_member(doc, "translation", [&](auto const& val)
@@ -60,14 +59,6 @@ namespace game
         prepare_scene(d, *child);
       }
     }
-    void remove_scene(gfx::IDriver& d, Scene_Node& sn) noexcept
-    {
-      remove_object(d, sn.obj);
-      for(auto& child : sn.children)
-      {
-        remove_scene(d, *child);
-      }
-    }
 
     void render_scene_with_model(gfx::IDriver& d, Scene_Node const& scene,
                                  glm::mat4 const& par_mod) noexcept
@@ -80,7 +71,7 @@ namespace game
 
       for(auto const& child : scene.children)
       {
-        render_scene_with_model(d, scene, this_world);
+        render_scene_with_model(d, *child, this_world);
       }
     }
     void render_scene(gfx::IDriver& d, Scene_Node const& scene) noexcept
