@@ -3,8 +3,7 @@
  * All rights reserved.
  */
 #include "driver.h"
-#include "prep_mesh.h"
-#include "prep_tex.h"
+#include "mesh.h"
 #include "../../common/software_texture.h"
 #include "../../common/software_mesh.h"
 namespace game
@@ -39,11 +38,16 @@ namespace game
       }
       std::unique_ptr<Mesh> Driver::make_mesh_repr() noexcept
       {
-        // This is obviously temporary.
-        return std::make_unique<Software_Mesh>();
+        // Make it and forget about it, we'll just use a dynamic cast for
+        // simplicity.
+        return std::make_unique<GL_Mesh>();
       }
       void Driver::render_mesh(Mesh& mesh) noexcept
       {
+        auto gl_mesh = dynamic_cast<GL_Mesh*>(&mesh);
+        if(!gl_mesh) return;
+        gl_mesh->bind();
+        gl_mesh->draw();
       }
 
       std::shared_ptr<Texture> Driver::make_texture_repr() noexcept

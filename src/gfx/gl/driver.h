@@ -5,8 +5,6 @@
 #pragma once
 #include <unordered_map>
 #include "../idriver.h"
-#include "prep_mesh.h"
-#include "prep_tex.h"
 #include "ishader.h"
 #include "hud_shader.h"
 #include "standard_shader.h"
@@ -46,9 +44,6 @@ namespace game
     void clear_color() noexcept override;
     void clear_depth() noexcept override;
   private:
-    //std::unordered_map<Mesh const*, Prep_Mesh> meshs_;
-    //std::unordered_map<Texture const*, Prep_Tex> textures_;
-
     IShader* current_shader_;
 
     Standard_Shader standard_shader_;

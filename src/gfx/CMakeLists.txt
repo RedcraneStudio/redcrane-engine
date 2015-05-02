@@ -3,7 +3,7 @@
 # All rights reserved.
 
 set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/standard_shader.cpp gl/program.cpp
-                           gl/hud_shader.cpp)
+                           gl/hud_shader.cpp gl/mesh.cpp)
 add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES}
                           material.cpp object.cpp camera.cpp scene_node.cpp)
 
