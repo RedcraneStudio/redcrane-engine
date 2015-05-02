@@ -7,12 +7,12 @@ namespace game
 {
   void Software_Mesh::set_impl(Maybe_Owned<Mesh> m, bool should_prep) noexcept
   {
-    // Bail out early, if necessary.
-    if(!m) return;
+    // We are allowing a nullptr to be set to our child, since that would
+    // probably indicate the client is looking to destruct the child.
 
     // If we were prepared with a mesh, we should prepare this child but only
     // if the user specifially told us to do that.
-    if(prepared_ && should_prep)
+    if(prepared_ && should_prep && m)
     {
       copy_to(*m);
     }
