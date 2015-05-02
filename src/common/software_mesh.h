@@ -17,8 +17,9 @@ namespace game
     /*!
      * \brief Sets the child of this mesh.
      *
-     * \params should_prepare if true, this function will copy it's mesh data
-     * to the given child if it has been prepared itself. The child will be
+     * \param m This function is a no-op if m evaluates to false (is nullptr).
+     * \param should_prepare if true, this function will copy it's mesh data to
+     * the given child if it has been prepared itself. The child will be
      * prepared after all subsequent calls to this structures prepare method
      * anyway.
      */
