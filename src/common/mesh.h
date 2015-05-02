@@ -5,6 +5,7 @@
 #pragma once
 #include <vector>
 #include <glm/glm.hpp>
+#include <cstring>
 namespace game
 {
   enum class Usage_Hint
@@ -36,7 +37,21 @@ namespace game
     Upload_Hint upload_hint;
 
     Primitive_Type primitive;
+
+    // This function doesn't strictly need to be in a class member function, it
+    // can be a free function, but from a Mesh::set_vertices implementation
+    // the free function would be impossible to call without a namespace
+    // specifier (otherwise it would be recursive).
+    inline void set_vertices(unsigned int b, unsigned int l,
+                             Vertex const* v) noexcept;
   };
+
+  // A reference implementation of Mesh::set_vertices, basically.
+  inline void Mesh_Data::set_vertices(unsigned int b, unsigned int l,
+                                      Vertex const* v) noexcept
+  {
+    std::memcpy(&vertices[b], v, l);
+  }
 
   struct Mesh
   {
