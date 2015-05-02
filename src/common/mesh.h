@@ -30,6 +30,12 @@ namespace game
 
   struct Mesh_Data
   {
+    // Everything is fair game.
+    Mesh_Data(Mesh_Data&&) noexcept = default;
+    Mesh_Data(Mesh_Data const&) = default;
+    Mesh_Data& operator=(Mesh_Data const&) = default;
+    Mesh_Data& operator=(Mesh_Data&&) noexcept = default;
+
     std::vector<Vertex> vertices;
     std::vector<unsigned int> elements;
 
