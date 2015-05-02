@@ -6,6 +6,9 @@
 #include "mesh.h"
 namespace game
 {
+  /*!
+   * \brief A simple mesh impl that wraps a mesh_data.
+   */
   struct Software_Mesh : public Mesh
   {
     virtual ~Software_Mesh() noexcept {}
