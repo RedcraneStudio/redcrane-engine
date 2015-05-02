@@ -5,16 +5,19 @@
 #include "software_mesh.h"
 namespace game
 {
-  void Software_Mesh::set_impl(Mesh& m, bool should_prepare) noexcept
+  void Software_Mesh::set_impl(Maybe_Owned<Mesh> m, bool should_prep) noexcept
   {
+    // Bail out early, if necessary.
+    if(!m) return;
+
     // If we were prepared with a mesh, we should prepare this child but only
     // if the user specifially told us to do that.
-    if(prepared_ && should_prepare)
+    if(prepared_ && should_prep)
     {
-      copy_to(m);
+      copy_to(*m);
     }
 
-    impl_ = &m;
+    impl_ = std::move(m);
   }
   void Software_Mesh::prepare(Mesh_Data const& data) noexcept
   {

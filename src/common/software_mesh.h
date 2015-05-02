@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include "maybe_owned.hpp"
 #include "mesh.h"
 namespace game
 {
@@ -21,7 +22,7 @@ namespace game
      * prepared after all subsequent calls to this structures prepare method
      * anyway.
      */
-    void set_impl(Mesh& m, bool should_prepare = false) noexcept;
+    void set_impl(Maybe_Owned<Mesh> m, bool should_prepare = false) noexcept;
     Mesh& get_impl() noexcept { return *impl_; }
     Mesh const& get_impl() const noexcept { return *impl_; }
 
@@ -43,7 +44,7 @@ namespace game
      */
     inline void copy_to(Mesh& m) const noexcept { m.prepare(mesh_data_); }
   private:
-    Mesh* impl_;
+    Maybe_Owned<Mesh> impl_;
     bool prepared_ = false;
     Mesh_Data mesh_data_;
   };
