@@ -82,6 +82,8 @@ namespace game
 
     bool is_owned() const noexcept;
     bool is_pointer() const noexcept;
+
+    void release() noexcept;
   private:
     bool owned_ = false;
     T* ptr_ = nullptr;
@@ -107,7 +109,7 @@ namespace game
   template <class T>
   Maybe_Owned<T>::~Maybe_Owned() noexcept
   {
-    if(owned_) delete ptr_;
+    release();
   }
 
   template <class T>
@@ -126,6 +128,8 @@ namespace game
   template <class R>
   Maybe_Owned<T>& Maybe_Owned<T>::operator=(std::unique_ptr<R> ptr) noexcept
   {
+    release();
+
     owned_ = true;
     ptr_ = ptr.release();
 
@@ -136,6 +140,9 @@ namespace game
   template <class R>
   Maybe_Owned<T>& Maybe_Owned<T>::operator=(Maybe_Owned<R>&& mo1) noexcept
   {
+    // Release ourselves, possibly unallocating our own pointer (if we own it).
+    release();
+
     owned_ = mo1.owned_;
     ptr_ = mo1.ptr_;
 
@@ -148,26 +155,22 @@ namespace game
   template <class T>
   void Maybe_Owned<T>::set_owned(T&& t) noexcept
   {
-    owned_ = true;
-    ptr_ = new T(std::move(t));
+    set_pointer(new T(std::move(t)), true);
   }
   template <class T>
   void Maybe_Owned<T>::set_owned(T const& t) noexcept
   {
-    owned_ = true;
-    ptr_ = new T(t);
+    set_pointer(new T(t), true);
   }
   template <class T>
   void Maybe_Owned<T>::set_owned(T* t) noexcept
   {
-    owned_ = true;
-    ptr_ = t;
+    set_pointer(t, true);
   }
   template <class T>
   void Maybe_Owned<T>::set_pointer(T* t, bool o) noexcept
   {
-    owned_ = o;
-    ptr_ = t;
+    *this = Maybe_Owned<T>(t, o);
   }
   template <class T>
   template <class R>
@@ -180,8 +183,7 @@ namespace game
   template <class R, class... Args>
   void Maybe_Owned<T>::emplace_owned(Args&&... args) noexcept
   {
-    owned_ = true;
-    ptr_ = new R(std::forward<Args>(args)...);
+    *this = make_maybe_owned<T>(std::forward<Args>(args)...);
   }
 
   template <class T>
@@ -194,12 +196,7 @@ namespace game
   T&& Maybe_Owned<T>::unwrap() noexcept
   {
     T&& old_t = std::move(*ptr_);
-    if(owned_)
-    {
-      delete ptr_;
-    }
-    ptr_ = nullptr;
-    owned_ = false;
+    release();
     return std::move(old_t);
   }
 
@@ -229,5 +226,15 @@ namespace game
   Maybe_Owned<T>::operator bool() const noexcept
   {
     return get();
+  }
+  template <class T>
+  void Maybe_Owned<T>::release() noexcept
+  {
+    if(owned_)
+    {
+      delete ptr_;
+    }
+    ptr_ = nullptr;
+    owned_ = false;
   }
 }
