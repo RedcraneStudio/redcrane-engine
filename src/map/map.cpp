@@ -74,6 +74,12 @@ namespace game
       }
     }
 
+    // Change the mesh defaults, of course the user can just switch these as
+    // soon as they get ahold of the mesh.
+    mesh.usage_hint = Usage_Hint::Draw;
+    mesh.upload_hint = Upload_Hint::Static;
+    mesh.primitive = Primitive_Type::Triangle;
+
     return mesh;
   }
   Structure_Instance::
