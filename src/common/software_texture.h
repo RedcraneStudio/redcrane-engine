@@ -9,6 +9,7 @@ namespace game
 {
   struct Software_Texture : public Texture
   {
+    Software_Texture() noexcept;
     virtual ~Software_Texture() noexcept;
 
     void set_impl(Maybe_Owned<Texture> t, bool should_blit = false) noexcept;

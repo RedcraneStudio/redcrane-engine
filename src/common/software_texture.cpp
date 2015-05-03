@@ -5,6 +5,10 @@
 #include "software_texture.h"
 namespace game
 {
+  Software_Texture::Software_Texture() noexcept
+  {
+    data_ = nullptr;
+  }
   Software_Texture::~Software_Texture() noexcept
   {
     delete[] data_;
