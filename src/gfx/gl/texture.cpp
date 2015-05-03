@@ -35,8 +35,7 @@ namespace game { namespace gfx { namespace gl
 
     // Go from the end to the beginning adding each byte to the end of the
     // vector.
-    auto max = vol.width * vol.height * 4 - 1;
-    for(int i = 0; i < max; ++i)
+    for(int i = 0; i < vol.width * vol.height * 4; ++i)
     {
       Color::c_t value;
 
@@ -48,7 +47,7 @@ namespace game { namespace gfx { namespace gl
       int y = pos / vol.width;
 
       // Flip vertically 'cause opengl.
-      y = vol.height - y;
+      y = vol.height - y - 1;
 
       // Now recalculate our position **in our colors array** to get that
       // coordinate calculated above.
