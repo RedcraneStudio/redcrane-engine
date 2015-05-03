@@ -20,8 +20,7 @@ add_subdirectory(fps)
 add_subdirectory(ui)
 
 add_executable(strategy main.cpp map/map.cpp map/json_structure.cpp)
-target_link_libraries(strategy gfxlib)
-target_link_libraries(strategy commonlib)
+target_link_libraries(strategy gfxlib commonlib uilib)
 
 find_package(Bullet REQUIRED)
 

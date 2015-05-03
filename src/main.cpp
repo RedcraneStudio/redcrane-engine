@@ -14,11 +14,14 @@
 #include "gfx/camera.h"
 #include "gfx/object.h"
 #include "gfx/scene_node.h"
+#include "gfx/idriver_ui_adapter.h"
 
 #include "common/software_texture.h"
 #include "common/texture_load.h"
 #include "common/software_mesh.h"
 #include "common/mesh_load.h"
+
+#include "ui/load.h"
 
 #include "map/map.h"
 #include "map/json_structure.h"
@@ -134,6 +137,20 @@ int main(int argc, char** argv)
   // either with global variables or like a bound struct or something.
   bool has_clicked_down = false;
 
+  // Load our ui
+  gfx::IDriver_UI_Adapter ui_adapter{driver};
+
+  struct Dummy_Font : public ui::IFont_Renderer
+  {
+    void text(std::string const&, int size, Texture& tb) noexcept override { }
+    Vec<int> query_size(std::string const&, int size) noexcept override
+    { return Vec<int>{125, 25}; }
+  } stupid_font;
+
+  auto ui_load_params = ui::Load_Params{stupid_font, ui_adapter};
+  auto hud = ui::load("ui/hud.json", ui_load_params);
+
+  hud->layout(driver.window_extents());
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
@@ -181,6 +198,10 @@ int main(int argc, char** argv)
       render_object(driver, instance.obj);
     }
 
+    {
+      ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
+      hud->render(ui_adapter);
+    }
     glfwSwapBuffers(window);
 
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&

@@ -1,0 +1,34 @@
+{
+  "type":"side_layout",
+  "children":
+  [
+    {
+      "id": "action",
+      "type": "label",
+      "text": "Doing something cool",
+      "size": 32,
+      "color": "black",
+      "this_background": "white",
+      "this_border": "black",
+
+      "autohide": 0.0,
+
+      "alignment": { "vertical": "top", "horizontal": "right" },
+      "padding": { "top": 5, "right": 5 }
+    },
+    {
+      "id": "do_something",
+      "type": "label",
+      "text": "PRESS HERE TO DO SOMETHING",
+      "size": 32,
+      "color": "black",
+      "this_background": "white",
+      "this_border": "black",
+
+      "autohide": 0.75,
+
+      "alignment": { "vertical": "bottom", "horizontal": "right" },
+      "padding": { "right": 5, "bottom": 5 }
+    }
+  ]
+}
