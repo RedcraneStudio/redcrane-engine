@@ -29,10 +29,12 @@ namespace game
           case Shader::Standard:
           {
             current_shader_ = &standard_shader_;
+            break;
           }
           case Shader::Hud:
           {
             current_shader_ = &hud_shader_;
+            break;
           }
         }
         current_shader_->use();
