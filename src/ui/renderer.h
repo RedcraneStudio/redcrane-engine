@@ -40,8 +40,8 @@ namespace game { namespace ui
 
   struct Draw_Scoped_Lock
   {
-    Draw_Scoped_Lock(Renderer& r) noexcept;
-    ~Draw_Scoped_Lock() noexcept;
+    inline Draw_Scoped_Lock(Renderer& r) noexcept;
+    inline ~Draw_Scoped_Lock() noexcept;
     Renderer& renderer;
   };
 
