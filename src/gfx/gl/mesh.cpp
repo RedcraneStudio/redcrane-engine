@@ -190,6 +190,7 @@ namespace game { namespace gfx { namespace gl
     glBindBuffer(GL_ARRAY_BUFFER, buf);
     glBufferData(GL_ARRAY_BUFFER, size, NULL, usage);
     glVertexAttribPointer(attrib_index, cs, type, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(attrib_index);
   }
   void GL_Mesh::allocate_array_buffer_(GLuint buf, GLuint attrib_index,
                                        GLint cs, std::size_t size, GLenum type,
