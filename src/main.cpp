@@ -22,6 +22,7 @@
 #include "common/mesh_load.h"
 
 #include "ui/load.h"
+#include "ui/freetype_renderer.h"
 
 #include "map/map.h"
 #include "map/json_structure.h"
@@ -139,15 +140,9 @@ int main(int argc, char** argv)
 
   // Load our ui
   gfx::IDriver_UI_Adapter ui_adapter{driver};
+  ui::Freetype_Renderer freetype_font;
 
-  struct Dummy_Font : public ui::IFont_Renderer
-  {
-    void text(std::string const&, int size, Texture& tb) noexcept override { }
-    Vec<int> query_size(std::string const&, int size) noexcept override
-    { return Vec<int>{125, 25}; }
-  } stupid_font;
-
-  auto ui_load_params = ui::Load_Params{stupid_font, ui_adapter};
+  auto ui_load_params = ui::Load_Params{freetype_font, ui_adapter};
   auto hud = ui::load("ui/hud.json", ui_load_params);
 
   hud->layout(driver.window_extents());
