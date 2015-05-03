@@ -52,7 +52,8 @@ flags = [
 '-I',
 'gl/include',
 '-I',
-'/usr/include/bullet'
+'/usr/include/bullet',
+'-I', '/usr/include/freetype2'
 ]
 
 
