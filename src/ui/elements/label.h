@@ -129,6 +129,6 @@ namespace game { namespace ui
     Vec<int> get_minimum_extents_() const noexcept override;
     Volume<int> layout_() override;
     void render_(Renderer&) const noexcept override;
-    void activate_regions_(Controller&) const noexcept override;
+    void activate_regions_(Controller&) const noexcept override {}
   };
 } }
