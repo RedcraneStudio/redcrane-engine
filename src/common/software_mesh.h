@@ -33,8 +33,8 @@ namespace game
      * anyway.
      */
     void set_impl(Maybe_Owned<Mesh> m, bool should_prepare = false) noexcept;
-    Mesh& get_impl() noexcept { return *impl_; }
-    Mesh const& get_impl() const noexcept { return *impl_; }
+    Mesh* get_impl() noexcept { return impl_.get(); }
+    Mesh const* get_impl() const noexcept { return impl_.get(); }
 
     void allocate(unsigned int max_verts,
                   unsigned int max_elemnt_indices, Usage_Hint, Upload_Hint,

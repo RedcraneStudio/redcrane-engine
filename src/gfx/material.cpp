@@ -49,9 +49,9 @@ namespace game
     {
       driver.set_diffuse(mat.diffuse_color);
       // TODO ADD **SOMETHING** TO SUPPORT MORE THAN JUST ONE FREAKIN' TEXTURE!
-      if(mat.texture)
+      if(mat.texture->get_impl())
       {
-        driver.bind_texture(mat.texture->get_impl(), 0);
+        driver.bind_texture(*mat.texture->get_impl(), 0);
       }
     }
   }

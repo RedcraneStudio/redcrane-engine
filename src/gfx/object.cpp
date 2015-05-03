@@ -58,7 +58,7 @@ namespace game
     {
       bind_material(d, *o.material);
       d.set_model(m);
-      d.render_mesh(o.mesh->get_impl());
+      if(o.mesh->get_impl()) d.render_mesh(*o.mesh->get_impl());
     }
     void render_object(IDriver& d, Object const& o) noexcept
     {

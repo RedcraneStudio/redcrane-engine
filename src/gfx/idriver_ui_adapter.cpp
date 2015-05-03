@@ -61,14 +61,14 @@ namespace game { namespace gfx
     d_->bind_texture(*white_texture_, 0);
 
     set_rect(lines_rect_, vol);
-    d_->render_mesh(lines_rect_.get_impl());
+    d_->render_mesh(*lines_rect_.get_impl());
   }
   void IDriver_UI_Adapter::fill_rect(Volume<int> const& vol) noexcept
   {
     d_->bind_texture(*white_texture_, 0);
 
     set_rect(filled_rect_, vol);
-    d_->render_mesh(filled_rect_.get_impl());
+    d_->render_mesh(*filled_rect_.get_impl());
   }
 
   std::shared_ptr<Texture> IDriver_UI_Adapter::make_texture() noexcept
@@ -87,7 +87,7 @@ namespace game { namespace gfx
 
     // Render the rectangle.
     set_rect(filled_rect_, dst);
-    d_->render_mesh(filled_rect_.get_impl());
+    d_->render_mesh(*filled_rect_.get_impl());
 
     // Reset the diffuse color
     d_->set_diffuse(dif_);
