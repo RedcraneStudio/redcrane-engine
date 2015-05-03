@@ -71,9 +71,9 @@ namespace game { namespace gfx
     d_->render_mesh(*filled_rect_.get_impl());
   }
 
-  std::shared_ptr<Texture> IDriver_UI_Adapter::make_texture() noexcept
+  std::unique_ptr<Texture> IDriver_UI_Adapter::make_texture() noexcept
   {
-    return std::shared_ptr<Texture>(d_->make_texture_repr().release());
+    return d_->make_texture_repr();
   }
 
   void IDriver_UI_Adapter::draw_texture(Volume<int> const& dst, Texture& tex,

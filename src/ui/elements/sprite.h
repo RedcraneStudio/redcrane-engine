@@ -20,7 +20,9 @@ namespace game { namespace ui
     { return src_; }
 
     inline void set_src_rect(Volume<int> vol) noexcept { src_vol_ = vol; }
-    Volume<int> get_src_rect() const noexcept;
+    Volume<int> get_src_rect() const noexcept
+    { return src_vol_ ? src_vol_.value() : Volume<int>{}; }
+
     inline void remove_src_rect() noexcept { src_vol_ = boost::none; }
 
   private:
@@ -31,8 +33,6 @@ namespace game { namespace ui
 
     std::shared_ptr<Software_Texture> src_;
     boost::optional<Volume<int> > src_vol_;
-
-    mutable std::shared_ptr<Texture> dst_tex_;
 
     double scale_ = 1.0;
   };

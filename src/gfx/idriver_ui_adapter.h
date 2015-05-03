@@ -19,7 +19,7 @@ namespace game { namespace gfx
     void draw_rect(Volume<int> const&) noexcept override;
     void fill_rect(Volume<int> const&) noexcept override;
 
-    std::shared_ptr<Texture> make_texture() noexcept override;
+    std::unique_ptr<Texture> make_texture() noexcept override;
 
     void draw_texture(Volume<int> const& dst, Texture& tex,
                       Volume<int> const& src) noexcept override;

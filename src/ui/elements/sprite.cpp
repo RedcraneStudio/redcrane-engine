@@ -7,13 +7,6 @@
 #include "../../common/center.hpp"
 namespace game { namespace ui
 {
-  Volume<int> Sprite::get_src_rect() const noexcept
-  {
-    auto vol = Volume<int>{};
-    if(src_vol_) vol = src_vol_.value();
-    return vol;
-  }
-
   Vec<int> Sprite::get_minimum_extents_() const noexcept
   {
     auto extents = src_->allocated_extents();
@@ -27,22 +20,22 @@ namespace game { namespace ui
   }
   void Sprite::render_(Renderer& r) const noexcept
   {
-    if(!dst_tex_)
-    {
-      // Make a new texture.
-      dst_tex_ = r.make_texture();
+    if(!src_) return;
 
-      // Blit our shit to it
-      if(src_)
-      {
-        src_->allocate_to(*dst_tex_.get());
-        src_->blit_to(*dst_tex_.get());
-      }
+    // This prohibits changing renderers mid-lifetime. The correct way is to
+    // cache it depending on the renderer pointer. So like, when a new pointer
+    // is passed this function just chucks it's driver-specific texture and
+    // rebuilds it.
+    if(!src_->get_impl())
+    {
+      // Make a new texture and blit our shit to it.
+      src_->set_impl(r.make_texture(), true);
     }
 
     // Center the image in using our image scale.
     auto dst = center_volume(this_volume(), get_minimum_extents());
     // Draw that texture.
-    r.draw_texture(dst, *dst_tex_);
+    if(src_vol_) r.draw_texture(dst, *src_->get_impl(), src_vol_.get());
+    else r.draw_texture(dst, *src_->get_impl());
   }
 } }
