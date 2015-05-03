@@ -8,8 +8,7 @@ namespace game { namespace gfx { namespace gl
 {
   GL_Mesh::~GL_Mesh() noexcept
   {
-    glDeleteBuffers(bufs.size(), &bufs[0]);
-    glDeleteVertexArrays(1, &vao);
+    unallocate_();
   }
   namespace
   {
@@ -66,51 +65,70 @@ namespace game { namespace gfx { namespace gl
       });
       return ret;
     }
-
-    template <class T>
-    void init_array_buffer(GLuint attrib,
-                           std::vector<T> const& buf,
-                           GLuint& buf_value, GLenum usage,
-                           GLint size, GLenum type,
-                           bool normalized) noexcept
-    {
-      glBindBuffer(GL_ARRAY_BUFFER, buf_value);
-      glBufferData(GL_ARRAY_BUFFER, buf.size() * sizeof(T),
-                   &buf[0], usage);
-      glVertexAttribPointer(attrib, size, type, normalized, 0, 0);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glEnableVertexAttribArray(attrib);
-    }
   }
-  void GL_Mesh::prepare(Mesh_Data const& data) noexcept
+  void GL_Mesh::allocate(unsigned int max_verts,
+                         unsigned int max_elemnt_indices, Usage_Hint uh,
+                         Upload_Hint up, Primitive_Type) noexcept
   {
-    // For write now, have a vao per object.
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    // Clean the slate.
+    unallocate_();
 
-    glGenBuffers(bufs.size(), &bufs[0]);
+    allocate_vao_();
+    allocate_buffers_();
 
-    auto positions = transform_vertex(data, &Vertex::position);
-    init_array_buffer(0, positions, bufs[0],
-                      get_gl_hint(data.upload_hint, data.usage_hint),
-                      3, GL_FLOAT, GL_FALSE);
-    auto normals = transform_vertex(data, &Vertex::normal);
-    init_array_buffer(1, normals, bufs[1],
-                      get_gl_hint(data.upload_hint, data.usage_hint),
-                      3, GL_FLOAT, GL_FALSE);
-    auto uvs = transform_vertex(data, &Vertex::uv);
-    init_array_buffer(2, uvs, bufs[2],
-                      get_gl_hint(data.upload_hint, data.usage_hint),
-                      2, GL_FLOAT, GL_FALSE);
+    allocate_array_buffer_(bufs[0], 0, 3, max_verts * sizeof(glm::vec3),
+                           GL_FLOAT, get_gl_hint(up, uh));
+    allocate_array_buffer_(bufs[1], 1, 3, max_verts * sizeof(glm::vec3),
+                           GL_FLOAT, get_gl_hint(up, uh));
+    allocate_array_buffer_(bufs[2], 2, 2, max_verts * sizeof(glm::vec2),
+                           GL_FLOAT, get_gl_hint(up, uh));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufs[3]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 data.elements.size() * sizeof(unsigned int),
-                 &data.elements[0],
-                 get_gl_hint(data.upload_hint, data.usage_hint));
-    num_faces = data.elements.size();
-    primitive = get_gl_primitive(data.primitive);
+                 max_elemnt_indices * sizeof(unsigned int), NULL,
+                 get_gl_hint(up, uh));
   }
+  void GL_Mesh::allocate_from(Mesh_Data const& md) noexcept
+  {
+    unallocate_();
+
+    allocate_vao_();
+    allocate_buffers_();
+
+    // This is adapted from set_vertices.
+    // Copy the vertex data out.
+    std::vector<glm::vec3> poss;
+    std::vector<glm::vec3> norms;
+    std::vector<glm::vec2> uvs;
+    for(auto iter = md.vertices.begin(); iter != md.vertices.end(); ++iter)
+    {
+      poss.push_back(iter->position);
+      norms.push_back(iter->normal);
+      uvs.push_back(iter->uv);
+    }
+
+    allocate_array_buffer_(bufs[0], 0, 3,
+                           md.vertices.size() * sizeof(glm::vec3), GL_FLOAT,
+                           get_gl_hint(md.upload_hint, md.usage_hint),
+                           &poss[0]);
+    allocate_array_buffer_(bufs[1], 1, 3,
+                           md.vertices.size() * sizeof(glm::vec3), GL_FLOAT,
+                           get_gl_hint(md.upload_hint, md.usage_hint),
+                           &norms[0]);
+    allocate_array_buffer_(bufs[2], 2, 2,
+                           md.vertices.size() * sizeof(glm::vec2), GL_FLOAT,
+                           get_gl_hint(md.upload_hint, md.usage_hint),
+                           &uvs[0]);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufs[3]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 md.elements.size() * sizeof(unsigned int), &md.elements[0],
+                 get_gl_hint(md.upload_hint, md.usage_hint));
+
+    num_indices = md.elements.size();
+    primitive = get_gl_primitive(md.primitive);
+  }
+
   void GL_Mesh::set_vertices(unsigned int b, unsigned int l,
                              Vertex const* v) noexcept
   {
@@ -140,12 +158,54 @@ namespace game { namespace gfx { namespace gl
     glBufferSubData(GL_ARRAY_BUFFER, b * sizeof(glm::vec2),
                     l * sizeof(glm::vec2), &uvs[0]);
   }
+  void GL_Mesh::set_element_indices(unsigned int b, unsigned int l,
+                                    unsigned int const* i) noexcept
+  {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufs[3]);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, b * sizeof(unsigned int),
+                    l * sizeof(unsigned int), i);
+  }
+  void GL_Mesh::set_num_element_indices(unsigned int i) noexcept
+  {
+    num_indices = i;
+  }
+  void GL_Mesh::unallocate_() noexcept
+  {
+    glDeleteBuffers(bufs.size(), &bufs[0]);
+    if(vao) glDeleteVertexArrays(1, &vao);
+  }
+  void GL_Mesh::allocate_vao_() noexcept
+  {
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+  }
+  void GL_Mesh::allocate_buffers_() noexcept
+  {
+    glGenBuffers(bufs.size(), &bufs[0]);
+  }
+  void GL_Mesh::allocate_array_buffer_(GLuint buf, GLuint attrib_index,
+                                       GLint cs, std::size_t size, GLenum type,
+                                       GLenum usage) noexcept
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, buf);
+    glBufferData(GL_ARRAY_BUFFER, size, NULL, usage);
+    glVertexAttribPointer(attrib_index, cs, type, GL_FALSE, 0, 0);
+  }
+  void GL_Mesh::allocate_array_buffer_(GLuint buf, GLuint attrib_index,
+                                       GLint cs, std::size_t size, GLenum type,
+                                       GLenum usage, void* data) noexcept
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, buf);
+    glBufferData(GL_ARRAY_BUFFER, size, data, usage);
+    glVertexAttribPointer(attrib_index, cs, type, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(attrib_index);
+  }
   void GL_Mesh::bind() const noexcept
   {
     glBindVertexArray(vao);
   }
   void GL_Mesh::draw() const noexcept
   {
-    glDrawElements(primitive, num_faces, GL_UNSIGNED_INT, 0);
+    glDrawElements(primitive, num_indices, GL_UNSIGNED_INT, 0);
   }
 } } }

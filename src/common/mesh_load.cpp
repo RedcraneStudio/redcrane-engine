@@ -176,6 +176,6 @@ namespace game
         }
       }
     }
-    m.prepare(std::move(mesh));
+    m.allocate_from(std::move(mesh));
   }
 }

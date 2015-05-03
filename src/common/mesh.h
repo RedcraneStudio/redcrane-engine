@@ -46,46 +46,70 @@ namespace game
 
     Primitive_Type primitive = Primitive_Type::Triangle;
 
+    // A reference implementation of Mesh::set_vertices, basically.
     // This function doesn't strictly need to be in a class member function, it
     // can be a free function, but from a Mesh::set_vertices implementation
     // the free function would be impossible to call without a namespace
     // specifier (otherwise it would be recursive).
     inline void set_vertices(unsigned int b, unsigned int l,
-                             Vertex const* v) noexcept;
+                             Vertex const* v) noexcept
+    {
+      std::memcpy(&vertices[b], v, l);
+    }
+    // A reference implementation of Mesh::set_element_indices, basically.
+    inline void set_element_indices(unsigned int b, unsigned int l,
+                                    unsigned int const* i) noexcept
+    {
+      std::memcpy(&elements[b], i, l);
+    }
   };
-
-  // A reference implementation of Mesh::set_vertices, basically.
-  inline void Mesh_Data::set_vertices(unsigned int b, unsigned int l,
-                                      Vertex const* v) noexcept
-  {
-    std::memcpy(&vertices[b], v, l);
-  }
 
   struct Mesh
   {
     virtual ~Mesh() noexcept {}
 
     /*!
-     * \brief Allocates a mesh based on given data.
+     * \brief Allocates a mesh for a certain amount of vertices and element
+     * indices.
      *
-     * If this function is called more than once, a mesh is to be reconstructed
-     * possibly from scratch, unless it is possible to use existing memory.
-     *
-     * Only the value of specific vertex attributes may be modified after the
-     * mesh is prepared. Everything else requires a complete reallocation.
-     *
-     * \note The representation may or may not retain the given Mesh_Data
-     * structure.
+     * If this function is called, no mesh data is guaranteed to be retained.
      */
-    virtual void prepare(Mesh_Data const& data) noexcept = 0;
+    virtual void allocate(unsigned int max_verts,
+                          unsigned int max_elemnt_indices,
+                          Usage_Hint, Upload_Hint,
+                          Primitive_Type) noexcept = 0;
+
     /*!
-     * \brief Allocates a mesh based on given data while taking ownership of
-     * the given mesh data.
+     * \brief Allocates a mesh given some initial mesh data.
      *
-     * Should be used if the client of this class can give up the data,
-     * otherwise it will just be copied.
+     * The default implementation is equivalent to allocation and then setting
+     * each of the components in sequence. ie allocation, set_vertices,
+     * set_element_indices, set_num_element_indices. This process may be
+     * optimized in implementations.
      */
-    inline virtual void prepare(Mesh_Data&& data) noexcept;
+    virtual void allocate_from(Mesh_Data const&) noexcept;
+    /*!
+     * \brief Allocates a mesh given some initial mesh data, the impl is
+     * allowed to steal the guts if that works better for it.
+     */
+    virtual void allocate_from(Mesh_Data&&) noexcept;
+
+    /*!
+     * \brief Sets a sequence of vertices starting from a certain vertex in an
+     * allocated mesh.
+     */
+    virtual void set_vertices(unsigned int begin,
+                              unsigned int length,
+                              Vertex const* data) noexcept = 0;
+
+    /*!
+     * \brief Set element indices up to a maximum set during allocation.
+     */
+    virtual void set_element_indices(unsigned int begin,
+                                     unsigned int length,
+                                     unsigned int const* indices) noexcept = 0;
+
+    virtual void set_num_element_indices(unsigned int) noexcept = 0;
 
     /*!
      * \brief **Changes** a single vertex in the mesh without reallocating
@@ -94,25 +118,9 @@ namespace game
      * Element is an offset into the vertices field of the Mesh_Data provided
      * in a previous call to prepare.
      */
-    inline void set_vertex(unsigned int elemnt, Vertex const&) noexcept;
-
-    /*!
-     * \brief Sets a sequence of vertices starting from a certain vertex in the
-     * prepared mesh.
-     */
-    virtual void set_vertices(unsigned int begin,
-                              unsigned int length,
-                              Vertex const*) noexcept = 0;
+    inline void set_vertex(unsigned int elemnt, Vertex const& v) noexcept
+    { set_vertices(elemnt, 1, &v); }
   };
-  void Mesh::set_vertex(unsigned int elemnt, Vertex const& v) noexcept
-  {
-    set_vertices(elemnt, 1, &v);
-  }
-  void Mesh::prepare(Mesh_Data&& data) noexcept
-  {
-    // Just default to making a copy.
-    prepare(static_cast<Mesh_Data const&>(data));
-  }
 
   AABB generate_aabb(Mesh_Data const& mesh) noexcept;
 }

@@ -29,7 +29,7 @@ namespace game
   inline void make_terrain_mesh(Mesh& m, Terrain const& t, double s = .01,
                                 double f = 1) noexcept
   {
-    m.prepare(std::move(make_terrain_mesh(t, s, f)));
+    m.allocate_from(std::move(make_terrain_mesh(t, s, f)));
   }
 
   enum class Orient

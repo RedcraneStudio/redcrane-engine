@@ -5,6 +5,19 @@
 #include "mesh.h"
 namespace game
 {
+  void Mesh::allocate_from(Mesh_Data&& mesh) noexcept
+  {
+    // By default initiate a copy of this data.
+    allocate_from(static_cast<Mesh_Data const&>(mesh));
+  }
+  void Mesh::allocate_from(Mesh_Data const& md) noexcept
+  {
+    allocate(md.vertices.size(), md.elements.size(), md.usage_hint,
+             md.upload_hint, md.primitive);
+    set_vertices(0, md.vertices.size(), &md.vertices[0]);
+    set_element_indices(0, md.elements.size(), &md.elements[0]);
+    set_num_element_indices(md.elements.size());
+  }
   AABB generate_aabb(Mesh_Data const& mesh) noexcept
   {
     glm::vec3 min;

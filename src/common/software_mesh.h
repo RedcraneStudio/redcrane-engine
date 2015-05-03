@@ -9,6 +9,9 @@ namespace game
 {
   /*!
    * \brief A simple decorater that stores mesh data for access.
+   *
+   * \note This class and Software_Texture basically are present to host all
+   * the good stuff in software so that real implementations don't have to.
    */
   struct Software_Mesh : public Mesh
   {
@@ -33,10 +36,20 @@ namespace game
     Mesh& get_impl() noexcept { return *impl_; }
     Mesh const& get_impl() const noexcept { return *impl_; }
 
-    void prepare(Mesh_Data const& data) noexcept override;
-    void prepare(Mesh_Data&& data) noexcept override;
-    void set_vertices(unsigned int begin, unsigned int length,
-                      Vertex const*) noexcept override;
+    void allocate(unsigned int max_verts,
+                  unsigned int max_elemnt_indices, Usage_Hint, Upload_Hint,
+                  Primitive_Type) noexcept override;
+
+    void allocate_from(Mesh_Data const&) noexcept override;
+    void allocate_from(Mesh_Data&&) noexcept override;
+
+    void set_vertices(unsigned int begin,
+                      unsigned int length,
+                      Vertex const* data) noexcept override;
+    void set_element_indices(unsigned int begin,
+                             unsigned int length,
+                             unsigned int const* indices) noexcept override;
+    void set_num_element_indices(unsigned int) noexcept override;
 
     inline Mesh_Data& mesh_data() noexcept { return mesh_data_; }
     inline Mesh_Data const& mesh_data() const noexcept { return mesh_data_; }
@@ -44,15 +57,12 @@ namespace game
     inline Mesh_Data&& unwrap_mesh_data() noexcept
     { return std::move(mesh_data_); }
 
-    /*!
-     * \brief Constructs a new mesh with a copy of its own mesh data.
-     *
-     * This function does not depend on an implementation / child.
-     */
-    inline void copy_to(Mesh& m) const noexcept { m.prepare(mesh_data_); }
+    void copy_to(Mesh& other) const noexcept;
   private:
     Maybe_Owned<Mesh> impl_;
-    bool prepared_ = false;
+    bool allocated_ = false;
+
+    int num_indices_;
     Mesh_Data mesh_data_;
   };
 }
