@@ -94,7 +94,7 @@ namespace game { namespace ui
      * controller, it's child a sprite handles the button graphic and a label
      * child can handle the text, for example.
      */
-    virtual void set_child(std::weak_ptr<Element> e) noexcept;
+    inline virtual void set_child(std::weak_ptr<Element> e) noexcept;
     inline virtual void remove_child() noexcept { child_.reset(); }
   protected:
     Volume<int> parent_vol_;
@@ -253,7 +253,7 @@ namespace game { namespace ui
     auto child_ptr = child_.lock();
     if(child_ptr) child_ptr->activate_regions(c);
   }
-  void Element::set_child(std::weak_ptr<Element> e) noexcept
+  inline void Element::set_child(std::weak_ptr<Element> e) noexcept
   {
     child_ = e;
   }
