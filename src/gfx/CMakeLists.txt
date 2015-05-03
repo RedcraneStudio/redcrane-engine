@@ -5,7 +5,8 @@
 set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/standard_shader.cpp gl/program.cpp
                            gl/hud_shader.cpp gl/mesh.cpp gl/texture.cpp)
 add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES}
-                          material.cpp object.cpp camera.cpp scene_node.cpp)
+                          material.cpp object.cpp camera.cpp scene_node.cpp
+                          idriver_ui_adapter.cpp)
 
 target_link_libraries(gfxlib engine_gl)
 
