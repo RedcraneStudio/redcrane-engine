@@ -142,7 +142,7 @@ int main(int argc, char** argv)
 
   {
     // Make an OpenGL driver.
-    gfx::gl::Driver driver{};
+    gfx::gl::Driver driver{Vec<int>{1000, 1000}};
 
     // Make an fps camera.
     auto cam = gfx::make_fps_camera();
