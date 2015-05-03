@@ -5,9 +5,15 @@
 #include "idriver_ui_adapter.h"
 namespace game { namespace gfx
 {
-  void set_rect(Mesh& rect, Volume<int> vol)
+  void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> v) const noexcept
   {
     // Don't worry about texture coordinates right now.
+    Volume<float> vol;
+    auto size = d_->window_extents();
+    vol.pos.x = (float) v.pos.x / size.x;
+    vol.pos.y = (float) v.pos.y / size.y;
+    vol.width = (float) v.width / size.x;
+    vol.height= (float) v.height/ size.y;
     rect.set_vertex(0, Vertex{glm::vec3{vol.pos.x, vol.pos.y, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
                               glm::vec2{0.0, 0.0}});
@@ -39,6 +45,7 @@ namespace game { namespace gfx
     filled_rect_.set_impl(d_->make_mesh_repr());
     filled_rect_.allocate(4, 6, Usage_Hint::Draw, Upload_Hint::Stream,
                           Primitive_Type::Triangle);
+    filled_rect_.set_num_element_indices(6);
 
     auto filled_indices = std::array<unsigned int, 6>{0, 1, 2, 0, 2, 3};
     filled_rect_.set_element_indices(0, 6, &filled_indices[0]);
@@ -46,6 +53,7 @@ namespace game { namespace gfx
     lines_rect_.set_impl(d_->make_mesh_repr());
     lines_rect_.allocate(4, 4, Usage_Hint::Draw, Upload_Hint::Stream,
                          Primitive_Type::Line);
+    lines_rect_.set_num_element_indices(4);
     auto line_indices = std::array<unsigned int, 4>{0, 1, 2, 3};
     lines_rect_.set_element_indices(0, 4, &line_indices[0]);
   }
@@ -60,14 +68,14 @@ namespace game { namespace gfx
   {
     d_->bind_texture(*white_texture_, 0);
 
-    set_rect(lines_rect_, vol);
+    set_rect_(lines_rect_, vol);
     d_->render_mesh(*lines_rect_.get_impl());
   }
   void IDriver_UI_Adapter::fill_rect(Volume<int> const& vol) noexcept
   {
     d_->bind_texture(*white_texture_, 0);
 
-    set_rect(filled_rect_, vol);
+    set_rect_(filled_rect_, vol);
     d_->render_mesh(*filled_rect_.get_impl());
   }
 
@@ -86,7 +94,7 @@ namespace game { namespace gfx
     d_->bind_texture(tex, 0);
 
     // Render the rectangle.
-    set_rect(filled_rect_, dst);
+    set_rect_(filled_rect_, dst);
     d_->render_mesh(*filled_rect_.get_impl());
 
     // Reset the diffuse color
