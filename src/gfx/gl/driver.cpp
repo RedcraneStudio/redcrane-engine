@@ -13,7 +13,7 @@ namespace game
   {
     namespace gl
     {
-      Driver::Driver() noexcept
+      Driver::Driver(Vec<int> size) noexcept : extents_(size)
       {
         current_shader_ = &standard_shader_;
         current_shader_->use();

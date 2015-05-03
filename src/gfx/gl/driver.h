@@ -20,7 +20,7 @@ namespace game
 
   struct gfx::gl::Driver : public gfx::IDriver
   {
-    Driver() noexcept;
+    Driver(Vec<int> size) noexcept;
     ~Driver() noexcept;
 
     void set_shader(Shader shade) noexcept override;
@@ -43,10 +43,14 @@ namespace game
     void clear() noexcept override;
     void clear_color() noexcept override;
     void clear_depth() noexcept override;
+
+    Vec<int> window_extents() const noexcept override { return extents_; }
   private:
     IShader* current_shader_;
 
     Standard_Shader standard_shader_;
     Hud_Shader hud_shader_;
+
+    Vec<int> extents_;
   };
 }
