@@ -18,6 +18,8 @@ namespace game
 
     inline Vec<int> allocated_extents() const noexcept;
 
+    virtual inline void fill_data(Volume<int> const& v,Color const c) noexcept;
+
   private:
     virtual void allocate_(Vec<int> const& extents) noexcept = 0;
     virtual void blit_data_(Volume<int> const& vol,
@@ -39,5 +41,11 @@ namespace game
   inline Vec<int> Texture::allocated_extents() const noexcept
   {
     return extents_;
+  }
+
+  inline void Texture::fill_data(Volume<int> const& v, Color const c) noexcept
+  {
+    std::vector<Color> colors(v.width * v.height, c);
+    blit_data(v, &colors[0]);
   }
 }
