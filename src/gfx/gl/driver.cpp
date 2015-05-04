@@ -17,6 +17,10 @@ namespace game
       {
         current_shader_ = &standard_shader_;
         current_shader_->use();
+
+        glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
+                            GL_ZERO);
       }
       Driver::~Driver() noexcept
       {
@@ -108,6 +112,11 @@ namespace game
       {
         if(enable) glEnable(GL_DEPTH_TEST);
         else glDisable(GL_DEPTH_TEST);
+      }
+      void Driver::blending(bool enable) noexcept
+      {
+        if(enable) glEnable(GL_BLEND);
+        else glDisable(GL_BLEND);
       }
     }
   }

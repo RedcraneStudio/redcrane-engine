@@ -45,6 +45,7 @@ namespace game
     void clear_depth() noexcept override;
 
     void depth_test(bool enable) noexcept override;
+    void blending(bool enable) noexcept override;
 
     Vec<int> window_extents() const noexcept override { return extents_; }
   private:
