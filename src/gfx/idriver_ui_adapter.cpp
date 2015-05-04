@@ -116,11 +116,13 @@ namespace game { namespace gfx
   void IDriver_UI_Adapter::begin_draw() noexcept
   {
     d_->depth_test(false);
+    d_->blending(true);
     d_->set_shader(Shader::Hud);
   }
   void IDriver_UI_Adapter::end_draw() noexcept
   {
     d_->depth_test(true);
+    d_->blending(false);
     d_->set_shader(Shader::Standard);
   }
 } }
