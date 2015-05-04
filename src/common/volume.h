@@ -87,4 +87,17 @@ namespace game
 
     return parent;
   }
+
+  template <typename Ret, typename Accept>
+  Volume<Ret> volume_cast(Volume<Accept> const& v) noexcept
+  {
+    Volume<Ret> ret;
+
+    ret.width  = static_cast<Ret>(v.width);
+    ret.height = static_cast<Ret>(v.height);
+    ret.pos.x  = static_cast<Ret>(v.pos.x);
+    ret.pos.y  = static_cast<Ret>(v.pos.y);
+
+    return ret;
+  }
 }
