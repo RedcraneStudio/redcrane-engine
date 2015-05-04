@@ -41,6 +41,8 @@ namespace game
       virtual void clear_color() noexcept = 0;
       virtual void clear_depth() noexcept = 0;
 
+      virtual void depth_test(bool enable) noexcept = 0;
+
       virtual Vec<int> window_extents() const noexcept = 0;
     };
   }

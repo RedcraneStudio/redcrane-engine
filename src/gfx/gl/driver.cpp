@@ -104,6 +104,11 @@ namespace game
       {
         glClear(GL_DEPTH_BUFFER_BIT);
       }
+      void Driver::depth_test(bool enable) noexcept
+      {
+        if(enable) glEnable(GL_DEPTH_TEST);
+        else glDisable(GL_DEPTH_TEST);
+      }
     }
   }
 }
