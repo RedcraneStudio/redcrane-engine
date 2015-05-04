@@ -68,7 +68,7 @@ namespace game { namespace gfx { namespace gl
   }
   void GL_Mesh::allocate(unsigned int max_verts,
                          unsigned int max_elemnt_indices, Usage_Hint uh,
-                         Upload_Hint up, Primitive_Type) noexcept
+                         Upload_Hint up, Primitive_Type pt) noexcept
   {
     // Clean the slate.
     unallocate_();
@@ -87,6 +87,8 @@ namespace game { namespace gfx { namespace gl
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                  max_elemnt_indices * sizeof(unsigned int), NULL,
                  get_gl_hint(up, uh));
+
+    primitive = get_gl_primitive(pt);
   }
   void GL_Mesh::allocate_from(Mesh_Data const& md) noexcept
   {
