@@ -130,7 +130,8 @@ namespace game { namespace ui
   {
     auto vol = query_size_and_pen(impl_, text, size);
     tb.allocate(vol_extents(vol));
-    tb.fill_data(vol_from_extents(tb.allocated_extents()), colors::black);
+    tb.fill_data(vol_from_extents(tb.allocated_extents()),
+                 Color{0x00,0x00,0x00,0x00});
 
     for(char c : text)
     {
@@ -167,10 +168,14 @@ namespace game { namespace ui
 
           // Expand data to colors.
           auto byte = bitmap->bitmap.buffer[i * bitmap->bitmap.pitch + j];
-          col.r = byte;
-          col.g = byte;
-          col.b = byte;
-          col.a = 0xff;
+          col.r = 0xff;
+          col.g = 0xff;
+          col.b = 0xff;
+          col.a = byte;
+
+          // Configure these alpha-modes
+          //if(byte == 0x00) col.a = 0x00;
+          //else col.a = 0xff;
 
         }
         // Blit the row using our pen position.
