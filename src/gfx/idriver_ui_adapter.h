@@ -37,6 +37,9 @@ namespace game { namespace gfx
     Software_Mesh filled_rect_;
     Software_Mesh lines_rect_;
 
-    void set_rect_(Mesh& rect, Volume<int> vol) const noexcept;
+    void set_rect_(Mesh& rect, Volume<int> vol) noexcept;
+
+    void set_rect_(Mesh& rect, Volume<int> vol,
+                   Volume<int> tex_v) const noexcept;
   };
 } }

@@ -5,28 +5,40 @@
 #include "idriver_ui_adapter.h"
 namespace game { namespace gfx
 {
-  void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> v) const noexcept
+  void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> vol) noexcept
   {
-    // Don't worry about texture coordinates right now.
-    Volume<float> vol;
+    set_rect_(rect, vol, Volume<int>{{0, 0}, 1, 1});
+  }
+  void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> v,
+                                     Volume<int> tex_v) const noexcept
+  {
+    Volume<float> vol = volume_cast<float>(v);
+
     auto size = d_->window_extents();
-    vol.pos.x = (float) v.pos.x / size.x;
-    vol.pos.y = (float) v.pos.y / size.y;
-    vol.width = (float) v.width / size.x;
-    vol.height= (float) v.height/ size.y;
-    rect.set_vertex(0, Vertex{glm::vec3{vol.pos.x, vol.pos.y, 0.0},
+    vol.pos.x = ((vol.pos.x / size.x) - 0.5f) * 2.0f;
+    vol.pos.y = ((vol.pos.y / size.y) - 0.5f) * -2.0f;
+    vol.width *= 2.0f / size.x;
+    vol.height *= 2.0f / -size.y;
+
+    rect.set_vertex(0, Vertex{glm::vec3{vol.pos.x,
+                                        vol.pos.y, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{0.0, 0.0}});
-    rect.set_vertex(1, Vertex{glm::vec3{vol.pos.x + vol.width, 0.0, 0.0},
+                              glm::vec2{tex_v.pos.x, tex_v.pos.y}});
+    rect.set_vertex(1, Vertex{glm::vec3{vol.pos.x + vol.width,
+                                        vol.pos.y, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{1.0, 0.0}});
+                              glm::vec2{tex_v.pos.x + tex_v.width,
+                                        tex_v.pos.y}});
     rect.set_vertex(2, Vertex{glm::vec3{vol.pos.x + vol.width,
                                         vol.pos.y + vol.height, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{1.0, 1.0}});
-    rect.set_vertex(3, Vertex{glm::vec3{0.0, vol.pos.y + vol.height, 0.0},
+                              glm::vec2{tex_v.pos.x + tex_v.width,
+                                        tex_v.pos.y + tex_v.height}});
+    rect.set_vertex(3, Vertex{glm::vec3{vol.pos.x,
+                                        vol.pos.y + vol.height, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{0.0, 1.0}});
+                              glm::vec2{tex_v.pos.x,
+                                        tex_v.pos.y + tex_v.height}});
   };
 
   IDriver_UI_Adapter::IDriver_UI_Adapter(IDriver& d) noexcept : d_(&d)
@@ -85,7 +97,7 @@ namespace game { namespace gfx
   }
 
   void IDriver_UI_Adapter::draw_texture(Volume<int> const& dst, Texture& tex,
-                                        Volume<int> const&) noexcept
+                                        Volume<int> const& src) noexcept
   {
     // Set the diffuse color.
     d_->set_diffuse(colors::white);
@@ -94,7 +106,7 @@ namespace game { namespace gfx
     d_->bind_texture(tex, 0);
 
     // Render the rectangle.
-    set_rect_(filled_rect_, dst);
+    set_rect_(filled_rect_, dst, src);
     d_->render_mesh(*filled_rect_.get_impl());
 
     // Reset the diffuse color
@@ -103,10 +115,12 @@ namespace game { namespace gfx
 
   void IDriver_UI_Adapter::begin_draw() noexcept
   {
+    d_->depth_test(false);
     d_->set_shader(Shader::Hud);
   }
   void IDriver_UI_Adapter::end_draw() noexcept
   {
+    d_->depth_test(true);
     d_->set_shader(Shader::Standard);
   }
 } }
