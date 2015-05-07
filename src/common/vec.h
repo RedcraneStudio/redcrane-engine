@@ -19,6 +19,12 @@ namespace game
     T y;
   };
 
+  template <class Ret, class Param>
+  Vec<Ret> vec_cast(Vec<Param> const& v) noexcept
+  {
+    return {static_cast<Ret>(v.x), static_cast<Ret>(v.y)};
+  }
+
   // comparison operators
   template <typename P1, typename P2>
   inline auto operator==(Vec<P1> const& p1, Vec<P2> const& p2) noexcept -> bool
