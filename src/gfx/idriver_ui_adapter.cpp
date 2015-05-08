@@ -85,14 +85,14 @@ namespace game { namespace gfx
   {
     d_->bind_texture(*white_texture_, 0);
 
-    set_rect_(lines_rect_, vol);
+    set_rect_(lines_rect_, vol, Volume<int>{{1,1},0,0}, Vec<int>{2,2});
     d_->render_mesh(*lines_rect_.get_impl());
   }
   void IDriver_UI_Adapter::fill_rect(Volume<int> const& vol) noexcept
   {
     d_->bind_texture(*white_texture_, 0);
 
-    set_rect_(filled_rect_, vol);
+    set_rect_(filled_rect_, vol, Volume<int>{{1,1},0,0}, Vec<int>{2,2});
     d_->render_mesh(*filled_rect_.get_impl());
   }
 
