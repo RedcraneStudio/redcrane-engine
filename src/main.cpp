@@ -144,14 +144,40 @@ int main(int argc, char** argv)
   gfx::IDriver_UI_Adapter ui_adapter{driver};
   ui::Freetype_Renderer freetype_font;
 
+  Software_Texture tex;
+  tex.set_impl(driver.make_texture_repr());
+  //freetype_font.text("Hello, world!", 32, tex);
+  //load_png("ui/build_icon.png", tex);
+
+  // Insert spaces for completely transparent pixels and a hash for all opaque
+  // pixels.
+  auto tex_ext = tex.allocated_extents();
+  for(int i = 0; i < tex_ext.x * tex_ext.y; ++i)
+  {
+    Vec<int> pos;
+
+    pos.x = i % tex_ext.x;
+    pos.y = i / tex_ext.x;
+
+    if(pos.x == 0 && pos.y != 0)
+    {
+      std::cout << std::endl;
+    }
+
+    auto c = tex.get_pt(pos);
+    if(c.a == 0x00) std::cout << " ";
+    else std::cout << "#";
+  }
+  std::cout << std::endl;
+
   auto ui_load_params = ui::Load_Params{freetype_font, ui_adapter};
   auto hud = ui::load("ui/hud.json", ui_load_params);
 
   auto controller = ui::GLFW_Controller{window};
 
-  hud->find_child_r("do_something")->add_click_listener([](auto const& pt)
+  hud->find_child_r("build_button")->add_click_listener([](auto const& pt)
   {
-    log_i("HELLO!");
+    log_i("BUILD!");
   });
 
   hud->layout(driver.window_extents());
