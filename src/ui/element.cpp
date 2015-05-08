@@ -5,40 +5,38 @@
 #include "element.h"
 namespace game { namespace ui
 {
-#if 0
-  void View::render() const noexcept
+  void Element::render(Renderer& r) const noexcept
   {
     if(layed_out_ && visible_)
     {
       // Render background
       if(parent_background_)
       {
-        fill_volume(graphics_.renderer, parent_volume(),
-                    parent_background_.value());
+        r.set_draw_color(parent_background_.value());
+        r.fill_rect(parent_volume());
       }
       if(this_background_)
       {
-        fill_volume(graphics_.renderer, this_volume(),
-                    this_background_.value());
+        r.set_draw_color(this_background_.value());
+        r.fill_rect(this_volume());
       }
 
       // Render the view.
-      render_();
+      render_(r);
 
       // Render borders
       if(parent_border_)
       {
-        draw_volume(graphics_.renderer, parent_volume(),
-                    parent_border_.value());
+        r.set_draw_color(parent_border_.value());
+        r.draw_rect(parent_volume());
       }
       if(this_border_)
       {
-        draw_volume(graphics_.renderer, this_volume(),
-                    this_border_.value());
+        r.set_draw_color(this_border_.value());
+        r.draw_rect(this_volume());
       }
     }
   }
-#endif
 
   Vec<int> Element::get_minimum_extents() const noexcept
   {
@@ -222,11 +220,5 @@ namespace game { namespace ui
   Element::replace_child_r(std::string i, Shared_Element v, bool r) noexcept
   {
     return replace_child_(i, v, r);
-  }
-
-  void Element::render(Renderer& r) const noexcept
-  {
-    // TODO render border and background color.
-    if(layed_out_ && visible_) render_(r);
   }
 } }
