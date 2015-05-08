@@ -53,10 +53,12 @@ namespace game { namespace ui
       case Elem_Volume::This:
       {
         this_border_ = color;
+        break;
       }
       case Elem_Volume::Parent:
       {
         parent_border_ = color;
+        break;
       }
     }
   }
