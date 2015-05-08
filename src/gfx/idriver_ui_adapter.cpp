@@ -25,22 +25,23 @@ namespace game { namespace gfx
     rect.set_vertex(0, Vertex{glm::vec3{vol.pos.x,
                                         vol.pos.y, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{tex_v.pos.x, tex_v.pos.y}});
+                              glm::vec2{tex_v.pos.x,
+                                        tex_v.pos.y + tex_v.height}});
     rect.set_vertex(1, Vertex{glm::vec3{vol.pos.x + vol.width,
                                         vol.pos.y, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
                               glm::vec2{tex_v.pos.x + tex_v.width,
-                                        tex_v.pos.y}});
+                                        tex_v.pos.y + tex_v.height}});
     rect.set_vertex(2, Vertex{glm::vec3{vol.pos.x + vol.width,
                                         vol.pos.y + vol.height, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
                               glm::vec2{tex_v.pos.x + tex_v.width,
-                                        tex_v.pos.y + tex_v.height}});
+                                        tex_v.pos.y}});
     rect.set_vertex(3, Vertex{glm::vec3{vol.pos.x,
                                         vol.pos.y + vol.height, 0.0},
                               glm::vec3{0.0, 0.0f, -1.0},
                               glm::vec2{tex_v.pos.x,
-                                        tex_v.pos.y + tex_v.height}});
+                                        tex_v.pos.y}});
   };
 
   IDriver_UI_Adapter::IDriver_UI_Adapter(IDriver& d) noexcept : d_(&d)
