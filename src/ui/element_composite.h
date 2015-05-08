@@ -21,6 +21,10 @@ namespace game { namespace ui
   template <class Layout_Type>
   struct Element_Composite : public Element
   {
+    Element_Composite() = default;
+    Element_Composite(Element_Composite&&) = default;
+    Element_Composite& operator=(Element_Composite&&) = default;
+
     virtual ~Element_Composite() {}
 
     virtual bool is_container() const noexcept { return true; }

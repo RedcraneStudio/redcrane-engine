@@ -34,6 +34,14 @@ namespace game { namespace ui
   // the rendering get's done. In other words: OpenGL v. SDL v. DirectX, etc.
   struct Element
   {
+    Element() = default;
+
+    Element(Element const&) = delete;
+    Element(Element&&) = default;
+
+    Element& operator=(Element const&) = delete;
+    Element& operator=(Element&&) = default;
+
     virtual ~Element() {}
 
     virtual bool is_container() const noexcept { return false; }
