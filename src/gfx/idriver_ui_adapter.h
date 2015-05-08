@@ -40,6 +40,6 @@ namespace game { namespace gfx
     void set_rect_(Mesh& rect, Volume<int> vol) noexcept;
 
     void set_rect_(Mesh& rect, Volume<int> vol,
-                   Volume<int> tex_v) const noexcept;
+                   Volume<int> tex_v, Vec<int> tex_max) const noexcept;
   };
 } }

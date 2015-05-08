@@ -7,10 +7,11 @@ namespace game { namespace gfx
 {
   void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> vol) noexcept
   {
-    set_rect_(rect, vol, Volume<int>{{0, 0}, 1, 1});
+    set_rect_(rect, vol, Volume<int>{{0, 0}, 1, 1}, {1,1});
   }
   void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> v,
-                                     Volume<int> tex_v) const noexcept
+                                     Volume<int> t_v,
+                                     Vec<int> t_m) const noexcept
   {
     Volume<float> vol = volume_cast<float>(v);
 
@@ -19,6 +20,12 @@ namespace game { namespace gfx
     vol.pos.y = ((vol.pos.y / size.y) - 0.5f) * -2.0f;
     vol.width *= 2.0f / size.x;
     vol.height *= 2.0f / -size.y;
+
+    auto tex_v = volume_cast<float>(t_v);
+    tex_v.pos.x /= t_m.x;
+    tex_v.pos.y /= t_m.y;
+    tex_v.width /= t_m.x;
+    tex_v.height /= t_m.y;
 
     rect.set_vertex(0, Vertex{glm::vec3{vol.pos.x,
                                         vol.pos.y, 0.0},
@@ -106,7 +113,7 @@ namespace game { namespace gfx
     d_->bind_texture(tex, 0);
 
     // Render the rectangle.
-    set_rect_(filled_rect_, dst, src);
+    set_rect_(filled_rect_, dst, src, tex.allocated_extents());
     d_->render_mesh(*filled_rect_.get_impl());
 
     // Reset the diffuse color

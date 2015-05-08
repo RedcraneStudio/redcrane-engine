@@ -12,7 +12,7 @@ namespace game { namespace gfx { namespace gl
     glActiveTexture(GL_TEXTURE0);
 
     texture_type = GL_TEXTURE_2D;
-    if(extents.x != extents.y) texture_type = GL_TEXTURE_RECTANGLE;
+    //if(extents.x != extents.y) texture_type = GL_TEXTURE_RECTANGLE;
 
     glBindTexture(texture_type, tex_id);
 
