@@ -31,6 +31,10 @@ namespace game { namespace gfx { namespace gl
   void GL_Texture::blit_data_(Volume<int> const& vol,
                   Color const* colors) noexcept
   {
+    // Bail out if the volume isn't valid, we want to avoid the
+    // GL_INVALID_OPERATION if we can.
+    if(vol.width == 0 || vol.height == 0) return;
+
     std::vector<unsigned char> data;
 
     // Go from the end to the beginning adding each byte to the end of the
@@ -46,7 +50,7 @@ namespace game { namespace gfx { namespace gl
       int x = pos % vol.width;
       int y = pos / vol.width;
 
-      // Flip vertically 'cause opengl.
+      // Use the row from the bottom first, relative to the given sub-volume.
       y = vol.height - y - 1;
 
       // Now recalculate our position **in our colors array** to get that
@@ -76,10 +80,16 @@ namespace game { namespace gfx { namespace gl
       data.push_back(value);
     }
 
+    // We have a good array of data, where each successive row is going from
+    // bottom to top, but we need to figure out our sub-region on the opengl
+    // texture.
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(texture_type, tex_id);
-    glTexSubImage2D(texture_type, 0, vol.pos.x, vol.pos.y, vol.width,
-                    vol.height, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
+    glTexSubImage2D(texture_type, 0, vol.pos.x,
+                    allocated_extents().y - vol.pos.y - vol.height,
+                    vol.width, vol.height, GL_RGBA, GL_UNSIGNED_BYTE,
+                    &data[0]);
   }
 
   void GL_Texture::bind(unsigned int loc) const noexcept
