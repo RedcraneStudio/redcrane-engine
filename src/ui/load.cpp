@@ -246,6 +246,10 @@ namespace game { namespace ui
       {
         sprite.scale(val.GetDouble());
       });
+      if_has_member(doc, "color", [&](auto const& val)
+      {
+        sprite.color(load_color(val));
+      });
 
       ret_ptr = std::make_shared<Sprite>(std::move(sprite));
     }

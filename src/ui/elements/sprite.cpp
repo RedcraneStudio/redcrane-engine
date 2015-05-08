@@ -35,6 +35,7 @@ namespace game { namespace ui
     // Center the image in using our image scale.
     auto dst = center_volume(this_volume(), get_minimum_extents());
     // Draw that texture.
+    r.set_draw_color(color_);
     if(src_vol_) r.draw_texture(dst, *src_->get_impl(), src_vol_.get());
     else r.draw_texture(dst, *src_->get_impl());
   }
