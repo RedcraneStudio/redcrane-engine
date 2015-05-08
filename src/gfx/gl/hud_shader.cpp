@@ -14,8 +14,14 @@ namespace game
       Hud_Shader::Hud_Shader() noexcept
         : prog_(Program::from_files("shader/hud/v", "shader/hud/f"))
       {
+        ortho_loc_ = prog_.get_uniform_location("ortho");
         sampler_loc_ = prog_.get_uniform_location("tex");
         diffuse_loc_ = prog_.get_uniform_location("dif");
+      }
+
+      void Hud_Shader::set_projection(glm::mat4 const& proj) noexcept
+      {
+        glUniformMatrix4fv(ortho_loc_, 1, GL_FALSE, &proj[0][0]);
       }
 
       void Hud_Shader::set_texture(unsigned int tex) noexcept

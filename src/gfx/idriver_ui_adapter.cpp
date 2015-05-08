@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #include "idriver_ui_adapter.h"
+#include <glm/gtc/matrix_transform.hpp>
 namespace game { namespace gfx
 {
   void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> vol) noexcept
@@ -14,12 +15,6 @@ namespace game { namespace gfx
                                      Vec<int> t_m) const noexcept
   {
     Volume<float> vol = volume_cast<float>(v);
-
-    auto size = d_->window_extents();
-    vol.pos.x = ((vol.pos.x / size.x) - 0.5f) * 2.0f;
-    vol.pos.y = ((vol.pos.y / size.y) - 0.5f) * -2.0f;
-    vol.width *= 2.0f / size.x;
-    vol.height *= 2.0f / -size.y;
 
     auto tex_v = volume_cast<float>(t_v);
     tex_v.pos.x /= t_m.x;
@@ -126,6 +121,9 @@ namespace game { namespace gfx
     d_->depth_test(false);
     d_->blending(true);
     d_->set_shader(Shader::Hud);
+
+    auto size = vec_cast<float>(d_->window_extents());
+    d_->set_projection(glm::ortho(0.0f, size.x, size.y, 0.0f, -1.0f, 1.0f));
   }
   void IDriver_UI_Adapter::end_draw() noexcept
   {

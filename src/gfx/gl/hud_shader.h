@@ -15,10 +15,13 @@ namespace game
       {
         Hud_Shader() noexcept;
 
+        void set_projection(glm::mat4 const& proj) noexcept override;
+
         void set_texture(unsigned int tex) noexcept override;
         void set_diffuse(Color const&) noexcept override;
         void use() noexcept override;
       private:
+        GLint ortho_loc_;
         GLint sampler_loc_;
         GLint diffuse_loc_;
         Program prog_;

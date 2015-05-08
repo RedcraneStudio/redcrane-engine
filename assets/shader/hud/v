@@ -4,8 +4,10 @@ layout(location = 0) in vec3 vertex;
 layout(location = 2) in vec2 uv_in;
 layout(location = 0) out vec2 uv_out;
 
+uniform mat4 ortho;
+
 void main()
 {
-  gl_Position = vec4(vertex.xy, 1.0, 1.0);
+  gl_Position = ortho * vec4(vertex.xy, 1.0, 1.0);
   uv_out = uv_in;
 }
