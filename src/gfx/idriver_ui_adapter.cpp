@@ -53,9 +53,7 @@ namespace game { namespace gfx
     // Prepare an all white texture so we can just change the diffuse color.
     // We can change this when the driver and the shader become more
     // distinguished, right now I'm not really sure how this can be done so
-    // this is the simplest option, without adding another shader/program and
-    // incurring all that context switching. (Maybe, I'm assuming it's slower
-    // then a texture sample, but I could be wrong).
+    // this is the simplest option, without adding another shader/program.
     white_texture_ = d_->make_texture_repr();
     white_texture_->allocate(Vec<int>{1,1});
     white_texture_->blit_data({{0,0}, 1, 1}, &colors::white);
@@ -107,7 +105,10 @@ namespace game { namespace gfx
                                         Volume<int> const& src) noexcept
   {
     // Set the diffuse color.
-    d_->set_diffuse(colors::white);
+    // d_->set_diffuse(colors::white);
+    // ^ We shouldn't be setting this to white in case the user does actually
+    // want color modulation on the texture (how we are rendering text right
+    // now).
 
     // Bind the texture.
     d_->bind_texture(tex, 0);
