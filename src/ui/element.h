@@ -14,6 +14,9 @@
 
 #include "controller.h"
 #include "renderer.h"
+
+#include <boost/signals2.hpp>
+
 namespace game { namespace ui
 {
   struct Element;
@@ -26,6 +29,8 @@ namespace game { namespace ui
   {
     This, Parent
   };
+
+  namespace signals2 = boost::signals2;
 
   // Pronouned: ui::Element. Our ui element here is our model. The exact UI
   // isn't up to much interpretation, since positions are going to be worked
@@ -92,6 +97,28 @@ namespace game { namespace ui
     replace_child_r(std::string, Shared_Element, bool r = true) noexcept;
 
     void render(Renderer&) const noexcept;
+
+    // Event handling interface.
+    void on_click(Vec<int> pt) noexcept { on_click_(pt); }
+    void on_hover(Vec<int> pt) noexcept { on_hover_(pt); };
+    void on_drag(Vec<int> np, Vec<int> op) noexcept { on_drag_(np, op); }
+
+    using click_signal_t = signals2::signal<void (Vec<int>) >;
+
+    signals2::connection
+    add_click_listener(click_signal_t::slot_type s) noexcept
+    { return on_click_.connect(s); }
+
+    using hover_signal_t = signals2::signal<void (Vec<int>) >;
+
+    signals2::connection
+    add_hover_listener(hover_signal_t::slot_type s) noexcept
+    { return on_hover_.connect(s); }
+
+    using drag_signal_t = signals2::signal<void (Vec<int>, Vec<int>) >;
+
+    signals2::connection add_drag_listener(drag_signal_t::slot_type s) noexcept
+    { return on_drag_.connect(s); }
   protected:
     Volume<int> parent_vol_;
     Volume<int> this_vol_;
@@ -116,5 +143,9 @@ namespace game { namespace ui
     virtual bool replace_child_(std::string, Shared_Element, bool) noexcept;
 
     virtual void render_(Renderer&) const noexcept = 0;
+
+    click_signal_t on_click_;
+    hover_signal_t on_hover_;
+    drag_signal_t on_drag_;
   };
 } }
