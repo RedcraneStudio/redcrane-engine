@@ -96,7 +96,10 @@ namespace game { namespace ui
       if(col != col_)
       {
         col_ = col;
-        invalidate_cache_();
+
+        // For now we are multiplying the color with the all white text.
+        // So we don't need to invalidate anything.
+        //invalidate_cache_();
       }
     }
 

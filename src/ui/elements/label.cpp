@@ -17,6 +17,8 @@ namespace game { namespace ui
   {
     gen_cache_(r);
 
+    r.set_draw_color(col_);
+
     // Center the texture in our volume.
     auto dst = center_volume(this_volume(), tex_->allocated_extents());
     r.draw_texture(dst, *tex_.get());
