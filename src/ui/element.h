@@ -131,7 +131,7 @@ namespace game { namespace ui
 
     bool layed_out_ = false;
     bool visible_ = true;
-    bool handle_events_ = true;
+    bool handle_events_ = false;
 
     virtual Volume<int> layout_() = 0;
     virtual Vec<int> get_minimum_extents_() const noexcept = 0;

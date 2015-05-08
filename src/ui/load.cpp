@@ -302,6 +302,11 @@ namespace game { namespace ui
         ret_ptr->min_size(load_size(val));
       });
 
+      if_has_member(doc, "handle_events", [&](auto const& val)
+      {
+        ret_ptr->handle_events(val.GetBool());
+      });
+
       return ret_ptr;
     }
 

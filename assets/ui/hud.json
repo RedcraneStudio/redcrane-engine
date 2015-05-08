@@ -27,6 +27,8 @@
 
       "autohide": 0.75,
 
+      "handle_events": true,
+
       "alignment": { "vertical": "bottom", "horizontal": "right" },
       "padding": { "right": 5, "bottom": 5 }
     }
