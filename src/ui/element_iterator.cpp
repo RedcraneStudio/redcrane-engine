@@ -50,6 +50,11 @@ namespace game { namespace ui
     // Get our path.
     auto& cur = path_.back();
 
+    // If we are currently dealing with a nullptr bail out, the logic of this
+    // function should prevent this in general unless we are an end iterator
+    // or we become an end iterator.
+    if(cur.elem == nullptr) return *this;
+
     // If we still have children for this element that need exploring.
     if(cur.cur_child + 1 < cur.elem->child_count())
     {
@@ -62,6 +67,14 @@ namespace game { namespace ui
     // If we are done exploring our current element's children, we can go up
     else if(cur.cur_child + 1 == cur.elem->child_count())
     {
+      // If we are the root node, we can't go up, just mark ourselves as done
+      // by becoming an end iterator.
+      if(path_.size() == 1)
+      {
+        path_.back().elem = nullptr;
+        return *this;
+      }
+
       // Get rid of this one.
       path_.erase(path_.end() - 1);
 
