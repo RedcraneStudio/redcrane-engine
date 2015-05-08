@@ -7,7 +7,7 @@ add_library(uilib elements/layouts/grid_layout.cpp
                   elements/layouts/side_layout.cpp
                   elements/bar.cpp elements/label.cpp elements/sprite.cpp
                   controller.cpp element.cpp load.cpp freetype_renderer.cpp
-                  element_iterator.cpp)
+                  mouse_logic.cpp element_iterator.cpp)
 
 target_link_libraries(uilib commonlib)
 
