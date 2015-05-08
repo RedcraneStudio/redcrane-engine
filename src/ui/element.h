@@ -85,17 +85,6 @@ namespace game { namespace ui
 
     inline void render(Renderer&) const noexcept;
     inline void activate_regions(Controller&) const noexcept;
-
-    /*!
-     * \brief This is used to set a single child *without layout params*.
-     *
-     * It can be set for non-composite elements to get fairly good buttons for
-     * example with pre-existing elements. A button element handles the
-     * controller, it's child a sprite handles the button graphic and a label
-     * child can handle the text, for example.
-     */
-    inline virtual void set_child(std::weak_ptr<Element> e) noexcept;
-    inline virtual void remove_child() noexcept { child_.reset(); }
   protected:
     Volume<int> parent_vol_;
     Volume<int> this_vol_;
@@ -123,8 +112,6 @@ namespace game { namespace ui
 
     virtual void render_(Renderer&) const noexcept = 0;
     virtual void activate_regions_(Controller&) const noexcept = 0;
-
-    std::weak_ptr<Element> child_;
   };
 
   inline Volume<int> const& Element::parent_volume() const noexcept
@@ -173,9 +160,6 @@ namespace game { namespace ui
     {
       throw;
     }
-
-    auto child_ptr = child_.lock();
-    if(child_ptr) child_ptr->layout(vol);
 
     return true;
   }
@@ -240,21 +224,9 @@ namespace game { namespace ui
   {
     // TODO render border and background color.
     if(layed_out_ && visible_) render_(r);
-
-    // Render the child.
-    auto child_ptr = child_.lock();
-    if(child_ptr) child_ptr->render(r);
   }
   inline void Element::activate_regions(Controller& c) const noexcept
   {
     if(layed_out_ && visible_ && handle_events_) activate_regions_(c);
-
-    // Tell the child.
-    auto child_ptr = child_.lock();
-    if(child_ptr) child_ptr->activate_regions(c);
-  }
-  inline void Element::set_child(std::weak_ptr<Element> e) noexcept
-  {
-    child_ = e;
   }
 } }
