@@ -24,6 +24,8 @@
 #include "ui/load.h"
 #include "ui/freetype_renderer.h"
 
+#include "glfw3_controller.h"
+
 #include "map/map.h"
 #include "map/json_structure.h"
 #include "glad/glad.h"
@@ -145,6 +147,13 @@ int main(int argc, char** argv)
   auto ui_load_params = ui::Load_Params{freetype_font, ui_adapter};
   auto hud = ui::load("ui/hud.json", ui_load_params);
 
+  auto controller = ui::GLFW_Controller{window};
+
+  hud->find_child_r("do_something")->add_click_listener([](auto const& pt)
+  {
+    log_i("HELLO!");
+  });
+
   hud->layout(driver.window_extents());
   while(!glfwWindowShouldClose(window))
   {
@@ -194,6 +203,7 @@ int main(int argc, char** argv)
     }
 
     {
+      controller.step(hud);
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
       hud->render(ui_adapter);
     }
