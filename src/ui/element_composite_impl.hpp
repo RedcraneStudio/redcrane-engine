@@ -128,12 +128,4 @@ namespace game { namespace ui
       child.view->render(r);
     }
   }
-  template <class T>
-  void Element_Composite<T>::activate_regions_(Controller& c) const noexcept
-  {
-    for(auto& child : children_)
-    {
-      child.view->activate_regions(c);
-    }
-  }
 } }

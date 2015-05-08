@@ -84,7 +84,6 @@ namespace game { namespace ui
     replace_child_r(std::string, Shared_Element, bool r = true) noexcept;
 
     void render(Renderer&) const noexcept;
-    void activate_regions(Controller&) const noexcept;
   protected:
     Volume<int> parent_vol_;
     Volume<int> this_vol_;

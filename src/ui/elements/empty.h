@@ -14,7 +14,6 @@ namespace game { namespace ui
     inline Vec<int> get_minimum_extents_() const noexcept override;
     inline Volume<int> layout_() override;
     void render_(Renderer&) const noexcept override {}
-    void activate_regions_(Controller&) const noexcept override {}
   };
   inline Vec<int> Empty::get_minimum_extents_() const noexcept
   {

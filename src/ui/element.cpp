@@ -238,8 +238,4 @@ namespace game { namespace ui
     // TODO render border and background color.
     if(layed_out_ && visible_) render_(r);
   }
-  void Element::activate_regions(Controller& c) const noexcept
-  {
-    if(layed_out_ && visible_ && handle_events_) activate_regions_(c);
-  }
 } }

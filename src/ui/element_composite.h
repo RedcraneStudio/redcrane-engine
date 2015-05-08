@@ -59,7 +59,6 @@ namespace game { namespace ui
     virtual Vec<int> get_minimum_extents_() const noexcept = 0;
 
     void render_(Renderer&) const noexcept override;
-    void activate_regions_(Controller&) const noexcept override;
   };
 
   using Null_Element_Composite = Element_Composite<null_layout_t>;
