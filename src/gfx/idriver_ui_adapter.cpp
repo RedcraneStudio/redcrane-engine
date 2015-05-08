@@ -68,11 +68,11 @@ namespace game { namespace gfx
     filled_rect_.set_element_indices(0, 6, &filled_indices[0]);
 
     lines_rect_.set_impl(d_->make_mesh_repr());
-    lines_rect_.allocate(4, 4, Usage_Hint::Draw, Upload_Hint::Stream,
+    lines_rect_.allocate(4, 8, Usage_Hint::Draw, Upload_Hint::Stream,
                          Primitive_Type::Line);
-    lines_rect_.set_num_element_indices(4);
-    auto line_indices = std::array<unsigned int, 4>{0, 1, 2, 3};
-    lines_rect_.set_element_indices(0, 4, &line_indices[0]);
+    lines_rect_.set_num_element_indices(8);
+    auto line_indices = std::array<unsigned int, 8>{0, 1, 1, 2, 2, 3, 3, 0};
+    lines_rect_.set_element_indices(0, 8, &line_indices[0]);
   }
 
   void IDriver_UI_Adapter::set_draw_color(Color const& c) noexcept
