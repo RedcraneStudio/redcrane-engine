@@ -3,5 +3,6 @@
 # All rights reserved.
 
 add_executable(engine_test_suite maybe_owned.cpp mesh.cpp grid_iterator.cpp
-                                object.cpp software_texture.cpp)
-target_link_libraries(engine_test_suite commonlib gfxlib)
+                                 object.cpp software_texture.cpp
+                                 element_iterator.cpp)
+target_link_libraries(engine_test_suite commonlib gfxlib uilib)
