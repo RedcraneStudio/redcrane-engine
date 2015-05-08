@@ -12,7 +12,6 @@
 
 #include "cast.h"
 
-#include "controller.h"
 #include "renderer.h"
 
 #include <boost/signals2.hpp>
