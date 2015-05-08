@@ -241,7 +241,11 @@ namespace game { namespace ui
 
       sprite.src(std::make_shared<Software_Texture>());
       load_png(doc["src"].GetString(), *sprite.src().get());
-      sprite.scale(doc["scale"].GetDouble());
+
+      if_has_member(doc, "scale", [&](auto const& val)
+      {
+        sprite.scale(val.GetDouble());
+      });
 
       ret_ptr = std::make_shared<Sprite>(std::move(sprite));
     }
