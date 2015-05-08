@@ -38,13 +38,13 @@ namespace game { namespace ui
 
     virtual bool is_container() const noexcept { return false; }
 
-    inline bool layout(Vec<int>);
-    inline bool layout(Volume<int>);
+    bool layout(Vec<int>);
+    bool layout(Volume<int>);
 
     Vec<int> get_minimum_extents() const noexcept;
 
-    inline Volume<int> const& parent_volume() const noexcept;
-    inline Volume<int> const& this_volume() const noexcept;
+    Volume<int> const& parent_volume() const noexcept;
+    Volume<int> const& this_volume() const noexcept;
 
     std::string id;
 
@@ -56,35 +56,35 @@ namespace game { namespace ui
     boost::optional<Color> query_background(Elem_Volume) const noexcept;
     bool remove_background(Elem_Volume) noexcept;
 
-    inline void visible(bool visible) noexcept;
-    inline bool visible() const noexcept;
+    void visible(bool visible) noexcept;
+    bool visible() const noexcept;
 
-    inline void handle_events(bool h) noexcept;
-    inline bool handle_events() noexcept;
+    void handle_events(bool h) noexcept;
+    bool handle_events() noexcept;
 
-    inline Vec<int> min_size() const noexcept;
-    inline void min_size(Vec<int>) noexcept;
+    Vec<int> min_size() const noexcept;
+    void min_size(Vec<int>) noexcept;
 
-    inline Shared_Element
+    Shared_Element
     find_child(std::string id, bool recursive = false) const noexcept;
 
-    inline Shared_Element
+    Shared_Element
     find_child_r(std::string id, bool recursive = true) const noexcept;
 
-    template <class T> inline std::shared_ptr<T>
+    template <class T> std::shared_ptr<T>
     find_child(std::string, bool = false) const noexcept;
 
-    template <class T> inline std::shared_ptr<T>
+    template <class T> std::shared_ptr<T>
     find_child_r(std::string, bool = true) const noexcept;
 
-    inline bool
+    bool
     replace_child(std::string, Shared_Element, bool r = false) noexcept;
 
-    inline bool
+    bool
     replace_child_r(std::string, Shared_Element, bool r = true) noexcept;
 
-    inline void render(Renderer&) const noexcept;
-    inline void activate_regions(Controller&) const noexcept;
+    void render(Renderer&) const noexcept;
+    void activate_regions(Controller&) const noexcept;
   protected:
     Volume<int> parent_vol_;
     Volume<int> this_vol_;
@@ -104,129 +104,10 @@ namespace game { namespace ui
 
     Vec<int> min_size_;
 
-    inline virtual Shared_Element
-    find_child_(std::string, bool) const noexcept;
+    virtual Shared_Element find_child_(std::string, bool) const noexcept;
 
-    inline virtual bool
-    replace_child_(std::string, Shared_Element, bool) noexcept;
+    virtual bool replace_child_(std::string, Shared_Element, bool) noexcept;
 
     virtual void render_(Renderer&) const noexcept = 0;
-    virtual void activate_regions_(Controller&) const noexcept = 0;
   };
-
-  inline Volume<int> const& Element::parent_volume() const noexcept
-  {
-    return parent_vol_;
-  }
-  inline Volume<int> const& Element::this_volume() const noexcept
-  {
-    return this_vol_;
-  }
-
-  inline void Element::visible(bool visible) noexcept
-  {
-    visible_ = visible;
-  }
-  inline bool Element::visible() const noexcept
-  {
-    return visible_;
-  }
-  inline void Element::handle_events(bool h) noexcept
-  {
-    handle_events_ = h;
-  }
-  inline bool Element::handle_events() noexcept
-  {
-    return handle_events_;
-  }
-
-  inline bool Element::layout(Vec<int> size)
-  {
-    return layout({{0, 0}, size.x, size.y});
-  }
-  inline bool Element::layout(Volume<int> vol)
-  {
-    try
-    {
-      parent_vol_ = std::move(vol);
-      this_vol_ = layout_();
-      layed_out_ = true;
-    }
-    catch(Small_Volume_Error& e)
-    {
-      return false;
-    }
-    catch(...)
-    {
-      throw;
-    }
-
-    return true;
-  }
-
-  inline Vec<int> Element::min_size() const noexcept
-  {
-    return min_size_;
-  }
-  inline void Element::min_size(Vec<int> ms) noexcept
-  {
-    min_size_ = ms;
-  }
-
-  inline Shared_Element
-  Element::find_child(std::string id, bool r) const noexcept
-  {
-    return find_child_(id, r);
-  }
-  inline Shared_Element
-  Element::find_child_r(std::string id, bool r) const noexcept
-  {
-    return find_child_(id, r);
-  }
-
-
-  template <class T> inline std::shared_ptr<T>
-  Element::find_child(std::string id, bool r) const noexcept
-  {
-    return as<T>(find_child(id, r));
-  }
-  template <class T> inline std::shared_ptr<T>
-  Element::find_child_r(std::string id, bool r) const noexcept
-  {
-    return as<T>(find_child(id, r));
-  }
-
-  inline bool
-  Element::replace_child(std::string i, Shared_Element v, bool r) noexcept
-  {
-    return replace_child_(i, v, r);
-  }
-
-  inline bool
-  Element::replace_child_r(std::string i, Shared_Element v, bool r) noexcept
-  {
-    return replace_child_(i, v, r);
-  }
-
-  // Default impls of find_child_ and replace_child_ don't do anything.
-
-  inline Shared_Element Element::find_child_(std::string, bool) const noexcept
-  {
-    return nullptr;
-  }
-  inline bool
-  Element::replace_child_(std::string, Shared_Element, bool) noexcept
-  {
-    return false;
-  }
-
-  inline void Element::render(Renderer& r) const noexcept
-  {
-    // TODO render border and background color.
-    if(layed_out_ && visible_) render_(r);
-  }
-  inline void Element::activate_regions(Controller& c) const noexcept
-  {
-    if(layed_out_ && visible_ && handle_events_) activate_regions_(c);
-  }
 } }

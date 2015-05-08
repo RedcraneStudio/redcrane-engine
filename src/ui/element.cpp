@@ -39,6 +39,7 @@ namespace game { namespace ui
     }
   }
 #endif
+
   Vec<int> Element::get_minimum_extents() const noexcept
   {
     auto min = this->get_minimum_extents_();
@@ -128,5 +129,117 @@ namespace game { namespace ui
       return true;
     }
     return false;
+  }
+
+  Volume<int> const& Element::parent_volume() const noexcept
+  {
+    return parent_vol_;
+  }
+  Volume<int> const& Element::this_volume() const noexcept
+  {
+    return this_vol_;
+  }
+
+  void Element::visible(bool visible) noexcept
+  {
+    visible_ = visible;
+  }
+  bool Element::visible() const noexcept
+  {
+    return visible_;
+  }
+  void Element::handle_events(bool h) noexcept
+  {
+    handle_events_ = h;
+  }
+  bool Element::handle_events() noexcept
+  {
+    return handle_events_;
+  }
+
+  bool Element::layout(Vec<int> size)
+  {
+    return layout({{0, 0}, size.x, size.y});
+  }
+  bool Element::layout(Volume<int> vol)
+  {
+    try
+    {
+      parent_vol_ = std::move(vol);
+      this_vol_ = layout_();
+      layed_out_ = true;
+    }
+    catch(Small_Volume_Error& e)
+    {
+      return false;
+    }
+    catch(...)
+    {
+      throw;
+    }
+
+    return true;
+  }
+
+  Vec<int> Element::min_size() const noexcept
+  {
+    return min_size_;
+  }
+  void Element::min_size(Vec<int> ms) noexcept
+  {
+    min_size_ = ms;
+  }
+
+  Shared_Element Element::find_child(std::string id, bool r) const noexcept
+  {
+    return find_child_(id, r);
+  }
+  Shared_Element Element::find_child_r(std::string id, bool r) const noexcept
+  {
+    return find_child_(id, r);
+  }
+
+
+  template <class T>
+  std::shared_ptr<T> Element::find_child(std::string id, bool r) const noexcept
+  {
+    return as<T>(find_child(id, r));
+  }
+  template <class T> std::shared_ptr<T>
+  Element::find_child_r(std::string id, bool r) const noexcept
+  {
+    return as<T>(find_child(id, r));
+  }
+
+  bool Element::replace_child(std::string i, Shared_Element v, bool r) noexcept
+  {
+    return replace_child_(i, v, r);
+  }
+
+  bool
+  Element::replace_child_r(std::string i, Shared_Element v, bool r) noexcept
+  {
+    return replace_child_(i, v, r);
+  }
+
+  // Default impls of find_child_ and replace_child_ don't do anything.
+
+  Shared_Element Element::find_child_(std::string, bool) const noexcept
+  {
+    return nullptr;
+  }
+  bool Element::replace_child_(std::string, Shared_Element, bool) noexcept
+  {
+    return false;
+  }
+
+  void Element::render(Renderer& r) const noexcept
+  {
+    // TODO render border and background color.
+    if(layed_out_ && visible_) render_(r);
+  }
+  void Element::activate_regions(Controller& c) const noexcept
+  {
+    if(layed_out_ && visible_ && handle_events_) activate_regions_(c);
   }
 } }
