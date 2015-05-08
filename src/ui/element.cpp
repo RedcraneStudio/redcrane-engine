@@ -222,17 +222,6 @@ namespace game { namespace ui
     return replace_child_(i, v, r);
   }
 
-  // Default impls of find_child_ and replace_child_ don't do anything.
-
-  Shared_Element Element::find_child_(std::string, bool) const noexcept
-  {
-    return nullptr;
-  }
-  bool Element::replace_child_(std::string, Shared_Element, bool) noexcept
-  {
-    return false;
-  }
-
   void Element::render(Renderer& r) const noexcept
   {
     // TODO render border and background color.

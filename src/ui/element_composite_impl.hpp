@@ -121,6 +121,18 @@ namespace game { namespace ui
   }
 
   template <class T>
+  std::size_t Element_Composite<T>::child_count_() const noexcept
+  {
+    return children_.size();
+  }
+  template <class T>
+  Shared_Element Element_Composite<T>::child_at_(std::size_t i) noexcept
+  {
+    if(children_.size() <= i) { return nullptr; }
+    return children_[i].view;
+  }
+
+  template <class T>
   void Element_Composite<T>::render_(Renderer& r) const noexcept
   {
     for(auto& child : children_)

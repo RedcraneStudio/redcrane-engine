@@ -57,6 +57,8 @@ namespace game { namespace ui
   private:
     Shared_Element find_child_(std::string, bool) const noexcept override;
     bool replace_child_(std::string, Shared_Element, bool) noexcept override;
+    std::size_t child_count_() const noexcept override;
+    Shared_Element child_at_(std::size_t) noexcept override;
 
     // Left to be implemented
     virtual Volume<int> layout_() = 0;

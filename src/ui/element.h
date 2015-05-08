@@ -96,6 +96,13 @@ namespace game { namespace ui
     bool
     replace_child_r(std::string, Shared_Element, bool r = true) noexcept;
 
+    std::size_t child_count() const noexcept { return child_count_(); }
+    Shared_Element child_at(std::size_t index) noexcept
+    { return child_at_(index); }
+
+    template <class T> std::shared_ptr<T> child_at(std::size_t index) noexcept
+    { return as<T>(child_at_(index)); }
+
     void render(Renderer&) const noexcept;
 
     // Event handling interface.
@@ -138,9 +145,16 @@ namespace game { namespace ui
 
     Vec<int> min_size_;
 
-    virtual Shared_Element find_child_(std::string, bool) const noexcept;
-
-    virtual bool replace_child_(std::string, Shared_Element, bool) noexcept;
+    // child query functions. Implemented as-if we are an empty composite by
+    // default.
+    virtual Shared_Element find_child_(std::string, bool) const noexcept
+    { return nullptr; }
+    virtual bool replace_child_(std::string, Shared_Element, bool) noexcept
+    { return false; }
+    virtual std::size_t child_count_() const noexcept
+    { return 0; }
+    virtual Shared_Element child_at_(std::size_t) noexcept
+    { return nullptr; }
 
     virtual void render_(Renderer&) const noexcept = 0;
 
