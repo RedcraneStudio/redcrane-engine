@@ -85,32 +85,35 @@ namespace game
       png_bytes_per_pixel = 4;
     }
 
-    for(int i = 0; i < image_extents.y; ++i)
+    // We're allocated memory for the entire image, that may or may not bite
+    // us in the ass later.
+    auto colors = new Color[image_extents.x * image_extents.y];
+    for(int i = 0; i < image_extents.y * image_extents.x; ++i)
     {
-      auto row = new Color[image_extents.x];
-      for(int j = 0; j < image_extents.x; ++j)
-      {
-        // Find where we are in png's data.
-        auto dst_ptr = *(png_data + i);
-        dst_ptr += j * png_bytes_per_pixel;
+      // Find out our position.
+      int x = i % image_extents.x;
+      int y = i / image_extents.y;
 
-        row[j].r = dst_ptr[0];
-        row[j].g = dst_ptr[1];
-        row[j].b = dst_ptr[2];
-        if(format == PNG_COLOR_TYPE_RGB)
-        {
-          // We don't have an alpha value, so fill in full opacity.
-          row[j].a = 0xff;
-        }
-        else if(format == PNG_COLOR_TYPE_RGBA)
-        {
-          row[j].a = dst_ptr[3];
-        }
+      // Find where we are in png's data.
+      auto dst_ptr = *(png_data + y);
+      dst_ptr += x * png_bytes_per_pixel;
+
+      auto color_ptr = colors + (y * image_extents.y + x);
+      color_ptr->r = dst_ptr[0];
+      color_ptr->g = dst_ptr[1];
+      color_ptr->b = dst_ptr[2];
+      if(format == PNG_COLOR_TYPE_RGB)
+      {
+        // We don't have an alpha value, so fill in full opacity.
+        color_ptr->a = 0xff;
       }
-      // Blit row-by-row;
-      t.blit_data({{0, i}, image_extents.x, 1}, row);
-      delete[] row;
+      else if(format == PNG_COLOR_TYPE_RGBA)
+      {
+        color_ptr->a = dst_ptr[3];
+      }
     }
+    t.blit_data(vol_from_extents(image_extents), colors);
+    delete[] colors;
 
     // We copied the data, so just forget about png now.
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info_ptr);
