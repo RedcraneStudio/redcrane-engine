@@ -36,6 +36,7 @@ namespace game { namespace gfx { namespace gl
     if(vol.width == 0 || vol.height == 0) return;
 
     std::vector<unsigned char> data;
+    data.reserve(vol.width * vol.height * 4);
 
     // Go from the end to the beginning adding each byte to the end of the
     // vector.
