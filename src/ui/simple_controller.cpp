@@ -2,12 +2,12 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "glfw3_controller.h"
-#include "ui/element_iterator.h"
+#include "simple_controller.h"
+#include "element_iterator.h"
 namespace game { namespace ui
 {
-  bool GLFW_Controller::step(Shared_Element root,
-                             Mouse_State new_mouse) noexcept
+  bool Simple_Controller::step(Shared_Element root,
+                               Mouse_State new_mouse) noexcept
   {
     bool ret = false;
 
@@ -40,18 +40,24 @@ namespace game { namespace ui
       }
     }
 
+    if(ret == false)
+    {
+      if(is_click(new_mouse, old_mouse_))
+      {
+        on_click_(new_mouse.position);
+      }
+      if(is_hover(new_mouse, old_mouse_))
+      {
+        on_hover_(new_mouse.position);
+      }
+      if(is_drag(new_mouse, old_mouse_))
+      {
+        on_drag_(new_mouse.position, old_mouse_.position);
+      }
+    }
+
     old_mouse_ = new_mouse;
 
-    return ret;
-  }
-  Mouse_State GLFW_Controller::cur_mouse(GLFWwindow* win) noexcept
-  {
-    Vec<double> np_double;
-    glfwGetCursorPos(win, &np_double.x, &np_double.y);
-
-    auto ret =
-      Mouse_State{glfwGetMouseButton(win,GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS,
-                  vec_cast<int>(np_double)};
     return ret;
   }
 } }

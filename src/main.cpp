@@ -23,8 +23,8 @@
 
 #include "ui/load.h"
 #include "ui/freetype_renderer.h"
-
-#include "glfw3_controller.h"
+#include "ui/mouse_logic.h"
+#include "ui/simple_controller.h"
 
 #include "map/map.h"
 #include "map/json_structure.h"
@@ -39,6 +39,19 @@
 
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
+
+game::ui::Mouse_State gen_mouse_state(GLFWwindow* w)
+{
+  game::ui::Mouse_State ret;
+
+  ret.button_down =glfwGetMouseButton(w, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+
+  game::Vec<double> pos;
+  glfwGetCursorPos(w, &pos.x, &pos.y);
+  ret.position = game::vec_cast<int>(pos);
+
+  return ret;
+}
 
 struct Command_Options
 {
@@ -173,7 +186,7 @@ int main(int argc, char** argv)
   auto ui_load_params = ui::Load_Params{freetype_font, ui_adapter};
   auto hud = ui::load("ui/hud.json", ui_load_params);
 
-  auto controller = ui::GLFW_Controller{window};
+  auto controller = ui::Simple_Controller{};
 
   hud->find_child_r("build_button")->add_click_listener([](auto const& pt)
   {
@@ -181,31 +194,27 @@ int main(int argc, char** argv)
   });
 
   hud->layout(driver.window_extents());
-  while(!glfwWindowShouldClose(window))
+
+  controller.add_click_listener([&](auto const&)
   {
-    ++fps;
-
-    // Clear the screen and render the terrain.
-    driver.clear();
-    render_object(driver, terrain_obj);
-
-    glfwPollEvents();
-
-    // Get our mouse coordinates.
-    double x, y;
-    glfwGetCursorPos(window, &x, &y);
-
-    if(x < 0 || x > 1000.0 || y < 0 || y > 1000.0)
+    // Commit the current position of our moveable instance.
+    house_instances.push_back(moveable_instance);
+  });
+  controller.add_hover_listener([&](auto const& pt)
+  {
+    if(pt.x < 0 || pt.x > 1000.0 || pt.y < 0 || pt.y > 1000.0)
     {
       moveable_instance.obj.model_matrix = glm::mat4(1.0);
     }
     else
     {
+      // Find our depth.
       GLfloat z;
-      glReadPixels((float)x, (float) 1000.0 - y, 1, 1, GL_DEPTH_COMPONENT,
-                   GL_FLOAT, &z);
+      glReadPixels((float) pt.x, (float) 1000.0 - pt.y, 1, 1,
+                   GL_DEPTH_COMPONENT, GL_FLOAT, &z);
 
-      auto val = glm::unProject(glm::vec3(x, 1000.0 - y, z),
+      // Unproject our depth.
+      auto val = glm::unProject(glm::vec3(pt.x, 1000.0 - pt.y, z),
                                 camera_view_matrix(cam),
                                 camera_proj_matrix(cam),
                                 glm::vec4(0.0, 0.0, 1000.0, 1000.0));
@@ -213,11 +222,22 @@ int main(int argc, char** argv)
       // We have our position, render a single house there.
       moveable_instance.obj.model_matrix = glm::translate(glm::mat4(1.0), val);
     }
-
     // Move the house by however much the structure *type* requires.
-    moveable_instance.obj.model_matrix =
-      moveable_instance.obj.model_matrix *
-      house_struct.make_obj().model_matrix;
+    moveable_instance.obj.model_matrix = moveable_instance.obj.model_matrix *
+                                         house_struct.make_obj().model_matrix;
+  });
+  while(!glfwWindowShouldClose(window))
+  {
+    ++fps;
+    glfwPollEvents();
+
+    // Clear the screen and render the terrain.
+    driver.clear();
+    render_object(driver, terrain_obj);
+
+    // Render the terrain before we calculate the depth of the mouse position.
+    auto mouse_state = gen_mouse_state(window);
+    controller.step(hud, mouse_state);
 
     // Render our movable instance of a house.
     render_object(driver, moveable_instance.obj);
@@ -229,24 +249,10 @@ int main(int argc, char** argv)
     }
 
     {
-      controller.step(hud);
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
       hud->render(ui_adapter);
     }
     glfwSwapBuffers(window);
-
-    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
-       !has_clicked_down)
-    {
-      has_clicked_down = true;
-
-      // Commit the current position of our moveable instance.
-      house_instances.push_back(moveable_instance);
-    }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
-    {
-      has_clicked_down = false;
-    }
 
     if(int(glfwGetTime()) != time)
     {
