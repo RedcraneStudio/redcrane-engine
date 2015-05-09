@@ -6,17 +6,10 @@
 #include "ui/element_iterator.h"
 namespace game { namespace ui
 {
-  void GLFW_Controller::step(Shared_Element root) noexcept
+  bool GLFW_Controller::step(Shared_Element root,
+                             Mouse_State new_mouse) noexcept
   {
-    glfwPollEvents();
-
-    Vec<double> np_double;
-    glfwGetCursorPos(window_, &np_double.x, &np_double.y);
-
-    auto new_mouse =
-      Mouse_State{glfwGetMouseButton(window_,
-                                     GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS,
-                  vec_cast<int>(np_double)};
+    bool ret = false;
 
     auto iter = D_F_Elem_Iter{root};
 
@@ -31,19 +24,34 @@ namespace game { namespace ui
           if(is_click(new_mouse, old_mouse_))
           {
             cur_elem.on_click(pt);
+            ret = true;
           }
           if(is_hover(new_mouse, old_mouse_))
           {
             cur_elem.on_hover(pt);
+            ret = true;
           }
           if(is_drag(new_mouse, old_mouse_))
           {
             cur_elem.on_drag(new_mouse.position, old_mouse_.position);
+            ret = true;
           }
         }
       }
     }
 
     old_mouse_ = new_mouse;
+
+    return ret;
+  }
+  Mouse_State GLFW_Controller::cur_mouse(GLFWwindow* win) noexcept
+  {
+    Vec<double> np_double;
+    glfwGetCursorPos(win, &np_double.x, &np_double.y);
+
+    auto ret =
+      Mouse_State{glfwGetMouseButton(win,GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS,
+                  vec_cast<int>(np_double)};
+    return ret;
   }
 } }

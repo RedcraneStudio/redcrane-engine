@@ -11,7 +11,9 @@ namespace game { namespace ui
   struct GLFW_Controller
   {
     GLFW_Controller(GLFWwindow* window) noexcept : window_(window) {}
-    void step(Shared_Element root) noexcept;
+    bool step(Shared_Element root, Mouse_State ns) noexcept;
+
+    static Mouse_State cur_mouse(GLFWwindow* win) noexcept;
   private:
     GLFWwindow* window_;
     Mouse_State old_mouse_;
