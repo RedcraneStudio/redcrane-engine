@@ -122,15 +122,10 @@ int main(int argc, char** argv)
   use_camera(driver, cam);
 
   // Build our main mesh using our flat terrain.
-  auto terrain_obj = gfx::Object{};
-  make_terrain_mesh(*terrain_obj.mesh, make_flat_terrain(0, 25, 25), .01, 1);
+  auto terrain_obj = gfx::load_object("obj/terrain.obj", "mat/terrain.json");
 
-  terrain_obj.material->diffuse_color = colors::white;
-
-  load_png("tex/grass.png", *terrain_obj.material->texture);
-
-  terrain_obj.model_matrix = glm::translate(glm::mat4(1.0),
-                                            glm::vec3(-12.5, 0.0, -12.5));
+  terrain_obj.model_matrix = glm::scale(glm::mat4(1.0f),
+                                        glm::vec3(4.0f, 2.0f, 4.0f));
 
   prepare_object(driver, terrain_obj);
 
