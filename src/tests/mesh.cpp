@@ -16,22 +16,22 @@ TEST_CASE("Face index string is properly parsed", "[struct Face]")
 {
   using namespace game;
 
-  auto f = parse_face("6");
+  auto f = parse_vertex_indices("6");
   REQUIRE(f.vertex == 6);
   REQUIRE(f.tex_coord == 0);
   REQUIRE(f.normal == 0);
 
-  f = parse_face("5//2");
+  f = parse_vertex_indices("5//2");
   REQUIRE(f.vertex == 5);
   REQUIRE(f.tex_coord == 0);
   REQUIRE(f.normal == 2);
 
-  f = parse_face("7/1/5");
+  f = parse_vertex_indices("7/1/5");
   REQUIRE(f.vertex == 7);
   REQUIRE(f.tex_coord == 1);
   REQUIRE(f.normal == 5);
 
-  f = parse_face("9/8");
+  f = parse_vertex_indices("9/8");
   REQUIRE(f.vertex == 9);
   REQUIRE(f.tex_coord == 8);
   REQUIRE(f.normal == 0);
@@ -64,4 +64,7 @@ TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
   REQUIRE(mesh.mesh_data().vertices[2].position == pt);
   pt = {10.0, -10.0, 0.0};
   REQUIRE(mesh.mesh_data().vertices[3].position == pt);
+
+  REQUIRE(mesh.mesh_data().elements[0] == mesh.mesh_data().elements[4]);
+  REQUIRE(mesh.mesh_data().elements[2] == mesh.mesh_data().elements[5]);
 }

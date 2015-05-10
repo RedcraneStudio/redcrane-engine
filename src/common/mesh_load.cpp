@@ -6,30 +6,26 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <set>
 #include "log.h"
 namespace game
 {
-  bool operator<(Face const& f1, Face const& f2) noexcept
+  bool operator<(Vertex_Indices const& v1, Vertex_Indices const& v2) noexcept
   {
-    if(f1.vertex == f2.vertex)
-    {
-      if(f1.normal == f2.normal)
-      {
-        return f1.tex_coord < f2.tex_coord;
-      }
-      else return f1.normal < f2.normal;
-    }
-    else return f1.vertex < f2.vertex;
+    // This is to get correct sorting for the set of vertex indices, otherwise
+    // we'll generate the id right before it becomes useless.
+    return v1.index < v2.index;
   }
-  bool operator==(Face const& f1, Face const& f2) noexcept
+  bool operator==(Vertex_Indices const& v1, Vertex_Indices const& v2) noexcept
   {
-    return f1.vertex == f2.vertex && f1.normal == f2.normal &&
-           f1.tex_coord == f2.tex_coord;
+    // Index is intentionally left out of this comparison.
+    return v1.vertex == v2.vertex && v1.normal == v2.normal &&
+           v1.tex_coord == v2.tex_coord;
   }
-  Face parse_face(std::string str) noexcept
+  Vertex_Indices parse_vertex_indices(std::string str) noexcept
   {
     // str could be "2" or "2/1" or "2//4" or "2/1/4"
-    Face f{0, 0, 0};
+    Vertex_Indices f{0, 0, 0, 0};
 
     std::istringstream stream{str};
 
@@ -84,10 +80,10 @@ namespace game
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> uv;
 
-    // Vector to be filled with all the unique face vertex/texture/normal
-    // tuples.
-    std::vector<Face> face_tuples;
-    std::vector<Face> face_tuples_copy;
+    // This will store all of our unique vertices.
+    std::set<Vertex_Indices> indices_set;
+    // This will store our vertices in order.
+    std::vector<Vertex_Indices> indices;
 
     // First pass, load everything.
     std::string line;
@@ -116,37 +112,40 @@ namespace game
         line_stream >> coord.x >> coord.y;
         uv.push_back(coord);
       }
-      // Load the faces as a tuple into the faces_tuple vector.
       if(op == "f")
       {
+        // For each tuple of indices in the face.
         for(int i = 0; i < 3; ++i)
         {
-          // Parse the single face.
-          std::string face_str;
-          line_stream >> face_str;
-          // Push it to the vector
-          face_tuples.push_back(parse_face(face_str));
+          std::string index_str;
+          line_stream >> index_str;
+          indices.push_back(parse_vertex_indices(index_str));
         }
       }
     }
 
-    // First copy the faces to preserve the original order, which is important
-    // because pairs of threes represent triangles, obviously.
-    face_tuples_copy = face_tuples;
+    int cur_index = 0;
+    // Copy our vertice indices from the ordered vector to a set.
+    for(auto& vert : indices)
+    {
+      // Give it an id based on it's position.
+      vert.index = cur_index;
 
-    // Sort it
-    using std::begin; using std::end;
-    std::sort(begin(face_tuples), end(face_tuples));
+      // Because id doesn't participate in equality testing the first one in
+      // gets to keep it's id.
+      // But because index *is* used for ordering, these will stay in order
+      // so that index is actually relevant.
+      auto res = indices_set.insert(vert);
 
-    // Remove doubles
-    auto new_end = std::unique(begin(face_tuples), end(face_tuples));
-    face_tuples.erase(new_end, end(face_tuples));
+      // If an insertion took place, increment our counter.
+      if(std::get<1>(res)) ++cur_index;
+    }
 
     // Now duplicate vertices as needed.
     auto mesh = Mesh_Data{};
 
     // Go through the unique list and build each vertex.
-    for(auto const& f : face_tuples)
+    for(auto const& f : indices_set)
     {
       Vertex vertex;
       if(f.vertex - 1 < vertices.size())
@@ -166,6 +165,15 @@ namespace game
 
     // Now go through and get a suitable list of faces by matching each one
     // with the list of unique face tuples.
+
+    /*
+     * Note: This is when face_tuples was a vector.
+     * This is worst case O(n^2) assuming no duplicate vertices are used. Worst
+     * case probably won't be happening all that often but it's still a very
+     * large O(n*m) where m is the number of unique vertices and n is the total
+     * number of faces. Something like that.
+     */
+#if 0
     for(auto const& real_face : face_tuples_copy)
     {
       for(size_t i = 0; i < face_tuples.size(); ++i)
@@ -176,6 +184,15 @@ namespace game
         }
       }
     }
+#endif
+
+    for(auto const& vertex : indices)
+    {
+      // We need to find the index of our current element indices in our unique
+      // list. That offset should be what we push to the elements vector.
+      mesh.elements.push_back(indices_set.find(vertex)->index);
+    }
+
     m.allocate_from(std::move(mesh));
   }
 }
