@@ -241,6 +241,8 @@ int main(int argc, char** argv)
       log_d("fps: %", fps);
       fps = 0;
     }
+
+    flush_log();
   }
   }
   glfwTerminate();
