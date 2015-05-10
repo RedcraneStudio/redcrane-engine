@@ -53,6 +53,13 @@ game::ui::Mouse_State gen_mouse_state(GLFWwindow* w)
   return ret;
 }
 
+void log_gl_limits(game::Log_Severity s) noexcept
+{
+  GLint i = 0;
+  glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &i);
+  log(s, "GL_MAX_ELEMENTS_VERTICES: %", i);
+}
+
 struct Command_Options
 {
 };
