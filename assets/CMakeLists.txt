@@ -8,7 +8,7 @@ add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/house.obj
                     shader/basic/f shader/basic/v
                     shader/hud/f shader/hud/v
                     tex/cracked_soil.png tex/grass.png
-                    ui/hud.json)
+                    ui/hud.json obj/terrain.obj mat/terrain.json)
 
 include(convert_files)
 
