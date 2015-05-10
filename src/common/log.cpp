@@ -98,6 +98,26 @@ namespace game
     req->buf = uv_buf_init(msg_data, final_msg.size());
     uv_fs_write(loop_, &req->req, 1, &req->buf, 1, -1, after_log);
   }
+  void log(Log_Severity severity, std::string msg) noexcept
+  {
+    // This could be implemented differently, for instance with a
+    // enum-to-string function + calling the log(string,string) function
+    // directly.
+    switch(severity)
+    {
+      case Log_Severity::Error:
+        log_e(msg);
+        break;
+      case Log_Severity::Warning:
+        log_w(msg);
+        break;
+      case Log_Severity::Info:
+        log_i(msg);
+        break;
+      case Log_Severity::Debug:
+        log_d(msg);
+    }
+  }
   void log_e(std::string msg) noexcept
   {
     if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Error))

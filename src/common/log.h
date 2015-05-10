@@ -24,6 +24,13 @@ namespace game
 
   void set_log_level(Log_Severity level) noexcept;
 
+  template <class... Args>
+  void log(Log_Severity severity, std::string msg, Args&&... args) noexcept
+  {
+    log(severity, format(msg, 0, "", std::forward<Args>(args)...));
+  }
+  void log(Log_Severity severity, std::string msg) noexcept;
+
   void log_e(std::string msg) noexcept;
 
   template <class... Args>
