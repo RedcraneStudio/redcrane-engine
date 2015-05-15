@@ -6,5 +6,5 @@
 #include "texture.h"
 namespace game
 {
-  void load_png(std::string png, Texture& t) noexcept;
+  void load_png(std::string png, Texture& t, bool alloc_once = false) noexcept;
 }

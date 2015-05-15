@@ -10,7 +10,7 @@ namespace game
 {
   void error_fn(void*) noexcept {}
 
-  void load_png(std::string filename, Texture& t) noexcept
+  void load_png(std::string filename, Texture& t, bool allocate_once) noexcept
   {
     std::FILE* fp = std::fopen(filename.c_str(), "rb");
     if(!fp)
@@ -85,9 +85,11 @@ namespace game
       png_bytes_per_pixel = 4;
     }
 
-    // We're allocated memory for the entire image, that may or may not bite
-    // us in the ass later.
-    auto colors = new Color[image_extents.x * image_extents.y];
+    Color* colors = nullptr;
+    if(allocate_once)
+    {
+      colors = new Color[image_extents.x * image_extents.y];
+    }
     for(int i = 0; i < image_extents.y * image_extents.x; ++i)
     {
       // Find out our position.
@@ -98,7 +100,22 @@ namespace game
       auto dst_ptr = *(png_data + y);
       dst_ptr += x * png_bytes_per_pixel;
 
-      auto color_ptr = colors + (y * image_extents.y + x);
+      // Every time we are at a new row...
+      if(x == 0 && !allocate_once)
+      {
+        // Allocate the row.
+        colors = new Color[image_extents.x];
+      }
+
+      Color* color_ptr = nullptr;
+      if(allocate_once)
+      {
+        color_ptr = colors + (y * image_extents.y + x);
+      }
+      else
+      {
+        color_ptr = colors + x;
+      }
       color_ptr->r = dst_ptr[0];
       color_ptr->g = dst_ptr[1];
       color_ptr->b = dst_ptr[2];
@@ -111,9 +128,19 @@ namespace game
       {
         color_ptr->a = dst_ptr[3];
       }
+
+      // At the end of the row, blit the row.
+      if(x == image_extents.x - 1 && !allocate_once)
+      {
+        t.blit_data(Volume<int>{{0,y},image_extents.x,1}, colors);
+        delete[] colors;
+      }
     }
-    t.blit_data(vol_from_extents(image_extents), colors);
-    delete[] colors;
+    if(allocate_once)
+    {
+      t.blit_data(vol_from_extents(image_extents), colors);
+      delete[] colors;
+    }
 
     // We copied the data, so just forget about png now.
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info_ptr);
