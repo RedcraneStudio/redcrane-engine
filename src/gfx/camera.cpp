@@ -49,7 +49,7 @@ namespace game
 
       cam.projection_mode = Camera_Type::Perspective;
       cam.perspective = Perspective_Cam_Params{glm::radians(50.0f),
-                                               1.0f, .01f, 25.0f};
+                                               1.0f, .01f, 100.0f};
 
       cam.definition = Camera_Definition::Pitch_Yaw_Pos;
       cam.fp.pos = glm::vec3(5, 5, 5);
