@@ -60,7 +60,7 @@ namespace game { namespace gfx
                           Primitive_Type::Triangle);
     filled_rect_.set_num_element_indices(6);
 
-    auto filled_indices = std::array<unsigned int, 6>{0, 1, 2, 0, 2, 3};
+    auto filled_indices = std::array<unsigned int, 6>{0, 2, 1, 0, 3, 2};
     filled_rect_.set_element_indices(0, 6, &filled_indices[0]);
 
     lines_rect_.set_impl(d_->make_mesh_repr());
