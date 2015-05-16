@@ -8,8 +8,7 @@
 #include <unordered_map>
 #include "template_utility.hpp"
 namespace game
-{
-  struct Lang
+{ struct Lang
   {
     std::unordered_map<std::string, std::string> dict;
   };
@@ -68,6 +67,13 @@ namespace game
   std::string format_str(std::string str, Args&&... args) noexcept
   {
     return format(str, 0, "", std::forward<Args>(args)...);
+  }
+
+  template <class... Args>
+  void write_format_str(std::ostream& o, std::string str,
+                        Args&&... args) noexcept
+  {
+    o << format_str(str, std::forward<Args>(args)...);
   }
 
   template <class... Args>
