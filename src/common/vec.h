@@ -129,8 +129,8 @@ namespace game
   template <typename P1, typename Scalar> inline auto
   operator/=(Vec<P1>& lhs, Scalar rhs) noexcept -> Vec<P1>&
   {
-    lhs.x /= rhs.x;
-    lhs.y /= rhs.y;
+    lhs.x /= rhs;
+    lhs.y /= rhs;
 
     return lhs;
   }
