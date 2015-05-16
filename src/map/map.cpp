@@ -44,51 +44,57 @@ namespace game
   Mesh_Data make_terrain_mesh(Terrain const& t, double scale_fac,
                               double flat_fac) noexcept
   {
-    std::array<Vertex, 4> vertices;
-    std::vector<unsigned int> faces { 1, 3, 2, 0, 1, 2 };
-
-    vertices[0].position = {0.0, 0.0, 1.0};
-    vertices[1].position = {0.0, 0.0, 0.0};
-    vertices[2].position = {1.0, 0.0, 1.0};
-    vertices[3].position = {1.0, 0.0, 0.0};
-
-    vertices[0].uv = {0.0, 1.0};
-    vertices[1].uv = {0.0, 0.0};
-    vertices[2].uv = {1.0, 1.0};
-    vertices[3].uv = {1.0, 0.0};
-
     auto mesh = Mesh_Data{};
 
-    // Add some amount of rectangles, then adjust their height.
-    // Doesn't work when t.h or t.w == 1 or 0
-    auto iteration = 0;
-    for(int i = 0; i < t.h - 1; ++i)
+    // Add a vertex with a given height for each altitude given.
+    for(int i = 0; i < t.h; ++i)
     {
-      for(int j = 0; j < t.w - 1; ++j)
+      for(int j = 0; j < t.w; ++j)
       {
-        std::array<Vertex, 4> mod_verts = vertices;
+        Vertex v;
 
-        for(auto& vertex : mod_verts)
-        {
-          // Scale the width and depth by flat_fac and the height by scale_fac.
-          // We also translate the squares based on their position on the grid.
-          vertex.position.x = (vertex.position.x + j) * flat_fac;
-          vertex.position.y = t.altitude[i][j] * scale_fac;
-          vertex.position.z = (vertex.position.z + i) * flat_fac;
-        }
+        v.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        v.uv = glm::vec2(0.0f, 0.0f);
+        v.position.x = j * flat_fac;
+        v.position.y = t.altitude[i][j] * scale_fac;
+        v.position.z = i * flat_fac;
 
-        using std::end;
-        // Insert the vertices.
-        mesh.vertices.insert(end(mesh.vertices), begin(mod_verts),
-                             end(mod_verts));
+        mesh.vertices.push_back(v);
+      }
+    }
 
-        for(auto face : faces)
-        {
-          // Adjust the face by our current iteration.
-          mesh.elements.push_back(face + vertices.size() * iteration);
-        }
+    // Add faces.
+    std::array<unsigned int, 6> face_indices{ 0, 3, 2, 0, 1, 2 };
 
-        ++iteration;
+    // For the amount of rectangles.
+    int num_rects = (t.w - 1) * (t.h - 1);
+    for(int i = 0; i < num_rects; ++i)
+    {
+      int x = i % t.w;
+      int y = i / t.w;
+
+      if(x == t.w - 1 || y == t.h - 1)
+      {
+        // If we are at the last vertex, just bail out. Trying to make a face
+        // here will make one across the mesh which would be terrible.
+        continue;
+      }
+
+      mesh.elements.push_back(x + 0 + y * t.w);
+      mesh.elements.push_back(x + 1 + (y + 1) * t.w);
+      mesh.elements.push_back(x + 1 + y * t.w);
+      mesh.elements.push_back(x + 0 + y * t.w);
+      mesh.elements.push_back(x + 0 + (y + 1) * t.w);
+      mesh.elements.push_back(x + 1 + (y + 1) * t.w);
+    }
+
+    // Set the uv coordinates over the whole mesh.
+    for(int i = 0; i < t.h; ++i)
+    {
+      for(int j = 0; j < t.w; ++j)
+      {
+        mesh.vertices[i * t.w + j].uv = glm::vec2((float) j / t.w,
+                                                  (float) i / t.h);
       }
     }
 
