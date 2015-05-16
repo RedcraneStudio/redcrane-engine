@@ -47,13 +47,14 @@ namespace game
     {
       auto cam = Camera{};
 
-      cam.projection_mode = Camera_Type::Orthographic;
-      cam.ortho = Ortho_Cam_Params{-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 50.0f};
+      cam.projection_mode = Camera_Type::Perspective;
+      cam.perspective = Perspective_Cam_Params{glm::radians(50.0f),
+                                               1.0f, .01f, 25.0f};
 
-      cam.definition = Camera_Definition::Look_At;
-      cam.look_at.eye = glm::vec3(5, 10, 5);
-      cam.look_at.look = glm::vec3(0, 0, 0);
-      cam.look_at.up = glm::vec3(0, 1, 0);
+      cam.definition = Camera_Definition::Pitch_Yaw_Pos;
+      cam.fp.pos = glm::vec3(5, 5, 5);
+      cam.fp.yaw = glm::radians(-45.0f);
+      cam.fp.pitch = glm::radians(45.0f);
 
       return cam;
     }
