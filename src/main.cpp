@@ -40,6 +40,14 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
 
+void scroll_callback(GLFWwindow* window, double, double deltay)
+{
+  auto cam_ptr = glfwGetWindowUserPointer(window);
+  auto& camera = *((game::gfx::Camera*) cam_ptr);
+
+  camera.fp.pos += -deltay;
+}
+
 game::ui::Mouse_State gen_mouse_state(GLFWwindow* w)
 {
   game::ui::Mouse_State ret;
@@ -119,7 +127,6 @@ int main(int argc, char** argv)
 
   // Make an isometric camera.
   auto cam = gfx::make_isometric_camera();
-  use_camera(driver, cam);
 
   // Build our main mesh using our flat terrain.
   auto terrain_obj = gfx::load_object("obj/terrain.obj", "mat/terrain.json");
@@ -202,6 +209,23 @@ int main(int argc, char** argv)
     moveable_instance.obj.model_matrix = moveable_instance.obj.model_matrix *
                                          house_struct.make_obj().model_matrix;
   });
+
+  controller.add_drag_listener([&](auto const& np, auto const& op)
+  {
+    // pan
+    auto movement = vec_cast<float>(np - op);
+    movement /= -75;
+
+    glm::vec4 move_vec(movement.x, 0.0f, movement.y, 0.0f);
+    move_vec = glm::inverse(camera_view_matrix(cam)) * move_vec;
+
+    cam.fp.pos.x += move_vec.x;
+    cam.fp.pos.z += move_vec.z;
+  });
+
+  glfwSetWindowUserPointer(window, &cam);
+  glfwSetScrollCallback(window, scroll_callback);
+
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
@@ -209,6 +233,8 @@ int main(int argc, char** argv)
 
     // Clear the screen and render the terrain.
     driver.clear();
+    use_camera(driver, cam);
+
     render_object(driver, terrain_obj);
 
     // Render the terrain before we calculate the depth of the mouse position.
