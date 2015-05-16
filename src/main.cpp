@@ -128,11 +128,16 @@ int main(int argc, char** argv)
   // Make an isometric camera.
   auto cam = gfx::make_isometric_camera();
 
-  // Build our main mesh using our flat terrain.
-  auto terrain_obj = gfx::load_object("obj/terrain.obj", "mat/terrain.json");
+  auto terrain_obj = gfx::Object{};
+  *terrain_obj.material = gfx::load_material("mat/terrain.json");
 
-  terrain_obj.model_matrix = glm::scale(glm::mat4(1.0f),
-                                        glm::vec3(4.0f, 2.0f, 4.0f));
+  // Build our terrain from a heightmap.
+  {
+    Software_Texture terrain_heightmap;
+    load_png("map/default.png", terrain_heightmap);
+    auto terrain = make_terrain_from_heightmap(terrain_heightmap);
+    make_terrain_mesh(*terrain_obj.mesh, terrain, .01f, .01);
+  }
 
   prepare_object(driver, terrain_obj);
 
