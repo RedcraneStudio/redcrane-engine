@@ -3,8 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "map.h"
-#include "../gfx/idriver.h"
+#include "structure.h"
 namespace game
 {
   struct Json_Structure : public IStructure

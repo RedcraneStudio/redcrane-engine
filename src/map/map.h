@@ -3,14 +3,9 @@
  * All rights reserved.
  */
 #pragma once
-#include <memory>
 #include <vector>
-#include "../common/aabb.h"
-#include "../gfx/material.h"
 #include "../common/software_texture.h"
 #include "../common/mesh.h"
-#include "../gfx/object.h"
-#include "../gfx/idriver.h"
 namespace game
 {
   struct Terrain
@@ -34,38 +29,4 @@ namespace game
   {
     m.allocate_from(std::move(make_terrain_mesh(t, s, f)));
   }
-
-  enum class Orient
-  {
-    N,
-    E,
-    S,
-    W
-  };
-
-  struct IStructure
-  {
-    virtual ~IStructure() noexcept {}
-
-    virtual AABB aabb() const noexcept = 0;
-
-    /*!
-     * This function must always return the same mesh and material (points
-     * to the same object).
-     */
-    virtual gfx::Object make_obj() const noexcept = 0;
-  };
-
-  struct Structure_Instance
-  {
-    Structure_Instance(IStructure&, Orient) noexcept;
-    Structure_Instance(Structure_Instance const&) noexcept;
-    Structure_Instance& operator=(Structure_Instance const& i) noexcept;
-
-    ~Structure_Instance() noexcept = default;
-
-    const IStructure* structure_type;
-    gfx::Object obj;
-    Orient orientation;
-  };
 }
