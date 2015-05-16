@@ -23,8 +23,19 @@ namespace game
     }
     for(unsigned int i = 0; i < mesh.elements.size(); i += 3)
     {
-      write_format_str(stream, "f % % %\n", mesh.elements[i] + 1,
-                       mesh.elements[i + 1] + 1, mesh.elements[i + 2] + 1);
+      std::array<unsigned int, 3> indices;
+
+      indices[0] = mesh.elements[i] + 1;
+      indices[1] = mesh.elements[i + 1] + 1;
+      indices[2] = mesh.elements[i + 2] + 1;
+
+      write_format_str(stream, "f % % %n", indices[0], indices[1], indices[2]);
+#if 0
+      write_format_str(stream, "f %/%/% %/%/% %/%/%\n",
+                       indices[0], indices[0], indices[0],
+                       indices[1], indices[1], indices[1],
+                       indices[2], indices[2], indices[2]);
+#endif
     }
   }
   void write_obj(std::string fn, Mesh_Data const& mesh) noexcept
