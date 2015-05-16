@@ -23,6 +23,24 @@ namespace game
 
     return terrain;
   }
+  Terrain make_terrain_from_heightmap(Software_Texture const& tex, int add)
+  {
+    auto ret = Terrain{};
+    ret.w = tex.allocated_extents().x;
+    ret.h = tex.allocated_extents().y;
+
+    for(int i = 0; i < ret.h; ++i)
+    {
+      ret.altitude.emplace_back();
+      for(int j = 0; j < ret.w; ++j)
+      {
+        // Just use the red color.
+        auto col = tex.get_pt({i, j});
+        ret.altitude.back().push_back((int) col.r + add);
+      }
+    }
+    return ret;
+  }
   Mesh_Data make_terrain_mesh(Terrain const& t, double scale_fac,
                               double flat_fac) noexcept
   {

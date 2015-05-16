@@ -7,6 +7,7 @@
 #include <vector>
 #include "../common/aabb.h"
 #include "../gfx/material.h"
+#include "../common/software_texture.h"
 #include "../common/mesh.h"
 #include "../gfx/object.h"
 #include "../gfx/idriver.h"
@@ -22,6 +23,8 @@ namespace game
   };
 
   Terrain make_flat_terrain(int alt, int w, int h);
+  Terrain make_terrain_from_heightmap(Software_Texture const& tex,
+                                      int add = -0xff / 2);
 
   Mesh_Data make_terrain_mesh(Terrain const& t, double scale_fac = .01,
                               double flat_fac = 1) noexcept;
