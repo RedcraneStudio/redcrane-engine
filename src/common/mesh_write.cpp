@@ -9,7 +9,7 @@ namespace game
 {
   void write_obj_stream(std::ostream& stream, Mesh_Data const& mesh) noexcept
   {
-    stream << "# Generating by <insert-engine-version-here>" << std::endl;
+    stream << "# Generating by <insert-engine-version-here>\n";
 
     // For now don't worry about doubles.
 
@@ -31,5 +31,6 @@ namespace game
   {
     std::ofstream file{fn};
     write_obj_stream(file, mesh);
+    file.flush();
   }
 }
