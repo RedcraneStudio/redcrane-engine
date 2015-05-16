@@ -163,6 +163,8 @@ int main(int argc, char** argv)
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
+  glEnable(GL_CULL_FACE);
+
   // Our quick hack to avoid splitting into multiple functions and dealing
   // either with global variables or like a bound struct or something.
   bool has_clicked_down = false;
