@@ -29,7 +29,7 @@ namespace game
       indices[1] = mesh.elements[i + 1] + 1;
       indices[2] = mesh.elements[i + 2] + 1;
 
-      write_format_str(stream, "f % % %n", indices[0], indices[1], indices[2]);
+      write_format_str(stream, "f % % %\n", indices[0], indices[1], indices[2]);
 #if 0
       write_format_str(stream, "f %/%/% %/%/% %/%/%\n",
                        indices[0], indices[0], indices[0],
