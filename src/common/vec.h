@@ -134,5 +134,10 @@ namespace game
 
     return lhs;
   }
-}
 
+  template <typename P1>
+  inline auto area(Vec<P1> const& extents) noexcept -> decltype(auto)
+  {
+    return extents.x * extents.y;
+  }
+}
