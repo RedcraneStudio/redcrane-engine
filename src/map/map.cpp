@@ -6,60 +6,71 @@
 #include "../common/grid_iterator.h"
 namespace game
 {
-  Terrain make_flat_terrain(int alt, int w, int h)
+  void Heightmap::allocate(Vec<int> e) noexcept
   {
-    auto terrain = Terrain{};
+    vals = new int16_t[area(e)];
+    extents = e;
+    allocated = true;
+  }
+  Heightmap::~Heightmap() noexcept
+  {
+    delete[] vals;
+  }
+
+  Heightmap make_flat_heightmap(int16_t alt, int w, int h)
+  {
+    Heightmap heights{};
+
+    heights.allocate({w, h});
+
     for(int i = 0; i < h; ++i)
     {
-      terrain.altitude.emplace_back();
       for(int j = 0; j < w; ++j)
       {
-        terrain.altitude.back().push_back(alt);
+        heights.vals[i * w + j] = alt;
       }
     }
 
-    terrain.w = w;
-    terrain.h = h;
-
-    return terrain;
+    return heights;
   }
-  Terrain make_terrain_from_heightmap(Software_Texture const& tex, int add)
+  Heightmap make_heightmap_from_image(Software_Texture const& tex, int add)
   {
-    auto ret = Terrain{};
-    ret.w = tex.allocated_extents().x;
-    ret.h = tex.allocated_extents().y;
+    Heightmap ret{};
 
-    for(int i = 0; i < ret.h; ++i)
+    ret.allocate(tex.allocated_extents());
+
+    for(int i = 0; i < ret.extents.y; ++i)
     {
-      ret.altitude.emplace_back();
-      for(int j = 0; j < ret.w; ++j)
+      for(int j = 0; j < ret.extents.x; ++j)
       {
         // Just use the red color.
         auto col = tex.get_pt({i, j});
-        ret.altitude.back().push_back((int) col.r + add);
+        ret.vals[i * ret.extents.x + j] = col.r + add;
       }
     }
     return ret;
   }
-  Mesh_Data make_terrain_mesh(Terrain const& t, double scale_fac,
-                              double flat_fac) noexcept
+  Terrain_Mesh make_terrain_mesh(Heightmap const& heights,
+                                 Vec<float> chunk_extents, double y_scale,
+                                 double flat_scale) noexcept
   {
-    auto mesh = Mesh_Data{};
+    auto mesh = Terrain_Mesh{};
+    mesh.mesh = make_maybe_owned<Mesh_Data>();
 
     // Add a vertex with a given height for each altitude given.
-    for(int i = 0; i < t.h; ++i)
+    for(int i = 0; i < heights.extents.y; ++i)
     {
-      for(int j = 0; j < t.w; ++j)
+      for(int j = 0; j < heights.extents.x; ++j)
       {
         Vertex v;
 
         v.normal = glm::vec3(0.0f, 1.0f, 0.0f);
         v.uv = glm::vec2(0.0f, 0.0f);
-        v.position.x = j * flat_fac;
-        v.position.y = t.altitude[i][j] * scale_fac;
-        v.position.z = i * flat_fac;
+        v.position.x = j * flat_scale;
+        v.position.y = heights.vals[i * heights.extents.x + j] * y_scale;
+        v.position.z = i * flat_scale;
 
-        mesh.vertices.push_back(v);
+        mesh.mesh->vertices.push_back(v);
       }
     }
 
@@ -67,42 +78,44 @@ namespace game
     std::array<unsigned int, 6> face_indices{ 0, 3, 2, 0, 1, 2 };
 
     // For the amount of rectangles.
-    int num_rects = (t.w - 1) * (t.h - 1);
+    auto e = heights.extents;
+
+    int num_rects = (e.x - 1) * (e.y - 1);
     for(int i = 0; i < num_rects; ++i)
     {
-      int x = i % t.w;
-      int y = i / t.w;
+      int x = i % e.x;
+      int y = i / e.y;
 
-      if(x == t.w - 1 || y == t.h - 1)
+      if(x == e.x - 1 || y == e.y - 1)
       {
         // If we are at the last vertex, just bail out. Trying to make a face
         // here will make one across the mesh which would be terrible.
         continue;
       }
 
-      mesh.elements.push_back(x + 0 + y * t.w);
-      mesh.elements.push_back(x + 1 + (y + 1) * t.w);
-      mesh.elements.push_back(x + 1 + y * t.w);
-      mesh.elements.push_back(x + 0 + y * t.w);
-      mesh.elements.push_back(x + 0 + (y + 1) * t.w);
-      mesh.elements.push_back(x + 1 + (y + 1) * t.w);
+      mesh.mesh->elements.push_back(x + 0 + y * e.x);
+      mesh.mesh->elements.push_back(x + 1 + (y + 1) * e.x);
+      mesh.mesh->elements.push_back(x + 1 + y * e.x);
+      mesh.mesh->elements.push_back(x + 0 + y * e.x);
+      mesh.mesh->elements.push_back(x + 0 + (y + 1) * e.x);
+      mesh.mesh->elements.push_back(x + 1 + (y + 1) * e.x);
     }
 
     // Set the uv coordinates over the whole mesh.
-    for(int i = 0; i < t.h; ++i)
+    for(int i = 0; i < e.y; ++i)
     {
-      for(int j = 0; j < t.w; ++j)
+      for(int j = 0; j < e.x; ++j)
       {
-        mesh.vertices[i * t.w + j].uv = glm::vec2((float) j / t.w,
-                                                  (float) i / t.h);
+        mesh.mesh->vertices[i * e.x + j].uv =
+          glm::vec2((float) j / e.x, (float) i / e.y);
       }
     }
 
     // Change the mesh defaults, of course the user can just switch these as
     // soon as they get ahold of the mesh.
-    mesh.usage_hint = Usage_Hint::Draw;
-    mesh.upload_hint = Upload_Hint::Static;
-    mesh.primitive = Primitive_Type::Triangle;
+    mesh.mesh->usage_hint = Usage_Hint::Draw;
+    mesh.mesh->upload_hint = Upload_Hint::Static;
+    mesh.mesh->primitive = Primitive_Type::Triangle;
 
     return mesh;
   }

@@ -20,6 +20,7 @@
 #include "common/texture_load.h"
 #include "common/software_mesh.h"
 #include "common/mesh_load.h"
+#include "common/mesh_write.h"
 
 #include "ui/load.h"
 #include "ui/freetype_renderer.h"
@@ -135,8 +136,10 @@ int main(int argc, char** argv)
   {
     Software_Texture terrain_heightmap;
     load_png("map/default.png", terrain_heightmap);
-    auto terrain = make_terrain_from_heightmap(terrain_heightmap);
-    make_terrain_mesh(*terrain_obj.mesh, terrain, .01f, .01);
+    auto terrain = make_heightmap_from_image(terrain_heightmap);
+    auto terrain_chunks =
+      make_terrain_mesh(*terrain_obj.mesh, terrain, .01f, .01);
+    write_obj("../terrain.obj", terrain_obj.mesh->mesh_data());
   }
 
   prepare_object(driver, terrain_obj);

@@ -4,29 +4,58 @@
  */
 #pragma once
 #include <vector>
+#include "../common/color.h"
+#include "../common/aabb.h"
 #include "../common/software_texture.h"
-#include "../common/mesh.h"
+#include "../common/software_mesh.h"
 namespace game
 {
-  struct Terrain
+  struct Heightmap
   {
-    // Let's use a tile based system, for now. The integer represents altitude.
-    std::vector< std::vector<int> > altitude;
+    void allocate(Vec<int> extents) noexcept;
+    ~Heightmap() noexcept;
 
-    int w;
-    int h;
+    int16_t* vals = nullptr;
+    Vec<int> extents;
+    bool allocated;
   };
 
-  Terrain make_flat_terrain(int alt, int w, int h);
-  Terrain make_terrain_from_heightmap(Software_Texture const& tex,
-                                      int add = -0xff / 2);
-
-  Mesh_Data make_terrain_mesh(Terrain const& t, double scale_fac = .01,
-                              double flat_fac = 1) noexcept;
-
-  inline void make_terrain_mesh(Mesh& m, Terrain const& t, double s = .01,
-                                double f = 1) noexcept
+  struct Terrain_Chunk
   {
-    m.allocate_from(std::move(make_terrain_mesh(t, s, f)));
+    AABB aabb;
+    // In vertices, not bytes!
+    std::size_t vertex_offset;
+    std::size_t count;
+  };
+
+  struct Terrain_Mesh
+  {
+    Maybe_Owned<Mesh_Data> mesh;
+
+    std::vector<Terrain_Chunk> volume;
+  };
+
+  Heightmap make_flat_heightmap(int16_t alt, int w, int h);
+  Heightmap make_heightmap_from_image(Software_Texture const& tex,
+                                        int add = -0xff / 2);
+
+  Terrain_Mesh make_terrain_mesh(Heightmap const& heights,
+                                 Vec<float> chunk_extents = {10,10},
+                                 double y_scale = .01,
+                                 double flat_scale = 1) noexcept;
+
+  // We require a software mesh because only with a software mesh can we access
+  // the mesh_data after moving it into the mesh. This is the only expected
+  // thing to do so that our maybe owned mesh data in the terrain mesh can
+  // *point* to the data in the software mesh.
+  inline Terrain_Mesh make_terrain_mesh(Software_Mesh& m,
+                                        Heightmap const& heights,
+                                        double y_scale = .01,
+                                        double flat_scale = 1) noexcept
+  {
+    auto terrain_mesh = make_terrain_mesh(heights, {}, y_scale, flat_scale);
+    m.allocate_from(std::move(*terrain_mesh.mesh));
+    terrain_mesh.mesh.set_pointer(&m.mesh_data());
+    return terrain_mesh;
   }
 }
