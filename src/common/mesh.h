@@ -29,6 +29,12 @@ namespace game
     glm::vec2 uv;
   };
 
+  struct Mesh_Chunk
+  {
+    unsigned int offset;
+    unsigned int count;
+  };
+
   struct Mesh_Data
   {
     // Everything is fair game.
@@ -62,6 +68,8 @@ namespace game
     {
       std::memcpy(&elements[b], i, l);
     }
+
+    Mesh_Chunk append(Mesh_Data const&) noexcept;
   };
 
   struct Mesh

@@ -5,6 +5,23 @@
 #include "mesh.h"
 namespace game
 {
+  Mesh_Chunk Mesh_Data::append(Mesh_Data const& md) noexcept
+  {
+    // Should we check to make sure hints and primitive type are the same? Ehh.
+
+    vertices.insert(vertices.end(), md.vertices.begin(), md.vertices.end());
+
+    auto initial_size = elements.size();
+    for(unsigned int index : md.elements)
+    {
+      elements.push_back(index + initial_size);
+    }
+
+    Mesh_Chunk chunk;
+    chunk.offset = initial_size;
+    chunk.count = md.elements.size();
+    return chunk;
+  }
   void Mesh::allocate_from(Mesh_Data&& mesh) noexcept
   {
     // By default initiate a copy of this data.
