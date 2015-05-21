@@ -27,6 +27,8 @@ namespace game
 
     std::unique_ptr<Mesh> make_mesh_repr() noexcept override;
     void render_mesh(Mesh& mesh) noexcept override;
+    void render_mesh(Mesh& mesh, std::size_t start,
+                     std::size_t count) noexcept override;
 
     std::unique_ptr<Texture> make_texture_repr() noexcept override;
     void bind_texture(Texture& tex, unsigned int loc) noexcept override;

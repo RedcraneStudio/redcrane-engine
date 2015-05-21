@@ -56,6 +56,14 @@ namespace game
         gl_mesh->bind();
         gl_mesh->draw();
       }
+      void Driver::render_mesh(Mesh& mesh, std::size_t start,
+                               std::size_t count) noexcept
+      {
+        auto gl_mesh = dynamic_cast<GL_Mesh*>(&mesh);
+        if(!gl_mesh) return;
+        gl_mesh->bind();
+        gl_mesh->draw(start, count);
+      }
 
       std::unique_ptr<Texture> Driver::make_texture_repr() noexcept
       {

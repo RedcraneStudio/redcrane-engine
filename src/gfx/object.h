@@ -40,6 +40,11 @@ namespace game
     void prepare_object(IDriver& d, Object& o) noexcept;
 
     void render_object(IDriver& d, Object const&, glm::mat4 model) noexcept;
+    void render_object(IDriver& d, Object const& o, glm::mat4 m,
+                       std::size_t start, std::size_t count) noexcept;
+
     void render_object(IDriver& d, Object const&) noexcept;
+    void render_object(IDriver& d, Object const&, std::size_t start,
+                       std::size_t count) noexcept;
   }
 }

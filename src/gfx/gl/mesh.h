@@ -28,6 +28,7 @@ namespace game { namespace gfx { namespace gl
 
     void bind() const noexcept;
     void draw() const noexcept;
+    void draw(std::size_t start, std::size_t count) const noexcept;
 
     GLuint vao;
     std::array<GLuint, 4> bufs;

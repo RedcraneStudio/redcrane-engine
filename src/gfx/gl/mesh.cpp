@@ -211,4 +211,9 @@ namespace game { namespace gfx { namespace gl
   {
     glDrawElements(primitive, num_indices, GL_UNSIGNED_INT, 0);
   }
+  void GL_Mesh::draw(std::size_t start, std::size_t count) const noexcept
+  {
+    glDrawElements(primitive, count, GL_UNSIGNED_INT,
+                   (void*) (start * sizeof(unsigned int)));
+  }
 } } }
