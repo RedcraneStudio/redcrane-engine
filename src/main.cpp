@@ -132,15 +132,15 @@ int main(int argc, char** argv)
   auto terrain_obj = gfx::Object{};
   *terrain_obj.material = gfx::load_material("mat/terrain.json");
 
-  // Build our terrain from a heightmap.
-  {
-    Software_Texture terrain_heightmap;
-    load_png("map/default.png", terrain_heightmap);
-    auto terrain = make_heightmap_from_image(terrain_heightmap);
-    auto terrain_chunks =
-      make_terrain_mesh(*terrain_obj.mesh, terrain, .01f, .01);
-    write_obj("../terrain.obj", terrain_obj.mesh->mesh_data());
-  }
+  // Load the image
+  Software_Texture terrain_image;
+  load_png("map/default.png", terrain_image);
+
+  // Convert it into a heightmap
+  auto terrain_heightmap = make_heightmap_from_image(terrain_image);
+  auto terrain =
+    make_terrain_mesh(*terrain_obj.mesh, terrain_heightmap,{20,20}, .01f, .01);
+  write_obj("../terrain.obj", terrain_obj.mesh->mesh_data());
 
   prepare_object(driver, terrain_obj);
 
@@ -245,7 +245,10 @@ int main(int argc, char** argv)
     driver.clear();
     use_camera(driver, cam);
 
-    render_object(driver, terrain_obj);
+    for(auto const& chunk : terrain.chunks)
+    {
+      render_object(driver, terrain_obj, chunk.mesh.offset, chunk.mesh.count);
+    }
 
     // Render the terrain before we calculate the depth of the mouse position.
     auto mouse_state = gen_mouse_state(window);
