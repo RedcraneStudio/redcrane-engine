@@ -51,7 +51,7 @@ namespace game
     return ret;
   }
   Terrain_Mesh make_terrain_mesh(Heightmap const& heights,
-                                 Vec<float> chunk_extents, double y_scale,
+                                 Vec<int> chunk_extents, double y_scale,
                                  double flat_scale) noexcept
   {
     auto mesh = Terrain_Mesh{};
@@ -74,31 +74,74 @@ namespace game
       }
     }
 
-    // Add faces.
-    std::array<unsigned int, 6> face_indices{ 0, 3, 2, 0, 1, 2 };
-
     // For the amount of rectangles.
     auto e = heights.extents;
 
-    int num_rects = (e.x - 1) * (e.y - 1);
-    for(int i = 0; i < num_rects; ++i)
+    // Separate into segments.
+    int chunks_x = e.x / chunk_extents.x;
+    // Add a segment if the amount we just calculated would be short.
+    chunks_x += chunks_x * chunk_extents.x != e.x ? 1 : 0;
+
+    int chunks_y = e.y / chunk_extents.y;
+    chunks_y += chunks_y * chunk_extents.y != e.y ? 1 : 0;
+
+    decltype(Mesh_Chunk::offset) cur_offset = 0;
+
+    for(int i = 0; i < chunks_y; ++i)
     {
-      int x = i % e.x;
-      int y = i / e.y;
-
-      if(x == e.x - 1 || y == e.y - 1)
+      for(int j = 0; j < chunks_x; ++j)
       {
-        // If we are at the last vertex, just bail out. Trying to make a face
-        // here will make one across the mesh which would be terrible.
-        continue;
-      }
+        Terrain_Chunk chunk;
 
-      mesh.mesh->elements.push_back(x + 0 + y * e.x);
-      mesh.mesh->elements.push_back(x + 1 + (y + 1) * e.x);
-      mesh.mesh->elements.push_back(x + 1 + y * e.x);
-      mesh.mesh->elements.push_back(x + 0 + y * e.x);
-      mesh.mesh->elements.push_back(x + 0 + (y + 1) * e.x);
-      mesh.mesh->elements.push_back(x + 1 + (y + 1) * e.x);
+        chunk.mesh.offset = cur_offset;
+        chunk.mesh.count = 0;
+
+        // Get the minimum components from every point.
+        for(int vertex_i = 0; vertex_i < chunk_extents.y; ++vertex_i)
+        {
+          for(int vertex_j = 0; vertex_j < chunk_extents.x; ++vertex_j)
+          {
+            int y = i * chunk_extents.y + vertex_i;
+            int x = j * chunk_extents.x + vertex_j;
+
+            // If we can't be here. This will only happen with the rightmost /
+            // bottommost chunk.
+            if(e.y <= y || e.x <= x) continue;
+
+            // We basically need to access a small sub volume of the mesh.
+            auto vertex = mesh.mesh->vertices[y * e.x + x];
+
+            chunk.aabb.min.x  = std::min(chunk.aabb.min.x,  vertex.position.x);
+            chunk.aabb.min.y  = std::min(chunk.aabb.min.y,  vertex.position.y);
+            chunk.aabb.min.z  = std::min(chunk.aabb.min.z,  vertex.position.z);
+
+            chunk.aabb.width  = std::max(chunk.aabb.width,  vertex.position.x);
+            chunk.aabb.height = std::max(chunk.aabb.height, vertex.position.y);
+            chunk.aabb.depth  = std::max(chunk.aabb.depth,  vertex.position.z);
+
+            if(x == e.x - 1 || y == e.y - 1)
+            {
+              // If we are at the last vertex, just bail out. Trying to make a face
+              // here will make one across the mesh which would be terrible.
+              continue;
+            }
+
+            // Add the faces while we are at it.
+            mesh.mesh->elements.push_back(x + 0 + y * e.x);
+            mesh.mesh->elements.push_back(x + 1 + (y + 1) * e.x);
+            mesh.mesh->elements.push_back(x + 1 + y * e.x);
+            mesh.mesh->elements.push_back(x + 0 + y * e.x);
+            mesh.mesh->elements.push_back(x + 0 + (y + 1) * e.x);
+            mesh.mesh->elements.push_back(x + 1 + (y + 1) * e.x);
+
+            chunk.mesh.count += 6;
+          }
+        }
+
+        cur_offset += chunk.mesh.count;
+
+        mesh.chunks.push_back(chunk);
+      }
     }
 
     // Set the uv coordinates over the whole mesh.

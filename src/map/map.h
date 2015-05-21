@@ -7,6 +7,7 @@
 #include "../common/color.h"
 #include "../common/aabb.h"
 #include "../common/software_texture.h"
+#include "../common/mesh.h"
 #include "../common/software_mesh.h"
 namespace game
 {
@@ -23,24 +24,23 @@ namespace game
   struct Terrain_Chunk
   {
     AABB aabb;
-    // In vertices, not bytes!
-    std::size_t vertex_offset;
-    std::size_t count;
+    Mesh_Chunk mesh;
   };
 
   struct Terrain_Mesh
   {
     Maybe_Owned<Mesh_Data> mesh;
 
-    std::vector<Terrain_Chunk> volume;
+    std::vector<Terrain_Chunk> chunks;
   };
 
   Heightmap make_flat_heightmap(int16_t alt, int w, int h);
   Heightmap make_heightmap_from_image(Software_Texture const& tex,
                                         int add = -0xff / 2);
 
+  // Extents are given in vertices.
   Terrain_Mesh make_terrain_mesh(Heightmap const& heights,
-                                 Vec<float> chunk_extents = {10,10},
+                                 Vec<int> chunk_extents = {20, 20},
                                  double y_scale = .01,
                                  double flat_scale = 1) noexcept;
 
@@ -50,10 +50,11 @@ namespace game
   // *point* to the data in the software mesh.
   inline Terrain_Mesh make_terrain_mesh(Software_Mesh& m,
                                         Heightmap const& heights,
+                                        Vec<unsigned int> ce = {20,20},
                                         double y_scale = .01,
                                         double flat_scale = 1) noexcept
   {
-    auto terrain_mesh = make_terrain_mesh(heights, {}, y_scale, flat_scale);
+    auto terrain_mesh = make_terrain_mesh(heights, ce, y_scale, flat_scale);
     m.allocate_from(std::move(*terrain_mesh.mesh));
     terrain_mesh.mesh.set_pointer(&m.mesh_data());
     return terrain_mesh;
