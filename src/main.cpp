@@ -149,10 +149,20 @@ int main(int argc, char** argv)
   // Convert it into a heightmap
   auto terrain_heightmap = make_heightmap_from_image(terrain_image);
   auto terrain =
-    make_terrain_mesh(*terrain_obj.mesh, terrain_heightmap,{20,20}, .01f, .01);
+    make_terrain_mesh(*terrain_obj.mesh, terrain_heightmap,{20,20}, .001f, .01);
   write_obj("../terrain.obj", terrain_obj.mesh->mesh_data());
 
   prepare_object(driver, terrain_obj);
+
+  // Make water.
+  gfx::Object water_obj;
+  *water_obj.material = gfx::load_material("mat/terrain.json");
+  water_obj.material->diffuse_color = colors::blue;
+  auto water_heightmap = make_flat_heightmap(-1, 2, 2);
+  auto water = make_terrain_mesh(*water_obj.mesh, water_heightmap, {1,1},
+                                 .01f, 2.56f);
+
+  prepare_object(driver, water_obj);
 
   // Load our house structure
   auto house_struct = Json_Structure{"structure/house.json"};
@@ -267,6 +277,8 @@ int main(int argc, char** argv)
 
       render_object(driver, terrain_obj, chunk.mesh.offset, chunk.mesh.count);
     }
+
+    render_object(driver, water_obj);
 
     // Render the terrain before we calculate the depth of the mouse position.
     auto mouse_state = gen_mouse_state(window);
