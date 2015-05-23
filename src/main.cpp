@@ -41,6 +41,16 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
 
+glm::vec4 project_point(glm::vec4 pt,
+                        glm::mat4 const& model,
+                        glm::mat4 const& view,
+                        glm::mat4 const& proj) noexcept
+{
+  pt = proj * view * model * pt;
+  pt /= pt.w;
+  return pt;
+}
+
 void scroll_callback(GLFWwindow* window, double, double deltay)
 {
   auto cam_ptr = glfwGetWindowUserPointer(window);
@@ -247,6 +257,14 @@ int main(int argc, char** argv)
 
     for(auto const& chunk : terrain.chunks)
     {
+      // Check each point of the aabb for visibility.
+      //for(auto iter = begin_point_iter(chunk.aabb);
+          //iter != end_point_iter(); ++iter)
+      {
+        //glm::vec4 pt(*iter, 1.0f);
+        //auto pt = project_point(pt);
+      }
+
       render_object(driver, terrain_obj, chunk.mesh.offset, chunk.mesh.count);
     }
 
