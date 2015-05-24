@@ -27,7 +27,7 @@ namespace game { namespace ui
 
     virtual ~Element_Composite() {}
 
-    virtual bool is_container() const noexcept { return true; }
+    virtual bool is_container() const noexcept override { return true; }
 
     using child_t = View_Child<Layout_Type>;
     using child_vec_t = std::vector<child_t>;
@@ -61,8 +61,8 @@ namespace game { namespace ui
     Shared_Element child_at_(std::size_t) noexcept override;
 
     // Left to be implemented
-    virtual Volume<int> layout_() = 0;
-    virtual Vec<int> get_minimum_extents_() const noexcept = 0;
+    virtual Volume<int> layout_() override = 0;
+    virtual Vec<int> get_minimum_extents_() const noexcept override = 0;
 
     void render_(Renderer&) const noexcept override;
   };
