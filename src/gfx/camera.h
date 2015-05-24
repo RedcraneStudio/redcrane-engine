@@ -31,12 +31,20 @@ namespace game
 
     struct Eye_Look_Up
     {
+      Eye_Look_Up() noexcept {}
+      Eye_Look_Up(Eye_Look_Up const&) = default;
+      Eye_Look_Up& operator=(Eye_Look_Up const&) = default;
+
       glm::vec3 eye;
       glm::vec3 look;
       glm::vec3 up;
     };
     struct Pitch_Yaw_Pos
     {
+      Pitch_Yaw_Pos() noexcept {}
+      Pitch_Yaw_Pos(Pitch_Yaw_Pos const&) = default;
+      Pitch_Yaw_Pos& operator=(Pitch_Yaw_Pos const&) = default;
+
       glm::vec3 pos;
       float pitch = 0.0;
       float yaw = 0.0;
@@ -44,6 +52,10 @@ namespace game
 
     struct Camera
     {
+      Camera() noexcept {}
+      Camera(Camera const& cam) noexcept;
+      Camera& operator=(Camera const& cam) noexcept;
+
       // A camera also includes a perspective and orthographic mode.
       Camera_Type projection_mode;
       union

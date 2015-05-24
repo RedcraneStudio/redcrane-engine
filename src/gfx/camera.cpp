@@ -9,6 +9,33 @@ namespace game
 {
   namespace gfx
   {
+    Camera::Camera(Camera const& cam) noexcept
+    {
+      *this = cam;
+    }
+    Camera& Camera::operator=(Camera const& cam) noexcept
+    {
+      this->projection_mode = cam.projection_mode;
+      switch(cam.projection_mode)
+      {
+        case Camera_Type::Perspective:
+          this->perspective = cam.perspective;
+          break;
+        case Camera_Type::Orthographic:
+          this->ortho = cam.ortho;
+      }
+      this->definition = cam.definition;
+      switch(cam.definition)
+      {
+        case Camera_Definition::Look_At:
+          this->look_at = cam.look_at;
+          break;
+        case Camera_Definition::Pitch_Yaw_Pos:
+          this->fp = cam.fp;
+      }
+
+      return *this;
+    }
     glm::mat4 camera_view_matrix(Camera const& cam) noexcept
     {
       if(cam.definition == Camera_Definition::Look_At)
