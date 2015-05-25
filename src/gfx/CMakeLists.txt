@@ -2,11 +2,12 @@
 # Copyright (C) 2015 Luke San Antonio
 # All rights reserved.
 
-set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/standard_shader.cpp gl/program.cpp
-                           gl/hud_shader.cpp gl/mesh.cpp gl/texture.cpp)
+set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/mesh.cpp gl/texture.cpp
+                           gl/shader.cpp)
 add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES}
                           material.cpp object.cpp camera.cpp scene_node.cpp
-                          idriver_ui_adapter.cpp)
+                          idriver_ui_adapter.cpp shader.cpp location_cache.cpp
+                          scoped_shader_lock.cpp)
 
 target_link_libraries(gfxlib engine_gl)
 

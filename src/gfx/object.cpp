@@ -54,17 +54,18 @@ namespace game
       prepare_material(d, *o.material);
     }
 
-    void render_object(IDriver& d, Object const& o, glm::mat4 m) noexcept
+    void render_object(IDriver& d, Object const& o,
+                       glm::mat4 m) noexcept
     {
       bind_material(d, *o.material);
-      d.set_model(m);
+      d.active_shader()->set_model(m);
       if(o.mesh->get_impl()) d.render_mesh(*o.mesh->get_impl());
     }
     void render_object(IDriver& d, Object const& o, glm::mat4 m,
                        std::size_t start, std::size_t count) noexcept
     {
       bind_material(d, *o.material);
-      d.set_model(m);
+      d.active_shader()->set_model(m);
       if(o.mesh->get_impl()) d.render_mesh(*o.mesh->get_impl(), start, count);
     }
     void render_object(IDriver& d, Object const& o) noexcept

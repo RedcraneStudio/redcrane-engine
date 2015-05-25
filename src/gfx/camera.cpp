@@ -101,8 +101,8 @@ namespace game
     }
     void use_camera(IDriver& driver, Camera const& cam) noexcept
     {
-      driver.set_view(camera_view_matrix(cam));
-      driver.set_projection(camera_proj_matrix(cam));
+      driver.active_shader()->set_view(camera_view_matrix(cam));
+      driver.active_shader()->set_projection(camera_proj_matrix(cam));
     }
   }
 }

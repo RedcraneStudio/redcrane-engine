@@ -6,6 +6,7 @@
 #include "idriver.h"
 #include "../ui/renderer.h"
 #include "../common/software_mesh.h"
+#include "scoped_shader_lock.h"
 namespace game { namespace gfx
 {
   struct IDriver_UI_Adapter : public ui::Renderer
@@ -29,6 +30,9 @@ namespace game { namespace gfx
 
   private:
     IDriver* d_;
+
+    std::unique_ptr<Shader_Push_Lock> shader_lock_;
+    std::unique_ptr<Shader> hud_shader_;
 
     Color dif_ = colors::white;
 

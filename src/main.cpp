@@ -136,6 +136,18 @@ int main(int argc, char** argv)
   // Make an OpenGL driver.
   gfx::gl::Driver driver{Vec<int>{1000, 1000}};
 
+  // Load our default shader.
+  auto default_shader = driver.make_shader_repr();
+  default_shader->load_vertex_part("shader/basic/v");
+  default_shader->load_fragment_part("shader/basic/f");
+
+  default_shader->set_projection_name("proj");
+  default_shader->set_view_name("view");
+  default_shader->set_model_name("model");
+  default_shader->set_sampler_name("tex");
+  default_shader->set_diffuse_name("dif");
+  driver.set_shader(*default_shader);
+
   // Make an isometric camera.
   auto cam = gfx::make_isometric_camera();
 
@@ -285,12 +297,12 @@ int main(int argc, char** argv)
     controller.step(hud, mouse_state);
 
     // Render our movable instance of a house.
-    render_object(driver, moveable_instance.obj);
+    //render_object(driver, moveable_instance.obj);
 
     // Render all of our other house instances.
     for(auto const& instance : house_instances)
     {
-      render_object(driver, instance.obj);
+      //render_object(driver, instance.obj);
     }
 
     {

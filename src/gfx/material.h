@@ -8,6 +8,7 @@
 #include "../common/color.h"
 #include "../common/maybe_owned.hpp"
 #include "../common/software_texture.h"
+#include "shader.h"
 namespace game
 {
   namespace gfx
@@ -24,6 +25,6 @@ namespace game
 
     struct IDriver;
     void prepare_material(IDriver& driver, Material& mat) noexcept;
-    void bind_material(IDriver& driver, Material const& mat) noexcept;
+    void bind_material(IDriver&, Material const&) noexcept;
   }
 }

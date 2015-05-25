@@ -44,8 +44,18 @@ namespace game { namespace gfx
                                         tex_v.pos.y}});
   };
 
-  IDriver_UI_Adapter::IDriver_UI_Adapter(IDriver& d) noexcept : d_(&d)
+  IDriver_UI_Adapter::IDriver_UI_Adapter(IDriver& d) noexcept
+    : d_(&d), hud_shader_(std::move(d.make_shader_repr()))
   {
+    // Somehow manage these resources in a better way?
+    // Or otherwise declare this data in json?
+    hud_shader_->load_vertex_part("shader/hud/v");
+    hud_shader_->load_fragment_part("shader/hud/f");
+
+    hud_shader_->set_projection_name("ortho");
+    hud_shader_->set_diffuse_name("dif");
+    hud_shader_->set_sampler_name("tex");
+
     // Prepare an all white texture so we can just change the diffuse color.
     // We can change this when the driver and the shader become more
     // distinguished, right now I'm not really sure how this can be done so
@@ -73,7 +83,7 @@ namespace game { namespace gfx
 
   void IDriver_UI_Adapter::set_draw_color(Color const& c) noexcept
   {
-    d_->set_diffuse(c);
+    hud_shader_->set_diffuse(c);
     dif_ = c;
   }
 
@@ -114,22 +124,28 @@ namespace game { namespace gfx
     d_->render_mesh(*filled_rect_.get_impl());
 
     // Reset the diffuse color
-    d_->set_diffuse(dif_);
+    hud_shader_->set_diffuse(dif_);
   }
 
   void IDriver_UI_Adapter::begin_draw() noexcept
   {
     d_->depth_test(false);
     d_->blending(true);
-    d_->set_shader(Shader::Hud);
+
+    using SPL = Shader_Push_Lock;
+    shader_lock_ = std::make_unique<SPL>(push_shader(*hud_shader_, *d_));
 
     auto size = vec_cast<float>(d_->window_extents());
-    d_->set_projection(glm::ortho(0.0f, size.x, size.y, 0.0f, -1.0f, 1.0f));
+
+    hud_shader_->set_projection(glm::ortho(0.0f, size.x, size.y, 0.0f,
+                               -1.0f, 1.0f));
+    hud_shader_->set_sampler(0);
   }
   void IDriver_UI_Adapter::end_draw() noexcept
   {
     d_->depth_test(true);
     d_->blending(false);
-    d_->set_shader(Shader::Standard);
+
+    shader_lock_.reset();
   }
 } }

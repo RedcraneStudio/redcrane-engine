@@ -5,8 +5,10 @@
 #include "driver.h"
 #include "mesh.h"
 #include "texture.h"
+#include "shader.h"
 #include "../../common/software_texture.h"
 #include "../../common/software_mesh.h"
+#include "../../common/log.h"
 namespace game
 {
   namespace gfx
@@ -15,9 +17,6 @@ namespace game
     {
       Driver::Driver(Vec<int> size) noexcept : extents_(size)
       {
-        current_shader_ = &standard_shader_;
-        current_shader_->use();
-
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
                             GL_ZERO);
@@ -26,23 +25,25 @@ namespace game
       {
         glUseProgram(0);
       }
-      void Driver::set_shader(Shader shade) noexcept
+
+      std::unique_ptr<Shader> Driver::make_shader_repr() noexcept
       {
-        switch(shade)
-        {
-          case Shader::Standard:
-          {
-            current_shader_ = &standard_shader_;
-            break;
-          }
-          case Shader::Hud:
-          {
-            current_shader_ = &hud_shader_;
-            break;
-          }
-        }
-        current_shader_->use();
+        return std::make_unique<GL_Shader>();
       }
+      void Driver::set_shader(Shader& s) noexcept
+      {
+        auto shader_ptr = reinterpret_cast<GL_Shader*>(&s);
+        if(shader_ptr != cur_shader_)
+        {
+          shader_ptr->use();
+          cur_shader_ = shader_ptr;
+        }
+      }
+      Shader* Driver::active_shader() const noexcept
+      {
+        return cur_shader_;
+      }
+
       std::unique_ptr<Mesh> Driver::make_mesh_repr() noexcept
       {
         // Make it and forget about it, we'll just use a dynamic cast for
@@ -77,23 +78,6 @@ namespace game
         gl_tex->bind(loc);
       }
 
-      void Driver::set_diffuse(Color const& c) noexcept
-      {
-        current_shader_->set_diffuse(c);
-      }
-
-      void Driver::set_projection(glm::mat4 const& p) noexcept
-      {
-        current_shader_->set_projection(p);
-      }
-      void Driver::set_view(glm::mat4 const& v) noexcept
-      {
-        current_shader_->set_view(v);
-      }
-      void Driver::set_model(glm::mat4 const& m) noexcept
-      {
-        current_shader_->set_model(m);
-      }
       void Driver::clear_color_value(Color const& c) noexcept
       {
         glClearColor(c.r / (float) 0xff, c.g / (float) 0xff,
@@ -125,6 +109,21 @@ namespace game
       {
         if(enable) glEnable(GL_BLEND);
         else glDisable(GL_BLEND);
+      }
+      void Driver::face_culling(bool enable) noexcept
+      {
+        if(enable) glEnable(GL_CULL_FACE);
+        else glDisable(GL_CULL_FACE);
+      }
+      void Driver::check_error() noexcept
+      {
+        if(glGetError() == GL_INVALID_OPERATION)
+        {
+          log_e("Invalid operation");
+
+          int* ptr = nullptr;
+          *ptr = 5;
+        }
       }
     }
   }

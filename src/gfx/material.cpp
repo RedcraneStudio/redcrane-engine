@@ -47,11 +47,12 @@ namespace game
     }
     void bind_material(IDriver& driver, Material const& mat) noexcept
     {
-      driver.set_diffuse(mat.diffuse_color);
+      driver.active_shader()->set_diffuse(mat.diffuse_color);
       // TODO ADD **SOMETHING** TO SUPPORT MORE THAN JUST ONE FREAKIN' TEXTURE!
       if(mat.texture->get_impl())
       {
         driver.bind_texture(*mat.texture->get_impl(), 0);
+        driver.active_shader()->set_sampler(0);
       }
     }
   }
