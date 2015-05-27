@@ -117,6 +117,11 @@ namespace game { namespace gfx { namespace gl
     if(loc == -1) return;
     glUniform4fv(loc, 1, &v[0]);
   }
+  void GL_Shader::set_float(int loc, float f) noexcept
+  {
+    if(loc == -1) return;
+    glUniform1f(loc, f);
+  }
   void GL_Shader::use() noexcept
   {
     if(!linked_) return;

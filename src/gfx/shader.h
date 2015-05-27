@@ -28,6 +28,8 @@ namespace game
       virtual void set_vec3(int, glm::vec3 const&) noexcept {}
       virtual void set_vec4(int, glm::vec4 const&) noexcept {}
 
+      virtual void set_float(int, float) noexcept {}
+
       // Defaults to wrapping over set_vec4 converting the colors to
       // a floating point value out of 0xff.
       virtual void set_color(int, Color const&) noexcept;

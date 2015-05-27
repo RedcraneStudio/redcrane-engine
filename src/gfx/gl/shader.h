@@ -25,6 +25,8 @@ namespace game { namespace gfx { namespace gl
     void set_vec3(int, glm::vec3 const&) noexcept override;
     void set_vec4(int, glm::vec4 const&) noexcept override;
 
+    void set_float(int, float) noexcept override;
+
     void use() noexcept;
   private:
     GLuint v_shade_;
