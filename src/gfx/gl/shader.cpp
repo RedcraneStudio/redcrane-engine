@@ -10,6 +10,9 @@
 #include "glad/glad.h"
 
 #include "../../common/log.h"
+
+#define LOC_BAIL(location) if(location == -1) return
+
 namespace game { namespace gfx { namespace gl
 {
   std::string load_stream(std::istream& stream) noexcept
@@ -92,34 +95,34 @@ namespace game { namespace gfx { namespace gl
 
   void GL_Shader::set_matrix(int loc, glm::mat4 const& mat) noexcept
   {
-    if(loc == -1) return;
+    LOC_BAIL(loc);
     glUniformMatrix4fv(loc, 1, GL_FALSE, &mat[0][0]);
   }
 
   void GL_Shader::set_sampler(int loc, unsigned int tex_unit) noexcept
   {
-    if(loc == -1) return;
+    LOC_BAIL(loc);
     glUniform1i(loc, tex_unit);
   }
 
   void GL_Shader::set_vec2(int loc, glm::vec2 const& v) noexcept
   {
-    if(loc == -1) return;
+    LOC_BAIL(loc);
     glUniform2fv(loc, 1, &v[0]);
   }
   void GL_Shader::set_vec3(int loc, glm::vec3 const& v) noexcept
   {
-    if(loc == -1) return;
+    LOC_BAIL(loc);
     glUniform3fv(loc, 1, &v[0]);
   }
   void GL_Shader::set_vec4(int loc, glm::vec4 const& v) noexcept
   {
-    if(loc == -1) return;
+    LOC_BAIL(loc);
     glUniform4fv(loc, 1, &v[0]);
   }
   void GL_Shader::set_float(int loc, float f) noexcept
   {
-    if(loc == -1) return;
+    LOC_BAIL(loc);
     glUniform1f(loc, f);
   }
   void GL_Shader::use() noexcept
@@ -128,3 +131,5 @@ namespace game { namespace gfx { namespace gl
     glUseProgram(prog_);
   }
 } } }
+
+#undef LOC_BAIL
