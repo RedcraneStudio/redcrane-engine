@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <glm/glm.hpp>
 #include <cstdint>
 namespace game
 {
@@ -29,6 +30,24 @@ namespace game
   inline bool operator!=(Color const& c1, Color const& c2) noexcept
   {
     return !(c1 == c2);
+  }
+
+  inline glm::vec3 c_to_vec3(Color const& c) noexcept
+  {
+    glm::vec3 ret;
+    ret.r = c.r / (float) 0xff;
+    ret.g = c.g / (float) 0xff;
+    ret.b = c.b / (float) 0xff;
+    return ret;
+  }
+  inline glm::vec4 c_to_vec4(Color const& c) noexcept
+  {
+    glm::vec4 ret;
+    ret.r = c.r / (float) 0xff;
+    ret.g = c.g / (float) 0xff;
+    ret.b = c.b / (float) 0xff;
+    ret.a = c.a / (float) 0xff;
+    return ret;
   }
 
   namespace colors
