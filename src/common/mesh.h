@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <cstring>
 #include "aabb.h"
+#include <boost/optional.hpp>
 namespace game
 {
   enum class Usage_Hint
@@ -131,4 +132,21 @@ namespace game
   };
 
   AABB generate_aabb(Mesh_Data const& mesh) noexcept;
-}
+
+  struct Vert_Ref
+  {
+    boost::optional<unsigned int> position;
+    boost::optional<unsigned int> normal;
+    boost::optional<unsigned int> tex_coord;
+  };
+
+  bool operator==(Vert_Ref const& v1, Vert_Ref const& v2) noexcept;
+  bool operator<(Vert_Ref const& lhs, Vert_Ref const& rhs) noexcept;
+
+  // Optimized in the sense that duplicate vertex references will not be
+  // duplicated in the buffer.
+  Mesh_Data make_optimized_mesh_data(std::vector<Vert_Ref> indices,
+                                     std::vector<glm::vec3> pos,
+                                     std::vector<glm::vec3> norm = {},
+                                     std::vector<glm::vec2> uv = {}) noexcept;
+  }

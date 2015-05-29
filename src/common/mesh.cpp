@@ -3,6 +3,8 @@
  * All rights reserved.
  */
 #include "mesh.h"
+#include <set>
+#include <functional>
 namespace game
 {
   Mesh_Chunk Mesh_Data::append(Mesh_Data const& md) noexcept
@@ -59,5 +61,124 @@ namespace game
     aabb.min = min;
 
     return aabb;
+  }
+
+  bool operator==(Vert_Ref const& lhs, Vert_Ref const& rhs) noexcept
+  {
+    return lhs.position == rhs.position &&
+           lhs.normal == rhs.normal &&
+           lhs.tex_coord == rhs.tex_coord;
+  }
+  bool operator<(Vert_Ref const& lhs, Vert_Ref const& rhs) noexcept
+  {
+    if(lhs.position < rhs.position) return true;
+    else if(lhs.position == rhs.position)
+    {
+      if(lhs.normal < rhs.normal) return true;
+      else if(lhs.normal == rhs.normal)
+      {
+        if(lhs.tex_coord < rhs.tex_coord) return true;
+        else return false;
+      }
+    }
+    return false;
+  }
+
+
+  // Pronounded Ordered-vertex-reference.
+  using Ord_Vert_Ref = std::pair<unsigned int, Vert_Ref>;
+  bool operator<(Ord_Vert_Ref const& lhs, Ord_Vert_Ref const& rhs) noexcept
+  {
+    return std::get<1>(lhs) < std::get<1>(rhs);
+  }
+  bool operator==(Ord_Vert_Ref const& lhs, Ord_Vert_Ref const& rhs) noexcept
+  {
+    return std::get<1>(lhs) == std::get<1>(rhs);
+  }
+
+  template <class T, class F>
+  void if_has_value(boost::optional<T> const& t, F func) noexcept
+  {
+    if(t)
+    {
+      func(t.value());
+    }
+  }
+
+  Mesh_Data make_optimized_mesh_data(std::vector<Vert_Ref> orig_indices,
+                                     std::vector<glm::vec3> positions,
+                                     std::vector<glm::vec3> normals,
+                                     std::vector<glm::vec2> tex_coords)noexcept
+  {
+    using std::begin; using std::end;
+
+    // The set represents all unique vertices.
+    std::set<Ord_Vert_Ref> indices;
+    unsigned int where = 0;
+    for(Vert_Ref orig_v : orig_indices)
+    {
+      Ord_Vert_Ref ref;
+      std::get<0>(ref) = where;
+      std::get<1>(ref) = orig_v;
+
+      auto res = indices.insert(ref);
+      if(std::get<1>(res)) ++where;
+    }
+
+    Mesh_Data ret;
+
+    // Insert each necessary, unique permutations of vertex arrays.
+    ret.vertices.resize(indices.size());
+    for(auto const& ref : indices)
+    {
+      Vertex vert;
+
+      if_has_value(std::get<1>(ref).position, [&](auto pos)
+      {
+        pos -= 1;
+        if(pos < positions.size())
+        {
+          vert.position = positions[pos];
+        }
+      });
+      if_has_value(std::get<1>(ref).normal, [&](auto norm)
+      {
+        norm -= 1;
+        if(norm < normals.size())
+        {
+          vert.normal = normals[norm];
+        }
+      });
+      if_has_value(std::get<1>(ref).tex_coord, [&](auto uv)
+      {
+        uv -= 1;
+        if(uv < tex_coords.size())
+        {
+          vert.uv = tex_coords[uv];
+        }
+      });
+
+      // Set the vertices in order of their index (first element of the tuple).
+      // This may benefit from a cache optimization, but probably not. Since
+      // probably fragmentation of the set itself is unavoidable.
+      ret.vertices[std::get<0>(ref)] = vert;
+    }
+
+    // Create an index list, by finding each permutation in the set.
+    for(Vert_Ref orig_ref : orig_indices)
+    {
+      Ord_Vert_Ref ref;
+      std::get<1>(ref) = orig_ref;
+      auto ord_find = indices.find(ref);
+
+      // This shouldn't even happen once.
+      if(ord_find == indices.end()) continue;
+
+      ret.elements.push_back(std::get<0>(*ord_find));
+    }
+
+    ret.primitive = Primitive_Type::Triangle;
+
+    return ret;
   }
 }
