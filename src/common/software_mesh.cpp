@@ -19,9 +19,9 @@ namespace game
 
     impl_ = std::move(m);
   }
-  void Software_Mesh::allocate(unsigned int max_verts,
-                               unsigned int max_elemnt_indices, Usage_Hint uh,
-                               Upload_Hint up, Primitive_Type pt) noexcept
+  void Software_Mesh::allocate_(unsigned int max_verts,
+                                unsigned int max_elemnt_indices, Usage_Hint uh,
+                                Upload_Hint up, Primitive_Type pt) noexcept
   {
     allocated_ = true;
 
@@ -33,14 +33,14 @@ namespace game
 
     if(impl_) impl_->allocate(max_verts, max_elemnt_indices, uh, up, pt);
   }
-  void Software_Mesh::allocate_from(Mesh_Data const& md) noexcept
+  void Software_Mesh::allocate_from_(Mesh_Data const& md) noexcept
   {
     allocated_ = true;
 
     mesh_data_ = md;
     if(impl_) impl_->allocate_from(mesh_data_);
   }
-  void Software_Mesh::allocate_from(Mesh_Data&& md) noexcept
+  void Software_Mesh::allocate_from_(Mesh_Data&& md) noexcept
   {
     allocated_ = true;
 

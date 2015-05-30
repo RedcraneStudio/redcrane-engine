@@ -12,12 +12,6 @@ namespace game { namespace gfx { namespace gl
   {
     virtual ~GL_Mesh() noexcept;
 
-    void allocate(unsigned int max_verts,
-                  unsigned int max_elemnt_indices, Usage_Hint, Upload_Hint,
-                  Primitive_Type) noexcept override;
-
-    void allocate_from(Mesh_Data const&) noexcept override;
-
     void set_vertices(unsigned int begin,
                       unsigned int length,
                       Vertex const* data) noexcept override;
@@ -36,6 +30,12 @@ namespace game { namespace gfx { namespace gl
     GLenum primitive;
 
   private:
+    void allocate_(unsigned int max_verts,
+                  unsigned int max_elemnt_indices, Usage_Hint, Upload_Hint,
+                  Primitive_Type) noexcept override;
+
+    void allocate_from_(Mesh_Data const&) noexcept override;
+
     void unallocate_() noexcept;
     void allocate_vao_() noexcept;
     void allocate_buffers_() noexcept;

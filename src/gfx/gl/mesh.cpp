@@ -66,7 +66,7 @@ namespace game { namespace gfx { namespace gl
       return ret;
     }
   }
-  void GL_Mesh::allocate(unsigned int max_verts,
+  void GL_Mesh::allocate_(unsigned int max_verts,
                          unsigned int max_elemnt_indices, Usage_Hint uh,
                          Upload_Hint up, Primitive_Type pt) noexcept
   {
@@ -90,7 +90,7 @@ namespace game { namespace gfx { namespace gl
 
     primitive = get_gl_primitive(pt);
   }
-  void GL_Mesh::allocate_from(Mesh_Data const& md) noexcept
+  void GL_Mesh::allocate_from_(Mesh_Data const& md) noexcept
   {
     unallocate_();
 

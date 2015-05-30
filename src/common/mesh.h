@@ -78,32 +78,6 @@ namespace game
     virtual ~Mesh() noexcept {}
 
     /*!
-     * \brief Allocates a mesh for a certain amount of vertices and element
-     * indices.
-     *
-     * If this function is called, no mesh data is guaranteed to be retained.
-     */
-    virtual void allocate(unsigned int max_verts,
-                          unsigned int max_elemnt_indices,
-                          Usage_Hint, Upload_Hint,
-                          Primitive_Type) noexcept = 0;
-
-    /*!
-     * \brief Allocates a mesh given some initial mesh data.
-     *
-     * The default implementation is equivalent to allocation and then setting
-     * each of the components in sequence. ie allocation, set_vertices,
-     * set_element_indices, set_num_element_indices. This process may be
-     * optimized in implementations.
-     */
-    virtual void allocate_from(Mesh_Data const&) noexcept;
-    /*!
-     * \brief Allocates a mesh given some initial mesh data, the impl is
-     * allowed to steal the guts if that works better for it.
-     */
-    virtual void allocate_from(Mesh_Data&&) noexcept;
-
-    /*!
      * \brief Sets a sequence of vertices starting from a certain vertex in an
      * allocated mesh.
      */
@@ -129,6 +103,41 @@ namespace game
      */
     inline void set_vertex(unsigned int elemnt, Vertex const& v) noexcept
     { set_vertices(elemnt, 1, &v); }
+
+    inline bool allocated() const noexcept { return allocated_; }
+
+    void allocate(unsigned int max_verts, unsigned int max_elemnt_indices,
+                  Usage_Hint, Upload_Hint, Primitive_Type) noexcept;
+    void allocate_from(Mesh_Data const&) noexcept;
+    void allocate_from(Mesh_Data&&) noexcept;
+  private:
+    bool allocated_ = false;
+
+    /*!
+     * \brief Allocates a mesh for a certain amount of vertices and element
+     * indices.
+     *
+     * If this function is called, no mesh data is guaranteed to be retained.
+     */
+    virtual void allocate_(unsigned int max_verts,
+                          unsigned int max_elemnt_indices,
+                          Usage_Hint, Upload_Hint,
+                          Primitive_Type) noexcept = 0;
+
+    /*!
+     * \brief Allocates a mesh given some initial mesh data.
+     *
+     * The default implementation is equivalent to allocation and then setting
+     * each of the components in sequence. ie allocation, set_vertices,
+     * set_element_indices, set_num_element_indices. This process may be
+     * optimized in implementations.
+     */
+    virtual void allocate_from_(Mesh_Data const&) noexcept;
+    /*!
+     * \brief Allocates a mesh given some initial mesh data, the impl is
+     * allowed to steal the guts if that works better for it.
+     */
+    virtual void allocate_from_(Mesh_Data&&) noexcept;
   };
 
   AABB generate_aabb(Mesh_Data const& mesh) noexcept;

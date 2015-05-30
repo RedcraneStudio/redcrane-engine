@@ -24,12 +24,28 @@ namespace game
     chunk.count = md.elements.size();
     return chunk;
   }
-  void Mesh::allocate_from(Mesh_Data&& mesh) noexcept
+  void Mesh::allocate(unsigned int max_verts, unsigned int max_elemnt_indices,
+                Usage_Hint ush, Upload_Hint uph, Primitive_Type p) noexcept
+  {
+    allocate_(max_verts, max_elemnt_indices, ush, uph, p);
+    allocated_ = true;
+  }
+  void Mesh::allocate_from(Mesh_Data const& md) noexcept
+  {
+    allocate_from_(md);
+    allocated_ = true;
+  }
+  void Mesh::allocate_from(Mesh_Data&& md) noexcept
+  {
+    allocate_from_(std::move(md));
+    allocated_ = true;
+  }
+  void Mesh::allocate_from_(Mesh_Data&& mesh) noexcept
   {
     // By default initiate a copy of this data.
     allocate_from(static_cast<Mesh_Data const&>(mesh));
   }
-  void Mesh::allocate_from(Mesh_Data const& md) noexcept
+  void Mesh::allocate_from_(Mesh_Data const& md) noexcept
   {
     allocate(md.vertices.size(), md.elements.size(), md.usage_hint,
              md.upload_hint, md.primitive);

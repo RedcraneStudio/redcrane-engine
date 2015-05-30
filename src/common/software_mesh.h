@@ -36,13 +36,6 @@ namespace game
     Mesh* get_impl() noexcept { return impl_.get(); }
     Mesh const* get_impl() const noexcept { return impl_.get(); }
 
-    void allocate(unsigned int max_verts,
-                  unsigned int max_elemnt_indices, Usage_Hint, Upload_Hint,
-                  Primitive_Type) noexcept override;
-
-    void allocate_from(Mesh_Data const&) noexcept override;
-    void allocate_from(Mesh_Data&&) noexcept override;
-
     void set_vertices(unsigned int begin,
                       unsigned int length,
                       Vertex const* data) noexcept override;
@@ -59,6 +52,13 @@ namespace game
 
     void copy_to(Mesh& other) const noexcept;
   private:
+    void allocate_(unsigned int max_verts,
+                   unsigned int max_elemnt_indices, Usage_Hint, Upload_Hint,
+                   Primitive_Type) noexcept override;
+
+    void allocate_from_(Mesh_Data const&) noexcept override;
+    void allocate_from_(Mesh_Data&&) noexcept override;
+
     Maybe_Owned<Mesh> impl_;
     bool allocated_ = false;
 
