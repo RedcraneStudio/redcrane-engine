@@ -12,6 +12,9 @@ add_subdirectory(io)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
+find_package(PortAudio REQUIRED)
+add_subdirectory(snd)
+
 add_subdirectory(fps)
 
 #find_package(Boost REQUIRED COMPONENTS filesystem)
@@ -23,7 +26,7 @@ add_subdirectory(ui)
 add_subdirectory(map)
 
 add_executable(strategy main.cpp)
-target_link_libraries(strategy gfxlib commonlib uilib maplib)
+target_link_libraries(strategy gfxlib commonlib uilib maplib sndlib)
 
 find_package(Bullet REQUIRED)
 
