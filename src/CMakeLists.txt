@@ -13,6 +13,7 @@ find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
 find_package(PortAudio REQUIRED)
+find_package(FLAC REQUIRED)
 add_subdirectory(snd)
 
 add_subdirectory(fps)

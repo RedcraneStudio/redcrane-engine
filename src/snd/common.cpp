@@ -29,6 +29,9 @@ namespace game { namespace snd
   struct Stream_Impl
   {
     PaStream* stream;
+
+    PCM_Data* pcm_data;
+    bool done;
   };
 
   int snd_callback(const void* input, void* output, unsigned long frame_count,
@@ -36,14 +39,21 @@ namespace game { namespace snd
                    PaStreamCallbackFlags status_flag,
                    void* user_data) noexcept
   {
-    return paComplete;
+    auto stream_impl = reinterpret_cast<Stream_Impl*>(user_data);
+
+    if(stream_impl->done)
+      return paComplete;
+    else
+      return paContinue;
   }
 
   Stream::Stream() noexcept : impl(new Stream_Impl())
   {
+    // We give the user data in terms of the impl so that moving a stream won't
+    // make the portaudio callback erroneously fail.
     auto err = Pa_OpenDefaultStream(&impl->stream, 0, 2, paFloat32,
                                     44100, paFramesPerBufferUnspecified,
-                                    snd_callback, nullptr);
+                                    snd_callback, impl);
     if(err != paNoError)
     {
       log_e("Failed to initialize portaudio stream. %", Pa_GetErrorText(err));
@@ -74,5 +84,11 @@ namespace game { namespace snd
     }
 
     delete impl;
+  }
+
+  void Stream::use_pcm(PCM_Data& data) noexcept
+  {
+    impl->done = false;
+    impl->pcm_data = &data;
   }
 } }

@@ -4,6 +4,7 @@
  */
 #pragma once
 #include <memory>
+#include "pcm_data.h"
 namespace game { namespace snd
 {
   void initialize_pa() noexcept;
@@ -23,5 +24,7 @@ namespace game { namespace snd
     ~Stream() noexcept;
 
     Stream_Impl* impl;
+
+    void use_pcm(PCM_Data&) noexcept;
   };
 } }
