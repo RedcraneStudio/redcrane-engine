@@ -2,6 +2,8 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
+#include <limits>
+
 #include "common.h"
 #include "portaudio.h"
 #include "../common/log.h"
@@ -31,6 +33,7 @@ namespace game { namespace snd
     PaStream* stream;
 
     PCM_Data* pcm_data;
+    unsigned int where;
     bool done;
   };
 
@@ -40,6 +43,25 @@ namespace game { namespace snd
                    void* user_data) noexcept
   {
     auto stream_impl = reinterpret_cast<Stream_Impl*>(user_data);
+
+    auto* out = reinterpret_cast<float*>(output);
+
+    auto& where = stream_impl->where;
+    for(unsigned int i = 0; i < frame_count; ++i, ++where)
+    {
+      if(where >= stream_impl->pcm_data->samples.size())
+      {
+        // We are done here.
+        stream_impl->done = true;
+        log_i("Out of data");
+        break;
+      }
+
+      out[i] = (float) stream_impl->pcm_data->samples[where].left /
+               std::numeric_limits<uint32_t>::max();
+      out[i+1] = (float) stream_impl->pcm_data->samples[where].right /
+                 std::numeric_limits<uint32_t>::max();
+    }
 
     if(stream_impl->done)
       return paComplete;
