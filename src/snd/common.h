@@ -14,6 +14,7 @@ namespace game { namespace snd
   struct Stream
   {
     Stream() noexcept;
+    Stream(int device_id) noexcept;
 
     Stream(Stream const& s) noexcept = delete;
     Stream& operator=(Stream const& s) noexcept = delete;
@@ -26,5 +27,7 @@ namespace game { namespace snd
     Stream_Impl* impl;
 
     void use_pcm(PCM_Data&) noexcept;
+    void start() noexcept;
+    void stop(bool force = false) noexcept;
   };
 } }

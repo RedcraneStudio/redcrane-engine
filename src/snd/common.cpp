@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #include <limits>
+#include <algorithm>
 
 #include "common.h"
 #include "portaudio.h"
@@ -81,6 +82,25 @@ namespace game { namespace snd
       log_e("Failed to initialize portaudio stream. %", Pa_GetErrorText(err));
     }
   }
+  Stream::Stream(int device_id) noexcept : impl(new Stream_Impl())
+  {
+    PaStreamParameters params;
+
+    params.device = device_id;
+    params.sampleFormat = paFloat32;
+    params.channelCount = 2;
+    params.suggestedLatency = 0;
+    params.hostApiSpecificStreamInfo = 0;
+
+    auto err = Pa_OpenStream(&impl->stream, NULL, &params, 44100,
+                             paFramesPerBufferUnspecified,
+                             paNoFlag, snd_callback, impl);
+    if(err != paNoError)
+    {
+      log_e("Failed to initialize a portaudio stream given an id. %",
+            Pa_GetErrorText(err));
+    }
+  }
 
   Stream::Stream(Stream&& s) noexcept : impl(s.impl)
   {
@@ -110,7 +130,20 @@ namespace game { namespace snd
 
   void Stream::use_pcm(PCM_Data& data) noexcept
   {
-    impl->done = false;
     impl->pcm_data = &data;
+  }
+  void Stream::start() noexcept
+  {
+    this->stop();
+
+    Pa_StartStream(impl->stream);
+  }
+  void Stream::stop(bool force) noexcept
+  {
+    if(impl->done || force)
+    {
+      Pa_StopStream(impl->stream);
+    }
+    impl->done = false;
   }
 } }
