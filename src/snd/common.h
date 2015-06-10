@@ -14,7 +14,6 @@ namespace game { namespace snd
   struct Stream
   {
     Stream() noexcept;
-    Stream(int device_id) noexcept;
 
     Stream(Stream const& s) noexcept = delete;
     Stream& operator=(Stream const& s) noexcept = delete;

@@ -12,7 +12,7 @@ add_subdirectory(io)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
-find_package(PortAudio REQUIRED)
+find_package(PulseAudio_Simple REQUIRED)
 find_package(FLAC REQUIRED)
 add_subdirectory(snd)
 

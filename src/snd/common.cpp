@@ -6,99 +6,39 @@
 #include <algorithm>
 
 #include "common.h"
-#include "portaudio.h"
 #include "../common/log.h"
+
+#include "pulse/simple.h"
+#include "pulse/error.h"
 namespace game { namespace snd
 {
-  void initialize_pa() noexcept
-  {
-    auto err = Pa_Initialize();
-    if(err != paNoError)
-    {
-      log_e("Failed to initialize portaudio. %", Pa_GetErrorText(err));
-      return;
-    }
-  }
-  void terminate_pa() noexcept
-  {
-    auto err = Pa_Terminate();
-    if(err != paNoError)
-    {
-      log_e("Failed to terminate portaudio. %", Pa_GetErrorText(err));
-      return;
-    }
-  }
+  void initialize_pa() noexcept {}
+  void terminate_pa() noexcept {}
 
   struct Stream_Impl
   {
-    PaStream* stream;
+    pa_simple* stream;
 
     PCM_Data* pcm_data;
-    unsigned int where;
     bool done;
   };
 
-  int snd_callback(const void* input, void* output, unsigned long frame_count,
-                   const PaStreamCallbackTimeInfo* time_info,
-                   PaStreamCallbackFlags status_flag,
-                   void* user_data) noexcept
-  {
-    auto stream_impl = reinterpret_cast<Stream_Impl*>(user_data);
-
-    auto* out = reinterpret_cast<float*>(output);
-
-    auto& where = stream_impl->where;
-    for(unsigned int i = 0; i < frame_count; ++i, ++where)
-    {
-      if(where >= stream_impl->pcm_data->samples.size())
-      {
-        // We are done here.
-        stream_impl->done = true;
-        log_i("Out of data");
-        break;
-      }
-
-      out[i] = (float) stream_impl->pcm_data->samples[where].left /
-               std::numeric_limits<uint32_t>::max();
-      out[i+1] = (float) stream_impl->pcm_data->samples[where].right /
-                 std::numeric_limits<uint32_t>::max();
-    }
-
-    if(stream_impl->done)
-      return paComplete;
-    else
-      return paContinue;
-  }
-
   Stream::Stream() noexcept : impl(new Stream_Impl())
   {
-    // We give the user data in terms of the impl so that moving a stream won't
-    // make the portaudio callback erroneously fail.
-    auto err = Pa_OpenDefaultStream(&impl->stream, 0, 2, paFloat32,
-                                    44100, paFramesPerBufferUnspecified,
-                                    snd_callback, impl);
-    if(err != paNoError)
-    {
-      log_e("Failed to initialize portaudio stream. %", Pa_GetErrorText(err));
-    }
-  }
-  Stream::Stream(int device_id) noexcept : impl(new Stream_Impl())
-  {
-    PaStreamParameters params;
+    pa_sample_spec ss;
 
-    params.device = device_id;
-    params.sampleFormat = paFloat32;
-    params.channelCount = 2;
-    params.suggestedLatency = 0;
-    params.hostApiSpecificStreamInfo = 0;
+    ss.rate = 44100;
+    ss.channels = 2;
+    ss.format = PA_SAMPLE_S16LE;
 
-    auto err = Pa_OpenStream(&impl->stream, NULL, &params, 44100,
-                             paFramesPerBufferUnspecified,
-                             paNoFlag, snd_callback, impl);
-    if(err != paNoError)
+    int err = 0;
+    impl->stream = pa_simple_new(NULL, "He came with the dust...",
+                                 PA_STREAM_PLAYBACK,
+                                 NULL, "Like Wind Blows Fire", &ss,
+                                 NULL, NULL, &err);
+    if(err)
     {
-      log_e("Failed to initialize a portaudio stream given an id. %",
-            Pa_GetErrorText(err));
+      log_e("... And was gone with the wind! %", pa_strerror(err));
     }
   }
 
@@ -118,11 +58,7 @@ namespace game { namespace snd
   {
     if(impl->stream)
     {
-      auto err = Pa_CloseStream(impl->stream);
-      if(err != paNoError)
-      {
-        log_e("Failed to close portaudio stream. %", Pa_GetErrorText(err));
-      }
+      pa_simple_free(impl->stream);
     }
 
     delete impl;
@@ -134,16 +70,23 @@ namespace game { namespace snd
   }
   void Stream::start() noexcept
   {
-    this->stop();
-
-    Pa_StartStream(impl->stream);
-  }
-  void Stream::stop(bool force) noexcept
-  {
-    if(impl->done || force)
+    if(!impl->pcm_data)
     {
-      Pa_StopStream(impl->stream);
+      log_e("No PCM data!");
+      return;
     }
-    impl->done = false;
+
+    // Get the bytes
+    int err = 0;
+
+    pa_simple_write(impl->stream, &impl->pcm_data->samples[0],
+                    impl->pcm_data->samples.size() * sizeof(Sample), &err);
+    if(err) log_e("When writing: %", pa_strerror(err));
+
+    err = 0;
+
+    pa_simple_drain(impl->stream, NULL);
+    if(err) log_e("When draining: %", pa_strerror(err));
   }
+  void Stream::stop(bool) noexcept {}
 } }
