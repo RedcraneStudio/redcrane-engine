@@ -9,12 +9,13 @@ namespace game { namespace snd
 {
   struct Sample
   {
-    uint32_t left;
-    uint32_t right;
+    int16_t left;
+    int16_t right;
   };
-
   struct PCM_Data
   {
+    int bits_per_sample;
+
     std::vector<Sample> samples;
     bool error;
   };

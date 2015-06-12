@@ -17,20 +17,41 @@ namespace game { namespace snd
                 FLAC__int32 const* const buffer[],
                 void* client_data) noexcept
   {
-    auto pcm_data_out = reinterpret_cast<PCM_Data*>(client_data);
+    auto pcm_data = reinterpret_cast<PCM_Data*>(client_data);
 
     for(unsigned int i = 0; i < frame->header.blocksize; ++i)
     {
-      auto sample = Sample{};
-
-      sample.left = buffer[0][i];
-      sample.right = buffer[1][i];
-
-      pcm_data_out->samples.push_back(sample);
+      if(pcm_data->bits_per_sample == 16)
+      {
+        pcm_data->samples.push_back(Sample{
+          static_cast<int16_t>(buffer[0][i]),
+          static_cast<int16_t>(buffer[1][i])});
+      }
     }
 
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
   }
+
+  void flac_metadata_fn(FLAC__StreamDecoder const* decoder,
+                        FLAC__StreamMetadata const* metadata,
+                        void* client_data) noexcept
+  {
+    if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO)
+    {
+      log_i("Total samples: %", metadata->data.stream_info.total_samples);
+      log_i("Sample rate: %", metadata->data.stream_info.sample_rate);
+      log_i("Channels: %", metadata->data.stream_info.channels);
+      log_i("Bits per sample: %", metadata->data.stream_info.bits_per_sample);
+
+      auto* pcm_data = reinterpret_cast<PCM_Data*>(client_data);
+      pcm_data->bits_per_sample = metadata->data.stream_info.bits_per_sample;
+      if(pcm_data->bits_per_sample != 16)
+      {
+        log_e("We only support signed 16bit little-endian PCM data.");
+      }
+    }
+  }
+
   void flac_error_fn(FLAC__StreamDecoder const* decoder,
                      FLAC__StreamDecoderErrorStatus status,
                      void* client_data) noexcept
@@ -48,10 +69,11 @@ namespace game { namespace snd
     }
 
     PCM_Data pcm_data;
+    pcm_data.error = false;
 
     FLAC__stream_decoder_init_file(stream_decoder, filename.c_str(),
-                                   flac_write_fn, NULL, flac_error_fn,
-                                   &pcm_data);
+                                   flac_write_fn, flac_metadata_fn,
+                                   flac_error_fn, &pcm_data);
 
     FLAC__stream_decoder_process_until_end_of_stream(stream_decoder);
 
