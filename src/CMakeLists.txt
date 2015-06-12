@@ -37,4 +37,7 @@ target_link_libraries(fps_exe ${BULLET_LIBRARIES})
 
 target_include_directories(fps_exe PUBLIC ${BULLET_INCLUDE_DIRS})
 
+add_executable(play_snd play_snd.cpp)
+target_link_libraries(play_snd sndlib commonlib)
+
 add_subdirectory(tests)
