@@ -3,37 +3,37 @@
  * All rights reserved.
  */
 
-#include "../common/mesh.h"
-#include "../common/mesh_load.h"
-#include "../common/software_mesh.h"
+#include "../gfx/mesh.h"
+#include "../gfx/support/load_wavefront.h"
 
 #include <sstream>
 
-#define CATCH_CONFIG_MAIN
 #include "catch/catch.hpp"
 
 TEST_CASE("Face index string is properly parsed", "[struct Face]")
 {
   using namespace game;
 
-  auto f = parse_vert_ref("6");
-  REQUIRE(f.position.value() == 6);
+  using gfx::parse_wavefront_vert_ref;
+
+  auto f = parse_wavefront_vert_ref("6");
+  REQUIRE(f.position.value() == 5);
   REQUIRE_FALSE(f.tex_coord);
   REQUIRE_FALSE(f.normal);
 
-  f = parse_vert_ref("5//2");
-  REQUIRE(f.position.value() == 5);
+  f = parse_wavefront_vert_ref("5//2");
+  REQUIRE(f.position.value() == 4);
   REQUIRE_FALSE(f.tex_coord);
-  REQUIRE(f.normal.value() == 2);
+  REQUIRE(f.normal.value() == 1);
 
-  f = parse_vert_ref("7/1/5");
-  REQUIRE(f.position.value() == 7);
-  REQUIRE(f.tex_coord.value() == 1);
-  REQUIRE(f.normal.value() == 5);
+  f = parse_wavefront_vert_ref("7/1/5");
+  REQUIRE(f.position.value() == 6);
+  REQUIRE(f.tex_coord.value() == 0);
+  REQUIRE(f.normal.value() == 4);
 
-  f = parse_vert_ref("9/8");
-  REQUIRE(f.position.value() == 9);
-  REQUIRE(f.tex_coord.value() == 8);
+  f = parse_wavefront_vert_ref("9/8");
+  REQUIRE(f.position.value() == 8);
+  REQUIRE(f.tex_coord.value() == 7);
   REQUIRE_FALSE(f.normal);
 }
 
@@ -49,22 +49,25 @@ TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
   "f 2 4 3\n"
   "f 1 2 3\n";
 
-  Software_Mesh mesh;
   std::istringstream stream{data};
-  load_obj(stream, mesh);
-  REQUIRE(mesh.mesh_data().vertices.size() == 4);
-  REQUIRE(mesh.mesh_data().elements.size() == 6);
+  auto mesh_data = gfx::load_wavefront(stream);
+
+  REQUIRE(mesh_data.positions.size() == 4);
+  REQUIRE(mesh_data.indices.size() == 6);
 
   glm::vec3 pt;
-  pt = {-10.0, -10.0, 0.0};
-  REQUIRE(mesh.mesh_data().vertices[0].position == pt);
-  pt = {10.0, -10.0, 0.0};
-  REQUIRE(mesh.mesh_data().vertices[1].position == pt);
-  pt = {10.0, 10.0, 0.0};
-  REQUIRE(mesh.mesh_data().vertices[2].position == pt);
   pt = {-10.0, 10.0, 0.0};
-  REQUIRE(mesh.mesh_data().vertices[3].position == pt);
+  REQUIRE(mesh_data.positions[0] == pt);
 
-  REQUIRE(mesh.mesh_data().elements[0] == mesh.mesh_data().elements[4]);
-  REQUIRE(mesh.mesh_data().elements[2] == mesh.mesh_data().elements[5]);
+  pt = {-10.0, -10.0, 0.0};
+  REQUIRE(mesh_data.positions[1] == pt);
+
+  pt = {10.0, 10.0, 0.0};
+  REQUIRE(mesh_data.positions[2] == pt);
+
+  pt = {10.0, -10.0, 0.0};
+  REQUIRE(mesh_data.positions[3] == pt);
+
+  REQUIRE(mesh_data.indices[0] == mesh_data.indices[4]);
+  REQUIRE(mesh_data.indices[2] == mesh_data.indices[5]);
 }
