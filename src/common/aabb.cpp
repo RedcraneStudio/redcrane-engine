@@ -5,6 +5,38 @@
 #include "aabb.h"
 namespace game
 {
+  AABB aabb_from_min_max(glm::vec3 min, glm::vec3 max) noexcept
+  {
+    auto aabb = AABB{};
+    aabb.width = std::abs(max.x - min.x);
+    aabb.height = std::abs(max.y - min.y);
+    aabb.depth = std::abs(max.z - min.z);
+
+    aabb.min = min;
+    return aabb;
+  }
+
+  glm::vec3 min_pt(glm::vec3 v1, glm::vec3 v2) noexcept
+  {
+    glm::vec3 pt;
+
+    pt.x = std::min(v1.x, v2.x);
+    pt.y = std::min(v1.y, v2.y);
+    pt.z = std::min(v1.z, v2.z);
+
+    return pt;
+  }
+  glm::vec3 max_pt(glm::vec3 v1, glm::vec3 v2) noexcept
+  {
+    glm::vec3 pt;
+
+    pt.x = std::max(v1.x, v2.x);
+    pt.y = std::max(v1.y, v2.y);
+    pt.z = std::max(v1.z, v2.z);
+
+    return pt;
+  }
+
   Point_Iter::Point_Iter(AABB const* aabb) noexcept : aabb_(aabb)
   {
     if(aabb == nullptr)
@@ -63,6 +95,6 @@ namespace game
   }
   bool Point_Iter::operator==(Point_Iter const& pi) const noexcept
   {
-    return this->where_ = pi.where_;
+    return this->where_ == pi.where_;
   }
 }

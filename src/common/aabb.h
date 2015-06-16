@@ -16,6 +16,10 @@ namespace game
     glm::vec3 min;
   };
 
+  AABB aabb_from_min_max(glm::vec3 min, glm::vec3 max) noexcept;
+  glm::vec3 min_pt(glm::vec3 v1, glm::vec3 v2) noexcept;
+  glm::vec3 max_pt(glm::vec3 v1, glm::vec3 v2) noexcept;
+
   struct Point_Iter
   {
     Point_Iter(AABB const* aabb = nullptr) noexcept;
