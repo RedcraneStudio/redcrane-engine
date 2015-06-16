@@ -9,7 +9,7 @@
 #include "../../common/log.h"
 namespace game { namespace gfx
 {
-  Vert_Ref parse_vert_ref(std::string str) noexcept
+  Vert_Ref parse_wavefront_vert_ref(std::string str) noexcept
   {
     // str could be "2" or "2/1" or "2//4" or "2/1/4"
     Vert_Ref f;
@@ -84,7 +84,7 @@ namespace game { namespace gfx
         {
           std::string index_str;
           line_stream >> index_str;
-          ret.indices.push_back(parse_vert_ref(index_str));
+          ret.indices.push_back(parse_wavefront_vert_ref(index_str));
         }
       }
     }
