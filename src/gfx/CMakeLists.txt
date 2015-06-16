@@ -6,9 +6,10 @@ add_subdirectory(support)
 
 set(SURVIVE_GFX_GL_SOURCES gl/driver.cpp gl/mesh.cpp gl/texture.cpp
                            gl/shader.cpp gl/common.cpp)
+set(LOVELY_CUP_GFX_NULL_SOURCES null/driver.cpp null/mesh.cpp)
 add_library(gfxlib STATIC ${SURVIVE_GFX_GL_SOURCES} camera.cpp shader.cpp
-                          idriver_ui_adapter.cpp mesh.cpp mesh_chunk.cpp
-                          mesh_data.cpp)
+                          ${LOVELY_CUP_GFX_NULL_SOURCES} idriver_ui_adapter.cpp
+                          mesh.cpp mesh_chunk.cpp mesh_data.cpp)
 
 target_link_libraries(gfxlib engine_gl)
 
