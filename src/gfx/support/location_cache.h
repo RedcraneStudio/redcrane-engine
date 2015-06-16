@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "shader.h"
+#include "../shader.h"
 #include <unordered_map>
 namespace game { namespace gfx
 {

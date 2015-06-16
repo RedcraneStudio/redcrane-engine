@@ -5,45 +5,52 @@
 #pragma once
 #include "glad/glad.h"
 #include <array>
-#include "../../common/mesh.h"
+#include "../mesh.h"
+#include "driver.h"
 namespace game { namespace gfx { namespace gl
 {
   struct GL_Mesh : public Mesh
   {
+    GL_Mesh(Driver& driver) noexcept;
     virtual ~GL_Mesh() noexcept;
 
-    void set_vertices(unsigned int begin,
-                      unsigned int length,
-                      Vertex const* data) noexcept override;
-    void set_element_indices(unsigned int begin,
-                             unsigned int length,
-                             unsigned int const* indices) noexcept override;
-    void set_num_element_indices(unsigned int) noexcept override;
+    unsigned int allocate_buffer(std::size_t size, Usage_Hint,
+                                 Upload_Hint) override;
+    unsigned int allocate_element_array(unsigned int elements, Usage_Hint,
+                                        Upload_Hint) override;
 
-    void bind() const noexcept;
-    void draw() const noexcept;
-    void draw(std::size_t start, std::size_t count) const noexcept;
+    void reallocate_buffer(unsigned int buf, std::size_t size, Usage_Hint,
+                           Upload_Hint) override;
+    void unallocate_buffer(unsigned int) noexcept override;
+
+    void buffer_data(unsigned int buf, unsigned int offset, unsigned int size,
+                     void const* const d) noexcept override;
+
+    void format_buffer(unsigned int buf,
+                       unsigned int attrib,
+                       unsigned short size, // must be 1 2 3 or 4
+                       Buffer_Format format,
+                       unsigned int stride,
+                       unsigned int offset) noexcept override;
+    void enable_vertex_attrib(unsigned int attrib) noexcept override;
+
+    void set_primitive_type(Primitive_Type) noexcept override;
+
+    void use_elements(unsigned int buf) noexcept override;
+
+    void bind() noexcept;
+    void draw_arrays(unsigned int start, unsigned int count) noexcept override;
+    void draw_elements(unsigned int st, unsigned int count) noexcept override;
+    void draw_elements_base_vertex(unsigned int st, unsigned int count,
+                                   unsigned int base) noexcept override;
 
     GLuint vao;
-    std::array<GLuint, 4> bufs;
-    int num_indices;
     GLenum primitive;
 
   private:
-    void allocate_(unsigned int max_verts,
-                  unsigned int max_elemnt_indices, Usage_Hint, Upload_Hint,
-                  Primitive_Type) noexcept override;
-
-    void allocate_from_(Mesh_Data const&) noexcept override;
+    Driver* driver_;
 
     void unallocate_() noexcept;
     void allocate_vao_() noexcept;
-    void allocate_buffers_() noexcept;
-    void allocate_array_buffer_(GLuint buf, GLuint attrib_index, GLint cs,
-                                std::size_t size, GLenum type,
-                                GLenum usage) noexcept;
-    void allocate_array_buffer_(GLuint buf, GLuint attrib_index, GLint cs,
-                                std::size_t size, GLenum type,
-                                GLenum usage, void* data) noexcept;
   };
 } } }

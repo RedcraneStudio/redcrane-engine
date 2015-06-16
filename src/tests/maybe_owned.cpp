@@ -3,6 +3,8 @@
  * All rights reserved.
  */
 #include "../common/maybe_owned.hpp"
+
+#define CATCH_CONFIG_MAIN
 #include "catch/catch.hpp"
 
 using namespace game;

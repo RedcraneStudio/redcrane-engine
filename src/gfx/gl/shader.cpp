@@ -10,8 +10,13 @@
 #include "glad/glad.h"
 
 #include "../../common/log.h"
+#include "driver.h"
 
 #define LOC_BAIL(location) if(location == -1) return
+
+#define USE_THIS_SHADER() driver_->use_shader(*this)
+
+// TODO: Log bad uniform locations.
 
 namespace game { namespace gfx { namespace gl
 {
@@ -48,7 +53,7 @@ namespace game { namespace gfx { namespace gl
       delete[] info_log;
     }
   }
-  GL_Shader::GL_Shader() noexcept
+  GL_Shader::GL_Shader(Driver& d) noexcept : driver_(&d)
   {
     prog_ = glCreateProgram();
   }
@@ -96,33 +101,45 @@ namespace game { namespace gfx { namespace gl
   void GL_Shader::set_matrix(int loc, glm::mat4 const& mat) noexcept
   {
     LOC_BAIL(loc);
+
+    USE_THIS_SHADER();
     glUniformMatrix4fv(loc, 1, GL_FALSE, &mat[0][0]);
   }
 
-  void GL_Shader::set_sampler(int loc, unsigned int tex_unit) noexcept
+  void GL_Shader::set_integer(int loc, int tex_unit) noexcept
   {
     LOC_BAIL(loc);
+
+    USE_THIS_SHADER();
     glUniform1i(loc, tex_unit);
   }
 
   void GL_Shader::set_vec2(int loc, glm::vec2 const& v) noexcept
   {
     LOC_BAIL(loc);
+
+    USE_THIS_SHADER();
     glUniform2fv(loc, 1, &v[0]);
   }
   void GL_Shader::set_vec3(int loc, glm::vec3 const& v) noexcept
   {
     LOC_BAIL(loc);
+
+    USE_THIS_SHADER();
     glUniform3fv(loc, 1, &v[0]);
   }
   void GL_Shader::set_vec4(int loc, glm::vec4 const& v) noexcept
   {
     LOC_BAIL(loc);
+
+    USE_THIS_SHADER();
     glUniform4fv(loc, 1, &v[0]);
   }
   void GL_Shader::set_float(int loc, float f) noexcept
   {
     LOC_BAIL(loc);
+
+    USE_THIS_SHADER();
     glUniform1f(loc, f);
   }
   void GL_Shader::use() noexcept

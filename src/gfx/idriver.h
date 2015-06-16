@@ -4,12 +4,15 @@
  */
 #pragma once
 #include <memory>
-#include "../common/color.h"
-#include "../common/texture.h"
-#include "../common/mesh.h"
+#include "../common/vec.h"
+#include "texture.h"
+#include "mesh.h"
 #include "shader.h"
 namespace game
 {
+  // Forward declare the color structure.
+  struct Color;
+
   namespace gfx
   {
     struct IDriver
@@ -17,13 +20,11 @@ namespace game
       virtual ~IDriver() noexcept {}
 
       virtual std::unique_ptr<Shader> make_shader_repr() noexcept = 0;
-      virtual void set_shader(Shader&) noexcept = 0;
+      virtual void use_shader(Shader&) noexcept = 0;
       virtual Shader* active_shader() const noexcept = 0;
 
       virtual std::unique_ptr<Mesh> make_mesh_repr() noexcept = 0;
-      virtual void render_mesh(Mesh& mesh) noexcept = 0;
-      virtual void render_mesh(Mesh& mesh, std::size_t start,
-                               std::size_t count) noexcept = 0;
+      virtual void bind_mesh(Mesh& mesh) noexcept = 0;
 
       virtual std::unique_ptr<Texture> make_texture_repr() noexcept = 0;
       virtual void bind_texture(Texture& tex, unsigned int loc) noexcept = 0;

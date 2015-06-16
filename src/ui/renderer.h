@@ -6,7 +6,7 @@
 #include "../common/vec.h"
 #include "../common/volume.h"
 #include "../common/color.h"
-#include "../common/texture.h"
+#include "../gfx/texture.h"
 
 #include <memory>
 namespace game { namespace ui

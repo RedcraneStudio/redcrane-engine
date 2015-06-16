@@ -3,9 +3,9 @@
  * All rights reserved.
  */
 #pragma once
-#include "vec.h"
-#include "volume.h"
-#include "color.h"
+#include "../common/vec.h"
+#include "../common/volume.h"
+#include "../common/color.h"
 namespace game
 {
   struct Texture

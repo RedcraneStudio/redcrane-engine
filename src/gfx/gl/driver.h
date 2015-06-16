@@ -21,13 +21,11 @@ namespace game
     ~Driver() noexcept;
 
     std::unique_ptr<Shader> make_shader_repr() noexcept override;
-    void set_shader(Shader&) noexcept override;
+    void use_shader(Shader&) noexcept override;
     Shader* active_shader() const noexcept override;
 
     std::unique_ptr<Mesh> make_mesh_repr() noexcept override;
-    void render_mesh(Mesh& mesh) noexcept override;
-    void render_mesh(Mesh& mesh, std::size_t start,
-                     std::size_t count) noexcept override;
+    void bind_mesh(Mesh& mesh) noexcept override;
 
     std::unique_ptr<Texture> make_texture_repr() noexcept override;
     void bind_texture(Texture& tex, unsigned int loc) noexcept override;
@@ -50,5 +48,6 @@ namespace game
     Vec<int> extents_;
 
     Shader* cur_shader_;
+    Mesh* cur_mesh_;
   };
 }

@@ -12,15 +12,14 @@
 
 #include "gfx/gl/driver.h"
 #include "gfx/camera.h"
-#include "gfx/object.h"
-#include "gfx/scene_node.h"
+#include "gfx/mesh_chunk.h"
 #include "gfx/idriver_ui_adapter.h"
-
-#include "common/software_texture.h"
-#include "common/texture_load.h"
-#include "common/software_mesh.h"
-#include "common/mesh_load.h"
-#include "common/mesh_write.h"
+#include "gfx/support/load_wavefront.h"
+#include "gfx/support/mesh_conversion.h"
+#include "gfx/support/generate_aabb.h"
+#include "gfx/support/write_data_to_mesh.h"
+#include "gfx/support/texture_load.h"
+#include "gfx/support/software_texture.h"
 
 #include "ui/load.h"
 #include "ui/freetype_renderer.h"
@@ -28,7 +27,7 @@
 #include "ui/simple_controller.h"
 
 #include "map/map.h"
-#include "map/json_structure.h"
+#include "map/water.h"
 #include "glad/glad.h"
 #include "glfw3.h"
 
@@ -146,47 +145,40 @@ int main(int argc, char** argv)
   default_shader->set_model_name("model");
   default_shader->set_sampler_name("tex");
   default_shader->set_diffuse_name("dif");
-  driver.set_shader(*default_shader);
+  driver.use_shader(*default_shader);
+
+  default_shader->set_sampler(0);
+
+  // Load our textures.
+  auto grass_tex = driver.make_texture_repr();
+  load_png("tex/grass.png", *grass_tex);
 
   // Make an isometric camera.
   auto cam = gfx::make_isometric_camera();
-
-  auto terrain_obj = gfx::Object{};
-  *terrain_obj.material = gfx::load_material("mat/terrain.json");
 
   // Load the image
   Software_Texture terrain_image;
   load_png("map/default.png", terrain_image);
 
   // Convert it into a heightmap
-  auto terrain_heightmap = make_heightmap_from_image(terrain_image);
-  auto terrain =
-    make_terrain_mesh(*terrain_obj.mesh, terrain_heightmap,{20,20}, .001f, .01);
-  write_obj("../terrain.obj", terrain_obj.mesh->mesh_data());
+  auto terrain = driver.make_mesh_repr();
 
-  prepare_object(driver, terrain_obj);
+  auto terrain_heightmap = make_heightmap_from_image(terrain_image);
+  auto terrain_data =
+    make_terrain_mesh(terrain_heightmap, {20, 20}, .001f, .01);
+
+  auto terrain_model = glm::scale(glm::mat4(1.0f),
+                                  glm::vec3(5.0f, 1.0f, 5.0f));
+
+  gfx::allocate_mesh_buffers(terrain_data.mesh, *terrain);
+  gfx::write_data_to_mesh(terrain_data.mesh, *terrain);
+  gfx::format_mesh_buffers(*terrain);
 
   // Make water.
-  gfx::Object water_obj;
-  *water_obj.material = gfx::load_material("mat/terrain.json");
-  water_obj.material->diffuse_color = colors::blue;
-  auto water_heightmap = make_flat_heightmap(-1, 2, 2);
-  auto water = make_terrain_mesh(*water_obj.mesh, water_heightmap, {1,1},
-                                 .01f, 2.56f);
+  auto water = driver.make_mesh_repr();
 
-  prepare_object(driver, water_obj);
-
-  // Load our house structure
-  auto house_struct = Json_Structure{"structure/house.json"};
-
-  // This is code smell, right here. The fact that before, we were preparing
-  // a temporary but it still worked because of the implementation of
-  // Json_Structure and the object sharing mechanism.
-  auto house_obj = house_struct.make_obj();
-  prepare_object(driver, house_obj);
-
-  std::vector<Structure_Instance> house_instances;
-  Structure_Instance moveable_instance{house_struct, Orient::N};
+  Heightmap water_heightmap;
+  water_heightmap.allocate({100, 100});
 
   int fps = 0;
   int time = glfwGetTime();
@@ -220,38 +212,6 @@ int main(int argc, char** argv)
 
   hud->layout(driver.window_extents());
 
-  controller.add_click_listener([&](auto const&)
-  {
-    // Commit the current position of our moveable instance.
-    house_instances.push_back(moveable_instance);
-  });
-  controller.add_hover_listener([&](auto const& pt)
-  {
-    if(pt.x < 0 || pt.x > 1000.0 || pt.y < 0 || pt.y > 1000.0)
-    {
-      moveable_instance.obj.model_matrix = glm::mat4(1.0);
-    }
-    else
-    {
-      // Find our depth.
-      GLfloat z;
-      glReadPixels((float) pt.x, (float) 1000.0 - pt.y, 1, 1,
-                   GL_DEPTH_COMPONENT, GL_FLOAT, &z);
-
-      // Unproject our depth.
-      auto val = glm::unProject(glm::vec3(pt.x, 1000.0 - pt.y, z),
-                                camera_view_matrix(cam),
-                                camera_proj_matrix(cam),
-                                glm::vec4(0.0, 0.0, 1000.0, 1000.0));
-
-      // We have our position, render a single house there.
-      moveable_instance.obj.model_matrix = glm::translate(glm::mat4(1.0), val);
-    }
-    // Move the house by however much the structure *type* requires.
-    moveable_instance.obj.model_matrix = moveable_instance.obj.model_matrix *
-                                         house_struct.make_obj().model_matrix;
-  });
-
   controller.add_drag_listener([&](auto const& np, auto const& op)
   {
     // pan
@@ -268,6 +228,11 @@ int main(int argc, char** argv)
   glfwSetWindowUserPointer(window, &cam);
   glfwSetScrollCallback(window, scroll_callback);
 
+  //water_obj.material->diffuse_color = Color{0xaa, 0xaa, 0xff};
+
+  terrain->set_primitive_type(Primitive_Type::Triangle);
+  water->set_primitive_type(Primitive_Type::Triangle);
+
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
@@ -277,34 +242,35 @@ int main(int argc, char** argv)
     driver.clear();
     use_camera(driver, cam);
 
-    for(auto const& chunk : terrain.chunks)
+    driver.bind_texture(*grass_tex, 0);
+
+    default_shader->set_diffuse(colors::white);
+    default_shader->set_model(terrain_model);
+
+    terrain->draw_arrays(0, terrain_data.mesh.vertices.size());
+
+    set_noise_heightmap(water_heightmap, glfwGetTime() / 1.0f);
+    auto water_data = make_terrain_mesh(water_heightmap, {2,2}, .001f, .0256f);
+
+    if(water->get_num_allocated_buffers() == 0)
     {
-      // Check each point of the aabb for visibility.
-      //for(auto iter = begin_point_iter(chunk.aabb);
-          //iter != end_point_iter(); ++iter)
-      {
-        //glm::vec4 pt(*iter, 1.0f);
-        //auto pt = project_point(pt);
-      }
-
-      render_object(driver, terrain_obj, chunk.mesh.offset, chunk.mesh.count);
+      gfx::allocate_mesh_buffers(water_data.mesh, *water, Upload_Hint::Stream);
+      gfx::format_mesh_buffers(*water);
     }
+    gfx::write_data_to_mesh(water_data.mesh, *water);
 
-    render_object(driver, water_obj);
+    driver.bind_texture(*grass_tex, 0);
+    default_shader->set_diffuse(colors::blue);
+    default_shader->set_model(glm::mat4(1.0f));
+    water->draw_arrays(0, water_data.mesh.vertices.size());
 
     // Render the terrain before we calculate the depth of the mouse position.
     auto mouse_state = gen_mouse_state(window);
     controller.step(hud, mouse_state);
 
     // Render our movable instance of a house.
-    //render_object(driver, moveable_instance.obj);
 
     // Render all of our other house instances.
-    for(auto const& instance : house_instances)
-    {
-      //render_object(driver, instance.obj);
-    }
-
     {
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
       hud->render(ui_adapter);

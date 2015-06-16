@@ -4,7 +4,7 @@
  */
 #include "load.h"
 #include "../common/json.h"
-#include "../common/texture_load.h"
+#include "../gfx/support/texture_load.h"
 #include "elements/layouts/linear_layout.h"
 #include "elements/layouts/side_layout.h"
 #include "elements/layouts/grid_layout.h"

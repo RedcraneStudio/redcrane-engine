@@ -2,13 +2,12 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "mesh_load.h"
+#include "load_wavefront.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <set>
-#include "log.h"
-namespace game
+#include "../../common/log.h"
+namespace game { namespace gfx
 {
   Vert_Ref parse_vert_ref(std::string str) noexcept
   {
@@ -28,15 +27,15 @@ namespace game
 
     try
     {
-      if(!vert_str.empty()) f.position = std::stoi(vert_str);
+      if(!vert_str.empty()) f.position = std::stoi(vert_str) - 1;
     } catch(...) {}
     try
     {
-      if(!tex_str.empty()) f.tex_coord = std::stoi(tex_str);
+      if(!tex_str.empty()) f.tex_coord = std::stoi(tex_str) - 1;
     } catch(...) {}
     try
     {
-      if(!norm_str.empty()) f.normal = std::stoi(norm_str);
+      if(!norm_str.empty()) f.normal = std::stoi(norm_str) - 1;
     } catch(...) {}
 
     return f;
@@ -48,26 +47,9 @@ namespace game
     return t;
   }
 
-  void load_obj(std::string file, Mesh& m) noexcept
+  Indexed_Split_Mesh_Data load_wavefront(std::istream& stream) noexcept
   {
-    // Load us a stream.
-    std::ifstream stream{file};
-    if(!stream.good())
-    {
-      // Fuck. Abort.
-      log_w("File stream from '%' not good", file);
-      return;
-    }
-    load_obj(stream, m);
-  }
-  void load_obj(std::istream& stream, Mesh& m) noexcept
-  {
-    // This mesh will store the intermediate vertices, normals, and texture
-    // coordinates.
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec3> normals;
-    std::vector<glm::vec2> uv;
-    std::vector<Vert_Ref> indices;
+    Indexed_Split_Mesh_Data ret{};
 
     std::string line;
     while(!std::getline(stream, line).eof() && stream.good())
@@ -83,17 +65,17 @@ namespace game
       // Load vertices, normals and texture coordinates into basic_mesh.
       if(op == "v")
       {
-        vertices.push_back(parse_vec3(line_stream));
+        ret.positions.push_back(parse_vec3(line_stream));
       }
       if(op == "vn")
       {
-        normals.push_back(parse_vec3(line_stream));
+        ret.normals.push_back(parse_vec3(line_stream));
       }
       if(op == "vt")
       {
         glm::vec2 coord;
         line_stream >> coord.x >> coord.y;
-        uv.push_back(coord);
+        ret.tex_coords.push_back(coord);
       }
       if(op == "f")
       {
@@ -102,12 +84,23 @@ namespace game
         {
           std::string index_str;
           line_stream >> index_str;
-          indices.push_back(parse_vert_ref(index_str));
+          ret.indices.push_back(parse_vert_ref(index_str));
         }
       }
     }
 
-    auto mesh = make_optimized_mesh_data(indices, vertices, normals, uv);
-    m.allocate_from(std::move(mesh));
+    return ret;
   }
-}
+  Indexed_Split_Mesh_Data load_wavefront(std::string file) noexcept
+  {
+    // Load us a stream.
+    std::ifstream stream{file};
+    if(!stream.good())
+    {
+      // Fuck. Abort.
+      log_w("File stream from '%' not good", file);
+      return Indexed_Split_Mesh_Data{};
+    }
+    return load_wavefront(stream);
+  }
+} }

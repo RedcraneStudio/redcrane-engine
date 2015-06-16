@@ -7,7 +7,7 @@
 #include <memory>
 #include "../common/color.h"
 #include "../common/maybe_owned.hpp"
-#include "../common/software_texture.h"
+#include "support/software_texture.h"
 #include "shader.h"
 namespace game
 {

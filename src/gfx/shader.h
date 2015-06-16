@@ -22,7 +22,7 @@ namespace game
 
       virtual void set_matrix(int, glm::mat4 const&) noexcept {}
 
-      virtual void set_sampler(int, unsigned int) noexcept {}
+      virtual void set_integer(int, int) noexcept {}
 
       virtual void set_vec2(int, glm::vec2 const&) noexcept {}
       virtual void set_vec3(int, glm::vec3 const&) noexcept {}
@@ -46,7 +46,7 @@ namespace game
       void set_projection(glm::mat4 const&) noexcept;
       void set_view(glm::mat4 const&) noexcept;
       void set_model(glm::mat4 const&) noexcept;
-      void set_sampler(unsigned int) noexcept;
+      void set_sampler(int) noexcept;
 
     private:
       int diffuse_loc_ = -1;

@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "../common/texture.h"
+#include "../gfx/texture.h"
 #include "../common/log.h"
 
 #include <ft2build.h>

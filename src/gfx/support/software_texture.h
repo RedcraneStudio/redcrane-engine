@@ -3,8 +3,8 @@
  * All rights reserved.
  */
 #pragma once
-#include "texture.h"
-#include "maybe_owned.hpp"
+#include "../texture.h"
+#include "../../common/maybe_owned.hpp"
 namespace game
 {
   struct Software_Texture : public Texture

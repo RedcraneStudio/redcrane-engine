@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "glad/glad.h"
-#include "../../common/texture.h"
+#include "../texture.h"
 namespace game { namespace gfx { namespace gl
 {
   struct GL_Texture : public Texture

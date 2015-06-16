@@ -5,8 +5,7 @@
 #pragma once
 #include "idriver.h"
 #include "../ui/renderer.h"
-#include "../common/software_mesh.h"
-#include "scoped_shader_lock.h"
+#include "support/scoped_shader_lock.h"
 namespace game { namespace gfx
 {
   struct IDriver_UI_Adapter : public ui::Renderer
@@ -34,12 +33,33 @@ namespace game { namespace gfx
     std::unique_ptr<Shader_Push_Lock> shader_lock_;
     std::unique_ptr<Shader> hud_shader_;
 
-    Color dif_ = colors::white;
-
     std::unique_ptr<Texture> white_texture_;
 
-    Software_Mesh filled_rect_;
-    Software_Mesh lines_rect_;
+    std::unique_ptr<Mesh> mesh_;
+
+    unsigned int pos_buf_;
+    unsigned int tex_buf_;
+    unsigned int col_buf_;
+
+    unsigned int offset_ = 0;
+
+    unsigned int pos_pos_ = 0;
+    unsigned int tex_pos_ = 0;
+    unsigned int col_pos_ = 0;
+
+    Color cur_dif_ = colors::white;
+
+    enum class Render_Type { Fill, Draw };
+    struct Rectangle
+    {
+      Render_Type type;
+      unsigned int offset;
+      unsigned int count;
+
+      Texture* texture = nullptr;
+    };
+
+    std::vector<Rectangle> to_draw_;
 
     void set_rect_(Mesh& rect, Volume<int> vol) noexcept;
 

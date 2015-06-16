@@ -15,8 +15,12 @@
 
 #include "gfx/gl/driver.h"
 #include "gfx/camera.h"
-#include "gfx/object.h"
-#include "gfx/scene_node.h"
+#include "gfx/mesh_chunk.h"
+#include "gfx/support/load_wavefront.h"
+#include "gfx/support/mesh_conversion.h"
+#include "gfx/support/generate_aabb.h"
+#include "gfx/support/write_data_to_mesh.h"
+#include "gfx/support/texture_load.h"
 
 #include "fps/camera_controller.h"
 
@@ -144,6 +148,27 @@ int main(int argc, char** argv)
     // Make an OpenGL driver.
     gfx::gl::Driver driver{Vec<int>{1000, 1000}};
 
+    auto shader = driver.make_shader_repr();
+    shader->load_vertex_part("shader/basic/v");
+    shader->load_fragment_part("shader/basic/f");
+
+    // We need to get rid of dependency on these in the future.
+    shader->set_diffuse_name("dif");
+    shader->set_projection_name("proj");
+    shader->set_view_name("view");
+    shader->set_model_name("model");
+    shader->set_sampler_name("tex");
+
+    driver.use_shader(*shader);
+
+    shader->set_sampler(0);
+
+    // Get all our textures
+    auto brick = driver.make_texture_repr();
+    load_png("tex/cracked_soil.png", *brick);
+    auto grass = driver.make_texture_repr();
+    load_png("tex/grass.png", *grass);
+
     // Make an fps camera.
     auto cam = gfx::make_fps_camera();
     cam.fp.pos = glm::vec3(0.0f, 0.0f, 15.0f);
@@ -154,10 +179,15 @@ int main(int argc, char** argv)
     cam_controller.set_yaw_limit(PI / 2);
     cam_controller.set_pitch_limit(PI / 2);
 
-    auto house = gfx::load_object("obj/house.obj", "mat/house.json");
-    prepare_object(driver, house);
+    auto house = driver.make_mesh_repr();
+    auto house_data =
+               gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/house.obj"));
+    gfx::allocate_mesh_buffers(house_data, *house);
+    auto house_chunk = gfx::write_data_to_mesh(house_data, *house);
+    auto house_model = glm::mat4(1.0f);
+    gfx::format_mesh_buffers(*house);
 
-    auto house_aabb = generate_aabb(house.mesh->mesh_data());
+    auto house_aabb = gfx::generate_aabb(house_data);
 
     btBoxShape bt_house_shape(btVector3(house_aabb.width / 2.f,
                                         house_aabb.height / 2.f,
@@ -173,17 +203,27 @@ int main(int argc, char** argv)
 
     bt_world.addRigidBody(&bt_house_rigidbody);
 
-    auto plane = gfx::load_object("obj/plane.obj", "mat/plane.json");
-    prepare_object(driver, plane);
-    plane.model_matrix = glm::scale(plane.model_matrix,
-                                    glm::vec3(5.0f, 1.0f, 7.0f));
-    plane.model_matrix = glm::translate(plane.model_matrix,
-                                        glm::vec3(0.0f,-1.0f,0.0f));
-    plane.model_matrix = glm::translate(plane.model_matrix,
-                                        glm::vec3(-0.5f, 0.0f, -0.5f));
+    auto plane = driver.make_mesh_repr();
+    auto plane_data =
+      gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/plane.obj"));
 
-    auto sphere = gfx::load_object("obj/sphere.obj", "mat/plane.json");
-    prepare_object(driver, sphere);
+    gfx::allocate_mesh_buffers(plane_data, *plane);
+    auto plane_chunk = gfx::write_data_to_mesh(plane_data, *plane);
+    gfx::format_mesh_buffers(*plane);
+
+    auto plane_model = glm::mat4(1.0f);
+    plane_model = glm::scale(plane_model, glm::vec3(5.0f, 1.0f, 7.0f));
+    plane_model = glm::translate(plane_model, glm::vec3(0.0f,-1.0f,0.0f));
+    plane_model = glm::translate(plane_model, glm::vec3(-0.5f, 0.0f, -0.5f));
+
+    auto sphere = driver.make_mesh_repr();
+    auto sphere_data =
+              gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/sphere.obj"));
+
+    gfx::allocate_mesh_buffers(sphere_data, *sphere);
+    auto sphere_chunk = gfx::write_data_to_mesh(sphere_data, *sphere);
+    auto sphere_model = glm::mat4(1.0f);
+    gfx::format_mesh_buffers(*sphere);
 
     btDefaultMotionState default_motion;
     btCapsuleShape sphere_shape(1.0f, 1.0f);
@@ -255,26 +295,35 @@ int main(int argc, char** argv)
 
       btTransform transform;
       bt_house_motion_state.getWorldTransform(transform);
+
       auto orig = transform.getOrigin();
-      house.model_matrix = glm::translate(glm::mat4(1.0f),
-                                          glm::vec3(orig.x(), orig.y(),
-                                                    orig.z()));
+      house_model = glm::translate(glm::mat4(1.0f),
+                                   glm::vec3(orig.x(), orig.y(), orig.z()));
 
       auto y_delta_for_now = house_aabb.min.y - house_aabb.height / 2;
 
-      house.model_matrix = glm::translate(house.model_matrix,
-                                          glm::vec3(0.f,
-                                          -house_aabb.height / 2.f -
-                                          house_aabb.min.y,0.f));
+      house_model = glm::translate(house_model,
+              glm::vec3(0.f, -house_aabb.height / 2.f - house_aabb.min.y,0.f));
 
-      render_object(driver, house);
-      render_object(driver, plane);
+      shader->set_diffuse(colors::white);
+
+      driver.bind_texture(*grass, 0);
+
+      shader->set_model(plane_model);
+      gfx::render_chunk(plane_chunk);
+
+      driver.bind_texture(*brick, 0);
+
+      shader->set_model(house_model);
+      gfx::render_chunk(house_chunk);
 
       btTransform sphere_trans;
       default_motion.getWorldTransform(sphere_trans);
-      sphere_trans.getOpenGLMatrix(&sphere.model_matrix[0][0]);
+      sphere_trans.getOpenGLMatrix(&sphere_model[0][0]);
 
-      render_object(driver, sphere);
+      shader->set_model(sphere_model);
+      shader->set_diffuse(colors::red);
+      gfx::render_chunk(sphere_chunk);
 
       glfwSwapBuffers(window);
 

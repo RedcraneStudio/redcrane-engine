@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "texture_load.h"
-#include "log.h"
+#include "../../common/log.h"
 #include <png.h>
 #include <cstring>
 namespace game

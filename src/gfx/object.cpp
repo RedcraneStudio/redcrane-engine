@@ -3,27 +3,21 @@
  * All rights reserved.
  */
 #include "object.h"
+#include "idriver.h"
 #include "../common/mesh_load.h"
 namespace game
 {
   namespace gfx
   {
-    Object::Object() noexcept : model_matrix(1.0)
+    Object::Object(IDriver& d) noexcept : driver_(&d), model_matrix(1.0)
     {
-      mesh = make_maybe_owned<Software_Mesh>();
+      mesh = d.make_mesh_repr();
       material = make_maybe_owned<Material>();
-    }
-    Object load_object(std::string obj, std::string mat) noexcept
-    {
-      auto ret = Object{};
-      load_obj(obj, *ret.mesh);
-      *ret.material = load_material(mat);
-      return ret;
     }
 
     Object share_object_keep_ownership(Object const& obj) noexcept
     {
-      auto new_obj = Object{};
+      auto new_obj = Object{obj.driver()};
 
       new_obj.mesh.set_pointer(obj.mesh);
       new_obj.material.set_pointer(obj.material);
@@ -34,7 +28,7 @@ namespace game
     }
     Object share_object_move_ownership(Object& obj) noexcept
     {
-      auto new_obj = Object{};
+      auto new_obj = Object{obj.driver()};
 
       new_obj.mesh = std::move(obj.mesh);
       new_obj.material = std::move(obj.material);

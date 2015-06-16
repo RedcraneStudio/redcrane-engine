@@ -3,8 +3,8 @@
  * All rights reserved.
  */
 #pragma once
-#include "shader.h"
-#include "idriver.h"
+#include "../shader.h"
+#include "../idriver.h"
 namespace game { namespace gfx
 {
   struct Shader_Push_Lock

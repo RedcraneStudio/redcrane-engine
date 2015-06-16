@@ -6,46 +6,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 namespace game { namespace gfx
 {
-  void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> vol) noexcept
-  {
-    set_rect_(rect, vol, Volume<int>{{0, 0}, 1, 1}, {1,1});
-  }
-  void IDriver_UI_Adapter::set_rect_(Mesh& rect, Volume<int> v,
-                                     Volume<int> t_v,
-                                     Vec<int> t_m) const noexcept
-  {
-    Volume<float> vol = volume_cast<float>(v);
-
-    auto tex_v = volume_cast<float>(t_v);
-    tex_v.pos.x /= t_m.x;
-    tex_v.pos.y /= t_m.y;
-    tex_v.width /= t_m.x;
-    tex_v.height /= t_m.y;
-
-    rect.set_vertex(0, Vertex{glm::vec3{vol.pos.x,
-                                        vol.pos.y, 0.0},
-                              glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{tex_v.pos.x,
-                                        tex_v.pos.y + tex_v.height}});
-    rect.set_vertex(1, Vertex{glm::vec3{vol.pos.x + vol.width,
-                                        vol.pos.y, 0.0},
-                              glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{tex_v.pos.x + tex_v.width,
-                                        tex_v.pos.y + tex_v.height}});
-    rect.set_vertex(2, Vertex{glm::vec3{vol.pos.x + vol.width,
-                                        vol.pos.y + vol.height, 0.0},
-                              glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{tex_v.pos.x + tex_v.width,
-                                        tex_v.pos.y}});
-    rect.set_vertex(3, Vertex{glm::vec3{vol.pos.x,
-                                        vol.pos.y + vol.height, 0.0},
-                              glm::vec3{0.0, 0.0f, -1.0},
-                              glm::vec2{tex_v.pos.x,
-                                        tex_v.pos.y}});
-  };
-
   IDriver_UI_Adapter::IDriver_UI_Adapter(IDriver& d) noexcept
-    : d_(&d), hud_shader_(std::move(d.make_shader_repr()))
+    : d_(&d), hud_shader_(std::move(d.make_shader_repr())),
+      mesh_(d.make_mesh_repr())
   {
     // Somehow manage these resources in a better way?
     // Or otherwise declare this data in json?
@@ -56,6 +19,8 @@ namespace game { namespace gfx
     hud_shader_->set_diffuse_name("dif");
     hud_shader_->set_sampler_name("tex");
 
+    hud_shader_->set_sampler(0);
+
     // Prepare an all white texture so we can just change the diffuse color.
     // We can change this when the driver and the shader become more
     // distinguished, right now I'm not really sure how this can be done so
@@ -64,42 +29,159 @@ namespace game { namespace gfx
     white_texture_->allocate(Vec<int>{1,1});
     white_texture_->blit_data({{0,0}, 1, 1}, &colors::white);
 
-    // Prepare some mesh we can use to render textures.
-    filled_rect_.set_impl(d_->make_mesh_repr());
-    filled_rect_.allocate(4, 6, Usage_Hint::Draw, Upload_Hint::Stream,
-                          Primitive_Type::Triangle);
-    filled_rect_.set_num_element_indices(6);
+    // Initialize two buffers for our mesh. One for positional data and the
+    // other for texture coordinates.
 
-    auto filled_indices = std::array<unsigned int, 6>{0, 2, 1, 0, 3, 2};
-    filled_rect_.set_element_indices(0, 6, &filled_indices[0]);
+    // We don't know how much data we actually need for now, so for now
+    // allocate four kilobytes and hope for the best.
+    pos_buf_ = mesh_->allocate_buffer(4096, Usage_Hint::Draw,
+                                      Upload_Hint::Stream);
+    mesh_->format_buffer(pos_buf_, 0, 2, Buffer_Format::Float, 0, 0);
+    mesh_->enable_vertex_attrib(0);
 
-    lines_rect_.set_impl(d_->make_mesh_repr());
-    lines_rect_.allocate(4, 8, Usage_Hint::Draw, Upload_Hint::Stream,
-                         Primitive_Type::Line);
-    lines_rect_.set_num_element_indices(8);
-    auto line_indices = std::array<unsigned int, 8>{0, 1, 1, 2, 2, 3, 3, 0};
-    lines_rect_.set_element_indices(0, 8, &line_indices[0]);
+    tex_buf_ = mesh_->allocate_buffer(4096, Usage_Hint::Draw,
+                                      Upload_Hint::Stream);
+    mesh_->format_buffer(tex_buf_, 1, 2, Buffer_Format::Float, 0, 0);
+    mesh_->enable_vertex_attrib(1);
+
+    col_buf_ = mesh_->allocate_buffer(4096, Usage_Hint::Draw,
+                                      Upload_Hint::Stream);
+    mesh_->format_buffer(col_buf_, 2, 4, Buffer_Format::Float, 0, 0);
+    mesh_->enable_vertex_attrib(2);
   }
 
   void IDriver_UI_Adapter::set_draw_color(Color const& c) noexcept
   {
-    hud_shader_->set_diffuse(c);
-    dif_ = c;
+    cur_dif_ = c;
   }
 
+#define EXPAND_VEC4(v) v.x, v.y, v.z, v.w
   void IDriver_UI_Adapter::draw_rect(Volume<int> const& vol) noexcept
   {
-    d_->bind_texture(*white_texture_, 0);
+    std::array<float, 2*8> positions =
+    {
+      (float) vol.pos.x,             (float) vol.pos.y,
+      (float) vol.pos.x + vol.width, (float) vol.pos.y,
 
-    set_rect_(lines_rect_, vol, Volume<int>{{1,1},0,0}, Vec<int>{2,2});
-    d_->render_mesh(*lines_rect_.get_impl());
+      (float) vol.pos.x + vol.width, (float) vol.pos.y,
+      (float) vol.pos.x + vol.width, (float) vol.pos.y + vol.height,
+
+      (float) vol.pos.x + vol.width, (float) vol.pos.y + vol.height,
+      (float) vol.pos.x,             (float) vol.pos.y + vol.height,
+
+      (float) vol.pos.x,             (float) vol.pos.y + vol.height,
+      (float) vol.pos.x,             (float) vol.pos.y,
+    };
+    std::array<float, 2*8> tex_coords =
+    {
+      .5, .5,
+      .5, .5,
+      .5, .5,
+      .5, .5,
+
+      .5, .5,
+      .5, .5,
+      .5, .5,
+      .5, .5
+    };
+
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::array<float, 4*8> colors =
+    {
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec)
+    };
+
+    Rectangle rect;
+
+    // Set fields and populate (append) the buffer.
+    rect.type = Render_Type::Draw;
+    rect.offset = offset_;
+    rect.count = 8;
+
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += rect.count;
+
+    to_draw_.push_back(rect);
   }
+
   void IDriver_UI_Adapter::fill_rect(Volume<int> const& vol) noexcept
   {
-    d_->bind_texture(*white_texture_, 0);
+    std::array<float, 2*6> positions =
+    {
+      (float) vol.pos.x,             (float) vol.pos.y,
+      (float) vol.pos.x + vol.width, (float) vol.pos.y + vol.height,
+      (float) vol.pos.x + vol.width, (float) vol.pos.y,
 
-    set_rect_(filled_rect_, vol, Volume<int>{{1,1},0,0}, Vec<int>{2,2});
-    d_->render_mesh(*filled_rect_.get_impl());
+      (float) vol.pos.x,             (float) vol.pos.y,
+      (float) vol.pos.x,             (float) vol.pos.y + vol.height,
+      (float) vol.pos.x + vol.width, (float) vol.pos.y + vol.height
+    };
+    std::array<float, 2*6> tex_coords =
+    {
+      .5, .5,
+      .5, .5,
+      .5, .5,
+
+      .5, .5,
+      .5, .5,
+      .5, .5
+    };
+
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::array<float, 4*6> colors =
+    {
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec)
+    };
+
+    Rectangle rect;
+
+    // Set fields and populate (append) the buffer.
+    rect.type = Render_Type::Fill;
+    rect.offset = offset_;
+    rect.count = 6;
+    rect.texture = white_texture_.get();
+
+    // Append positions and 
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += rect.count;
+
+    to_draw_.push_back(rect);
   }
 
   std::unique_ptr<Texture> IDriver_UI_Adapter::make_texture() noexcept
@@ -110,39 +192,114 @@ namespace game { namespace gfx
   void IDriver_UI_Adapter::draw_texture(Volume<int> const& dst, Texture& tex,
                                         Volume<int> const& src) noexcept
   {
-    // Set the diffuse color.
-    // d_->set_diffuse(colors::white);
-    // ^ We shouldn't be setting this to white in case the user does actually
-    // want color modulation on the texture (how we are rendering text right
-    // now).
+    std::array<float, 2*6> positions =
+    {
+      (float) dst.pos.x,             (float) dst.pos.y,
+      (float) dst.pos.x + dst.width, (float) dst.pos.y + dst.height,
+      (float) dst.pos.x + dst.width, (float) dst.pos.y,
 
-    // Bind the texture.
-    d_->bind_texture(tex, 0);
+      (float) dst.pos.x,             (float) dst.pos.y,
+      (float) dst.pos.x,             (float) dst.pos.y + dst.height,
+      (float) dst.pos.x + dst.width, (float) dst.pos.y + dst.height
+    };
 
-    // Render the rectangle.
-    set_rect_(filled_rect_, dst, src, tex.allocated_extents());
-    d_->render_mesh(*filled_rect_.get_impl());
+    auto tex_e = tex.allocated_extents();
 
-    // Reset the diffuse color
-    hud_shader_->set_diffuse(dif_);
+    auto tex_src = volume_cast<float>(src);
+
+    tex_src.pos.x /= (float) tex_e.x;
+    tex_src.width /= (float) tex_e.x;
+
+    tex_src.pos.y /= (float) tex_e.y;
+    tex_src.height /= (float) tex_e.y;
+
+    std::array<float, 2*6> tex_coords =
+    {
+      tex_src.pos.x,                 tex_src.pos.y + tex_src.height,
+      tex_src.pos.x + tex_src.width, tex_src.pos.y,
+      tex_src.pos.x + tex_src.width, tex_src.pos.y + tex_src.height,
+
+      tex_src.pos.x,                 tex_src.pos.y + tex_src.height,
+      tex_src.pos.x,                 tex_src.pos.y,
+      tex_src.pos.x + tex_src.width, tex_src.pos.y
+    };
+
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::array<float, 4*6> colors =
+    {
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec),
+      EXPAND_VEC4(cur_dif_vec)
+    };
+
+    Rectangle rect;
+
+    // Set fields and populate (append) the buffer.
+    rect.type = Render_Type::Fill;
+    rect.offset = offset_;
+    rect.count = 6;
+    rect.texture = &tex;
+
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += rect.count;
+
+    to_draw_.push_back(rect);
   }
 
-  void IDriver_UI_Adapter::begin_draw() noexcept
+  void IDriver_UI_Adapter::begin_draw() noexcept { }
+  void IDriver_UI_Adapter::end_draw() noexcept
   {
-    d_->depth_test(false);
-    d_->blending(true);
-
     using SPL = Shader_Push_Lock;
     shader_lock_ = std::make_unique<SPL>(push_shader(*hud_shader_, *d_));
 
     auto size = vec_cast<float>(d_->window_extents());
-
     hud_shader_->set_projection(glm::ortho(0.0f, size.x, size.y, 0.0f,
                                -1.0f, 1.0f));
-    hud_shader_->set_sampler(0);
-  }
-  void IDriver_UI_Adapter::end_draw() noexcept
-  {
+
+    d_->depth_test(false);
+    d_->blending(true);
+
+    for(Rectangle const& r : to_draw_)
+    {
+      switch(r.type)
+      {
+        case Render_Type::Draw:
+          mesh_->set_primitive_type(Primitive_Type::Line);
+          break;
+        case Render_Type::Fill:
+          mesh_->set_primitive_type(Primitive_Type::Triangle);
+          break;
+      }
+
+      d_->bind_texture(*r.texture, 0);
+      mesh_->draw_arrays(r.offset, r.count);
+    }
+
+    // For now, reset the mesh (or pretend to) until we can figure out a way to
+    // check if anything is going to change. If nothing has changed in the ui
+    // there is no reason to completely reset, after all.
+
+    offset_ = 0;
+    pos_pos_ = 0;
+    tex_pos_ = 0;
+    col_pos_ = 0;
+    to_draw_.clear();
+
     d_->depth_test(true);
     d_->blending(false);
 

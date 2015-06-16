@@ -27,12 +27,13 @@ add_subdirectory(ui)
 add_subdirectory(map)
 
 add_executable(strategy main.cpp)
-target_link_libraries(strategy gfxlib commonlib uilib maplib sndlib)
+target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib maplib
+                               sndlib)
 
 find_package(Bullet REQUIRED)
 
 add_executable(fps_exe main_fps.cpp)
-target_link_libraries(fps_exe gfxlib commonlib fpslib)
+target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib)
 target_link_libraries(fps_exe ${BULLET_LIBRARIES})
 
 target_include_directories(fps_exe PUBLIC ${BULLET_INCLUDE_DIRS})

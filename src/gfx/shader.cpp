@@ -55,8 +55,8 @@ namespace game { namespace gfx
   {
     set_matrix(model_loc_, mat);
   }
-  void Shader::set_sampler(unsigned int unit) noexcept
+  void Shader::set_sampler(int unit) noexcept
   {
-    set_sampler(sampler_loc_, unit);
+    set_integer(sampler_loc_, unit);
   }
 } }

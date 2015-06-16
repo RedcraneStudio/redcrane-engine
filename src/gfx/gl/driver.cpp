@@ -6,9 +6,17 @@
 #include "mesh.h"
 #include "texture.h"
 #include "shader.h"
-#include "../../common/software_texture.h"
-#include "../../common/software_mesh.h"
+#include "../../common/color.h"
 #include "../../common/log.h"
+
+#include "../../common/debugging.h"
+
+#ifdef GAME_DEBUGGING_ENABLED
+#define CAST_PTR dynamic_cast
+#else
+#define CAST_PTR reinterpret_cast
+#endif
+
 namespace game
 {
   namespace gfx
@@ -28,16 +36,17 @@ namespace game
 
       std::unique_ptr<Shader> Driver::make_shader_repr() noexcept
       {
-        return std::make_unique<GL_Shader>();
+        return std::make_unique<GL_Shader>(*this);
       }
-      void Driver::set_shader(Shader& s) noexcept
+      void Driver::use_shader(Shader& s) noexcept
       {
-        auto shader_ptr = reinterpret_cast<GL_Shader*>(&s);
-        if(shader_ptr != cur_shader_)
-        {
-          shader_ptr->use();
-          cur_shader_ = shader_ptr;
-        }
+        if(&s == cur_shader_) return;
+
+        auto shader_ptr = CAST_PTR<GL_Shader*>(&s);
+        if(!shader_ptr) return;
+
+        shader_ptr->use();
+        cur_shader_ = shader_ptr;
       }
       Shader* Driver::active_shader() const noexcept
       {
@@ -48,22 +57,17 @@ namespace game
       {
         // Make it and forget about it, we'll just use a dynamic cast for
         // simplicity.
-        return std::make_unique<GL_Mesh>();
+        return std::make_unique<GL_Mesh>(*this);
       }
-      void Driver::render_mesh(Mesh& mesh) noexcept
+      void Driver::bind_mesh(Mesh& mesh) noexcept
       {
-        auto gl_mesh = dynamic_cast<GL_Mesh*>(&mesh);
+        if(&mesh == cur_mesh_) return;
+
+        auto gl_mesh = CAST_PTR<GL_Mesh*>(&mesh);
         if(!gl_mesh) return;
+
         gl_mesh->bind();
-        gl_mesh->draw();
-      }
-      void Driver::render_mesh(Mesh& mesh, std::size_t start,
-                               std::size_t count) noexcept
-      {
-        auto gl_mesh = dynamic_cast<GL_Mesh*>(&mesh);
-        if(!gl_mesh) return;
-        gl_mesh->bind();
-        gl_mesh->draw(start, count);
+        cur_mesh_ = gl_mesh;
       }
 
       std::unique_ptr<Texture> Driver::make_texture_repr() noexcept
@@ -73,7 +77,7 @@ namespace game
       }
       void Driver::bind_texture(Texture& tex, unsigned int loc) noexcept
       {
-        auto gl_tex = dynamic_cast<GL_Texture*>(&tex);
+        auto gl_tex = CAST_PTR<GL_Texture*>(&tex);
         if(!gl_tex) return;
         gl_tex->bind(loc);
       }

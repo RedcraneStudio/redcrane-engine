@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 
-#include "../common/software_texture.h"
+#include "../gfx/support/software_texture.h"
 
 #include "catch/catch.hpp"
 
