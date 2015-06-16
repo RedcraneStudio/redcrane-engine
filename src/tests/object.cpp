@@ -4,6 +4,7 @@
  */
 
 #include "../gfx/object.h"
+#include "../gfx/null/driver.h"
 
 #include "catch/catch.hpp"
 
@@ -12,8 +13,10 @@ TEST_CASE("Object moving and sharing works as expected", "[struct Object]")
   using namespace game;
   using namespace game::gfx;
 
-  Object obj;
-  Object other;
+  null::Driver driver{{1000,1000}};
+
+  Object obj{driver};
+  Object other{driver};
 
   // We just need something unique to check later.
   obj.model_matrix = glm::mat4(10.0);
@@ -44,7 +47,7 @@ TEST_CASE("Object moving and sharing works as expected", "[struct Object]")
   }
   SECTION("Original data doesn't own it's data")
   {
-    auto mesh_data = std::make_unique<Software_Mesh>();
+    auto mesh_data = driver.make_mesh_repr();
     auto mat_data = std::make_unique<Material>();
 
     obj.mesh.set_pointer(mesh_data.get());
