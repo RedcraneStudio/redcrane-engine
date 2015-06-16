@@ -36,6 +36,7 @@ import ycm_core
 flags = [
 '-Wall',
 '-Wextra',
+'-Wno-missing-braces',
 '-std=c++1y',
 # ...and the same thing goes for the magic -x option which specifies the
 # language that the files to be compiled are written in. This is mostly
