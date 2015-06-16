@@ -14,19 +14,18 @@ namespace game { namespace gfx { namespace gl
     GL_Mesh(Driver& driver) noexcept;
     virtual ~GL_Mesh() noexcept;
 
-    unsigned int allocate_buffer(std::size_t size, Usage_Hint,
+    buf_t allocate_buffer(std::size_t size, Usage_Hint, Upload_Hint) override;
+    buf_t allocate_element_array(unsigned int elements, Usage_Hint,
                                  Upload_Hint) override;
-    unsigned int allocate_element_array(unsigned int elements, Usage_Hint,
-                                        Upload_Hint) override;
 
-    void reallocate_buffer(unsigned int buf, std::size_t size, Usage_Hint,
+    void reallocate_buffer(buf_t buf, std::size_t size, Usage_Hint,
                            Upload_Hint) override;
-    void unallocate_buffer(unsigned int) noexcept override;
+    void unallocate_buffer(buf_t) noexcept override;
 
-    void buffer_data(unsigned int buf, unsigned int offset, unsigned int size,
+    void buffer_data(buf_t, unsigned int offset, unsigned int size,
                      void const* const d) noexcept override;
 
-    void format_buffer(unsigned int buf,
+    void format_buffer(buf_t,
                        unsigned int attrib,
                        unsigned short size, // must be 1 2 3 or 4
                        Buffer_Format format,
@@ -36,7 +35,7 @@ namespace game { namespace gfx { namespace gl
 
     void set_primitive_type(Primitive_Type) noexcept override;
 
-    void use_elements(unsigned int buf) noexcept override;
+    void use_elements(buf_t) noexcept override;
 
     void bind() noexcept;
     void draw_arrays(unsigned int start, unsigned int count) noexcept override;

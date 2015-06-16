@@ -38,29 +38,28 @@ namespace game
   {
     virtual ~Mesh() noexcept {}
 
-    virtual unsigned int allocate_buffer(std::size_t size,
-                                         Usage_Hint, Upload_Hint) = 0;
-    virtual void reallocate_buffer(unsigned int buf,
-                                   std::size_t size,
-                                   Usage_Hint, Upload_Hint) = 0;
+    using buf_t = unsigned int;
 
-    virtual unsigned int allocate_element_array(unsigned int elements,
-                                                Usage_Hint, Upload_Hint) = 0;
+    virtual buf_t allocate_buffer(std::size_t sz, Usage_Hint, Upload_Hint) = 0;
+    virtual void reallocate_buffer(buf_t, std::size_t size, Usage_Hint,
+                                   Upload_Hint) = 0;
+
+    virtual buf_t allocate_element_array(unsigned int elements,
+                                         Usage_Hint, Upload_Hint) = 0;
 
     // These functions accept a buffer paramater which could have been created
     // as a regular buffer or an element array.
-    virtual void unallocate_buffer(unsigned int) noexcept = 0;
+    virtual void unallocate_buffer(buf_t) noexcept = 0;
 
     // Offset is in bytes!
-    virtual void buffer_data(unsigned int, unsigned int off, unsigned int size,
+    virtual void buffer_data(buf_t, unsigned int off, unsigned int size,
                              void const* const data) noexcept = 0;
 
     unsigned int get_num_allocated_buffers() noexcept;
-    unsigned int get_buffer(unsigned int index) noexcept;
-    unsigned int get_buffer_size(unsigned int buf) noexcept;
+    buf_t get_buffer(unsigned int index) noexcept;
+    unsigned int get_buffer_size(buf_t) noexcept;
 
-    virtual void format_buffer(unsigned int buf,
-                               unsigned int attrib,
+    virtual void format_buffer(buf_t, unsigned int attrib,
                                unsigned short size, // must be 1 2 3 or 4
                                Buffer_Format format,
                                unsigned int stride,
@@ -74,7 +73,7 @@ namespace game
      * \brief Use the given buffer as an element array when rendering with
      * draw_elements.
      */
-    virtual void use_elements(unsigned int buf) noexcept = 0;
+    virtual void use_elements(buf_t) noexcept = 0;
 
     virtual void draw_arrays(unsigned int start, unsigned int c) noexcept = 0;
     // St is given in elements, not bytes.
@@ -83,16 +82,16 @@ namespace game
                                            unsigned int bv) noexcept = 0;
 
   protected:
-    void push_buffer_(unsigned int buf, unsigned int bytes) noexcept;
-    void erase_buffer_(unsigned int buf) noexcept;
-    void set_buffer_size_(unsigned int buf, unsigned int bytes) noexcept;
+    void push_buffer_(buf_t buf, unsigned int bytes) noexcept;
+    void erase_buffer_(buf_t buf) noexcept;
+    void set_buffer_size_(buf_t buf, unsigned int bytes) noexcept;
   private:
     // Index: Buf + Size
-    std::vector<std::tuple<unsigned int, unsigned int> > bufs_;
+    std::vector<std::tuple<buf_t, unsigned int> > bufs_;
   };
 
   template <class T>
-  bool mesh_has_room(Mesh& m, unsigned int buffer, unsigned int offset,
+  bool mesh_has_room(Mesh& m, Mesh::buf_t buffer, unsigned int offset,
                      unsigned int elements) noexcept
   {
     return m.get_buffer_size(buffer) - offset >= elements * sizeof(T);

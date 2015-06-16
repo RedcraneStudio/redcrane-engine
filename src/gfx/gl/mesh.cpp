@@ -16,8 +16,8 @@ namespace game { namespace gfx { namespace gl
     unallocate_();
   }
 
-  unsigned int GL_Mesh::allocate_buffer(std::size_t size, Usage_Hint us,
-                                        Upload_Hint up)
+  GL_Mesh::buf_t GL_Mesh::allocate_buffer(std::size_t size, Usage_Hint us,
+                                          Upload_Hint up)
   {
     if(size == 0) return 0;
 
@@ -29,8 +29,8 @@ namespace game { namespace gfx { namespace gl
     push_buffer_(buf, size);
     return buf;
   }
-  unsigned int GL_Mesh::allocate_element_array(unsigned int elements,
-                                               Usage_Hint us, Upload_Hint up)
+  GL_Mesh::buf_t GL_Mesh::allocate_element_array(unsigned int elements,
+                                                 Usage_Hint us, Upload_Hint up)
   {
     if(elements == 0) return 0;
 
@@ -50,7 +50,7 @@ namespace game { namespace gfx { namespace gl
     return buf;
   }
 
-  void GL_Mesh::reallocate_buffer(unsigned int buf, std::size_t size,
+  void GL_Mesh::reallocate_buffer(buf_t buf, std::size_t size,
                                   Usage_Hint us, Upload_Hint up)
   {
     glBindBuffer(GL_ARRAY_BUFFER, buf);
@@ -59,32 +59,29 @@ namespace game { namespace gfx { namespace gl
     set_buffer_size_(buf, size);
   }
 
-  void GL_Mesh::unallocate_buffer(unsigned int buf) noexcept
+  void GL_Mesh::unallocate_buffer(buf_t buf) noexcept
   {
     glDeleteBuffers(1, &buf);
     erase_buffer_(buf);
   }
 
-  void GL_Mesh::buffer_data(unsigned int buf, unsigned int offset,
-                            unsigned int size, void const* const data) noexcept
+  void GL_Mesh::buffer_data(buf_t buf, unsigned int offset, unsigned int size,
+                            void const* const data) noexcept
   {
     glBindBuffer(GL_ARRAY_BUFFER, buf);
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
   }
 
-  void GL_Mesh::format_buffer(unsigned int buf,
-                              unsigned int attrib,
-                              unsigned short size,
-                              Buffer_Format format,
-                              unsigned int stride,
-                              unsigned int offset) noexcept
+  void GL_Mesh::format_buffer(buf_t buf, unsigned int attrib,
+                              unsigned short size, Buffer_Format format,
+                              unsigned int stride, unsigned int offs) noexcept
   {
     driver_->bind_mesh(*this);
 
     glBindBuffer(GL_ARRAY_BUFFER, buf);
 
     glVertexAttribPointer(attrib, size, get_gl_buffer_format(format),
-                          GL_FALSE, stride, reinterpret_cast<void*>(offset));
+                          GL_FALSE, stride, reinterpret_cast<void*>(offs));
   }
   void GL_Mesh::set_primitive_type(Primitive_Type prim) noexcept
   {
@@ -96,7 +93,7 @@ namespace game { namespace gfx { namespace gl
     glEnableVertexAttribArray(attrib);
   }
 
-  void GL_Mesh::use_elements(unsigned int buf) noexcept
+  void GL_Mesh::use_elements(buf_t buf) noexcept
   {
     // Make sure we are dealing with our own VAO.
     driver_->bind_mesh(*this);
