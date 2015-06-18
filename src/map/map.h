@@ -32,7 +32,7 @@ namespace game
 
   struct Terrain_Mesh
   {
-    Ordered_Mesh_Data mesh;
+    Indexed_Mesh_Data mesh;
 
     std::vector<Terrain_Chunk> chunks;
   };

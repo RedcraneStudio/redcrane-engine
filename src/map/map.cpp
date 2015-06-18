@@ -53,10 +53,29 @@ namespace game
     return ret;
   }
   Terrain_Mesh make_terrain_mesh(Heightmap const& height,
-                                 Vec<int> chunk_extents, double y_scale,
-                                 double flat_scale, bool gen_aabbs) noexcept
+                                 Vec<int> chunk_extents,
+                                 double y_scale,
+                                 double flat_scale,
+                                 bool gen_aabbs) noexcept
   {
-    auto mesh = Terrain_Mesh{};
+    auto tmesh = Terrain_Mesh{};
+
+    // Add a vertex with a given height for each altitude given.
+    for(int i = 0; i < height.extents.y; ++i)
+    {
+      for(int j = 0; j < height.extents.x; ++j)
+      {
+        Vertex v;
+
+        v.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        v.uv = glm::vec2(0.0f, 0.0f);
+        v.position.x = j * flat_scale;
+        v.position.y = height.vals[i * height.extents.x + j] * y_scale;
+        v.position.z = i * flat_scale;
+
+        tmesh.mesh.vertices.push_back(v);
+      }
+    }
 
     // For the amount of rectangles.
     auto e = height.extents;
@@ -71,17 +90,16 @@ namespace game
 
     unsigned int cur_offset = 0;
 
-    auto size = chunks_y * chunks_x * chunk_extents.y * chunk_extents.x * 6;
-    mesh.mesh.vertices.resize(size);
-
     for(int i = 0; i < chunks_y; ++i)
     {
       for(int j = 0; j < chunks_x; ++j)
       {
         Terrain_Chunk chunk;
-        chunk.start = cur_offset;
 
-        // For each first vertex in a face in the chunk
+        chunk.start = cur_offset;
+        chunk.count = 0;
+
+        // Get the minimum components from every point.
         for(int vertex_i = 0; vertex_i < chunk_extents.y; ++vertex_i)
         {
           for(int vertex_j = 0; vertex_j < chunk_extents.x; ++vertex_j)
@@ -89,56 +107,56 @@ namespace game
             int y = i * chunk_extents.y + vertex_i;
             int x = j * chunk_extents.x + vertex_j;
 
-            for(int vert_i = 0; vert_i < 6; vert_i++)
+            // If we can't be here. This will only happen with the rightmost /
+            // bottommost chunk.
+            if(e.y <= y || e.x <= x) continue;
+
+            // We basically need to access a small sub volume of the mesh.
+            auto vertex = tmesh.mesh.vertices[y * e.x + x];
+
+            chunk.aabb.min.x  = std::min(chunk.aabb.min.x,  vertex.position.x);
+            chunk.aabb.min.y  = std::min(chunk.aabb.min.y,  vertex.position.y);
+            chunk.aabb.min.z  = std::min(chunk.aabb.min.z,  vertex.position.z);
+
+            chunk.aabb.width  = std::max(chunk.aabb.width,  vertex.position.x);
+            chunk.aabb.height = std::max(chunk.aabb.height, vertex.position.y);
+            chunk.aabb.depth  = std::max(chunk.aabb.depth,  vertex.position.z);
+
+            if(x == e.x - 1 || y == e.y - 1)
             {
-              auto& v = mesh.mesh.vertices[(y * e.x + x) * 6 + vert_i];
-
-              // Generate a normal using the cross product.
-              v.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-
-              v.uv = glm::vec2(x / (float) e.x, y / (float) e.y);
-
-              int add_x = vert_i == 1 || vert_i == 2 || vert_i == 5 ? 1 : 0;
-              int add_y = vert_i == 1 || vert_i == 4 || vert_i == 5 ? 1 : 0;
-
-              // If we can't be here. This will only happen with the
-              // rightmost / bottommost chunk.
-              if(e.y <= (y + add_y) || e.x <= x + (add_x)) continue;
-
-              // The x-z position is generated.
-              v.position.x = (x + add_x) * flat_scale;
-              v.position.z = (y + add_y) * flat_scale;
-
-              // The height is from the heightmap.
-              v.position.y = height.vals[(y + add_y) * e.x +
-                                         (x + add_x)] * y_scale;
-
-              ++cur_offset;
-
-              if(gen_aabbs)
-              {
-                chunk.aabb.min.x  = std::min(chunk.aabb.min.x,  v.position.x);
-                chunk.aabb.min.y  = std::min(chunk.aabb.min.y,  v.position.y);
-                chunk.aabb.min.z  = std::min(chunk.aabb.min.z,  v.position.z);
-
-                chunk.aabb.width  = std::max(chunk.aabb.width,  v.position.x);
-                chunk.aabb.height = std::max(chunk.aabb.height, v.position.y);
-                chunk.aabb.depth  = std::max(chunk.aabb.depth,  v.position.z);
-              }
+              // If we are at the last vertex, just bail out. Trying to make a face
+              // here will make one across the mesh which would be terrible.
+              continue;
             }
+
+            // Add the faces while we are at it.
+            tmesh.mesh.elements.push_back(x + 0 + y * e.x);
+            tmesh.mesh.elements.push_back(x + 1 + (y + 1) * e.x);
+            tmesh.mesh.elements.push_back(x + 1 + y * e.x);
+            tmesh.mesh.elements.push_back(x + 0 + y * e.x);
+            tmesh.mesh.elements.push_back(x + 0 + (y + 1) * e.x);
+            tmesh.mesh.elements.push_back(x + 1 + (y + 1) * e.x);
+
+            chunk.count += 6;
           }
         }
 
-        chunk.count = cur_offset - chunk.start;
+        cur_offset += chunk.count;
 
-        mesh.chunks.push_back(chunk);
+        tmesh.chunks.push_back(chunk);
       }
     }
 
-    mesh.mesh.vertices.resize(cur_offset);
+    // Set the uv coordinates over the whole mesh.
+    for(int i = 0; i < e.y; ++i)
+    {
+      for(int j = 0; j < e.x; ++j)
+      {
+        tmesh.mesh.vertices[i * e.x + j].uv =
+          glm::vec2((float) j / e.x, (float) i / e.y);
+      }
+    }
 
-    GAME_ASSERT(cur_offset == mesh.mesh.vertices.size());
-
-    return mesh;
+    return tmesh;
   }
 }
