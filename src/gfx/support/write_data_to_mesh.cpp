@@ -88,10 +88,9 @@ namespace game { namespace gfx
                                 elemnt_offset * sizeof(Vertex::uv));
 
 
-    // The chunk is mostly (short of a primitive type) ready to be rendered
-    // even if the client chooses not to copy over the element array buffer, in
-    // which case that function will fill out the necessarily fields of its
-    // mesh chunk.
+    // Partially initialize the chunk so we can render with it. If the user
+    // copies the element array buffer later, that function will overrite these
+    // values.
     chunk.mesh.set_pointer(&mesh);
     chunk.start = elemnt_offset;
     chunk.count = vertices.size();
@@ -135,6 +134,8 @@ namespace game { namespace gfx
     write_element_array_to_mesh(data, ret, mesh, mesh.get_buffer(3),
                                 element_array_offset, vertice_element_offset);
 
+    ret.type = data.primitive;
+
     return ret;
   }
   Mesh_Chunk write_data_to_mesh(Ordered_Mesh_Data const& data, Mesh& mesh,
@@ -143,6 +144,8 @@ namespace game { namespace gfx
     Mesh_Chunk ret;
 
     write_vertices_to_mesh(data.vertices, ret, mesh, vert_elemnt_off);
+
+    ret.type = data.primitive;
 
     return ret;
   }

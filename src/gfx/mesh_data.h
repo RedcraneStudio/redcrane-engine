@@ -9,6 +9,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <boost/optional.hpp>
+#include "primitive_type.h"
 namespace game
 {
   struct Vertex
@@ -55,11 +56,15 @@ namespace game
   {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> elements;
+
+    Primitive_Type primitive = Primitive_Type::Triangle;
   };
 
   struct Ordered_Mesh_Data
   {
     std::vector<Vertex> vertices;
+
+    Primitive_Type primitive = Primitive_Type::Triangle;
   };
 
   struct Indexed_Split_Mesh_Data
@@ -69,6 +74,8 @@ namespace game
     std::vector<glm::vec2> tex_coords;
 
     std::vector<Vert_Ref> indices;
+
+    Primitive_Type primitive = Primitive_Type::Triangle;
   };
 
   struct Ordered_Split_Mesh_Data
@@ -76,5 +83,7 @@ namespace game
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> tex_coords;
+
+    Primitive_Type primitive = Primitive_Type::Triangle;
   };
 }

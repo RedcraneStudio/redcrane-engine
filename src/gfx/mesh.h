@@ -9,6 +9,7 @@
 #include <array>
 #include <vector>
 #include <tuple>
+#include "primitive_type.h"
 namespace game
 {
   enum class Usage_Hint
@@ -18,10 +19,6 @@ namespace game
   enum class Upload_Hint
   {
     Static, Dynamic, Stream
-  };
-  enum class Primitive_Type
-  {
-    Triangle, Line
   };
 
   enum class Buffer_Format
