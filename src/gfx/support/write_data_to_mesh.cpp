@@ -95,7 +95,7 @@ namespace game { namespace gfx
     chunk.start = elemnt_offset;
     chunk.count = vertices.size();
   }
-  void write_element_array_to_mesh(Indexed_Mesh_Data const& data,
+  void write_element_array_to_mesh(std::vector<unsigned int> const& data,
                                    Mesh_Chunk& c,
                                    Mesh& mesh,
                                    unsigned int buffer,
@@ -104,7 +104,7 @@ namespace game { namespace gfx
   {
     // No conventions established.
 
-    auto size = data.elements.size() * sizeof(data.elements[0]);
+    auto size = data.size() * sizeof(data[0]);
 
     if(mesh.get_buffer_size(buffer) < element_offset + size)
     {
@@ -112,11 +112,10 @@ namespace game { namespace gfx
             " isn't enough room for every value.");
     }
 
-    mesh.buffer_data(buffer, sizeof(data.elements[0]) * element_offset, size,
-                     &data.elements[0]);
+    mesh.buffer_data(buffer, sizeof(data[0]) * element_offset, size, &data[0]);
 
     c.start = element_offset;
-    c.count = data.elements.size();
+    c.count = data.size();
     c.mesh.set_pointer(&mesh);
 
     c.base_vertex = base_vertex;
@@ -131,7 +130,7 @@ namespace game { namespace gfx
     Mesh_Chunk ret;
 
     write_vertices_to_mesh(data.vertices, ret, mesh, vertice_element_offset);
-    write_element_array_to_mesh(data, ret, mesh, mesh.get_buffer(3),
+    write_element_array_to_mesh(data.elements, ret, mesh, mesh.get_buffer(3),
                                 element_array_offset, vertice_element_offset);
 
     ret.type = data.primitive;

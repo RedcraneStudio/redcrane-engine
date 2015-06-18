@@ -28,7 +28,7 @@ namespace game { namespace gfx
                               Mesh& mesh,
                               unsigned int element_offset = 0) noexcept;
 
-  void write_element_array_to_mesh(Indexed_Mesh_Data const& data,
+  void write_element_array_to_mesh(std::vector<unsigned int> const& data,
                                    Mesh_Chunk& c,
                                    Mesh& mesh,
                                    unsigned int buf,
