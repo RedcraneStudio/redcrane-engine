@@ -232,9 +232,6 @@ int main(int argc, char** argv)
 
   //water_obj.material->diffuse_color = Color{0xaa, 0xaa, 0xff};
 
-  terrain->set_primitive_type(Primitive_Type::Triangle);
-  water->set_primitive_type(Primitive_Type::Triangle);
-
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
