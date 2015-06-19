@@ -24,6 +24,8 @@ add_subdirectory(fps)
 find_package(Freetype REQUIRED)
 add_subdirectory(ui)
 
+add_subdirectory(stratlib)
+
 add_subdirectory(map)
 
 add_executable(strategy main.cpp)
