@@ -179,11 +179,15 @@ int main(int argc, char** argv)
     cam_controller.set_yaw_limit(PI / 2);
     cam_controller.set_pitch_limit(PI / 2);
 
-    auto house = driver.make_mesh_repr();
+    Maybe_Owned<Mesh> house = driver.make_mesh_repr();
     auto house_data =
                gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/house.obj"));
     gfx::allocate_mesh_buffers(house_data, *house);
-    auto house_chunk = gfx::write_data_to_mesh(house_data, *house);
+    // TODO: We should be moving here, but we can't because that would require
+    // allocating a mesh, but maybe_owned doesn't know the implementation.
+    // Moving here would ideally change our house to point to the ptr in the
+    // mesh chunk, which now owns the mesh.
+    auto house_chunk = gfx::write_data_to_mesh(house_data, std::move(house));
     auto house_model = glm::mat4(1.0f);
     gfx::format_mesh_buffers(*house);
 
@@ -203,12 +207,12 @@ int main(int argc, char** argv)
 
     bt_world.addRigidBody(&bt_house_rigidbody);
 
-    auto plane = driver.make_mesh_repr();
+    Maybe_Owned<Mesh> plane = driver.make_mesh_repr();
     auto plane_data =
       gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/plane.obj"));
 
     gfx::allocate_mesh_buffers(plane_data, *plane);
-    auto plane_chunk = gfx::write_data_to_mesh(plane_data, *plane);
+    auto plane_chunk = gfx::write_data_to_mesh(plane_data, std::move(plane));
     gfx::format_mesh_buffers(*plane);
 
     auto plane_model = glm::mat4(1.0f);
@@ -216,12 +220,12 @@ int main(int argc, char** argv)
     plane_model = glm::translate(plane_model, glm::vec3(0.0f,-1.0f,0.0f));
     plane_model = glm::translate(plane_model, glm::vec3(-0.5f, 0.0f, -0.5f));
 
-    auto sphere = driver.make_mesh_repr();
+    Maybe_Owned<Mesh> sphere = driver.make_mesh_repr();
     auto sphere_data =
               gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/sphere.obj"));
 
     gfx::allocate_mesh_buffers(sphere_data, *sphere);
-    auto sphere_chunk = gfx::write_data_to_mesh(sphere_data, *sphere);
+    auto sphere_chunk =gfx::write_data_to_mesh(sphere_data,std::move(sphere));
     auto sphere_model = glm::mat4(1.0f);
     gfx::format_mesh_buffers(*sphere);
 

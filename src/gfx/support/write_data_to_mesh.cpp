@@ -65,63 +65,68 @@ namespace game { namespace gfx
 
   void write_vertices_to_mesh(std::vector<Vertex> const& vertices,
                               Mesh_Chunk& chunk,
-                              Mesh& mesh,
+                              Maybe_Owned<Mesh> mesh,
                               unsigned int elemnt_offset) noexcept
   {
+    if(!mesh) return;
+
     // We're establishing a convention with this function.
     // First three buffers represent positions, normals, and texture
     // coordinates, respectively.
-    auto pos_buf = mesh.get_buffer(0);
-    auto norm_buf = mesh.get_buffer(1);
-    auto uv_buf = mesh.get_buffer(2);
+    auto pos_buf = mesh->get_buffer(0);
+    auto norm_buf = mesh->get_buffer(1);
+    auto uv_buf = mesh->get_buffer(2);
 
     write_vertex_member_to_mesh(&vertices[0], vertices.size(),
-                                &Vertex::position, mesh, pos_buf,
+                                &Vertex::position, *mesh, pos_buf,
                                 elemnt_offset * sizeof(Vertex::position));
 
     write_vertex_member_to_mesh(&vertices[0], vertices.size(),
-                                &Vertex::normal, mesh, norm_buf,
+                                &Vertex::normal, *mesh, norm_buf,
                                 elemnt_offset * sizeof(Vertex::normal));
 
     write_vertex_member_to_mesh(&vertices[0], vertices.size(),
-                                &Vertex::uv, mesh, uv_buf,
+                                &Vertex::uv, *mesh, uv_buf,
                                 elemnt_offset * sizeof(Vertex::uv));
 
 
     // Partially initialize the chunk so we can render with it. If the user
     // copies the element array buffer later, that function will overrite these
     // values.
-    chunk.mesh.set_pointer(&mesh);
+    chunk.mesh = std::move(mesh);
     chunk.start = elemnt_offset;
     chunk.count = vertices.size();
   }
   void write_element_array_to_mesh(std::vector<unsigned int> const& data,
                                    Mesh_Chunk& c,
-                                   Mesh& mesh,
+                                   Maybe_Owned<Mesh> mesh,
                                    unsigned int buffer,
                                    unsigned int element_offset,
                                    int base_vertex) noexcept
   {
+    if(!mesh) return;
+
     // No conventions established.
 
     auto size = data.size() * sizeof(data[0]);
 
-    if(mesh.get_buffer_size(buffer) < element_offset + size)
+    if(mesh->get_buffer_size(buffer) < element_offset + size)
     {
       log_e("Failed to write element array data to the mesh because there"
             " isn't enough room for every value.");
     }
 
-    mesh.buffer_data(buffer, sizeof(data[0]) * element_offset, size, &data[0]);
+    mesh->buffer_data(buffer, sizeof(data[0]) * element_offset, size, &data[0]);
 
     c.start = element_offset;
     c.count = data.size();
-    c.mesh.set_pointer(&mesh);
+    c.mesh = std::move(mesh);
 
     c.base_vertex = base_vertex;
   }
 
-  Mesh_Chunk write_data_to_mesh(Indexed_Mesh_Data const& data, Mesh& mesh,
+  Mesh_Chunk write_data_to_mesh(Indexed_Mesh_Data const& data,
+                                Maybe_Owned<Mesh> mesh,
                                 unsigned int vertice_element_offset,
                                 unsigned int element_array_offset) noexcept
   {
@@ -129,20 +134,27 @@ namespace game { namespace gfx
 
     Mesh_Chunk ret;
 
-    write_vertices_to_mesh(data.vertices, ret, mesh, vertice_element_offset);
-    write_element_array_to_mesh(data.elements, ret, mesh, mesh.get_buffer(3),
-                                element_array_offset, vertice_element_offset);
+    if(!mesh) return ret;
+
+    // The first time use a reference.
+    write_vertices_to_mesh(data.vertices, ret, ref_mo(mesh),
+                           vertice_element_offset);
+    // Next time move the mesh into the mesh_chunk.
+    write_element_array_to_mesh(data.elements, ret, std::move(mesh),
+                                mesh->get_buffer(3), element_array_offset,
+                                vertice_element_offset);
 
     ret.type = data.primitive;
 
     return ret;
   }
-  Mesh_Chunk write_data_to_mesh(Ordered_Mesh_Data const& data, Mesh& mesh,
-                                unsigned int vert_elemnt_off) noexcept
+  Mesh_Chunk write_data_to_mesh(Ordered_Mesh_Data const& data,
+                                Maybe_Owned<Mesh> mesh,
+                                unsigned int vert_off) noexcept
   {
     Mesh_Chunk ret;
 
-    write_vertices_to_mesh(data.vertices, ret, mesh, vert_elemnt_off);
+    write_vertices_to_mesh(data.vertices, ret, std::move(mesh), vert_off);
 
     ret.type = data.primitive;
 

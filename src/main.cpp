@@ -161,7 +161,7 @@ int main(int argc, char** argv)
   load_png("map/default.png", terrain_image);
 
   // Convert it into a heightmap
-  auto terrain = driver.make_mesh_repr();
+  Maybe_Owned<Mesh> terrain = driver.make_mesh_repr();
 
   auto terrain_heightmap = make_heightmap_from_image(terrain_image);
   auto terrain_data =
@@ -171,7 +171,7 @@ int main(int argc, char** argv)
                                   glm::vec3(5.0f, 1.0f, 5.0f));
 
   gfx::allocate_mesh_buffers(terrain_data.mesh, *terrain);
-  gfx::write_data_to_mesh(terrain_data.mesh, *terrain);
+  gfx::write_data_to_mesh(terrain_data.mesh, ref_mo(terrain));
   gfx::format_mesh_buffers(*terrain);
   terrain->set_primitive_type(Primitive_Type::Triangle);
 
