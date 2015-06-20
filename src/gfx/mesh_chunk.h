@@ -20,6 +20,15 @@ namespace game
     boost::optional<int> base_vertex;
   };
 
+  /*!
+   * \brief Copies a mesh chunk so the copy's mesh points to the original.
+   */
+  Mesh_Chunk copy_mesh_chunk_share_mesh(Mesh_Chunk const&) noexcept;
+  /*!
+   * \brief Copies a mesh chunk so the new copy owns the mesh.
+   */
+  Mesh_Chunk copy_mesh_chunk_move_mesh(Mesh_Chunk&) noexcept;
+
   namespace gfx
   {
     void render_chunk(Mesh_Chunk const&) noexcept;

@@ -5,6 +5,36 @@
 #include "mesh_chunk.h"
 namespace game { namespace gfx
 {
+  Mesh_Chunk copy_mesh_chunk_share_mesh(Mesh_Chunk const& orig) noexcept
+  {
+    Mesh_Chunk ret;
+
+    ret.start = orig.start;
+    ret.count = orig.count;
+
+    ret.type = orig.type;
+    ret.mesh.set_pointer(orig.mesh.get());
+
+    ret.base_vertex = orig.base_vertex;
+
+    return ret;
+  }
+  Mesh_Chunk copy_mesh_chunk_move_mesh(Mesh_Chunk& orig) noexcept
+  {
+    Mesh_Chunk ret;
+
+    ret.start = orig.start;
+    ret.count = orig.count;
+
+    ret.type = orig.type;
+
+    ret.mesh = std::move(orig.mesh);
+    orig.mesh.set_pointer(ret.mesh.get());
+
+    ret.base_vertex = orig.base_vertex;
+
+    return ret;
+  }
   void render_chunk(Mesh_Chunk const& m) noexcept
   {
     if(!m.mesh) return;
