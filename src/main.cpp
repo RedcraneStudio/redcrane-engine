@@ -175,13 +175,6 @@ int main(int argc, char** argv)
   gfx::format_mesh_buffers(*terrain);
   terrain->set_primitive_type(Primitive_Type::Triangle);
 
-  // Make water.
-  auto water = driver.make_mesh_repr();
-  water->set_primitive_type(Primitive_Type::Triangle);
-
-  Heightmap water_heightmap;
-  water_heightmap.allocate({100, 100});
-
   int fps = 0;
   int time = glfwGetTime();
 
@@ -248,28 +241,10 @@ int main(int argc, char** argv)
 
     terrain->draw_elements(0, terrain_data.mesh.elements.size());
 
-    set_noise_heightmap(water_heightmap, glfwGetTime() / 1.0f);
-    auto water_data = make_terrain_mesh(water_heightmap, {2,2}, .001f, .0256f);
-
-    if(water->get_num_allocated_buffers() == 0)
-    {
-      gfx::allocate_mesh_buffers(water_data.mesh, *water, Upload_Hint::Stream);
-      gfx::format_mesh_buffers(*water);
-    }
-    gfx::write_data_to_mesh(water_data.mesh, *water);
-
-    driver.bind_texture(*grass_tex, 0);
-    default_shader->set_diffuse(colors::blue);
-    default_shader->set_model(glm::mat4(1.0f));
-    water->draw_elements(0, water_data.mesh.elements.size());
-
     // Render the terrain before we calculate the depth of the mouse position.
     auto mouse_state = gen_mouse_state(window);
     controller.step(hud, mouse_state);
 
-    // Render our movable instance of a house.
-
-    // Render all of our other house instances.
     {
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
       hud->render(ui_adapter);
