@@ -35,7 +35,7 @@ TEST_CASE("Constructed to null", "[Maybe_Owned]")
     }
   }
 }
-TEST_CASE("Destruction when owned", "[Maybe_Owned]")
+TEST_CASE("Pointer is destructed properly", "[Maybe_Owned]")
 {
   struct Is_Destructed
   {
@@ -45,18 +45,46 @@ TEST_CASE("Destruction when owned", "[Maybe_Owned]")
     bool* is;
   };
 
-  bool is_destructed;
+  SECTION("Owning maybe destructs pointer; Pointing maybe doesn't.")
   {
-    auto ptr = Maybe_Owned<Is_Destructed>{&is_destructed};
-  }
-  REQUIRE(is_destructed == true);
+    bool is_destructed;
+    {
+      auto ptr = Maybe_Owned<Is_Destructed>{&is_destructed};
+    }
+    REQUIRE(is_destructed == true);
 
-  auto destructed = std::make_unique<Is_Destructed>(&is_destructed);
-  {
-    // Construct a maybe owned that *doesn't* own it's ptr.
-    auto ptr = Maybe_Owned<Is_Destructed>{destructed.get(), false};
+    auto destructed = std::make_unique<Is_Destructed>(&is_destructed);
+    {
+      // Construct a maybe owned that *doesn't* own it's ptr.
+      auto ptr = Maybe_Owned<Is_Destructed>{destructed.get(), false};
+    }
+    REQUIRE(is_destructed == false);
   }
-  REQUIRE(is_destructed == false);
+
+  SECTION("Won't move into itself to cause destruction")
+  {
+    bool is_destructed;
+
+    // First maybe owned is owned.
+    auto fmo = make_maybe_owned<Is_Destructed>(&is_destructed);
+    REQUIRE(fmo.is_owned());
+
+    {
+      // The second is now owning whatever fmo had.
+      auto smo = std::move(fmo);
+      REQUIRE(smo.is_owned());
+
+      // The pointer should be the same, but now we are moving from a maybe that
+      // doesn't own it's data.
+      smo = std::move(fmo);
+
+      // It shouldn't matter!
+      REQUIRE(smo.is_owned());
+    }
+
+    // Finally, make sure our thing was destructed.
+    REQUIRE(is_destructed);
+  }
 }
 TEST_CASE("Move won't nullify pointer", "[Maybe_Owned]")
 {

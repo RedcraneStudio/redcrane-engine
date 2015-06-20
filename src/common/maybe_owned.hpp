@@ -130,12 +130,9 @@ namespace game
   template <class T>
   template <class R>
   Maybe_Owned<T>::Maybe_Owned(Maybe_Owned<R>&& mo1) noexcept
-    : owned_(mo1.owned_), ptr_(mo1.ptr_)
   {
-    // Check out the move operator= for reasoning as to why we don't null-ify
-    // the mo1 pointer.
-
-    mo1.owned_ = false;
+    // Just use our operator=, since it's somewhat complex of an impl.
+    *this = std::move(mo1);
   }
 
   template <class T>
@@ -154,16 +151,32 @@ namespace game
   template <class R>
   Maybe_Owned<T>& Maybe_Owned<T>::operator=(Maybe_Owned<R>&& mo1) noexcept
   {
-    // Release ourselves, possibly unallocating our own pointer (if we own it).
-    reset();
+    // If we have the same pointer, move ownership to ourselves if necessary.
+    if(mo1.ptr_ == ptr_)
+    {
+      // If they owned it, now we do. That's about it, since neither pointer
+      // needs to change.
+      if(mo1.owned_)
+      {
+        owned_ = true;
+        mo1.owned_ = false;
+      }
+    }
+    else
+    {
+      // Release ourselves, possibly unallocating our own pointer (only if we
+      // own it, of course).
+      reset();
 
-    owned_ = mo1.owned_;
-    ptr_ = mo1.ptr_;
+      // We own now if they did, but not if they didn't
+      owned_ = mo1.owned_;
+      ptr_ = mo1.ptr_;
 
-    // We don't need to null their pointer, just kill their ownership, which is
-    // enough. It also has the lovely side effect of leaving mo1 in a
-    // non-owning but functionally-equivalent state!
-    mo1.owned_ = false;
+      // We don't need to null their pointer, just kill their ownership, which
+      // is enough. It also has the lovely side effect of leaving mo1 in a
+      // non-owning but functionally-equivalent state!
+      mo1.owned_ = false;
+    }
 
     return *this;
   }
