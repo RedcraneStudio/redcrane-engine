@@ -186,7 +186,7 @@ namespace game
   template <class R>
   void Maybe_Owned<T>::set_pointer(Maybe_Owned<R> const& mo) noexcept
   {
-    set_pointer(mo.get(), false);
+    *this = Maybe_Owned<T>(mo.get(), false);
   }
 
   template <class T>
