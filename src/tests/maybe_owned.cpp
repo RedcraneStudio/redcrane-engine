@@ -54,7 +54,7 @@ TEST_CASE("Destruction when owned", "[Maybe_Owned]")
   auto destructed = std::make_unique<Is_Destructed>(&is_destructed);
   {
     // Construct a maybe owned that *doesn't* own it's ptr.
-    auto ptr = Maybe_Owned<Is_Destructed>{destructed.get()};
+    auto ptr = Maybe_Owned<Is_Destructed>{destructed.get(), false};
   }
   REQUIRE(is_destructed == false);
 

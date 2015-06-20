@@ -44,7 +44,9 @@ namespace game
      * declared above! make_owned_maybe can also be used if the pointer
      * cannot be constructed by the client.
      */
-    /* implicit */ Maybe_Owned(T* t = nullptr, bool owned = false) noexcept;
+    /* implicit */ Maybe_Owned(T* t, bool owned) noexcept;
+
+    Maybe_Owned() noexcept;
 
     template <class R>
     Maybe_Owned(std::unique_ptr<R>) noexcept;
@@ -65,7 +67,8 @@ namespace game
     void set_owned(T&& t) noexcept;
     void set_owned(T const& t) noexcept;
     void set_owned(T* t) noexcept;
-    void set_pointer(T* t, bool owned = false) noexcept;
+
+    void set_pointer(T* t) noexcept;
 
     template <class R>
     void set_pointer(Maybe_Owned<R> const&) noexcept;
@@ -83,6 +86,8 @@ namespace game
     bool is_owned() const noexcept;
     bool is_pointer() const noexcept;
 
+    // TODO: Remove this function, it is inconsistent from the unique_ptr's
+    // reset somehow, I think.
     void reset() noexcept;
   private:
     bool owned_ = false;
@@ -100,6 +105,9 @@ namespace game
 
   template <class T>
   Maybe_Owned<T>::Maybe_Owned(T* t, bool o) noexcept : owned_(o), ptr_(t) {}
+
+  template <class T>
+  Maybe_Owned<T>::Maybe_Owned() noexcept : owned_(false), ptr_(nullptr) {}
 
   template <class T>
   template <class R>
@@ -155,22 +163,22 @@ namespace game
   template <class T>
   void Maybe_Owned<T>::set_owned(T&& t) noexcept
   {
-    set_pointer(new T(std::move(t)), true);
+    *this = Maybe_Owned<T>(new T(std::move(t)), true);
   }
   template <class T>
   void Maybe_Owned<T>::set_owned(T const& t) noexcept
   {
-    set_pointer(new T(t), true);
+    *this = Maybe_Owned<T>(new T(t), true);
   }
   template <class T>
   void Maybe_Owned<T>::set_owned(T* t) noexcept
   {
-    set_pointer(t, true);
+    *this = Maybe_Owned<T>(t, true);
   }
   template <class T>
-  void Maybe_Owned<T>::set_pointer(T* t, bool o) noexcept
+  void Maybe_Owned<T>::set_pointer(T* t) noexcept
   {
-    *this = Maybe_Owned<T>(t, o);
+    *this = Maybe_Owned<T>(t, false);
   }
   template <class T>
   template <class R>

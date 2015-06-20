@@ -98,7 +98,7 @@ namespace game
     void step_(bool recursive) noexcept;
 
     // Counterpart mode. Counter part is pointed to, not owned.
-    Pipe_IO(Pipe_IO& cp) noexcept : cp_(&cp) {}
+    Pipe_IO(Pipe_IO& cp) noexcept : cp_(&cp, false) {}
 
     // Represents a Pipe_IO object that is maybe owned.
     Maybe_Owned<Pipe_IO> cp_;
