@@ -125,11 +125,10 @@ namespace game
   Maybe_Owned<T>::Maybe_Owned(Maybe_Owned<R>&& mo1) noexcept
     : owned_(mo1.owned_), ptr_(mo1.ptr_)
   {
+    // Check out the move operator= for reasoning as to why we don't null-ify
+    // the mo1 pointer.
+
     mo1.owned_ = false;
-    // We don't need to null the pointer since setting the owned value to false
-    // should suffice in preventing this other maybe-owned from deleting its
-    // pointer. Nonetheless:
-    mo1.ptr_ = nullptr;
   }
 
   template <class T>
@@ -154,8 +153,10 @@ namespace game
     owned_ = mo1.owned_;
     ptr_ = mo1.ptr_;
 
+    // We don't need to null their pointer, just kill their ownership, which is
+    // enough. It also has the lovely side effect of leaving mo1 in a
+    // non-owning but functionally-equivalent state!
     mo1.owned_ = false;
-    mo1.ptr_ = nullptr;
 
     return *this;
   }

@@ -57,5 +57,30 @@ TEST_CASE("Destruction when owned", "[Maybe_Owned]")
     auto ptr = Maybe_Owned<Is_Destructed>{destructed.get(), false};
   }
   REQUIRE(is_destructed == false);
+}
+TEST_CASE("Move won't nullify pointer", "[Maybe_Owned]")
+{
+  // Construct a regular owned maybe.
+  auto mo = make_maybe_owned<int>(5);
+  REQUIRE(*mo == 5); // It must be equal to five.
+  REQUIRE(mo.is_owned()); // It must be owned.
 
+  // Move it somewhere else.
+  auto other = std::move(mo);
+
+  // It better be owned by other.
+  REQUIRE(other.is_owned());
+
+  // And mo should be pointing now.
+  REQUIRE(mo.is_pointer());
+
+  // Most importantly, mo must still be equal to five.
+  REQUIRE(*mo == 5);
+  // On that note, so should other.
+  REQUIRE(*other == 5);
+
+  // Therefore they are equal
+  REQUIRE(*mo == *other);
+  // And point to the same thing.
+  REQUIRE(mo.get() == other.get());
 }
