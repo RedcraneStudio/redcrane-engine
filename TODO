@@ -1,0 +1,1 @@
+Do not crash if a element can not be found and we want to add a click listener to it
