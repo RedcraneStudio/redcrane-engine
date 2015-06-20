@@ -3,15 +3,33 @@
   "children":
   [
     {
-      "id": "build_button",
-      "type": "sprite",
-      "src": "ui/build_icon.png",
-      "scale": 1.0,
-      "color": "white",
-      "this_background": "black",
-      "this_border": "white",
+      "type": "linear_layout",
+      "orientation": "horizontal",
+      "children":
+      [
+        {
+          "id": "build_house",
+          "type": "sprite",
+          "src": "ui/build_icon.png",
+          "scale": 1.0,
+          "color": "white",
+          "this_background": "black",
+          "this_border": "white",
 
-      "handle_events": true,
+          "handle_events": true
+        },
+        {
+          "id": "build_gvn_build",
+          "type": "sprite",
+          "src": "ui/build_icon.png",
+          "scale": 1.0,
+          "color": "white",
+          "this_background": "black",
+          "this_border": "white",
+
+          "handle_events": true
+        }
+      ],
 
       "alignment": { "vertical": "bottom", "horizontal": "right" },
       "padding": { "right": 5, "bottom": 5 }

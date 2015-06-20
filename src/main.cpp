@@ -200,9 +200,13 @@ int main(int argc, char** argv)
 
   auto controller = ui::Simple_Controller{};
 
-  hud->find_child_r("build_button")->add_click_listener([](auto const& pt)
+  hud->find_child_r("build_house")->add_click_listener([](auto const& pt)
   {
-    log_i("BUILD!");
+    log_i("build house!");
+  });
+  hud->find_child_r("build_gvn_build")->add_click_listener([](auto const& pt)
+  {
+    log_i("build government building!");
   });
 
   hud->layout(driver.window_extents());
