@@ -13,7 +13,8 @@ namespace game { namespace gfx
     ret.count = orig.count;
 
     ret.type = orig.type;
-    ret.mesh.set_pointer(orig.mesh.get());
+
+    ret.mesh = ref_mo(orig.mesh);
 
     ret.base_vertex = orig.base_vertex;
 
@@ -29,7 +30,6 @@ namespace game { namespace gfx
     ret.type = orig.type;
 
     ret.mesh = std::move(orig.mesh);
-    orig.mesh.set_pointer(ret.mesh.get());
 
     ret.base_vertex = orig.base_vertex;
 
