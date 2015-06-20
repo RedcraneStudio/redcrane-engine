@@ -78,7 +78,6 @@ namespace game { namespace ui
     return vol;
   }
 
-  // This implementation is currently broken.
   Vec<int> Linear_Layout::get_minimum_extents_() const noexcept
   {
     auto bounds = Vec<int>{};
@@ -95,7 +94,7 @@ namespace game { namespace ui
       else
       {
         bounds.x += view_vec.x;
-        bounds.y += std::max(bounds.y, view_vec.y);
+        bounds.y = std::max(bounds.y, view_vec.y);
       }
     }
 
