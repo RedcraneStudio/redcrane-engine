@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include "../map/structure.h"
 namespace game { namespace strat
 {
   enum class Player_State_Type
@@ -13,7 +14,6 @@ namespace game { namespace strat
 
   struct Nothing_State { };
 
-  struct Structure;
   struct Building_State
   {
     Structure* to_build;
