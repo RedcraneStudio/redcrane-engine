@@ -5,21 +5,23 @@
 #include "structure.h"
 namespace game
 {
-  Structure_Instance::
-  Structure_Instance(IStructure& s, Orient o) noexcept
-    : structure_type(&s),
-      obj(structure_type->make_obj()),
-      orientation(o) {}
-  Structure_Instance::Structure_Instance(Structure_Instance const& s) noexcept
-    : structure_type(s.structure_type),
-      obj(share_object_keep_ownership(s.obj)),
-      orientation(s.orientation) {}
-  Structure_Instance& Structure_Instance::
-  operator=(Structure_Instance const& i) noexcept
+  Structure::Structure(Mesh_Chunk&& m, AABB aabb, std::string name,
+                      std::string desc) noexcept
+    : mesh_chunk_(std::move(m)), aabb_(aabb), name_(name), desc_(desc) { }
+
+  Mesh_Chunk const& Structure::mesh_chunk() const noexcept
   {
-    structure_type = i.structure_type;
-    obj = share_object_keep_ownership(i.obj);
-    orientation = i.orientation;
-    return *this;
+    return mesh_chunk_;
+  }
+
+  Structure_Instance::Structure_Instance(Structure& s) noexcept : s_type_(&s){}
+
+  void Structure_Instance::set_structure_type(Structure const& s) noexcept
+  {
+    s_type_ = &s;
+  }
+  Structure const& Structure_Instance::structure() noexcept
+  {
+    return *s_type_;
   }
 }

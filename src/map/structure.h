@@ -4,41 +4,38 @@
  */
 #pragma once
 #include "../common/aabb.h"
-#include "../gfx/object.h"
+#include "../gfx/mesh_chunk.h"
 namespace game
 {
-  enum class Orient
+  struct Structure
   {
-    N,
-    E,
-    S,
-    W
-  };
+    // We request to own the mesh chunk so we can give out weak-ptr like
+    // instances ourselves.
+    Structure(Mesh_Chunk&& m, AABB aabb, std::string name,
+              std::string desc) noexcept;
+    virtual ~Structure() noexcept {}
 
-  struct IStructure
-  {
-    virtual ~IStructure() noexcept {}
+    Mesh_Chunk const& mesh_chunk() const noexcept;
+    AABB aabb() const noexcept { return aabb_; }
 
-    virtual AABB aabb() const noexcept = 0;
-
-    /*!
-     * This function must always return the same mesh and material (points
-     * to the same object).
-     */
-    virtual gfx::Object make_obj() const noexcept = 0;
+    std::string name() const noexcept { return name_; }
+    std::string desc() const noexcept { return desc_; }
+  private:
+    Mesh_Chunk mesh_chunk_;
+    AABB aabb_;
+    std::string name_;
+    std::string desc_;
   };
 
   struct Structure_Instance
   {
-    Structure_Instance(IStructure&, Orient) noexcept;
-    Structure_Instance(Structure_Instance const&) noexcept;
-    Structure_Instance& operator=(Structure_Instance const& i) noexcept;
-
+    Structure_Instance(Structure&) noexcept;
     ~Structure_Instance() noexcept = default;
 
-    const IStructure* structure_type;
-    gfx::Object obj;
-    Orient orientation;
+    void set_structure_type(Structure const& s) noexcept;
+    Structure const& structure() noexcept;
+
+  private:
+    Structure const* s_type_;
   };
 }
-
