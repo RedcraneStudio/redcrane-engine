@@ -26,6 +26,12 @@ namespace game
     return Maybe_Owned<T>(ptr, true);
   }
 
+  template <class T>
+  Maybe_Owned<T> ref_mo(Maybe_Owned<T> const& mo) noexcept
+  {
+    return Maybe_Owned<T>{mo.get(), false};
+  }
+
   // TODO Support a custom deleter.
   template <class T>
   struct Maybe_Owned
