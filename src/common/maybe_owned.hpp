@@ -30,6 +30,7 @@ namespace game
   template <class T>
   struct Maybe_Owned
   {
+    // ** PREFER THE ABOVE FUNCTION MAKE_MAYBE_OWNED **
     template <class... Args>
     explicit Maybe_Owned(Args&&... args) noexcept;
 
