@@ -5,6 +5,7 @@
 #include "write_data_to_mesh.h"
 namespace game { namespace gfx
 {
+  // TODO: Remove these implementations!
   void allocate_mesh_buffers(Indexed_Mesh_Data const& data,
                              Mesh& mesh, Upload_Hint up,
                              Usage_Hint us) noexcept
