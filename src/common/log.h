@@ -5,6 +5,13 @@
 #pragma once
 #include <string>
 #include "translate.h"
+
+// We make this a macro so we can just not do it should it become something we
+// don't want to be doing for some reason. Performance or IO bottleneck for
+// example.
+#define GAME_LOG_ATTEMPT_INIT() init_log()
+// #define GAME_LOG_ATTEMPT_INIT() ((void*)0)
+
 namespace game
 {
   struct Scoped_Log_Init
