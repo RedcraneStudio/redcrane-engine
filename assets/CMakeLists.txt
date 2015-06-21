@@ -4,7 +4,7 @@
 
 add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/house.obj
                     obj/sphere.obj
-                    scene/default.json structure/house.json
+                    scene/default.json structure/structures.json
                     shader/basic/f shader/basic/v
                     shader/hud/f shader/hud/v
                     tex/cracked_soil.png tex/grass.png

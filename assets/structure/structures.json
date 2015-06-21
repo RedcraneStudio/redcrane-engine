@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Yurt",
+    "desc": "A traditional Mongol shelter.",
+    "model": "obj/house.obj"
+  },
+  {
+    "name": "Government Building",
+    "desc": "A goat's home.",
+    "model": "obj/sphere.obj"
+  }
+]
