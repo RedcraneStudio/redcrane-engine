@@ -28,6 +28,7 @@
 
 #include "map/map.h"
 #include "map/water.h"
+#include "map/terrain.h"
 #include "glad/glad.h"
 #include "glfw3.h"
 
