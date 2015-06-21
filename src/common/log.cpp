@@ -90,6 +90,8 @@ namespace game
   void log(std::string severity, std::string msg,
            char const* const before, char const* const after) noexcept
   {
+    if(!loop_) return;
+
     // Create the final message.
     std::string time = format_time("%F|%T");
     std::string final_msg = std::string{before} + "(" + time + "): " +
