@@ -18,16 +18,20 @@ namespace game
     uninit_log();
   }
 
-  uv_loop_t* loop_ = nullptr;
+  thread_local uv_loop_t* loop_ = nullptr;
   Log_Severity level_ = Log_Severity::Info;
 
   void init_log() noexcept
   {
+    if(loop_) return;
+
     loop_ = new uv_loop_t;
     uv_loop_init(loop_);
   }
   void uninit_log() noexcept
   {
+    if(!loop_) return;
+
     uv_loop_close(loop_);
     delete loop_;
   }
