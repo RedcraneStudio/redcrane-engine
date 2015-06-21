@@ -25,6 +25,8 @@ namespace game
   std::vector<Structure> load_structure(std::string filename,
                                         Maybe_Owned<Mesh> mesh) noexcept
   {
+    GAME_LOG_ATTEMPT_INIT();
+
     auto doc = load_json(filename);
 
     std::vector<std::tuple<std::string, std::string> > structure_meta;
@@ -82,6 +84,8 @@ namespace game
       // Record how far off we went into the mesh.
       accum_vertex_off += structure_data[i].vertices.size();
       accum_element_off += structure_data[i].elements.size();
+
+      log_d("Loaded structure: '%' - '%'", name, desc);
 
       // Construct the structure.
       structures.emplace_back(std::move(chunk), aabb, std::move(name),
