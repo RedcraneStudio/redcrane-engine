@@ -3,6 +3,8 @@
  * All rights reserved.
  */
 #pragma once
+#include <string>
+#include <vector>
 #include "../common/aabb.h"
 #include "../gfx/mesh_chunk.h"
 namespace game
@@ -30,4 +32,7 @@ namespace game
     std::string name_;
     std::string desc_;
   };
+
+  std::vector<Structure> load_structure(std::string filename,
+                                        Maybe_Owned<Mesh> mesh) noexcept;
 }
