@@ -26,16 +26,4 @@ namespace game
     std::string name_;
     std::string desc_;
   };
-
-  struct Structure_Instance
-  {
-    Structure_Instance(Structure&) noexcept;
-    ~Structure_Instance() noexcept = default;
-
-    void set_structure_type(Structure const& s) noexcept;
-    Structure const& structure() noexcept;
-
-  private:
-    Structure const* s_type_;
-  };
 }
