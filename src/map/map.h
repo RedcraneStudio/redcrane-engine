@@ -21,4 +21,13 @@ namespace game
   private:
     Structure const* s_type_;
   };
+
+  struct Map
+  {
+    // Physical size on the screen, sort of. Hopefully can be used to make more
+    // sense of input mouse coordinates.
+    float pixels_per_unit;
+
+    std::vector<Structure_Instance> structures;
+  };
 }
