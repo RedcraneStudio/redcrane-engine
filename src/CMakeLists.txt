@@ -28,9 +28,13 @@ add_subdirectory(stratlib)
 
 add_subdirectory(map)
 
+find_package(Threads REQUIRED)
+
 add_executable(strategy main.cpp)
 target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib maplib
                                sndlib)
+target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
+
 
 find_package(Bullet REQUIRED)
 
