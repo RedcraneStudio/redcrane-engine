@@ -87,11 +87,13 @@ namespace game
     level_ = level;
   }
 
-  void log(std::string severity, std::string msg) noexcept
+  void log(std::string severity, std::string msg,
+           char const* const before, char const* const after) noexcept
   {
     // Create the final message.
     std::string time = format_time("%F|%T");
-    std::string final_msg = "(" + time + "): " + severity + ": " + msg + "\n";
+    std::string final_msg = std::string{before} + "(" + time + "): " +
+                            severity + ": " + msg + std::string{after} + "\n";
 
     // Copy to a buffer libuv can use.
     char* msg_data = new char[final_msg.size()];
@@ -122,24 +124,31 @@ namespace game
         log_d(msg);
     }
   }
+
+  constexpr char const* const RESET_C = "\x1b[0m";
+  constexpr char const* const ERROR_C = "\x1b[95m";
+  constexpr char const* const WARNING_C = "\x1b[91m";
+  constexpr char const* const INFO_C = "\x1b[92m";
+  constexpr char const* const DEBUG_C = "\x1b[96m";
+
   void log_e(std::string msg) noexcept
   {
     if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Error))
-      log("error", msg);
+      log("error", msg, ERROR_C, RESET_C);
   }
   void log_w(std::string msg) noexcept
   {
     if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Warning))
-      log("warning", msg);
+      log("warning", msg, WARNING_C, RESET_C);
   }
   void log_i(std::string msg) noexcept
   {
     if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Info))
-      log("info", msg);
+      log("info", msg, INFO_C, RESET_C);
   }
   void log_d(std::string msg) noexcept
   {
     if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Debug))
-      log("debug", msg);
+      log("debug", msg, DEBUG_C, RESET_C);
   }
 }
