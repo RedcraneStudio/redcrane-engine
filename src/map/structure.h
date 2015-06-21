@@ -33,6 +33,6 @@ namespace game
     std::string desc_;
   };
 
-  std::vector<Structure> load_structure(std::string filename,
-                                        Maybe_Owned<Mesh> mesh) noexcept;
+  std::vector<Structure> load_structures(std::string filename,
+                                         Maybe_Owned<Mesh> mesh) noexcept;
 }
