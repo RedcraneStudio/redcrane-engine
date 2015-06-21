@@ -13,6 +13,10 @@ namespace game
     // instances ourselves.
     Structure(Mesh_Chunk&& m, AABB aabb, std::string name,
               std::string desc) noexcept;
+
+    Structure(Structure&&) = default;
+    Structure& operator=(Structure&&) = default;
+
     virtual ~Structure() noexcept {}
 
     Mesh_Chunk const& mesh_chunk() const noexcept;
