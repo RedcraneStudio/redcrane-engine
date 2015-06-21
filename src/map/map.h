@@ -47,4 +47,6 @@ namespace game
                                  double y_scale = .01,
                                  double flat_scale = 1,
                                  bool gen_aabbs = false) noexcept;
+
+  using pos_t = Vec<float>;
 }

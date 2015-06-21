@@ -6,12 +6,11 @@
 #include <vector>
 #include <memory>
 #include "../common/vec.h"
+#include "../map/map.h"
 namespace game { namespace strat
 {
   // TODO: Use boost.units or std::ratio or something to make this type safe.
   using ms_t = int;
-
-  using pos_t = Vec<float>;
 
   struct Msg
   {
