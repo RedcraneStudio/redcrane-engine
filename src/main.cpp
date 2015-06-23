@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <vector>
 #include <thread>
+#include <future>
 
 #include "common/log.h"
 
@@ -29,6 +30,9 @@
 #include "map/map.h"
 #include "map/water.h"
 #include "map/terrain.h"
+
+#include "stratlib/player_state.h"
+
 #include "glad/glad.h"
 #include "glfw3.h"
 
@@ -176,6 +180,15 @@ int main(int argc, char** argv)
   gfx::format_mesh_buffers(*terrain);
   terrain->set_primitive_type(Primitive_Type::Triangle);
 
+  // Map + structures.
+  Maybe_Owned<Mesh> structure_mesh = driver.make_mesh_repr();
+  Map map;
+  strat::Player_State player_state{strat::Player_State_Type::Nothing};
+
+  auto structures_future =
+    std::async(std::launch::async, load_structures,"structure/structures.json",
+               ref_mo(structure_mesh));
+
   int fps = 0;
   int time = glfwGetTime();
 
@@ -201,13 +214,17 @@ int main(int argc, char** argv)
 
   auto controller = ui::Simple_Controller{};
 
-  hud->find_child_r("build_house")->add_click_listener([](auto const& pt)
+  auto structures = structures_future.get();
+
+  hud->find_child_r("build_house")->add_click_listener([&](auto const& pt)
   {
-    log_i("build house!");
+    player_state.type = strat::Player_State_Type::Building;
+    player_state.building.to_build = &structures[0];
   });
-  hud->find_child_r("build_gvn_build")->add_click_listener([](auto const& pt)
+  hud->find_child_r("build_gvn_build")->add_click_listener([&](auto const& pt)
   {
-    log_i("build government building!");
+    player_state.type = strat::Player_State_Type::Building;
+    player_state.building.to_build = &structures[1];
   });
 
   hud->layout(driver.window_extents());
