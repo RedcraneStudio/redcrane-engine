@@ -28,6 +28,8 @@ add_subdirectory(stratlib)
 
 add_subdirectory(map)
 
+add_subdirectory(collisionlib)
+
 find_package(Threads REQUIRED)
 
 add_executable(strategy main.cpp)
