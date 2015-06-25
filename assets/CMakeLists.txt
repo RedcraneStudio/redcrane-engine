@@ -3,13 +3,13 @@
 # All rights reserved.
 
 add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/house.obj
-                    obj/sphere.obj
+                    obj/sphere.obj obj/fps_terrain.obj
                     scene/default.json structure/structures.json
                     shader/basic/f shader/basic/v
                     shader/hud/f shader/hud/v
-                    tex/cracked_soil.png tex/grass.png
+                    tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
                     ui/hud.json obj/terrain.obj mat/terrain.json
-                    map/default.png)
+                    map/default.png scene/fps.json)
 
 include(convert_files)
 

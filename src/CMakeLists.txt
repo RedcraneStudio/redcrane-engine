@@ -36,13 +36,8 @@ target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib maplib
 target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
 
 
-find_package(Bullet REQUIRED)
-
 add_executable(fps_exe main_fps.cpp)
 target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib)
-target_link_libraries(fps_exe ${BULLET_LIBRARIES})
-
-target_include_directories(fps_exe PUBLIC ${BULLET_INCLUDE_DIRS})
 
 add_executable(play_snd play_snd.cpp)
 target_link_libraries(play_snd sndlib commonlib)

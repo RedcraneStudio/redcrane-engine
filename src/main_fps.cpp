@@ -9,8 +9,6 @@
 #include <thread>
 #include <chrono>
 
-#include <btBulletDynamicsCommon.h>
-
 #include "common/log.h"
 
 #include "gfx/gl/driver.h"
@@ -21,6 +19,11 @@
 #include "gfx/support/generate_aabb.h"
 #include "gfx/support/write_data_to_mesh.h"
 #include "gfx/support/texture_load.h"
+#include "gfx/support/format.h"
+#include "gfx/support/allocate.h"
+#include "gfx/support/json.h"
+
+#include "common/json.h"
 
 #include "fps/camera_controller.h"
 
@@ -38,49 +41,6 @@
 
 #define PI 3.141592653589793238463
 
-struct House_Kinematic_Motion : public btMotionState
-{
-  void getWorldTransform(btTransform &trans) const override;
-  void setWorldTransform(btTransform const& trans) override;
-
-  void move_left();
-  void move_right();
-private:
-  btVector3 pos_;
-};
-
-void House_Kinematic_Motion::getWorldTransform(btTransform &trans) const
-{
-  trans.setOrigin(pos_);
-}
-void House_Kinematic_Motion::setWorldTransform(btTransform const& trans)
-{
-  pos_ = trans.getOrigin();
-}
-
-void House_Kinematic_Motion::move_left()
-{
-  pos_.setX(pos_.getX() - .01);
-}
-void House_Kinematic_Motion::move_right()
-{
-  pos_.setX(pos_.getX() + .01);
-}
-
-struct Command_Options
-{
-};
-
-Command_Options parse_command_line(int argc, char**)
-{
-  Command_Options opt;
-  for(int i = 0; i < argc; ++i)
-  {
-    //auto option = argv[i];
-  }
-  return opt;
-}
-
 int main(int argc, char** argv)
 {
   using namespace game;
@@ -91,9 +51,6 @@ int main(int argc, char** argv)
 
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
-
-  // Parse command line arguments.
-  auto options = parse_command_line(argc - 1, argv+1);
 
   // Init glfw.
   if(!glfwInit())
@@ -120,29 +77,12 @@ int main(int argc, char** argv)
   // Log GL profile.
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
-  // Initialize bullet
-
-  btDbvtBroadphase bt_broadphase;
-
-  btDefaultCollisionConfiguration bt_configuration;
-  btCollisionDispatcher bt_collision_dispatcher(&bt_configuration);
-
-  btSequentialImpulseConstraintSolver bt_constraint_solver;
-  btDiscreteDynamicsWorld bt_world(&bt_collision_dispatcher,
-                                   &bt_broadphase,
-                                   &bt_constraint_solver,
-                                   &bt_configuration);
-
-  bt_world.setGravity(btVector3(0, -9.81, 0));
-
-  btStaticPlaneShape bt_plane_shape(btVector3(0, 1, 0), -1);
-  btDefaultMotionState bt_motion_state;
-  btRigidBody bt_plane(0, &bt_motion_state, &bt_plane_shape);
-
-  bt_world.addCollisionObject(&bt_plane);
-
   // Hide the mouse and capture it
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+  auto scene = load_json("scene/fps.json");
+
+  auto player_position = vec3_from_js(scene["player_pos"]);
 
   {
     // Make an OpenGL driver.
@@ -169,9 +109,12 @@ int main(int argc, char** argv)
     auto grass = driver.make_texture_repr();
     load_png("tex/grass.png", *grass);
 
+    auto terrain_tex = driver.make_texture_repr();
+    load_png("tex/topdown_terrain.png", *terrain_tex);
+
     // Make an fps camera.
     auto cam = gfx::make_fps_camera();
-    cam.fp.pos = glm::vec3(0.0f, 0.0f, 15.0f);
+    cam.fp.pos = player_position;
 
     auto cam_controller = fps::Camera_Controller{};
     cam_controller.camera(cam);
@@ -179,65 +122,19 @@ int main(int argc, char** argv)
     cam_controller.set_yaw_limit(PI / 2);
     cam_controller.set_pitch_limit(PI / 2);
 
-    Maybe_Owned<Mesh> house = driver.make_mesh_repr();
-    auto house_data =
-               gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/house.obj"));
-    gfx::allocate_mesh_buffers(house_data, *house);
-    // TODO: We should be moving here, but we can't because that would require
-    // allocating a mesh, but maybe_owned doesn't know the implementation.
-    // Moving here would ideally change our house to point to the ptr in the
-    // mesh chunk, which now owns the mesh.
-    auto house_chunk = gfx::write_data_to_mesh(house_data, std::move(house));
-    auto house_model = glm::mat4(1.0f);
-    gfx::format_mesh_buffers(*house);
+    // TODO put the house on the scene at a fixed location.
+    Maybe_Owned<Mesh> terrain = driver.make_mesh_repr();
+    auto terrain_data =
+      gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/fps_terrain.obj"));
 
-    auto house_aabb = gfx::generate_aabb(house_data);
+    gfx::allocate_standard_mesh_buffers(terrain_data.vertices.size(),
+                                        terrain_data.elements.size(),
+                                        *terrain, Usage_Hint::Draw,
+                                        Upload_Hint::Static);
+    auto ter_chunk = gfx::write_data_to_mesh(terrain_data, std::move(terrain));
+    gfx::format_standard_mesh_buffers(*terrain);
 
-    btBoxShape bt_house_shape(btVector3(house_aabb.width / 2.f,
-                                        house_aabb.height / 2.f,
-                                        house_aabb.depth / 2.f));
-    House_Kinematic_Motion bt_house_motion_state;
-    btRigidBody bt_house_rigidbody(100,&bt_house_motion_state,&bt_house_shape);
-    bt_house_rigidbody.setCollisionFlags(
-                       btCollisionObject::CF_KINEMATIC_OBJECT);
-
-    btTransform house_transform(btMatrix3x3::getIdentity(),
-                                btVector3(0, 0, 0));
-    bt_house_motion_state.setWorldTransform(house_transform);
-
-    bt_world.addRigidBody(&bt_house_rigidbody);
-
-    Maybe_Owned<Mesh> plane = driver.make_mesh_repr();
-    auto plane_data =
-      gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/plane.obj"));
-
-    gfx::allocate_mesh_buffers(plane_data, *plane);
-    auto plane_chunk = gfx::write_data_to_mesh(plane_data, std::move(plane));
-    gfx::format_mesh_buffers(*plane);
-
-    auto plane_model = glm::mat4(1.0f);
-    plane_model = glm::scale(plane_model, glm::vec3(5.0f, 1.0f, 7.0f));
-    plane_model = glm::translate(plane_model, glm::vec3(0.0f,-1.0f,0.0f));
-    plane_model = glm::translate(plane_model, glm::vec3(-0.5f, 0.0f, -0.5f));
-
-    Maybe_Owned<Mesh> sphere = driver.make_mesh_repr();
-    auto sphere_data =
-              gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/sphere.obj"));
-
-    gfx::allocate_mesh_buffers(sphere_data, *sphere);
-    auto sphere_chunk =gfx::write_data_to_mesh(sphere_data,std::move(sphere));
-    auto sphere_model = glm::mat4(1.0f);
-    gfx::format_mesh_buffers(*sphere);
-
-    btDefaultMotionState default_motion;
-    btCapsuleShape sphere_shape(1.0f, 1.0f);
-    btRigidBody sphere_body(50, &default_motion, &sphere_shape);
-
-    btTransform sphere_initial;
-    sphere_initial.setOrigin(btVector3(0.0f, 5.0f, 0.0f));
-    sphere_body.setWorldTransform(sphere_initial);
-
-    bt_world.addRigidBody(&sphere_body);
+    auto terrain_model = glm::mat4(1.0f);
 
     int fps = 0;
     int time = glfwGetTime();
@@ -253,31 +150,13 @@ int main(int argc, char** argv)
     glfwPollEvents();
     glfwGetCursorPos(window, &prev_x, &prev_y);
 
-    using time_point_t =
-                   std::chrono::time_point<std::chrono::high_resolution_clock>;
-    time_point_t before = time_point_t::clock::now();
+    shader->set_diffuse(colors::white);
+    driver.bind_texture(*terrain_tex, 0);
+    shader->set_model(terrain_model);
 
     while(!glfwWindowShouldClose(window))
     {
       ++fps;
-
-      if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-      {
-        bt_house_motion_state.move_left();
-      }
-      if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-      {
-        bt_house_motion_state.move_right();
-      }
-
-      auto now = time_point_t::clock::now();
-      auto diff = now - before;
-      before = now;
-
-      using std::chrono::duration_cast;
-      auto ms = duration_cast<std::chrono::milliseconds>(diff).count();
-
-      bt_world.stepSimulation(ms / 1000.0f, 6);
 
       glfwPollEvents();
 
@@ -297,37 +176,7 @@ int main(int argc, char** argv)
       // Clear the screen
       driver.clear();
 
-      btTransform transform;
-      bt_house_motion_state.getWorldTransform(transform);
-
-      auto orig = transform.getOrigin();
-      house_model = glm::translate(glm::mat4(1.0f),
-                                   glm::vec3(orig.x(), orig.y(), orig.z()));
-
-      auto y_delta_for_now = house_aabb.min.y - house_aabb.height / 2;
-
-      house_model = glm::translate(house_model,
-              glm::vec3(0.f, -house_aabb.height / 2.f - house_aabb.min.y,0.f));
-
-      shader->set_diffuse(colors::white);
-
-      driver.bind_texture(*grass, 0);
-
-      shader->set_model(plane_model);
-      gfx::render_chunk(plane_chunk);
-
-      driver.bind_texture(*brick, 0);
-
-      shader->set_model(house_model);
-      gfx::render_chunk(house_chunk);
-
-      btTransform sphere_trans;
-      default_motion.getWorldTransform(sphere_trans);
-      sphere_trans.getOpenGLMatrix(&sphere_model[0][0]);
-
-      shader->set_model(sphere_model);
-      shader->set_diffuse(colors::red);
-      gfx::render_chunk(sphere_chunk);
+      gfx::render_chunk(ter_chunk);
 
       glfwSwapBuffers(window);
 
