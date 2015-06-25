@@ -23,6 +23,9 @@
 #include "gfx/support/allocate.h"
 #include "gfx/support/json.h"
 
+#include "collisionlib/triangle_conversion.h"
+#include "collisionlib/triangle.h"
+
 #include "common/json.h"
 
 #include "fps/camera_controller.h"
@@ -119,7 +122,6 @@ int main(int argc, char** argv)
     auto cam_controller = fps::Camera_Controller{};
     cam_controller.camera(cam);
 
-    cam_controller.set_yaw_limit(PI / 2);
     cam_controller.set_pitch_limit(PI / 2);
 
     // TODO put the house on the scene at a fixed location.
@@ -133,6 +135,8 @@ int main(int argc, char** argv)
                                         Upload_Hint::Static);
     auto ter_chunk = gfx::write_data_to_mesh(terrain_data, std::move(terrain));
     gfx::format_standard_mesh_buffers(*terrain);
+
+    auto triangles = triangles_from_mesh_data(terrain_data);
 
     auto terrain_model = glm::mat4(1.0f);
 
@@ -165,11 +169,50 @@ int main(int argc, char** argv)
         glfwSetWindowShouldClose(window, true);
       }
 
+      glm::vec4 delta_movement;
+      if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+      {
+        delta_movement.z -= 1.0f;
+      }
+      if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+      {
+        delta_movement.x -= 1.0f;
+      }
+      if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+      {
+        delta_movement.z += 1.0f;
+      }
+      if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+      {
+        delta_movement.x += 1.0f;
+      }
+
+      delta_movement *= .005;
+
+      delta_movement = delta_movement *
+        glm::rotate(glm::mat4(1.0f), cam.fp.yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+
       double x, y;
       glfwGetCursorPos(window, &x, &y);
       cam_controller.apply_delta_pitch(y / 250.0 - prev_y / 250.0);
       cam_controller.apply_delta_yaw(x / 250.0 - prev_x / 250.0);
       prev_x = x, prev_y = y;
+
+      cam.fp.pos.x += delta_movement.x;
+      cam.fp.pos.z += delta_movement.z;
+
+      // Find the height at cam.fp.pos.
+      for(auto const& triangle : triangles)
+      {
+        if(is_contained_xz(glm::vec2(cam.fp.pos.x, cam.fp.pos.z),
+                           triangle))
+        {
+          auto bary = to_barycentric_coord(triangle, cam.fp.pos);
+          cam.fp.pos.y = triangle.positions[0].y * bary.x +
+                         triangle.positions[1].y * bary.y +
+                         triangle.positions[2].y * bary.z + 1.0f;
+        }
+      }
 
       use_camera(driver, cam);
 
