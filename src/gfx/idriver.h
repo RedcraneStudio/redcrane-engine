@@ -15,6 +15,11 @@ namespace game
 
   namespace gfx
   {
+    enum class Framebuffer
+    {
+      Depth
+    };
+
     struct IDriver
     {
       virtual ~IDriver() noexcept {}
@@ -39,6 +44,14 @@ namespace game
       virtual void depth_test(bool enable) noexcept = 0;
       virtual void blending(bool enable) noexcept = 0;
       virtual void face_culling(bool enable) noexcept = 0;
+
+      // For now we are only going to abstract a single point in the
+      // framebuffer. In addition, it'll get a bit complicated should we want
+      // to store the result in GL_PIXEL_PACK_BUFFER or maybe a shared buffer
+      // in client memory and just return a pointer to that, for all who
+      // request it. Who knows.
+
+      virtual float read_pixel(Framebuffer fr, Vec<int> vec) noexcept = 0;
 
       virtual Vec<int> window_extents() const noexcept = 0;
 

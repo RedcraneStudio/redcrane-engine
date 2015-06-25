@@ -54,4 +54,8 @@ namespace game { namespace gfx { namespace gl
         return GL_SHORT;
     }
   }
+  GLenum get_gl_pixel_format(Framebuffer) noexcept
+  {
+    return GL_DEPTH_COMPONENT;
+  }
 } } }

@@ -33,6 +33,9 @@ namespace game { namespace gfx
       void blending(bool) noexcept override {}
       void face_culling(bool) noexcept override {}
 
+      float read_pixel(Framebuffer, Vec<int>) noexcept override
+      { return 0.0f; }
+
       Vec<int> window_extents() const noexcept override { return extents_; }
 
       void check_error() noexcept override {}

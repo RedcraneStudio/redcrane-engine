@@ -6,6 +6,9 @@
 #include "mesh.h"
 #include "texture.h"
 #include "shader.h"
+
+#include "common.h"
+
 #include "../../common/color.h"
 #include "../../common/log.h"
 
@@ -118,6 +121,14 @@ namespace game
       {
         if(enable) glEnable(GL_CULL_FACE);
         else glDisable(GL_CULL_FACE);
+      }
+      float Driver::read_pixel(Framebuffer fb, Vec<int> pt) noexcept
+      {
+        auto f = get_gl_pixel_format(fb);
+
+        float ret;
+        glReadPixels(pt.x, extents_.y - pt.y, 1, 1, f, GL_FLOAT, &ret);
+        return ret;
       }
       void Driver::check_error() noexcept
       {

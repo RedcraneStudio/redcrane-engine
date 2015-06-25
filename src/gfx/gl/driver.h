@@ -41,6 +41,8 @@ namespace game
     void blending(bool enable) noexcept override;
     void face_culling(bool enable) noexcept override;
 
+    float read_pixel(Framebuffer, Vec<int> pt) noexcept override;
+
     Vec<int> window_extents() const noexcept override { return extents_; }
 
     void check_error() noexcept override;
