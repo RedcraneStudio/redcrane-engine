@@ -21,6 +21,7 @@
 #include "gfx/support/write_data_to_mesh.h"
 #include "gfx/support/texture_load.h"
 #include "gfx/support/software_texture.h"
+#include "gfx/support/unproject.h"
 
 #include "ui/load.h"
 #include "ui/freetype_renderer.h"
@@ -265,9 +266,9 @@ int main(int argc, char** argv)
 
     auto mouse_state = gen_mouse_state(window);
 
-    auto map_coord = unproject_mouse_coordinates(driver, cam, terrain_model,
-                                                 mouse_state.position);
-    log_i("% %", map_coord.x, map_coord.y);
+    auto map_coord = gfx::unproject_screen(driver, cam, terrain_model,
+                                           mouse_state.position);
+    log_i("% %", map_coord.x, map_coord.z);
 
     controller.step(hud, mouse_state);
 
