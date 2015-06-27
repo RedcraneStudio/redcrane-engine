@@ -187,7 +187,15 @@ int main(int argc, char** argv)
         delta_movement.x += 1.0f;
       }
 
-      delta_movement *= .005;
+      // Temporary replacement for shift, I just didn't feel like looking it up
+      if(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+      {
+        delta_movement *= .0005;
+      }
+      else
+      {
+        delta_movement *= .005;
+      }
 
       delta_movement = delta_movement *
         glm::rotate(glm::mat4(1.0f), cam.fp.yaw, glm::vec3(0.0f, 1.0f, 0.0f));
