@@ -182,7 +182,7 @@ int main(int argc, char** argv)
 
   // Map + structures.
   Maybe_Owned<Mesh> structure_mesh = driver.make_mesh_repr();
-  Map map;
+  Map map({1000, 1000}); // <-- Map size for now
   strat::Player_State player_state{strat::Player_State_Type::Nothing};
 
   auto structures_future =

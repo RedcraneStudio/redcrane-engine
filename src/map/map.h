@@ -24,10 +24,14 @@ namespace game
 
   struct Map
   {
+    Map(Vec<float> map_extents) noexcept : extents(map_extents) {}
+
     // Physical size on the screen, sort of. Hopefully can be used to make more
     // sense of input mouse coordinates.
     float pixels_per_unit;
 
     std::vector<Structure_Instance> structures;
+
+    Vec<float> extents;
   };
 }
