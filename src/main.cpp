@@ -172,8 +172,7 @@ int main(int argc, char** argv)
   auto terrain_data =
     make_terrain_mesh(terrain_heightmap, {20, 20}, .001f, .01);
 
-  auto terrain_model = glm::scale(glm::mat4(1.0f),
-                                  glm::vec3(5.0f, 1.0f, 5.0f));
+  auto terrain_model = glm::scale(glm::mat4(1.0f),glm::vec3(5.0f, 1.0f, 5.0f));
 
   gfx::allocate_mesh_buffers(terrain_data.mesh, *terrain);
   gfx::write_data_to_mesh(terrain_data.mesh, ref_mo(terrain));
