@@ -260,10 +260,15 @@ int main(int argc, char** argv)
     default_shader->set_diffuse(colors::white);
     default_shader->set_model(terrain_model);
 
+    // Render the terrain before we calculate the depth of the mouse position.
     terrain->draw_elements(0, terrain_data.mesh.elements.size());
 
-    // Render the terrain before we calculate the depth of the mouse position.
     auto mouse_state = gen_mouse_state(window);
+
+    auto map_coord = unproject_mouse_coordinates(driver, cam, terrain_model,
+                                                 mouse_state.position);
+    log_i("% %", map_coord.x, map_coord.y);
+
     controller.step(hud, mouse_state);
 
     {
