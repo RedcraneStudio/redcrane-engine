@@ -204,13 +204,15 @@ int main(int argc, char** argv)
       // Find the height at cam.fp.pos.
       for(auto const& triangle : triangles)
       {
-        if(is_contained_xz(glm::vec2(cam.fp.pos.x, cam.fp.pos.z),
-                           triangle))
+        if(is_contained(triangle, cam.fp.pos))
         {
           auto bary = to_barycentric_coord(triangle, cam.fp.pos);
-          cam.fp.pos.y = triangle.positions[0].y * bary.x +
+          // The order goes u v w, w is the one we found from the others, so
+          // it is the first point on the triangle. u is towards 2 and v is
+          // towards 1.
+          cam.fp.pos.y = triangle.positions[2].y * bary.x +
                          triangle.positions[1].y * bary.y +
-                         triangle.positions[2].y * bary.z + 1.0f;
+                         triangle.positions[0].y * bary.z + 0.5f;
         }
       }
 

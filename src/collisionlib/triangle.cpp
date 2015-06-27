@@ -5,15 +5,8 @@
 #include "triangle.h"
 namespace game
 {
-  bool is_contained_xz(glm::vec2 pt2, Triangle t) noexcept
+  bool is_contained(Triangle const& t, glm::vec3 pt) noexcept
   {
-    for(auto& pos : t.positions)
-    {
-      pos.y = 0.0f;
-    }
-
-    auto pt = glm::vec3(pt2.x, 0.0f, pt2.y);
-
     // Adapted from http://www.blackpawn.com/texts/pointinpoly/default.html
     auto v0 = t.positions[2] - t.positions[0];
     auto v1 = t.positions[1] - t.positions[0];
