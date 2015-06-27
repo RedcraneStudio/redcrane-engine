@@ -34,4 +34,13 @@ namespace game
 
     Vec<float> extents;
   };
+
+  namespace gfx
+  {
+    struct IDriver; struct Camera;
+  }
+
+  // We expect regular window coordinates, not y-flipped-window-coordinates.
+  pos_t unproject_mouse_coordinates(gfx::IDriver&, gfx::Camera&,
+                                    glm::mat4 const&, Vec<int>) noexcept;
 }
