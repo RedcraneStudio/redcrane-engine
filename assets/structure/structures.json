@@ -2,11 +2,11 @@
   {
     "name": "Yurt",
     "desc": "A traditional Mongol shelter.",
-    "model": "obj/house.obj"
+    "model": "obj/yurt.obj"
   },
   {
     "name": "Government Building",
     "desc": "A goat's home.",
-    "model": "obj/sphere.obj"
+    "model": "obj/govnm_building.obj"
   }
 ]
