@@ -265,10 +265,6 @@ int main(int argc, char** argv)
 
     auto mouse_state = gen_mouse_state(window);
 
-    auto map_coord = gfx::unproject_screen(driver, cam, terrain_model,
-                                           mouse_state.position);
-    log_i("% %", map_coord.x, map_coord.z);
-
     controller.step(hud, mouse_state);
 
     {
