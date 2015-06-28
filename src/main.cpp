@@ -197,9 +197,8 @@ int main(int argc, char** argv)
   Map map({1000, 1000}); // <-- Map size for now
   strat::Player_State player_state{strat::Player_State_Type::Nothing};
 
-  auto structures_future =
-    std::async(std::launch::async, load_structures,"structure/structures.json",
-               ref_mo(structure_mesh));
+  auto structures =
+    load_structures("structure/structures.json", ref_mo(structure_mesh));
 
   int fps = 0;
   int time = glfwGetTime();
@@ -225,8 +224,6 @@ int main(int argc, char** argv)
   auto hud = ui::load("ui/hud.json", ui_load_params);
 
   auto controller = ui::Simple_Controller{};
-
-  auto structures = structures_future.get();
 
   hud->find_child_r("build_house")->add_click_listener([&](auto const& pt)
   {
@@ -280,7 +277,21 @@ int main(int argc, char** argv)
     // Render the terrain before we calculate the depth of the mouse position.
     terrain->draw_elements(0, terrain_data.mesh.elements.size());
 
+    // Render any structures.
+    // Maybe the mouse?
+
+    // We only want to be able to pan the terrain for now. That's why we need
+    // to do this before any structure rendering.
+    auto mouse_world = gfx::unproject_screen(driver, cam, glm::mat4(1.0f),
+                                             mouse_state.position);
     controller.step(hud, mouse_state);
+
+    if(player_state.type == strat::Player_State_Type::Building)
+    {
+      auto model = glm::translate(glm::mat4(1.0f), mouse_world);
+      default_shader->set_model(model);
+      gfx::render_chunk(player_state.building.to_build->mesh_chunk());
+    }
 
     {
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
