@@ -56,12 +56,24 @@ glm::vec4 project_point(glm::vec4 pt,
   return pt;
 }
 
+struct Glfw_User_Data
+{
+  game::gfx::IDriver& driver;
+  game::gfx::Camera& cam;
+  game::ui::Mouse_State mouse_state;
+};
+
 void scroll_callback(GLFWwindow* window, double, double deltay)
 {
-  auto cam_ptr = glfwGetWindowUserPointer(window);
-  auto& camera = *((game::gfx::Camera*) cam_ptr);
+  auto ptr = glfwGetWindowUserPointer(window);
+  auto& data = *((Glfw_User_Data*) ptr);
 
-  camera.fp.pos += -deltay;
+  auto mworld = game::gfx::unproject_screen(data.driver, data.cam,
+                                            glm::mat4(1.0f),
+                                            data.mouse_state.position);
+
+  auto ray_to_cam = glm::normalize(mworld - data.cam.fp.pos);
+  data.cam.fp.pos += ray_to_cam * (float) deltay;
 }
 
 game::ui::Mouse_State gen_mouse_state(GLFWwindow* w)
@@ -241,13 +253,18 @@ int main(int argc, char** argv)
     // we don't go messing with the camera zoom and whatnot.
   });
 
-  glfwSetWindowUserPointer(window, &cam);
+  Glfw_User_Data data{driver, cam};
+
+  glfwSetWindowUserPointer(window, &data);
   glfwSetScrollCallback(window, scroll_callback);
 
   //water_obj.material->diffuse_color = Color{0xaa, 0xaa, 0xff};
 
   while(!glfwWindowShouldClose(window))
   {
+    auto mouse_state = gen_mouse_state(window);
+    data.mouse_state = mouse_state;
+
     ++fps;
     glfwPollEvents();
 
@@ -262,8 +279,6 @@ int main(int argc, char** argv)
 
     // Render the terrain before we calculate the depth of the mouse position.
     terrain->draw_elements(0, terrain_data.mesh.elements.size());
-
-    auto mouse_state = gen_mouse_state(window);
 
     controller.step(hud, mouse_state);
 
