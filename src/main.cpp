@@ -231,15 +231,14 @@ int main(int argc, char** argv)
 
   controller.add_drag_listener([&](auto const& np, auto const& op)
   {
-    // pan
-    auto movement = vec_cast<float>(np - op);
-    movement /= -75;
+    auto oworld = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), op);
+    auto nworld = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), np);
 
-    glm::vec4 move_vec(movement.x, 0.0f, movement.y, 0.0f);
-    move_vec = glm::inverse(camera_view_matrix(cam)) * move_vec;
+    cam.fp.pos += oworld - nworld;
 
-    cam.fp.pos.x += move_vec.x;
-    cam.fp.pos.z += move_vec.z;
+    // This will give erroneous results if the user clicks on the part of the
+    // screen with nothing drawn on it. So TODO: Put some checks in place so
+    // we don't go messing with the camera zoom and whatnot.
   });
 
   glfwSetWindowUserPointer(window, &cam);
