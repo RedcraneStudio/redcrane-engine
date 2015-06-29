@@ -33,6 +33,8 @@ namespace game
     std::string desc_;
   };
 
+  glm::vec3 ray_to_structure_bottom_center(Structure const& s) noexcept;
+
   std::vector<Structure> load_structures(std::string filename,
                                          Maybe_Owned<Mesh> mesh) noexcept;
 }

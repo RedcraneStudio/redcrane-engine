@@ -37,6 +37,19 @@ namespace game
     return pt;
   }
 
+  glm::vec3 ray_to_aabb_bottom_center(AABB const& a) noexcept
+  {
+    // Find bottom center point.
+    auto bcp = a.min;
+
+    bcp.x += a.width / 2;
+    bcp.z += a.depth / 2;
+
+    // From (0, 0, 0) (model origin) to bcp.
+    // return bcp - glm::vec3(0.0f, 0.0f, 0.0f) or just:
+    return bcp;
+  }
+
   Point_Iter::Point_Iter(AABB const* aabb) noexcept : aabb_(aabb)
   {
     if(aabb == nullptr)

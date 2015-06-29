@@ -94,4 +94,9 @@ namespace game
 
     return structures;
   }
+
+  glm::vec3 ray_to_structure_bottom_center(Structure const& s) noexcept
+  {
+    return ray_to_aabb_bottom_center(s.aabb());
+  }
 }
