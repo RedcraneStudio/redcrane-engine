@@ -288,9 +288,15 @@ int main(int argc, char** argv)
 
     if(player_state.type == strat::Player_State_Type::Building)
     {
+      auto const& st = *player_state.building.to_build;
+
       auto model = glm::translate(glm::mat4(1.0f), mouse_world);
+
+      auto ray = ray_to_structure_bottom_center(st);
+      model = glm::translate(model, -ray);
+
       default_shader->set_model(model);
-      gfx::render_chunk(player_state.building.to_build->mesh_chunk());
+      gfx::render_chunk(st.mesh_chunk());
     }
 
     {
