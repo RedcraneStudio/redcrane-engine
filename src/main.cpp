@@ -197,8 +197,9 @@ int main(int argc, char** argv)
   Map map({1000, 1000}); // <-- Map size for now
   strat::Player_State player_state{strat::Player_State_Type::Nothing};
 
-  auto structures =
-    load_structures("structure/structures.json", ref_mo(structure_mesh));
+  auto structures = load_structures("structure/structures.json",
+                                    ref_mo(structure_mesh),
+                                    driver);
 
   int fps = 0;
   int time = glfwGetTime();
@@ -294,6 +295,8 @@ int main(int argc, char** argv)
 
       auto ray = ray_to_structure_bottom_center(st);
       model = glm::translate(model, -ray);
+
+      driver.bind_texture(*st.texture(), 0);
 
       default_shader->set_model(model);
       gfx::render_chunk(st.mesh_chunk());

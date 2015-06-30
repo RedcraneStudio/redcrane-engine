@@ -2,11 +2,13 @@
   {
     "name": "Yurt",
     "desc": "A traditional Mongol shelter.",
-    "model": "obj/yurt.obj"
+    "model": "obj/yurt.obj",
+    "texture": "tex/yurt_skin.png"
   },
   {
     "name": "Government Building",
     "desc": "A goat's home.",
-    "model": "obj/govnm_building.obj"
+    "model": "obj/govnm_building.obj",
+    "texture": "tex/combined_building_textures.png"
   }
 ]

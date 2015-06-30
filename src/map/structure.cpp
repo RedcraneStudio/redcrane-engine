@@ -5,25 +5,33 @@
 #include "structure.h"
 
 #include "../common/json.h"
+#include "../gfx/idriver.h"
 #include "../gfx/support/load_wavefront.h"
 #include "../gfx/support/mesh_conversion.h"
 #include "../gfx/support/allocate.h"
 #include "../gfx/support/format.h"
 #include "../gfx/support/generate_aabb.h"
 #include "../gfx/support/write_data_to_mesh.h"
+#include "../gfx/support/texture_load.h"
 namespace game
 {
-  Structure::Structure(Mesh_Chunk&& m, AABB aabb, std::string name,
-                      std::string desc) noexcept
-    : mesh_chunk_(std::move(m)), aabb_(aabb), name_(name), desc_(desc) { }
+  Structure::Structure(Mesh_Chunk&& m, AABB aabb, Maybe_Owned<Texture> tex,
+                       std::string name, std::string desc) noexcept
+    : mesh_chunk_(std::move(m)), aabb_(aabb), texture_(std::move(tex)),
+      name_(name), desc_(desc) { }
 
   Mesh_Chunk const& Structure::mesh_chunk() const noexcept
   {
     return mesh_chunk_;
   }
+  Maybe_Owned<Texture> const& Structure::texture() const noexcept
+  {
+    return texture_;
+  }
 
   std::vector<Structure> load_structures(std::string filename,
-                                         Maybe_Owned<Mesh> mesh) noexcept
+                                         Maybe_Owned<Mesh> mesh,
+                                         gfx::IDriver& driver) noexcept
   {
     GAME_LOG_ATTEMPT_INIT();
 
@@ -31,10 +39,19 @@ namespace game
 
     std::vector<std::tuple<std::string, std::string> > structure_meta;
     std::vector<Indexed_Mesh_Data> structure_data;
+    std::vector<std::string> texture_paths;
     for(auto iter = doc.Begin(); iter != doc.End(); ++iter)
     {
       std::string name = (*iter)["name"].GetString();
       std::string desc = (*iter)["desc"].GetString();
+
+      // If we are given the same texture (or model for that matter) we should
+      // only load and reference it once, however, given the behavior of mesh
+      // chunk and it's included maybe_owned means we'll have to put it in
+      // someplace that will *definitely outlive* the structures that reference
+      // it.
+
+      // For now load it as many times as we want.
 
       std::string model_filename = (*iter)["model"].GetString();
       auto split_data = gfx::load_wavefront(model_filename);
@@ -44,6 +61,8 @@ namespace game
 
       // Push the meta data for later.
       structure_meta.emplace_back(name, desc);
+
+      texture_paths.push_back((*iter)["texture"].GetString());
     }
 
     int vertices = 0;
@@ -74,6 +93,9 @@ namespace game
       // Generate an AABB from the vertex data.
       auto aabb = gfx::generate_aabb(structure_data[i]);
 
+      auto texture = driver.make_texture_repr();
+      load_png(texture_paths[i], *texture);
+
       // Write the structure's data to the mesh and get the mesh chunk.
       // We still want to own our maybe owned to a mesh.
       Mesh_Chunk chunk = gfx::write_data_to_mesh(structure_data[i],
@@ -88,8 +110,8 @@ namespace game
       log_d("Loaded structure: '%' - '%'", name, desc);
 
       // Construct the structure.
-      structures.emplace_back(std::move(chunk), aabb, std::move(name),
-                              std::move(desc));
+      structures.emplace_back(std::move(chunk), aabb, std::move(texture),
+                              std::move(name), std::move(desc));
     }
 
     return structures;
