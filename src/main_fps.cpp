@@ -14,6 +14,7 @@
 #include "gfx/gl/driver.h"
 #include "gfx/camera.h"
 #include "gfx/mesh_chunk.h"
+#include "gfx/mesh_data.h"
 #include "gfx/support/load_wavefront.h"
 #include "gfx/support/mesh_conversion.h"
 #include "gfx/support/generate_aabb.h"
@@ -22,6 +23,7 @@
 #include "gfx/support/format.h"
 #include "gfx/support/allocate.h"
 #include "gfx/support/json.h"
+#include "gfx/support/load_scene.h"
 
 #include "collisionlib/triangle_conversion.h"
 #include "collisionlib/triangle.h"
@@ -83,9 +85,6 @@ int main(int argc, char** argv)
   // Hide the mouse and capture it
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-  auto scene = load_json("scene/fps.json");
-
-  auto player_position = vec3_from_js(scene["player_pos"]);
 
   {
     // Make an OpenGL driver.
@@ -115,9 +114,12 @@ int main(int argc, char** argv)
     auto terrain_tex = driver.make_texture_repr();
     load_png("tex/topdown_terrain.png", *terrain_tex);
 
+    auto scene_mesh = driver.make_mesh_repr();
+    auto scene = gfx::load_scene("scene/fps.json", std::move(scene_mesh));
+
     // Make an fps camera.
     auto cam = gfx::make_fps_camera();
-    cam.fp.pos = player_position;
+    cam.fp.pos = scene.player_pos;
 
     auto cam_controller = fps::Camera_Controller{};
     cam_controller.camera(cam);
@@ -156,7 +158,6 @@ int main(int argc, char** argv)
 
     shader->set_diffuse(colors::white);
     driver.bind_texture(*terrain_tex, 0);
-    shader->set_model(terrain_model);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -229,7 +230,14 @@ int main(int argc, char** argv)
       // Clear the screen
       driver.clear();
 
+      shader->set_model(terrain_model);
       gfx::render_chunk(ter_chunk);
+
+      for(auto const& obj : scene.objects)
+      {
+        driver.active_shader()->set_model(obj.model);
+        gfx::render_chunk(obj.mesh);
+      }
 
       glfwSwapBuffers(window);
 
