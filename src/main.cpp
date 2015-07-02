@@ -250,6 +250,18 @@ int main(int argc, char** argv)
     // screen with nothing drawn on it. So TODO: Put some checks in place so
     // we don't go messing with the camera zoom and whatnot.
   });
+  controller.add_click_listener([&](auto const& mp)
+  {
+    if(player_state.type == strat::Player_State_Type::Building)
+    {
+      if(player_state.building.to_build == nullptr) return;
+      auto world_p = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), mp);
+
+      // TODO: Sanitize this position a little better, maybe.
+      pos_t map_pos{world_p.x, world_p.z};
+      map.structures.emplace_back(*player_state.building.to_build, map_pos);
+    }
+  });
 
   Glfw_User_Data data{driver, cam};
 
@@ -300,6 +312,22 @@ int main(int argc, char** argv)
 
       default_shader->set_model(model);
       gfx::render_chunk(st.mesh_chunk());
+    }
+
+    // Render all the other structures.
+    for(auto const& st : map.structures)
+    {
+      // TODO: Find/store correct y somehow?
+      glm::mat4 model = glm::translate(glm::mat4(1.0f),
+                        glm::vec3(st.position.x, 0.0f, st.position.y));
+
+      auto ray = ray_to_structure_bottom_center(st.structure());
+      model = glm::translate(model, -ray);
+
+      driver.bind_texture(*st.structure().texture(), 0);
+      driver.active_shader()->set_model(model);
+
+      gfx::render_chunk(st.structure().mesh_chunk());
     }
 
     {
