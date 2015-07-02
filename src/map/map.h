@@ -15,7 +15,7 @@ namespace game
     ~Structure_Instance() noexcept = default;
 
     void set_structure_type(Structure const& s) noexcept;
-    Structure const& structure() noexcept;
+    Structure const& structure() const noexcept;
 
     pos_t position;
   private:

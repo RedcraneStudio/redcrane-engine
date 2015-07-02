@@ -13,7 +13,7 @@ namespace game
   {
     s_type_ = &s;
   }
-  Structure const& Structure_Instance::structure() noexcept
+  Structure const& Structure_Instance::structure() const noexcept
   {
     return *s_type_;
   }
