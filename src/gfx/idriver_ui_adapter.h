@@ -19,6 +19,11 @@ namespace game { namespace gfx
     void draw_rect(Volume<int> const&) noexcept override;
     void fill_rect(Volume<int> const&) noexcept override;
 
+    void fill_circle(Vec<int> center, int radius,
+                     int subdivs = 15) noexcept override;
+    void draw_circle(Vec<int> center, int radius,
+                     int subdivs = 15) noexcept override;
+
     std::unique_ptr<Texture> make_texture() noexcept override;
 
     void draw_texture(Volume<int> const& dst, Texture& tex,
@@ -49,8 +54,8 @@ namespace game { namespace gfx
 
     Color cur_dif_ = colors::white;
 
-    enum class Render_Type { Fill, Draw };
-    struct Rectangle
+    enum class Render_Type { Fill, Draw, Triangle_Fan };
+    struct Shape
     {
       Render_Type type;
       unsigned int offset;
@@ -59,7 +64,7 @@ namespace game { namespace gfx
       Texture* texture = nullptr;
     };
 
-    std::vector<Rectangle> to_draw_;
+    std::vector<Shape> to_draw_;
 
     void set_rect_(Mesh& rect, Volume<int> vol) noexcept;
 

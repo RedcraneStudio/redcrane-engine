@@ -99,7 +99,7 @@ namespace game { namespace gfx
       EXPAND_VEC4(cur_dif_vec)
     };
 
-    Rectangle rect;
+    Shape rect;
 
     // Set fields and populate (append) the buffer.
     rect.type = Render_Type::Draw;
@@ -158,7 +158,7 @@ namespace game { namespace gfx
       EXPAND_VEC4(cur_dif_vec)
     };
 
-    Rectangle rect;
+    Shape rect;
 
     // Set fields and populate (append) the buffer.
     rect.type = Render_Type::Fill;
@@ -182,6 +182,124 @@ namespace game { namespace gfx
     offset_ += rect.count;
 
     to_draw_.push_back(rect);
+  }
+
+  void IDriver_UI_Adapter::fill_circle(Vec<int> center, int radius,
+                                       int subdivs) noexcept
+  {
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::vector<float> colors;
+    colors.push_back(cur_dif_vec.r);
+    colors.push_back(cur_dif_vec.g);
+    colors.push_back(cur_dif_vec.b);
+    colors.push_back(cur_dif_vec.a);
+
+    std::vector<float> tex_coords;
+    tex_coords.push_back(0.5);
+    tex_coords.push_back(0.5);
+
+    std::vector<float> positions;
+    positions.push_back(center.x);
+    positions.push_back(center.y);
+
+    auto angle = 2.0f * M_PI / subdivs;
+    for(int i = 0; i <= subdivs; ++i)
+    {
+      // Negate sin so that we get a CCW winding order after the y-flip.
+      positions.push_back(glm::cos(angle * i) * radius + center.x);
+      positions.push_back(-glm::sin(angle * i) * radius + center.y);
+
+      colors.push_back(cur_dif_vec.r);
+      colors.push_back(cur_dif_vec.g);
+      colors.push_back(cur_dif_vec.b);
+      colors.push_back(cur_dif_vec.a);
+
+      tex_coords.push_back(0.5);
+      tex_coords.push_back(0.5);
+    }
+
+    Shape circle;
+
+    // Set fields and populate (append) the buffer.
+    circle.type = Render_Type::Triangle_Fan;
+    circle.offset = offset_;
+    circle.count = subdivs + 1 + 1;
+    circle.texture = white_texture_.get();
+
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += circle.count;
+
+    to_draw_.push_back(circle);
+  }
+  void IDriver_UI_Adapter::draw_circle(Vec<int> center, int radius,
+                                       int subdivs) noexcept
+  {
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::vector<float> colors;
+    std::vector<float> tex_coords;
+
+    std::vector<float> positions;
+
+    auto angle = 2.0f * M_PI / subdivs;
+    for(int i = 0; i < subdivs; ++i)
+    {
+      positions.push_back(glm::cos(angle * i) * radius + center.x);
+      positions.push_back(glm::sin(angle * i) * radius + center.y);
+
+      positions.push_back(glm::cos(angle * (i + 1)) * radius + center.x);
+      positions.push_back(glm::sin(angle * (i + 1)) * radius + center.y);
+
+      colors.push_back(cur_dif_vec.r);
+      colors.push_back(cur_dif_vec.g);
+      colors.push_back(cur_dif_vec.b);
+      colors.push_back(cur_dif_vec.a);
+
+      colors.push_back(cur_dif_vec.r);
+      colors.push_back(cur_dif_vec.g);
+      colors.push_back(cur_dif_vec.b);
+      colors.push_back(cur_dif_vec.a);
+
+      tex_coords.push_back(0.5);
+      tex_coords.push_back(0.5);
+
+      tex_coords.push_back(0.5);
+      tex_coords.push_back(0.5);
+    }
+
+    Shape circle;
+
+    // Set fields and populate (append) the buffer.
+    circle.type = Render_Type::Draw;
+    circle.offset = offset_;
+    circle.count = subdivs * 2;
+    circle.texture = white_texture_.get();
+
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += circle.count;
+
+    to_draw_.push_back(circle);
   }
 
   std::unique_ptr<Texture> IDriver_UI_Adapter::make_texture() noexcept
@@ -236,7 +354,7 @@ namespace game { namespace gfx
       EXPAND_VEC4(cur_dif_vec)
     };
 
-    Rectangle rect;
+    Shape rect;
 
     // Set fields and populate (append) the buffer.
     rect.type = Render_Type::Fill;
@@ -274,7 +392,7 @@ namespace game { namespace gfx
     d_->depth_test(false);
     d_->blending(true);
 
-    for(Rectangle const& r : to_draw_)
+    for(Shape const& r : to_draw_)
     {
       switch(r.type)
       {
@@ -283,6 +401,9 @@ namespace game { namespace gfx
           break;
         case Render_Type::Fill:
           mesh_->set_primitive_type(Primitive_Type::Triangle);
+          break;
+        case Render_Type::Triangle_Fan:
+          mesh_->set_primitive_type(Primitive_Type::Triangle_Fan);
           break;
       }
 
