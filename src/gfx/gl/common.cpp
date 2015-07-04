@@ -39,6 +39,8 @@ namespace game { namespace gfx { namespace gl
         return GL_LINES;
       case Primitive_Type::Triangle:
         return GL_TRIANGLES;
+      case Primitive_Type::Triangle_Fan:
+        return GL_TRIANGLE_FAN;
     }
   }
 

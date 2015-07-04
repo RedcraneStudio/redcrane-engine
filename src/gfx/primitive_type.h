@@ -7,6 +7,7 @@ namespace game
 {
   enum class Primitive_Type
   {
-    Triangle, Line
+    Triangle, Line,
+    Triangle_Fan
   };
 }
