@@ -166,7 +166,7 @@ namespace game { namespace gfx
     rect.count = 6;
     rect.texture = white_texture_.get();
 
-    // Append positions and 
+    // Append positions, texture coordinates, and vertex colors.
     auto count_bytes = sizeof(float) * positions.size();
     mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
     pos_pos_ += count_bytes;
