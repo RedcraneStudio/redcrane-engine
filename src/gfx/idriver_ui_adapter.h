@@ -24,6 +24,8 @@ namespace game { namespace gfx
     void draw_circle(Vec<int> center, int radius,
                      int subdivs = 15) noexcept override;
 
+    void draw_line(Vec<int> p1, Vec<int> p2) noexcept override;
+
     std::unique_ptr<Texture> make_texture() noexcept override;
 
     void draw_texture(Volume<int> const& dst, Texture& tex,

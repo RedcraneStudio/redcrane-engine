@@ -302,6 +302,48 @@ namespace game { namespace gfx
     to_draw_.push_back(circle);
   }
 
+  void IDriver_UI_Adapter::draw_line(Vec<int> p1, Vec<int> p2) noexcept
+  {
+    std::array<float, 2*2> positions =
+    {
+      (float) p1.x, (float) p1.y, (float) p2.x, (float) p2.y
+    };
+    std::array<float, 2*2> tex_coords =
+    {
+      .5, .5, .5, .5,
+    };
+
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::array<float, 4*2> colors =
+    {
+      EXPAND_VEC4(cur_dif_vec), EXPAND_VEC4(cur_dif_vec)
+    };
+
+    Shape line;
+
+    // Set fields and populate (append) the buffer.
+    line.type = Render_Type::Draw;
+    line.offset = offset_;
+    line.count = 2;
+    line.texture = white_texture_.get();
+
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += line.count;
+
+    to_draw_.push_back(line);
+  }
+
   std::unique_ptr<Texture> IDriver_UI_Adapter::make_texture() noexcept
   {
     return d_->make_texture_repr();
