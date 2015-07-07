@@ -100,4 +100,16 @@ namespace game
 
     return ret;
   }
+
+  template <typename T1, typename T2>
+  bool operator==(Volume<T1> const& v1, Volume<T2> const& v2) noexcept
+  {
+    return v1.pos == v2.pos && v1.width == v2.width && v1.height == v2.height;
+  }
+
+  template <typename T1, typename T2>
+  bool operator!=(Volume<T1> const& v1, Volume<T2> const& v2) noexcept
+  {
+    return !(v1 == v2);
+  }
 }
