@@ -41,6 +41,9 @@ namespace game { namespace ui
   }
   struct Label : public Element
   {
+    // Will crash when rendering if a font renderer hasn't been provided.
+    Label() noexcept : font_(nullptr) {}
+
     Label(IFont_Renderer& font) noexcept : font_(&font) {}
 
     inline std::string str() const noexcept { return str_; }
