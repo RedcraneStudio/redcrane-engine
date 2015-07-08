@@ -241,6 +241,9 @@ int main(int argc, char** argv)
 
   controller.add_drag_listener([&](auto const& np, auto const& op)
   {
+    // Only drag if we don't have anything else to do.
+    if(player_state.type != strat::Player_State_Type::Nothing) return;
+
     auto oworld = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), op);
     auto nworld = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), np);
 
