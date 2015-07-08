@@ -140,4 +140,10 @@ namespace game
   {
     return extents.x * extents.y;
   }
+
+  template <typename T1, typename T2> inline auto
+  dot(Vec<T1> const& v1, Vec<T2> const& v2) noexcept -> decltype(auto)
+  {
+    return v1.x * v2.x + v1.y * v2.y;
+  }
 }
