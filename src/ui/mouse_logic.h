@@ -15,7 +15,12 @@ namespace game { namespace ui
     Vec<int> position;
   };
 
-  bool is_click(Mouse_State const& ns, Mouse_State const& os) noexcept;
+  // Bool - True: Ignore mouse movement, False: Only consider it a click if
+  // position before and after is the same.
+  bool is_click(Mouse_State const& ns, Mouse_State const& os,
+                bool = false) noexcept;
+  bool is_release(Mouse_State const& ns, Mouse_State const& os,
+                  bool = false) noexcept;
   bool is_hover(Mouse_State const& ns, Mouse_State const& os) noexcept;
   bool is_drag(Mouse_State const& ns, Mouse_State const& os) noexcept;
 } }

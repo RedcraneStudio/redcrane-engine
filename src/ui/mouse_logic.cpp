@@ -10,11 +10,21 @@ namespace game { namespace ui
   // later but for now probably won't be an issue since anything accepting drag
   // events won't care about click events, and vise versa.
 
-  bool is_click(Mouse_State const& ns, Mouse_State const& os) noexcept
+  bool is_click(Mouse_State const& ns, Mouse_State const& os, bool s) noexcept
   {
     // If we have the user clicked the mouse button down without moving the
     // cursor position that's a click.
-    return ns.button_down && !os.button_down && ns.position == os.position;
+    if(s)
+      return ns.button_down && !os.button_down;
+    else
+      return ns.button_down && !os.button_down && ns.position == os.position;
+  }
+  bool is_release(Mouse_State const& ns, Mouse_State const& os, bool s)noexcept
+  {
+    if(s)
+      return !ns.button_down && os.button_down;
+    else
+      return !ns.button_down && os.button_down && ns.position == os.position;
   }
   bool is_hover(Mouse_State const& ns, Mouse_State const& os) noexcept
   {
