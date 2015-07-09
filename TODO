@@ -1,3 +1,9 @@
 Do not crash if a element can not be found and we want to add a click listener to it
 Implement Pie Menu
 Implement camera rotating with right click drag.
+
+Big:
+- Implement some sort of scene graph
+  - Replace stuff like the Pie menu which couples rendering and event handling
+    functionally with use of this scene graph.
+- Remove the Y-flip in UI rendering.
