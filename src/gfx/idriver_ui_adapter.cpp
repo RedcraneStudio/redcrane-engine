@@ -306,6 +306,133 @@ namespace game { namespace gfx
     to_draw_.push_back(circle_render);
   }
 
+  void IDriver_UI_Adapter::fill_arc(Arc<int> arc, int sbdivs) noexcept
+  {
+    auto radius = arc.radius;
+    auto center = arc.center;
+
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::vector<float> colors;
+    colors.push_back(cur_dif_vec.r);
+    colors.push_back(cur_dif_vec.g);
+    colors.push_back(cur_dif_vec.b);
+    colors.push_back(cur_dif_vec.a);
+
+    std::vector<float> tex_coords;
+    tex_coords.push_back(0.5);
+    tex_coords.push_back(0.5);
+
+    std::vector<float> positions;
+    positions.push_back(center.x);
+    positions.push_back(center.y);
+
+    auto angle = (arc.end_radians - arc.start_radians) / sbdivs;
+    for(int i = 0; i <= sbdivs; ++i)
+    {
+      auto this_angle = angle * i + arc.start_radians;
+
+      // Negate sin so that we get a CCW winding order after the y-flip.
+      positions.push_back(glm::cos(this_angle) * radius + center.x);
+      positions.push_back(-glm::sin(this_angle) * radius + center.y);
+
+      colors.push_back(cur_dif_vec.r);
+      colors.push_back(cur_dif_vec.g);
+      colors.push_back(cur_dif_vec.b);
+      colors.push_back(cur_dif_vec.a);
+
+      tex_coords.push_back(0.5);
+      tex_coords.push_back(0.5);
+    }
+
+    Shape arc_render;
+
+    // Set fields and populate (append) the buffer.
+    arc_render.type = Render_Type::Triangle_Fan;
+    arc_render.offset = offset_;
+    arc_render.count = sbdivs + 1 + 1;
+    arc_render.texture = white_texture_.get();
+
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += arc_render.count;
+
+    to_draw_.push_back(arc_render);
+  }
+  void IDriver_UI_Adapter::draw_arc(Arc<int> arc, int sbdivs) noexcept
+  {
+    auto radius = arc.radius;
+    auto center = arc.center;
+
+    auto cur_dif_vec = c_to_vec4(cur_dif_);
+    std::vector<float> colors;
+    std::vector<float> tex_coords;
+
+    std::vector<float> positions;
+
+    auto angle = (arc.end_radians - arc.start_radians) / sbdivs;
+    for(int i = 0; i < sbdivs; ++i)
+    {
+      auto this_angle = angle * i + arc.start_radians;
+      auto next_angle = angle * (i + 1) + arc.start_radians;
+
+      positions.push_back(glm::cos(this_angle) * radius + center.x);
+      positions.push_back(-glm::sin(this_angle) * radius + center.y);
+
+      positions.push_back(glm::cos(next_angle) * radius + center.x);
+      positions.push_back(-glm::sin(next_angle) * radius + center.y);
+
+      colors.push_back(cur_dif_vec.r);
+      colors.push_back(cur_dif_vec.g);
+      colors.push_back(cur_dif_vec.b);
+      colors.push_back(cur_dif_vec.a);
+
+      colors.push_back(cur_dif_vec.r);
+      colors.push_back(cur_dif_vec.g);
+      colors.push_back(cur_dif_vec.b);
+      colors.push_back(cur_dif_vec.a);
+
+      tex_coords.push_back(0.5);
+      tex_coords.push_back(0.5);
+
+      tex_coords.push_back(0.5);
+      tex_coords.push_back(0.5);
+    }
+
+    Shape arc_render;
+
+    // Set fields and populate (append) the buffer.
+    arc_render.type = Render_Type::Draw;
+    arc_render.offset = offset_;
+    arc_render.count = sbdivs * 2;
+    arc_render.texture = white_texture_.get();
+
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * tex_coords.size();
+    mesh_->buffer_data(tex_buf_, tex_pos_, count_bytes, &tex_coords[0]);
+    tex_pos_ += count_bytes;
+
+    count_bytes = sizeof(float) * colors.size();
+    mesh_->buffer_data(col_buf_, col_pos_, count_bytes, &colors[0]);
+    col_pos_ += count_bytes;
+
+    offset_ += arc_render.count;
+
+    to_draw_.push_back(arc_render);
+  }
+
   void IDriver_UI_Adapter::draw_line(Vec<int> p1, Vec<int> p2) noexcept
   {
     std::array<float, 2*2> positions =

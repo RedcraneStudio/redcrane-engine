@@ -22,6 +22,9 @@ namespace game { namespace gfx
     void fill_circle(Circle<int> circle, int subdivs = 15) noexcept override;
     void draw_circle(Circle<int> circle, int subdivs = 15) noexcept override;
 
+    void fill_arc(Arc<int> arc, int subdivs) noexcept override;
+    void draw_arc(Arc<int> arc, int subdivs) noexcept override;
+
     void draw_line(Vec<int> p1, Vec<int> p2) noexcept override;
 
     std::unique_ptr<Texture> make_texture() noexcept override;

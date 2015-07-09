@@ -25,6 +25,9 @@ namespace game { namespace ui
     virtual void fill_circle(Circle<int> circle, int subdivs) noexcept = 0;
     virtual void draw_circle(Circle<int> circle, int subdivs) noexcept = 0;
 
+    virtual void fill_arc(Arc<int> arc, int subdivs) noexcept = 0;
+    virtual void draw_arc(Arc<int> arc, int subdivs) noexcept = 0;
+
     virtual void draw_line(Vec<int> p1, Vec<int> p2) noexcept = 0;
 
     virtual std::unique_ptr<Texture> make_texture() noexcept = 0;
