@@ -77,14 +77,14 @@ namespace game { namespace ui
   void Pie_Menu::render(Renderer& r) const noexcept
   {
     r.set_draw_color(Color{0x3d, 0x5c, 0x6d, 0xaa});
-    r.fill_circle(center_, radius_, 35);
+    r.fill_circle({center_, radius_}, 35);
 
     // Render inside circle
 
     auto radius_factor = 3.5f;
 
     r.set_draw_color(Color{0x00, 0x00, 0x00, 0xaa});
-    r.draw_circle(center_, radius_ / radius_factor, 35);
+    r.draw_circle({center_, static_cast<int>(radius_ / radius_factor)}, 35);
 
     // Render lines for each pie button in the radial buttons vector.
     auto segment_angle = 2 * M_PI / radial_buttons_.size();

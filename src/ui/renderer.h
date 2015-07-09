@@ -5,6 +5,7 @@
 #pragma once
 #include "../common/vec.h"
 #include "../common/volume.h"
+#include "../common/circle.h"
 #include "../common/color.h"
 #include "../gfx/texture.h"
 
@@ -21,8 +22,8 @@ namespace game { namespace ui
     virtual void draw_rect(Volume<int> const&) noexcept = 0;
     virtual void fill_rect(Volume<int> const&) noexcept = 0;
 
-    virtual void fill_circle(Vec<int> center, int radius, int sd) noexcept = 0;
-    virtual void draw_circle(Vec<int> center, int radius, int sd) noexcept = 0;
+    virtual void fill_circle(Circle<int> circle, int subdivs) noexcept = 0;
+    virtual void draw_circle(Circle<int> circle, int subdivs) noexcept = 0;
 
     virtual void draw_line(Vec<int> p1, Vec<int> p2) noexcept = 0;
 
