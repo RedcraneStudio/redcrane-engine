@@ -46,6 +46,9 @@ namespace game { namespace ui
 
     void handle_event(Mouse_State ms) noexcept;
 
+    bool active_center_button() const noexcept;
+    boost::optional<int> current_radial_button() const noexcept;
+
     void render(Renderer&) const noexcept;
   private:
     int radius_;
@@ -63,6 +66,7 @@ namespace game { namespace ui
 
     bool center_button_active_ = false;
 
+    boost::optional<int> active_radial_button_;
     // This is purely rendering state. TODO: Should this be located outside the
     // pie menu and instead reside in some sort of scene graph or the like?
     boost::optional< Arc<int> > selected_arc;

@@ -73,6 +73,7 @@ namespace game { namespace ui
   void Pie_Menu::handle_event(Mouse_State ms) noexcept
   {
     center_button_active_ = false;
+    active_radial_button_ = boost::none;
     selected_arc = boost::none;
 
     // Check if the mouse is hovering over us.
@@ -120,9 +121,20 @@ namespace game { namespace ui
           arc.end_radians += 2 * M_PI;
         }
         selected_arc = arc;
+        active_radial_button_ = i;
       }
     }
   }
+
+  bool Pie_Menu::active_center_button() const noexcept
+  {
+    return center_button_active_;
+  }
+  boost::optional<int> Pie_Menu::current_radial_button() const noexcept
+  {
+    return active_radial_button_;
+  }
+
   void Pie_Menu::render(Renderer& r) const noexcept
   {
     r.set_draw_color(Color{0x3d, 0x5c, 0x6d, 0xaa});

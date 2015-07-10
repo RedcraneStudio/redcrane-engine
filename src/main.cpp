@@ -352,6 +352,16 @@ int main(int argc, char** argv)
       render_pie = false;
 
       // Get current button
+      auto cur_radial = pie_menu.current_radial_button();
+
+      // It was either the center button
+      if(pie_menu.active_center_button())
+      {
+      }
+      // Or a radial button.
+      else if(cur_radial)
+      {
+      }
 
       // Commit action
     }
