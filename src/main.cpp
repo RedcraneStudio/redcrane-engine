@@ -27,6 +27,7 @@
 #include "ui/freetype_renderer.h"
 #include "ui/mouse_logic.h"
 #include "ui/simple_controller.h"
+#include "ui/pie_menu.h"
 
 #include "map/map.h"
 #include "map/water.h"
@@ -253,18 +254,6 @@ int main(int argc, char** argv)
     // screen with nothing drawn on it. So TODO: Put some checks in place so
     // we don't go messing with the camera zoom and whatnot.
   });
-  controller.add_click_listener([&](auto const& mp)
-  {
-    if(player_state.type == strat::Player_State_Type::Building)
-    {
-      if(player_state.building.to_build == nullptr) return;
-      auto world_p = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), mp);
-
-      // TODO: Sanitize this position a little better, maybe.
-      pos_t map_pos{world_p.x, world_p.z};
-      map.structures.emplace_back(*player_state.building.to_build, map_pos);
-    }
-  });
 
   Glfw_User_Data data{driver, cam};
 
@@ -273,8 +262,22 @@ int main(int argc, char** argv)
 
   //water_obj.material->diffuse_color = Color{0xaa, 0xaa, 0xff};
 
+  ui::Mouse_State old_mouse = gen_mouse_state(window);
+
+  ui::Pie_Menu pie_menu;
+  pie_menu.radius(200);
+  pie_menu.font_renderer(freetype_font);
+  pie_menu.num_buttons(3);
+  pie_menu.center_button("Place");
+  pie_menu.radial_button(0, "Analyze");
+  pie_menu.radial_button(1, "Rotate");
+  pie_menu.radial_button(2, "Cancel");
+
+  bool render_pie = false;
+
   while(!glfwWindowShouldClose(window))
   {
+    // TODO: Combine button and mouse state or something, this is terrible.
     auto mouse_state = gen_mouse_state(window);
     data.mouse_state = mouse_state;
 
@@ -333,8 +336,33 @@ int main(int argc, char** argv)
       gfx::render_chunk(st.structure().mesh_chunk());
     }
 
+    // If we release the mouse find the item of the pie menu the user selected.
+    if(ui::is_click(mouse_state, old_mouse, true) &&
+       player_state.type == strat::Player_State_Type::Building)
+    {
+      // Enable viewing of the pie menu
+      render_pie = true;
+
+      pie_menu.center(mouse_state.position);
+    }
+    else if(ui::is_release(mouse_state, old_mouse, true) &&
+            player_state.type == strat::Player_State_Type::Building)
+    {
+      // Disable viewing of the pie menu
+      render_pie = false;
+
+      // Get current button
+
+      // Commit action
+    }
+
+    if(render_pie) pie_menu.handle_event(mouse_state);
+
     {
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
+
+      if(render_pie) pie_menu.render(ui_adapter);
+
       hud->render(ui_adapter);
     }
     glfwSwapBuffers(window);
@@ -347,6 +375,8 @@ int main(int argc, char** argv)
     }
 
     flush_log();
+
+    old_mouse = mouse_state;
   }
   }
   glfwTerminate();
