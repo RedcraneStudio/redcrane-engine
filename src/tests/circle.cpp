@@ -46,9 +46,9 @@ TEST_CASE("Arc-point detection works", "[struct Arc]")
 
   REQUIRE(is_in(arc, {0.0f, 0.0f}));
 
-  REQUIRE(is_in(arc, {-50.0f, 0.0f}));
-  REQUIRE(is_in(arc, {00.0f, 50.0f}));
-  REQUIRE(is_in(arc, {00.0f, -50.0f}));
+  REQUIRE(is_in(arc, {-49.0f, 0.0f}));
+  REQUIRE(is_in(arc, {-5.0f, 35.0f}));
+  REQUIRE(is_in(arc, {-5.0f, -35.0f}));
 
   REQUIRE(is_in(arc, {-25.0f, 25.0f}));
   REQUIRE(is_in(arc, {-25.0f, -25.0f}));
@@ -63,4 +63,20 @@ TEST_CASE("Arc-point detection works", "[struct Arc]")
 
   REQUIRE(!is_in(arc, {-1000.0f, -0.0f}));
   REQUIRE(!is_in(arc, {0.0f, -1000.0f}));
+
+  arc.end_radians = M_PI;
+
+  REQUIRE(is_in(arc, {-5.0f, 35.0f}));
+  REQUIRE(!is_in(arc, {-5.0f, -35.0f}));
+
+  arc.start_radians = M_PI * 3 / 2; // 270 deg
+  arc.end_radians = M_PI / 2; // 90 deg
+
+  REQUIRE(is_in(arc, {35.0f, 0.0f}));
+  REQUIRE(is_in(arc, {5.0f, 35.0f}));
+  REQUIRE(is_in(arc, {5.0f, -35.0f}));
+
+  REQUIRE(!is_in(arc, {-35.0f, 0.0f}));
+  REQUIRE(!is_in(arc, {-5.0f, 35.0f}));
+  REQUIRE(!is_in(arc, {-5.0f, -35.0f}));
 }

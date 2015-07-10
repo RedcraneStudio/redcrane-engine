@@ -38,13 +38,18 @@ namespace game
     auto dif = pt - circle.center;
     if(length(dif) <= circle.radius && length(dif) != 0)
     {
-      // Check if the angle of the point in the circle is in the arc.
-      dif = normalize(dif);
-      Vec<T> rel{static_cast<T>(1), static_cast<T>(0)};
+      auto dir = normalize(dif);
+      auto angle = std::atan2(dir.y, dir.x);
+      if(angle < 0) angle = (2 * M_PI) + angle;
 
-      auto cos0 = dot(dif, rel);
-      auto angle = std::acos(cos0);
-      return circle.start_radians <= angle && angle <= circle.end_radians;
+      if(circle.end_radians < circle.start_radians)
+      {
+        return circle.start_radians <= angle || angle <= circle.end_radians;
+      }
+      else
+      {
+        return circle.start_radians <= angle && angle <= circle.end_radians;
+      }
     }
     return false;
   }
