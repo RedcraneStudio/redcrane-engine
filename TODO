@@ -7,3 +7,10 @@ Big:
   - Replace stuff like the Pie menu which couples rendering and event handling
     functionally with use of this scene graph.
 - Remove the Y-flip in UI rendering.
+- More centralized triangle functionality. (Combine from circle.h and
+  triangle.h)
+  - On that note make sure we use consistent value for pi, consistent trig
+    functions and sanitize the types used when using our own lib and not glm.
+    - Check out the normalize function, the way it returns a double, which
+      makes sense but still could be clearer.
+  - Define when to use our lib and when to use glm, or just only use glm.
