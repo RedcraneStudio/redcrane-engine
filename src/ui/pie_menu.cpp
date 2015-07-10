@@ -72,7 +72,56 @@ namespace game { namespace ui
 
   void Pie_Menu::handle_event(Mouse_State ms) noexcept
   {
+    center_button_active_ = false;
+    selected_arc = boost::none;
+
     // Check if the mouse is hovering over us.
+    if(!is_in(Circle<int>{center_, radius_}, ms.position)) return;
+
+    auto segment_angle = 2 * M_PI / radial_buttons_.size();
+
+    // Flip the y coordinate of the mouse relative to the center.
+    // This is getting ridiculous af by the way.
+    // TODO: FIX
+    auto dif = ms.position - center_;
+    dif.y = -dif.y;
+
+    bool is_in_small_circle =
+      is_in(Circle<int>{center_, static_cast<int>(radius_ / 3.5f)},
+            center_ + dif);
+    if(is_in_small_circle) { center_button_active_ = true; }
+
+    for(std::size_t i = 0; i < radial_buttons_.size(); ++i)
+    {
+      auto start_angle =
+        ((M_PI / 2) - segment_angle / 2) + (segment_angle * (i));
+      auto end_angle =
+        ((M_PI / 2) - segment_angle / 2) + (segment_angle * (i + 1));
+
+      Arc<int> arc;
+      arc.center = center_;
+      arc.radius = radius_;
+
+      arc.start_radians = start_angle;
+      arc.end_radians = end_angle;
+
+      // Normalize the angle, TODO: Move this to an external function
+      if(arc.end_radians > 2 * M_PI)
+      {
+        arc.end_radians -= 2 * M_PI;
+      }
+
+      if(is_in(arc, arc.center + dif) && !is_in_small_circle)
+      {
+        if(arc.end_radians < arc.start_radians)
+        {
+          // Reverse the flip so that when rendering we won't product triangles
+          // with a bad winding order.
+          arc.end_radians += 2 * M_PI;
+        }
+        selected_arc = arc;
+      }
+    }
   }
   void Pie_Menu::render(Renderer& r) const noexcept
   {
@@ -158,5 +207,14 @@ namespace game { namespace ui
     }
     center_button_.color(colors::white);
     center_button_.render(r);
+
+    if(selected_arc)
+    {
+      r.fill_arc(selected_arc.value(), 10);
+    }
+    if(center_button_active_)
+    {
+      r.fill_circle({center_, static_cast<int>(radius_ / radius_factor)}, 35);
+    }
   }
 } }

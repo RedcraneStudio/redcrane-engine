@@ -60,5 +60,11 @@ namespace game { namespace ui
     // memory or risk one or the other going out of date, etc.
     mutable Label center_button_;
     mutable std::vector<Label> radial_buttons_;
+
+    bool center_button_active_ = false;
+
+    // This is purely rendering state. TODO: Should this be located outside the
+    // pie menu and instead reside in some sort of scene graph or the like?
+    boost::optional< Arc<int> > selected_arc;
   };
 } }
