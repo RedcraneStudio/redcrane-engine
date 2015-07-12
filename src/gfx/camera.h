@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include "../common/vec.h"
 #include <glm/glm.hpp>
 namespace game
 {
@@ -81,5 +82,16 @@ namespace game
 
     struct IDriver;
     void use_camera(IDriver& driver, Camera const& cam) noexcept;
+
+    /*!
+     * \brief Calculates the amount to pan given to mouse coordinates.
+     *
+     * Costs two glReadPixels for depth. Requires the camera to be in first-
+     * person specification mode.
+     */
+    void apply_pan(Camera& cam, Vec<int> np, Vec<int> op, IDriver& d) noexcept;
+
+    void apply_zoom(Camera& c, double delta, Vec<int> mp, IDriver& d) noexcept;
+    void apply_zoom(Camera& c, double delta, glm::vec3 world) noexcept;
   }
 }

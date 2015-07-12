@@ -69,12 +69,8 @@ void scroll_callback(GLFWwindow* window, double, double deltay)
   auto ptr = glfwGetWindowUserPointer(window);
   auto& data = *((Glfw_User_Data*) ptr);
 
-  auto mworld = game::gfx::unproject_screen(data.driver, data.cam,
-                                            glm::mat4(1.0f),
-                                            data.mouse_state.position);
-
-  auto ray_to_cam = glm::normalize(mworld - data.cam.fp.pos);
-  data.cam.fp.pos += ray_to_cam * (float) deltay;
+  namespace gfx = game::gfx;
+  gfx::apply_zoom(data.cam, deltay, data.mouse_state.position, data.driver);
 }
 
 game::ui::Mouse_State gen_mouse_state(GLFWwindow* w)
@@ -245,14 +241,7 @@ int main(int argc, char** argv)
     // Only drag if we don't have anything else to do.
     if(player_state.type != strat::Player_State_Type::Nothing) return;
 
-    auto oworld = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), op);
-    auto nworld = gfx::unproject_screen(driver, cam, glm::mat4(1.0f), np);
-
-    cam.fp.pos += oworld - nworld;
-
-    // This will give erroneous results if the user clicks on the part of the
-    // screen with nothing drawn on it. So TODO: Put some checks in place so
-    // we don't go messing with the camera zoom and whatnot.
+    gfx::apply_pan(cam, np, op, driver);
   });
 
   Glfw_User_Data data{driver, cam};

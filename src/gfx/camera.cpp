@@ -4,7 +4,9 @@
  */
 #include "camera.h"
 #include <glm/gtc/matrix_transform.hpp>
+
 #include "idriver.h"
+#include "support/unproject.h"
 namespace game
 {
   namespace gfx
@@ -103,6 +105,31 @@ namespace game
     {
       driver.active_shader()->set_view(camera_view_matrix(cam));
       driver.active_shader()->set_projection(camera_proj_matrix(cam));
+    }
+
+    void apply_pan(Camera& cam, Vec<int> np, Vec<int> op, IDriver& dv) noexcept
+    {
+      auto oworld = gfx::unproject_screen(dv, cam, glm::mat4(1.0f), op);
+      auto nworld = gfx::unproject_screen(dv, cam, glm::mat4(1.0f), np);
+
+      cam.fp.pos += oworld - nworld;
+
+      // This will give erroneous results if the user clicks on the part of the
+      // screen with nothing drawn on it. It will also produce strange results
+      // if the user clicks on any surface with an angle. Basically only use
+      // function after drawing the map surface, or some flat surface just for
+      // this or something. So TODO: Put some checks in place so we don't go
+      // messing with the camera zoom and whatnot.
+    }
+    void apply_zoom(Camera& c, double delta, Vec<int> mp, IDriver& d) noexcept
+    {
+      auto mworld = gfx::unproject_screen(d, c, glm::mat4(1.0f), mp);
+      apply_zoom(c, delta, mworld);
+    }
+    void apply_zoom(Camera& cam, double delta, glm::vec3 world) noexcept
+    {
+      auto ray_to_cam = glm::normalize(world - cam.fp.pos);
+      cam.fp.pos += ray_to_cam * (float) delta;
     }
   }
 }
