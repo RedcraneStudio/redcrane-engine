@@ -311,6 +311,7 @@ int main(int argc, char** argv)
 
       auto model = glm::translate(glm::mat4(1.0f), mouse_world);
 
+      // TODO: Put this stuff somewhere to access it a bunch
       auto ray = ray_to_structure_bottom_center(st);
       model = glm::translate(model, -ray);
 
@@ -344,9 +345,18 @@ int main(int argc, char** argv)
       render_pie = true;
 
       pie_menu.center(mouse_state.position);
+
+      // Make sure we don't pan or build or whatever
+      player_state.type = strat::Player_State_Type::Pie_Menu;
+
+      // But place the object down.
+      auto struct_pos = Vec<float>{};
+      struct_pos.x = mouse_world.x;
+      struct_pos.y = mouse_world.z;
+      map.structures.emplace_back(*player_state.building.to_build, struct_pos);
     }
     else if(ui::is_release(mouse_state, old_mouse, true) &&
-            player_state.type == strat::Player_State_Type::Building)
+            player_state.type == strat::Player_State_Type::Pie_Menu)
     {
       // Disable viewing of the pie menu
       render_pie = false;
@@ -357,13 +367,32 @@ int main(int argc, char** argv)
       // It was either the center button
       if(pie_menu.active_center_button())
       {
+        // For now we know the center button places the object. Also, since the
+        // map already has it as a structure, we can just let things be.
       }
       // Or a radial button.
       else if(cur_radial)
       {
+        // For now brute force it.
+        switch(cur_radial.value())
+        {
+          case 0:
+            break;
+          case 1:
+            break;
+          case 2:
+            // Cancel
+            map.structures.erase(map.structures.end() - 1);
+            break;
+          default: break;
+        }
       }
-
-      // Commit action
+      else
+      {
+        // No button, reverse the initial placement.
+        map.structures.erase(map.structures.end() - 1);
+      }
+      player_state.type = strat::Player_State_Type::Building;
     }
 
     if(render_pie) pie_menu.handle_event(mouse_state);

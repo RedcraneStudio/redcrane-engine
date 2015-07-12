@@ -9,10 +9,13 @@ namespace game { namespace strat
   enum class Player_State_Type
   {
     Nothing,
-    Building
+    Building,
+    Pie_Menu,
   };
 
   struct Nothing_State { };
+
+  struct Pie_Menu_State { };
 
   struct Building_State
   {
@@ -26,6 +29,7 @@ namespace game { namespace strat
     {
       Nothing_State nothing;
       Building_State building;
+      Pie_Menu_State pie_menu;
     };
   };
 } }
