@@ -339,10 +339,13 @@ int main(int argc, char** argv)
       player_state.type = strat::Player_State_Type::Pie_Menu;
 
       // But place the object down.
-      auto struct_pos = Vec<float>{};
-      struct_pos.x = mouse_world.x;
-      struct_pos.y = mouse_world.z;
-      map.structures.emplace_back(*player_state.building.to_build, struct_pos);
+      auto st_pos = Vec<float>{};
+      st_pos.x = mouse_world.x;
+      st_pos.y = mouse_world.z;
+      if(!try_structure_place(map, *player_state.building.to_build, st_pos))
+      {
+        // Tell the user!
+      }
     }
     else if(ui::is_release(mouse_state, old_mouse, true) &&
             player_state.type == strat::Player_State_Type::Pie_Menu)

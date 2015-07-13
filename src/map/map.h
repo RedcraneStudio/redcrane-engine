@@ -30,4 +30,6 @@ namespace game
 
     Vec<float> extents;
   };
+
+  bool try_structure_place(Map& map, Structure const& st, pos_t pos) noexcept;
 }

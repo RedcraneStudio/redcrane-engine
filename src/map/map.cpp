@@ -17,4 +17,17 @@ namespace game
   {
     return *s_type_;
   }
+
+  bool try_structure_place(Map& map, Structure const& st, pos_t pos) noexcept
+  {
+    // Check collision with every other structure.
+
+    // Make sure it is in the bounds of the map
+
+    // Any other constraints?
+
+    map.structures.emplace_back(st, pos);
+
+    return true;
+  }
 }
