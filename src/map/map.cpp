@@ -6,7 +6,7 @@
 
 namespace game
 {
-  Structure_Instance::Structure_Instance(Structure& s, pos_t p) noexcept
+  Structure_Instance::Structure_Instance(Structure const& s, pos_t p) noexcept
     : position(p), s_type_(&s){}
 
   void Structure_Instance::set_structure_type(Structure const& s) noexcept

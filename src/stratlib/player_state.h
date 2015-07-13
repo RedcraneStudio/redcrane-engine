@@ -19,7 +19,7 @@ namespace game { namespace strat
 
   struct Building_State
   {
-    Structure* to_build;
+    Structure const* to_build;
   };
 
   struct Player_State

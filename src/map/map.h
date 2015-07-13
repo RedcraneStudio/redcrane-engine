@@ -11,7 +11,7 @@ namespace game
 
   struct Structure_Instance
   {
-    Structure_Instance(Structure&, pos_t pos) noexcept;
+    Structure_Instance(Structure const&, pos_t pos) noexcept;
     ~Structure_Instance() noexcept = default;
 
     void set_structure_type(Structure const& s) noexcept;
