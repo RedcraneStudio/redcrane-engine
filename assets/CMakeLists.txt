@@ -10,7 +10,8 @@ add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
                     ui/hud.json obj/terrain.obj mat/terrain.json
                     map/default.png scene/fps.json tex/yurt_skin.png
-                    tex/combined_building_textures.png)
+                    tex/combined_building_textures.png
+                    shader/debug/v shader/debug/f)
 
 include(convert_files)
 
