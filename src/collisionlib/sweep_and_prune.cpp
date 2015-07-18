@@ -86,16 +86,16 @@ namespace game
             auto pair_aabb = active_endpoint.aabb;
 
             // Check collision in the y and z dimensions.
-            if((endpt.aabb.min.y < pair_aabb.min.y &&
-                pair_aabb.min.y < endpt.aabb.min.y + endpt.aabb.height) ||
-               (endpt.aabb.min.y < pair_aabb.min.y + pair_aabb.height &&
-                pair_aabb.min.y + pair_aabb.height <
+            if((endpt.aabb.min.y <= pair_aabb.min.y &&
+                pair_aabb.min.y <= endpt.aabb.min.y + endpt.aabb.height) ||
+               (endpt.aabb.min.y <= pair_aabb.min.y + pair_aabb.height &&
+                pair_aabb.min.y + pair_aabb.height <=
                   endpt.aabb.min.y + endpt.aabb.height))
             {
-              if((endpt.aabb.min.z < pair_aabb.min.z &&
-                  pair_aabb.min.z < endpt.aabb.min.z + endpt.aabb.depth) ||
-                 (endpt.aabb.min.z < pair_aabb.min.z + pair_aabb.depth &&
-                  pair_aabb.min.z + pair_aabb.depth <
+              if((endpt.aabb.min.z <= pair_aabb.min.z &&
+                  pair_aabb.min.z <= endpt.aabb.min.z + endpt.aabb.depth) ||
+                 (endpt.aabb.min.z <= pair_aabb.min.z + pair_aabb.depth &&
+                  pair_aabb.min.z + pair_aabb.depth <=
                     endpt.aabb.min.z + endpt.aabb.depth))
               {
                 ret.emplace_back(endpt.id, active_endpoint.id);
