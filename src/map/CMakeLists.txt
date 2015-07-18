@@ -3,4 +3,4 @@
 # All rights reserved.
 
 add_library(maplib map.cpp structure.cpp water.cpp terrain.cpp)
-target_link_libraries(maplib gfxlib gfxsupportlib commonlib)
+target_link_libraries(maplib gfxlib gfxsupportlib commonlib collisionlib)
