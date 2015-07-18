@@ -5,6 +5,8 @@
 #pragma once
 #include "../common/vec.h"
 #include "structure.h"
+
+#include "../gfx/immediate_renderer.h"
 namespace game
 {
   using pos_t = Vec<float>;
@@ -31,5 +33,6 @@ namespace game
     Vec<float> extents;
   };
 
-  bool try_structure_place(Map& map, Structure const& st, pos_t pos) noexcept;
+  bool try_structure_place(Map& map, Structure const& st, pos_t pos,
+                           gfx::Immediate_Renderer* = nullptr) noexcept;
 }

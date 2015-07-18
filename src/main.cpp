@@ -22,6 +22,7 @@
 #include "gfx/support/texture_load.h"
 #include "gfx/support/software_texture.h"
 #include "gfx/support/unproject.h"
+#include "gfx/immediate_renderer.h"
 
 #include "ui/load.h"
 #include "ui/freetype_renderer.h"
@@ -266,6 +267,8 @@ int main(int argc, char** argv)
 
   int action_countdown = 0;
 
+  gfx::Immediate_Renderer ir{driver};
+
   while(!glfwWindowShouldClose(window))
   {
     action_countdown = std::max(action_countdown - 1, 0);
@@ -360,7 +363,9 @@ int main(int argc, char** argv)
       auto st_pos = Vec<float>{};
       st_pos.x = mouse_world.x;
       st_pos.y = mouse_world.z;
-      if(!try_structure_place(map, *player_state.building.to_build, st_pos))
+
+      ir.reset();
+      if(!try_structure_place(map, *player_state.building.to_build,st_pos,&ir))
       {
         // Tell the user!
       }
@@ -404,6 +409,8 @@ int main(int argc, char** argv)
       }
       player_state.type = strat::Player_State_Type::Building;
     }
+
+    ir.render(cam);
 
     if(render_pie) pie_menu.handle_event(mouse_state);
 

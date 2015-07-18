@@ -20,7 +20,8 @@ namespace game
     return *s_type_;
   }
 
-  bool try_structure_place(Map& map, Structure const& st, pos_t pos) noexcept
+  bool try_structure_place(Map& map, Structure const& st, pos_t pos,
+                           gfx::Immediate_Renderer* debug) noexcept
   {
     // Check collision with every other structure.
     SAP sap;
@@ -32,6 +33,9 @@ namespace game
       aabb.min.z += other_st.position.y;
       aabb.min.y = 0.0f;
       ids.push_back(sap.insert(aabb));
+
+      // Make this debugging bit less intrusive.
+      if(debug) debug->draw_aabb(aabb);
     }
 
     auto aabb = st.aabb();
@@ -39,6 +43,7 @@ namespace game
     aabb.min.z += pos.y;
     aabb.min.y = 0.0f;
     SAP_AABB_Ref this_id = sap.insert(aabb);
+    if(debug) debug->draw_aabb(aabb);
 
     auto pairs = sap.collisions();
 
