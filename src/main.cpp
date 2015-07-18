@@ -264,8 +264,12 @@ int main(int argc, char** argv)
 
   bool render_pie = false;
 
+  int action_countdown = 0;
+
   while(!glfwWindowShouldClose(window))
   {
+    action_countdown = std::max(action_countdown - 1, 0);
+
     // TODO: Combine button and mouse state or something, this is terrible.
     auto mouse_state = gen_mouse_state(window);
     data.mouse_state = mouse_state;
@@ -293,6 +297,20 @@ int main(int argc, char** argv)
     auto mouse_world = gfx::unproject_screen(driver, cam, glm::mat4(1.0f),
                                              mouse_state.position);
     controller.step(hud, mouse_state);
+
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS &&
+       player_state.type == strat::Player_State_Type::Building &&
+       action_countdown == 0)
+    {
+      player_state.type = strat::Player_State_Type::Nothing;
+      action_countdown = 500;
+    }
+    else if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS &&
+            player_state.type == strat::Player_State_Type::Nothing &&
+            action_countdown == 0)
+    {
+      glfwSetWindowShouldClose(window, true);
+    }
 
     if(player_state.type == strat::Player_State_Type::Building)
     {
