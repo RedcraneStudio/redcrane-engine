@@ -9,9 +9,9 @@ namespace game
 {
   struct AABB
   {
-    float depth;
-    float height;
     float width;
+    float height;
+    float depth;
 
     glm::vec3 min;
   };
