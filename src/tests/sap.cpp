@@ -127,4 +127,21 @@ TEST_CASE("MO TESTS", "[SAP]")
     // to go :)
     REQUIRE(pairs_equal(result[0], std::make_pair(id2, id3)));
   }
+  SECTION("Test #3")
+  {
+    // {(2.662700, 0.000000, 6.838024), 4.039232, 2.744290, 2.000000}
+    // {(5.947364, 0.000000, 6.580392), 2.339422, 1.333736, 2.339422}
+    AABB a1{4.039232, 2.744290, 2.000000, {2.662700, 0.000000, 6.838024}};
+    AABB a2{2.339422, 1.333736, 2.339422, {5.947364, 0.000000, 6.580392}};
+
+    auto id1 = sap.insert(a1);
+    auto id2 = sap.insert(a2);
+
+    auto result = sap.collisions();
+    REQUIRE(result.size() == 1);
+
+    // We shouldn't depend on the order but for now this is just how it's going
+    // to go :)
+    REQUIRE(pairs_equal(result[0], std::make_pair(id1, id2)));
+  }
 }
