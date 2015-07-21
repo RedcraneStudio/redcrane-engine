@@ -12,6 +12,11 @@ namespace game { namespace strat
     void allocate(Vec<int> const& extents) noexcept;
     ~Value_Map() noexcept;
 
+    inline T& at(Vec<int> pos) noexcept
+    {
+      return values[pos.y * extents.x + pos.x];
+    }
+
     T* values = nullptr;
     Vec<int> extents = Vec<int>{0,0};
     bool allocated = false;
