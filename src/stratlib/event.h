@@ -21,7 +21,7 @@ namespace game { namespace strat
 
   struct Event_Map
   {
-    std::vector<Vec<int>> visited_events;
+    Value_Map<bool> visited_map;
     std::vector<Vec<int>> active_events;
   };
 

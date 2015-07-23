@@ -46,6 +46,6 @@ add_executable(play_snd play_snd.cpp)
 target_link_libraries(play_snd sndlib commonlib)
 
 add_executable(event_spread_test event_spread.cpp)
-target_link_libraries(event_spread_test stratlib)
+target_link_libraries(event_spread_test stratlib commonlib)
 
 add_subdirectory(tests)

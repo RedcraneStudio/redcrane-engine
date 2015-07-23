@@ -10,6 +10,13 @@
 #include "../common/algorithm.h"
 namespace game { namespace strat
 {
+  template <class T>
+  static bool is_in_bounds_of(Value_Map<T> const& vm, Vec<int> pos) noexcept
+  {
+    return 0 <= pos.x && pos.x < vm.extents.x &&
+           0 <= pos.y && pos.y < vm.extents.y;
+  };
+
   template <class Container, class T>
   static bool is_contained(Container& container, T const& value) noexcept
   {
@@ -40,6 +47,8 @@ namespace game { namespace strat
   //                 ^
   void spread(Cost_Map const& cost, Event_Map& event_map) noexcept
   {
+    GAME_ASSERT(cost.extents == event_map.visited_map.extents);
+
     // The size shouldn't change even if we push some into the queue.
     auto old_active_events = std::move(event_map.active_events);
 
@@ -49,7 +58,7 @@ namespace game { namespace strat
     for(auto pos : old_active_events)
     {
       // This current position has been visited.
-      lower_bound_insert(event_map.visited_events, pos);
+      event_map.visited_map.at(pos) = true;
 
       // Factor in timings
 
@@ -58,31 +67,39 @@ namespace game { namespace strat
       // Left
       --pos.x;
       // If left hasn't been visited: add it
-      if(!is_contained(event_map.visited_events, pos))
+      if(!event_map.visited_map.at(pos) &&
+         is_in_bounds_of(event_map.visited_map, pos) &&
+         !is_contained(event_map.active_events, pos))
       {
-        event_map.active_events.push_back(pos);
+        lower_bound_insert(event_map.active_events, pos);
       }
 
       // Right
       ++pos.x; ++pos.x;
       // See above comment.
-      if(!is_contained(event_map.visited_events, pos))
+      if(!event_map.visited_map.at(pos) &&
+         is_in_bounds_of(event_map.visited_map, pos) &&
+         !is_contained(event_map.active_events, pos))
       {
-        event_map.active_events.push_back(pos);
+        lower_bound_insert(event_map.active_events, pos);
       }
 
       // Down
       --pos.x; --pos.y;
-      if(!is_contained(event_map.visited_events, pos))
+      if(!event_map.visited_map.at(pos) &&
+         is_in_bounds_of(event_map.visited_map, pos) &&
+         !is_contained(event_map.active_events, pos))
       {
-        event_map.active_events.push_back(pos);
+        lower_bound_insert(event_map.active_events, pos);
       }
 
       // Above
       ++pos.y; ++pos.y;
-      if(!is_contained(event_map.visited_events, pos))
+      if(!event_map.visited_map.at(pos) &&
+         is_in_bounds_of(event_map.visited_map, pos) &&
+         !is_contained(event_map.active_events, pos))
       {
-        event_map.active_events.push_back(pos);
+        lower_bound_insert(event_map.active_events, pos);
       }
     }
   }

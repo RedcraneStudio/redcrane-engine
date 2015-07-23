@@ -15,31 +15,28 @@ int main(int argc, char** argv) noexcept
 {
   using namespace game;
 
-  strat::Cost_Map cm;
+  auto const map_size = Vec<int>{50,50};
+
+  strat::Cost_Map cm; cm.allocate(map_size);
 
   strat::Event_Map event_map;
   event_map.active_events.push_back(Vec<int>{0,0});
+  event_map.visited_map.allocate(map_size);
 
-  for(int i = 0; i < 50; ++i)
+  strat::Value_Map<char> cmap;
+  cmap.allocate(map_size);
+
+  for(int i = 0; i < 100; ++i)
   {
     spread(cm, event_map);
 
-    // Initialize the grid.
-    strat::Value_Map<char> cmap;
-    cmap.allocate(Vec<int>{20,20});
-    for(int i = 0; i < cmap.extents.x * cmap.extents.y; ++i)
-    {
-      cmap.values[i] = ' ';
-    }
-
     // Set some cells to pound signs.
-    for(auto pos : event_map.visited_events)
+    for(int i = 0; i < cmap.extents.y; ++i)
     {
-      pos.x += 10;
-      pos.y += 10;
-      if(pos.x < 0 || 20 <= pos.x || pos.y < 0 || 20 <= pos.y) continue;
-      std::cout << pos.x << ',' << pos.y << std::endl;
-      cmap.at(pos) = '#';
+      for(int j = 0; j < cmap.extents.x; ++j)
+      {
+        cmap.at({j,i}) = event_map.visited_map.at({j,i}) ? '#' : ' ';
+      }
     }
 
     // Print the grid
