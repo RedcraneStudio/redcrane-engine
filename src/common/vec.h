@@ -19,6 +19,13 @@ namespace game
     T y;
   };
 
+  template <class T1, class T2>
+  bool operator<(Vec<T1> const& t1, Vec<T2> const& t2) noexcept
+  {
+    if(t1.x == t2.x) return t1.y < t2.y;
+    return t1.x < t2.x;
+  }
+
   template <class Ret, class Param>
   Vec<Ret> vec_cast(Vec<Param> const& v) noexcept
   {
