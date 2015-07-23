@@ -3,20 +3,33 @@
  * All rights reserved.
  */
 #include "event.h"
+
+#include <algorithm>
+
 #include "../common/debugging.h"
+#include "../common/algorithm.h"
 namespace game { namespace strat
 {
-  Event_Map create_event(Vec<int> extents, Vec<int> event_orig) noexcept
+  template <class Container, class T>
+  static bool is_contained(Container& container, T const& value) noexcept
   {
-    Event_Map event_map;
+    using std::begin; using std::end;
+    return std::binary_search(begin(container), end(container), value);
+  };
 
-    event_map.map.allocate(extents);
-
-    auto& event_ptr = event_map.map.at(event_orig);
-    event_ptr = Event{false, nullptr};
-    event_map.queue.push(&event_ptr);
-
-    return event_map;
+  template <class Container, class T>
+  void lower_bound_insert(Container& container, T const& value) noexcept
+  {
+    using std::begin; using std::end;
+    auto iter = std::lower_bound(begin(container), end(container), value);
+    if(iter != end(container))
+    {
+      if(*iter != value)
+      {
+        container.insert(iter, value);
+      }
+    }
+    else container.insert(iter, value);
   }
 
   // 2 2 2 2 2 3 3 3 4
@@ -25,42 +38,51 @@ namespace game { namespace strat
   // 2 1 1 1 1 3 3 3 4
   // 2 4 4 4 4 4 4 4 4
   //                 ^
-  void spread(Cost_Map const& cost, Event_Map& event) noexcept
+  void spread(Cost_Map const& cost, Event_Map& event_map) noexcept
   {
-    // Assert pre-conditions.
-    GAME_ASSERT(cost.extents == event.map.extents);
+    // The size shouldn't change even if we push some into the queue.
+    auto old_active_events = std::move(event_map.active_events);
 
-    for(int i = 0; i < event.map.extents.y; ++i)
+    // This is implied?
+    event_map.active_events.clear();
+
+    for(auto pos : old_active_events)
     {
-      for(int j = 0; j < event.map.extents.x; ++j)
+      // This current position has been visited.
+      lower_bound_insert(event_map.visited_events, pos);
+
+      // Factor in timings
+
+      // Add surrounding positions.
+
+      // Left
+      --pos.x;
+      // If left hasn't been visited: add it
+      if(!is_contained(event_map.visited_events, pos))
       {
-        // This specific event at this location has already been processed.
-        if(event.map.values[i].has_spread) continue;
+        event_map.active_events.push_back(pos);
+      }
 
-        auto event_to_process = event.queue.front();
-        event.queue.pop();
+      // Right
+      ++pos.x; ++pos.x;
+      // See above comment.
+      if(!is_contained(event_map.visited_events, pos))
+      {
+        event_map.active_events.push_back(pos);
+      }
 
-        event_to_process->has_spread = true;
+      // Down
+      --pos.x; --pos.y;
+      if(!is_contained(event_map.visited_events, pos))
+      {
+        event_map.active_events.push_back(pos);
+      }
 
-        // Add surrounding positions.
-
-        auto pos = Vec<int>{i,j};
-
-        // Left
-        --pos.x;
-        event.queue.push(&event.map.at(pos));
-
-        // Right
-        ++pos.x; ++pos.x;
-        event.queue.push(&event.map.at(pos));
-
-        // Down
-        --pos.x; --pos.y;
-        event.queue.push(&event.map.at(pos));
-
-        // Above
-        ++pos.y; ++pos.y;
-        event.queue.push(&event.map.at(pos));
+      // Above
+      ++pos.y; ++pos.y;
+      if(!is_contained(event_map.visited_events, pos))
+      {
+        event_map.active_events.push_back(pos);
       }
     }
   }

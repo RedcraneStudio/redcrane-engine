@@ -45,4 +45,7 @@ target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
 add_executable(play_snd play_snd.cpp)
 target_link_libraries(play_snd sndlib commonlib)
 
+add_executable(event_spread_test event_spread.cpp)
+target_link_libraries(event_spread_test stratlib)
+
 add_subdirectory(tests)
