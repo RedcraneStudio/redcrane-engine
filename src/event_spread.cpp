@@ -22,7 +22,7 @@ int main(int argc, char** argv) noexcept
   auto const map_size = Vec<int>{35,35};
 
   auto prng = std::mt19937(std::random_device{}());
-  auto dist = std::uniform_real_distribution<float>{0.5f, 2.5f};
+  auto dist = std::uniform_real_distribution<float>{0.0f, 2.5f};
 
   // Initialize, allocate, and populate the cost map.
   strat::Cost_Map cm; cm.allocate(map_size);
@@ -61,7 +61,10 @@ int main(int argc, char** argv) noexcept
 
     std::cout << RED_C << dt << RESET_C << std::endl;
 
-    spread(cm, event_map, dt);
+    if(spread(cm, event_map, dt))
+    {
+      spread(cm, event_map, 0.0f);
+    }
 
     // Set some cells to pound signs.
     for(int i = 0; i < cmap.extents.y; ++i)
