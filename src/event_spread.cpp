@@ -35,10 +35,9 @@ int main(int argc, char** argv) noexcept
     }
   }
 
-  strat::Event_Map event_map;
-  event_map.visited_map.allocate(map_size);
-  event_map.event_timer_map.allocate(map_size);
+  strat::Event_Map event_map{map_size};
 
+  // Could this be part of the interface of Event_Map?
   event_map.event_timer_map.at({0,0}).active = true;
 
   strat::Value_Map<char> cmap;

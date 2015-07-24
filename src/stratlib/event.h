@@ -15,18 +15,14 @@ namespace game { namespace strat
   // Event_Timer seems to fit here I guess.
   struct Event_Timer
   {
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    // Move these defaults to the initialization work done by Event_Map on
-    // construction.
-
     // Start time is relative to the accumulated time. Subtracting the
     // accumulated time from this start time will yield a greater number than
     // the cost at some position if this event is ready to spread from that
     // position.
-    float start_time = 0.0;
+    float start_time;
 
     // start_time is only considered relevant when active is true.
-    bool active = false;
+    bool active;
   };
 
   // The value is the amount of time in seconds it takes for an event to move.
@@ -34,7 +30,12 @@ namespace game { namespace strat
 
   struct Event_Map
   {
+    Event_Map(Vec<int> map_extents) noexcept;
+
     Value_Map<bool> visited_map;
+
+    // The rest is basically private stuff, but I don't see a real reason to
+    // restrict access in this case.
 
     // We've decided to use a value map here instead of a vector positions and
     // data because this will scale better and the other design (while
@@ -58,6 +59,10 @@ namespace game { namespace strat
 
     float accum_time;
   };
+
+  // We actually don't even need to accept a delta time in the function, the
+  // client code can just add it to accum_time itself and then call spread
+  // until it returns false.
 
   // Return value: Think 'NEEDS MORE SPREAD'.
   bool spread(Cost_Map const&, Event_Map&, float dt) noexcept;

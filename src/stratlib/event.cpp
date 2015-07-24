@@ -10,6 +10,15 @@
 #include "../common/algorithm.h"
 namespace game { namespace strat
 {
+  Event_Map::Event_Map(Vec<int> map_extents) noexcept : accum_time(0.0f)
+  {
+    visited_map.allocate(map_extents);
+
+    // We rely on the memset in Value_Map allocation to give every event timer
+    // inactive to start.
+    event_timer_map.allocate(map_extents);
+  }
+
   template <class Container, class T>
   static bool is_contained(Container& container, T const& value) noexcept
   {
@@ -83,8 +92,9 @@ namespace game { namespace strat
   {
     GAME_ASSERT(cost.extents == event_map.visited_map.extents);
 
-    // For now: Assert, for later: Hide behind Event_Map interface so it is
-    // always true.
+    // This isn't necessarily since allocation is done in construction and
+    // should provide the invariant that both maps have the same extents. Fuck
+    // it though it can't hurt.
     GAME_ASSERT(cost.extents == event_map.event_timer_map.extents);
 
     auto orig_accum_time = event_map.accum_time;
