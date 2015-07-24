@@ -17,6 +17,10 @@ namespace game { namespace strat
     {
       return values[pos.y * extents.x + pos.x];
     }
+    inline T const& at(Vec<int> pos) const noexcept
+    {
+      return values[pos.y * extents.x + pos.x];
+    }
 
     T* values = nullptr;
     Vec<int> extents = Vec<int>{0,0};
