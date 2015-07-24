@@ -41,4 +41,11 @@ namespace game { namespace strat
   {
     delete[] values;
   }
+
+  template <class T>
+  static bool is_in_bounds_of(Value_Map<T> const& vm, Vec<int> pos) noexcept
+  {
+    return 0 <= pos.x && pos.x < vm.extents.x &&
+           0 <= pos.y && pos.y < vm.extents.y;
+  };
 } }
