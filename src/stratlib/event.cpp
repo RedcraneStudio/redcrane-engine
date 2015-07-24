@@ -32,68 +32,114 @@ namespace game { namespace strat
     else container.insert(iter, value);
   }
 
+  void adjust_event_at(Vec<int> pos, Event_Map& event_map,
+                       float adj_start_time, float adj_cost) noexcept
+  {
+    // Our new event timer has a given position; The start time is old start
+    // time + old (adj. pos) cost because that will avoid adding any excess
+    // that was included in dt. In other words, using cost gets us to the exact
+    // cutoff point that caused the event timer at some adjacent position fire.
+
+    auto visited = event_map.visited_map.at(pos);
+    auto is_in_bounds = is_in_bounds_of(event_map.visited_map, pos);
+    // If it is in the bounds of the visited map we can assume that it is also
+    // in the bounds of the other map, since this function is only called from
+    // spread which checks this asserts this exactly.
+
+    if(!visited && is_in_bounds)
+    {
+      auto& event_timer = event_map.event_timer_map.at(pos);
+      if(!event_timer.active)
+      {
+        event_timer.active = true;
+        event_timer.start_time = adj_start_time + adj_cost;
+      }
+      else
+      {
+        // If there is already an event timer going on this position. We need
+        // to check to see if we can do better. In other words, does going to
+        // position through our previous cell mean we could get to this new
+        // position faster?
+
+        // TODO: Figure out if this is even necessary.
+        // The cell adjacent to this one that made it active in the first place
+        // seems like it would always have less of a cost. In fact, this is
+        // probably more of a test as to whether our simulation is correct. If
+        // it is, this else should never fire.
+
+        event_timer.start_time = std::min(event_timer.start_time,
+                                          adj_start_time + adj_cost);
+      }
+    }
+  }
+
   // 2 2 2 2 2 3 3 3 4
   // 2 1 1 1 1 3 3 3 4
   // 2 1 1 1 1 3 3 3 4
   // 2 1 1 1 1 3 3 3 4
   // 2 4 4 4 4 4 4 4 4
   //                 ^
-  void spread(Cost_Map const& cost, Event_Map& event_map) noexcept
+  bool spread(Cost_Map const& cost, Event_Map& event_map, float dt) noexcept
   {
     GAME_ASSERT(cost.extents == event_map.visited_map.extents);
 
-    // The size shouldn't change even if we push some into the queue.
-    auto old_active_events = std::move(event_map.active_events);
+    // For now: Assert, for later: Hide behind Event_Map interface so it is
+    // always true.
+    GAME_ASSERT(cost.extents == event_map.event_timer_map.extents);
 
-    // This is implied?
-    event_map.active_events.clear();
+    auto orig_accum_time = event_map.accum_time;
+    event_map.accum_time += dt;
 
-    for(auto pos : old_active_events)
+    bool did_spread = false;
+    for(int i = 0; i < event_map.event_timer_map.extents.y; ++i)
     {
-      // This current position has been visited.
-      event_map.visited_map.at(pos) = true;
-
-      // Factor in timings
-
-      // Add surrounding positions.
-
-      // Left
-      --pos.x;
-      // If left hasn't been visited: add it
-      if(!event_map.visited_map.at(pos) &&
-         is_in_bounds_of(event_map.visited_map, pos) &&
-         !is_contained(event_map.active_events, pos))
+      for(int j = 0; j < event_map.event_timer_map.extents.x; ++j)
       {
-        lower_bound_insert(event_map.active_events, pos);
-      }
+        auto pos = Vec<int>{j,i};
 
-      // Right
-      ++pos.x; ++pos.x;
-      // See above comment.
-      if(!event_map.visited_map.at(pos) &&
-         is_in_bounds_of(event_map.visited_map, pos) &&
-         !is_contained(event_map.active_events, pos))
-      {
-        lower_bound_insert(event_map.active_events, pos);
-      }
+        // In case the right amount of time has elapsed, we need this mutable
+        // so we can make it inactive.
+        auto& event_timer = event_map.event_timer_map.at(pos);
+        if(!event_timer.active) continue;
 
-      // Down
-      --pos.x; --pos.y;
-      if(!event_map.visited_map.at(pos) &&
-         is_in_bounds_of(event_map.visited_map, pos) &&
-         !is_contained(event_map.active_events, pos))
-      {
-        lower_bound_insert(event_map.active_events, pos);
-      }
+        // We are currently at an active event timer.
+        auto elapsed_time = event_map.accum_time - event_timer.start_time;
 
-      // Above
-      ++pos.y; ++pos.y;
-      if(!event_map.visited_map.at(pos) &&
-         is_in_bounds_of(event_map.visited_map, pos) &&
-         !is_contained(event_map.active_events, pos))
-      {
-        lower_bound_insert(event_map.active_events, pos);
+        auto cur_cost = cost.at(pos);
+        if(elapsed_time > cur_cost)
+        {
+          // Our event spread time for this position has already elapsed.
+
+          // The event timer at this position no longer needs to be active.
+          event_timer.active = false;
+          // And this position should be considered visited.
+          event_map.visited_map.at(pos) = true;
+
+          // Spread now to adjacent positions.
+
+          --pos.x;
+          adjust_event_at(pos, event_map, event_timer.start_time, cur_cost);
+
+          ++pos.x; ++pos.x;
+          adjust_event_at(pos, event_map, event_timer.start_time, cur_cost);
+
+          --pos.x; --pos.y;
+          adjust_event_at(pos, event_map, event_timer.start_time, cur_cost);
+
+          ++pos.y; ++pos.y;
+          adjust_event_at(pos, event_map, event_timer.start_time, cur_cost);
+
+          // We did spread!
+          did_spread = true;
+        }
       }
     }
+
+    // If we ended up spreading at all, there is a chance that there are event
+    // timers that could spread immediately, but where not processed.
+    // The function can therefore be run again with a delta time of 0.0. That
+    // will process all of those potential event timers without causing any
+    // simulation, obviously.
+    return did_spread;
   }
 } }
