@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <cstring>
 #include "../common/vec.h"
 namespace game { namespace strat
 {
@@ -28,6 +29,8 @@ namespace game { namespace strat
     values = new T[area(e)];
     extents = e;
     allocated = true;
+
+    std::memset(values, 0x00, area(e));
   }
   template <class T>
   Value_Map<T>::~Value_Map() noexcept
