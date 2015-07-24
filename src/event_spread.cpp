@@ -22,7 +22,7 @@ int main(int argc, char** argv) noexcept
   auto const map_size = Vec<int>{35,35};
 
   auto prng = std::mt19937(std::random_device{}());
-  auto dist = std::uniform_real_distribution<float>{0.0f, 2.5f};
+  auto dist = std::uniform_real_distribution<float>{0.0f, .9f};
 
   // Initialize, allocate, and populate the cost map.
   strat::Cost_Map cm; cm.allocate(map_size);
