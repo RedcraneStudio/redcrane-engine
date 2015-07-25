@@ -34,7 +34,7 @@ namespace game { namespace strat
     extents = e;
     allocated = true;
 
-    std::memset(values, 0x00, area(e));
+    std::memset(values, 0x00, area(e) * sizeof(T));
   }
   template <class T>
   Value_Map<T>::~Value_Map() noexcept
