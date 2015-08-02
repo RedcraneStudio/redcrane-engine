@@ -7,6 +7,9 @@
 #include <thread>
 #include <chrono>
 #include <random>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 #include "stratlib/event.h"
 
@@ -19,19 +22,55 @@ int main(int argc, char** argv) noexcept
   using namespace game;
   namespace chrono = std::chrono;
 
-  auto const map_size = Vec<int>{35,35};
-
-  auto prng = std::mt19937(std::random_device{}());
-  auto dist = std::uniform_real_distribution<float>{0.0f, .9f};
-
-  // Initialize, allocate, and populate the cost map.
-  strat::Cost_Map cm; cm.allocate(map_size);
-  for(int i = 0; i < cm.extents.y; ++i)
+  auto map_size = Vec<int>{35,35};
+  strat::Cost_Map cm;
+  if(argc > 1)
   {
-    for(int j = 0; j < cm.extents.x; ++j)
+    map_size = {0,0};
+
+    std::vector<std::vector<float> > value_vector;
+
+    // Load a csv with costs.
+    std::ifstream file(argv[1]);
+    std::string line;
+    while(!std::getline(file, line, '\n').eof())
     {
-      // One second per square.
-      cm.at({j,i}) = dist(prng);
+      value_vector.emplace_back();
+
+      std::istringstream line_stream{line};
+      std::string value;
+      while(!std::getline(line_stream, value, ',').eof())
+      {
+        //if(value.empty()) continue;
+        value_vector.back().push_back(std::stof(value));
+      }
+    }
+
+    map_size = {value_vector.front().size(), value_vector.size()};
+
+    cm.allocate(map_size);
+    for(int i = 0; i < cm.extents.y; ++i)
+    {
+      for(int j = 0; j < cm.extents.x; ++j)
+      {
+        cm.at({j,i}) = value_vector[i][j];
+      }
+    }
+  }
+  else
+  {
+    auto prng = std::mt19937(std::random_device{}());
+    auto dist = std::uniform_real_distribution<float>{0.0f, .9f};
+
+    // Initialize, allocate, and populate the cost map.
+    cm.allocate(map_size);
+    for(int i = 0; i < cm.extents.y; ++i)
+    {
+      for(int j = 0; j < cm.extents.x; ++j)
+      {
+        // One second per square.
+        cm.at({j,i}) = dist(prng);
+      }
     }
   }
 
