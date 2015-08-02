@@ -118,7 +118,7 @@ int main(int argc, char** argv) noexcept
     {
       for(int j = 0; j < cmap.extents.x; ++j)
       {
-        std::cout << cmap.at({i,j});
+        std::cout << cmap.at({j,i});
       }
       std::cout << std::endl;
     }
