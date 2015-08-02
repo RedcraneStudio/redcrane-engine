@@ -122,7 +122,7 @@ int main(int argc, char** argv) noexcept
       }
       std::cout << std::endl;
     }
-    std::cout << CLEAR_C;
+    //std::cout << CLEAR_C;
 
     // Sleep for a bit then grab the time.
     std::this_thread::sleep_for(chrono::milliseconds(200));
