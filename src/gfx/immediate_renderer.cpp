@@ -83,6 +83,18 @@ namespace game { namespace gfx
     mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
     pos_pos_ += count_bytes;
   }
+  void Immediate_Renderer::draw_line(glm::vec3 const& pt1,
+                                     glm::vec3 const& pt2) noexcept
+  {
+    std::array<float, 3*2> positions =
+    {
+      pt1.x, pt1.y, pt1.z,
+      pt2.x, pt2.y, pt2.z
+    };
+    auto count_bytes = sizeof(float) * positions.size();
+    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
+    pos_pos_ += count_bytes;
+  }
 
   void Immediate_Renderer::reset() noexcept
   {

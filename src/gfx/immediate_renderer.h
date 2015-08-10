@@ -17,6 +17,7 @@ namespace game { namespace gfx
     void set_draw_color(Color const&) noexcept;
 
     void draw_aabb(AABB const& aabb) noexcept;
+    void draw_line(glm::vec3 const& pt1, glm::vec3 const& pt2) noexcept;
 
     void reset() noexcept;
     void render(Camera const& cam) noexcept;
