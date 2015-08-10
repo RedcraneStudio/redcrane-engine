@@ -24,6 +24,14 @@ namespace game
     Structure const* s_type_;
   };
 
+  void render_structure(gfx::IDriver& d, Structure const& st,
+                        pos_t pos) noexcept;
+  inline void render_structure_instance(gfx::IDriver& d,
+                                        Structure_Instance const& st) noexcept
+  {
+    render_structure(d, st.structure(), st.position);
+  }
+
   struct Map
   {
     Map(Vec<float> map_extents) noexcept : extents(map_extents) {}

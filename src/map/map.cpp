@@ -5,6 +5,7 @@
 #include "map.h"
 #include "../collisionlib/sweep_and_prune.h"
 #include "../common/log.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace game
 {
@@ -18,6 +19,21 @@ namespace game
   Structure const& Structure_Instance::structure() const noexcept
   {
     return *s_type_;
+  }
+
+  void render_structure(gfx::IDriver& d, Structure const& st,
+                        pos_t pos) noexcept
+  {
+    glm::mat4 model = glm::translate(glm::mat4(1.0f),
+                      glm::vec3(pos.x, 0.0f, pos.y));
+
+    auto ray = ray_to_structure_bottom_center(st);
+    model = glm::translate(model, -ray);
+
+    d.bind_texture(*st.texture(), 0);
+    d.active_shader()->set_model(model);
+
+    gfx::render_chunk(st.mesh_chunk());
   }
 
   bool try_structure_place(Map& map, Structure const& st, pos_t pos,

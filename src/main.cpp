@@ -317,34 +317,20 @@ int main(int argc, char** argv)
 
     if(player_state.type == strat::Player_State_Type::Building)
     {
-      auto const& st = *player_state.building.to_build;
-
-      auto model = glm::translate(glm::mat4(1.0f), mouse_world);
+      auto& st = *player_state.building.to_build;
 
       // TODO: Put this stuff somewhere to access it a bunch
-      auto ray = ray_to_structure_bottom_center(st);
-      model = glm::translate(model, -ray);
 
-      driver.bind_texture(*st.texture(), 0);
-
-      default_shader->set_model(model);
-      gfx::render_chunk(st.mesh_chunk());
+      auto mouse_map = Vec<float>{mouse_world.x, mouse_world.z};
+      //auto new_pos = st.on_snap(mouse_map);
+      render_structure(driver, st, mouse_map);
     }
 
     // Render all the other structures.
     for(auto const& st : map.structures)
     {
       // TODO: Find/store correct y somehow?
-      glm::mat4 model = glm::translate(glm::mat4(1.0f),
-                        glm::vec3(st.position.x, 0.0f, st.position.y));
-
-      auto ray = ray_to_structure_bottom_center(st.structure());
-      model = glm::translate(model, -ray);
-
-      driver.bind_texture(*st.structure().texture(), 0);
-      driver.active_shader()->set_model(model);
-
-      gfx::render_chunk(st.structure().mesh_chunk());
+      render_structure_instance(driver, st);
     }
 
     // If we release the mouse find the item of the pie menu the user selected.
