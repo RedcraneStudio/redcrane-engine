@@ -201,10 +201,6 @@ int main(int argc, char** argv)
 
   glEnable(GL_CULL_FACE);
 
-  // Our quick hack to avoid splitting into multiple functions and dealing
-  // either with global variables or like a bound struct or something.
-  bool has_clicked_down = false;
-
   // Load our ui
   gfx::IDriver_UI_Adapter ui_adapter{driver};
   ui::Freetype_Renderer freetype_font;
