@@ -36,6 +36,7 @@ namespace game
   {
     Map(Vec<float> map_extents) noexcept : extents(map_extents) {}
 
+    boost::optional<Structure_Instance> pending_structure;
     std::vector<Structure_Instance> structures;
 
     Vec<float> extents;
