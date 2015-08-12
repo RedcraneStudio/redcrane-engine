@@ -12,9 +12,9 @@ add_subdirectory(io)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
-find_package(PulseAudio_Simple REQUIRED)
-find_package(FLAC REQUIRED)
-add_subdirectory(snd)
+# find_package(PulseAudio_Simple REQUIRED)
+# find_package(FLAC REQUIRED)
+# add_subdirectory(snd)
 
 add_subdirectory(fps)
 
@@ -34,7 +34,7 @@ find_package(Threads REQUIRED)
 
 add_executable(strategy main.cpp)
 target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib maplib
-                               sndlib stratlib)
+                               stratlib)
 target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
 
 
@@ -42,8 +42,8 @@ add_executable(fps_exe main_fps.cpp)
 target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
                               collisionlib)
 
-add_executable(play_snd play_snd.cpp)
-target_link_libraries(play_snd sndlib commonlib)
+# add_executable(play_snd play_snd.cpp)
+# target_link_libraries(play_snd sndlib commonlib)
 
 add_executable(event_spread_test event_spread.cpp)
 target_link_libraries(event_spread_test stratlib commonlib)
