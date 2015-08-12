@@ -62,36 +62,60 @@ struct Glfw_User_Data
 {
   game::gfx::IDriver& driver;
   game::gfx::Camera& cam;
-  game::ui::Mouse_State mouse_state;
+  game::ui::Mouse_State& mouse_state;
+  game::strat::Player_State& player_state;
 };
+
+void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
+{
+  using game::Vec;
+
+  auto& data = *static_cast<Glfw_User_Data*>(glfwGetWindowUserPointer(window));
+
+  auto mouse_world = game::gfx::unproject_screen(data.driver, data.cam,
+                                                 glm::mat4(1.0f),
+                                                 data.mouse_state.position);
+  bool down = (action == GLFW_PRESS);
+
+  using namespace game::ui;
+  Mouse_Button button;
+  switch(glfw_button)
+  {
+    case GLFW_MOUSE_BUTTON_LEFT:
+    {
+      button = Mouse_Button_Left;
+      break;
+    }
+    case GLFW_MOUSE_BUTTON_RIGHT:
+    {
+      button = Mouse_Button_Right;
+      break;
+    }
+    case GLFW_MOUSE_BUTTON_MIDDLE:
+    {
+      button = Mouse_Button_Middle;
+      break;
+    }
+  }
+
+  if(down) data.mouse_state.buttons |= button;
+  else data.mouse_state.buttons &= ~button;
+}
+
+void mouse_motion_callback(GLFWwindow* window, double x, double y)
+{
+  auto& data = *static_cast<Glfw_User_Data*>(glfwGetWindowUserPointer(window));
+
+  data.mouse_state.position.x = x;
+  data.mouse_state.position.y = y;
+}
 
 void scroll_callback(GLFWwindow* window, double, double deltay)
 {
   auto ptr = glfwGetWindowUserPointer(window);
   auto& data = *((Glfw_User_Data*) ptr);
 
-  namespace gfx = game::gfx;
-  gfx::apply_zoom(data.cam, deltay, data.mouse_state.position, data.driver);
-}
-
-game::ui::Mouse_State gen_mouse_state(GLFWwindow* w)
-{
-  game::ui::Mouse_State ret;
-
-  if(glfwGetMouseButton(w,GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-  {
-    ret.buttons = game::ui::Mouse_Button_Left;
-  }
-  else
-  {
-    ret.buttons = 0x00;
-  }
-
-  game::Vec<double> pos;
-  glfwGetCursorPos(w, &pos.x, &pos.y);
-  ret.position = game::vec_cast<int>(pos);
-
-  return ret;
+  data.mouse_state.scroll_delta = deltay;
 }
 
 void log_gl_limits(game::Log_Severity s) noexcept
@@ -137,6 +161,14 @@ int main(int argc, char** argv)
   // Log GL profile.
   log_i("OpenGL core profile %.%.%", maj, min, rev);
 
+  // Set GLFW callbacks
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, mouse_motion_callback);
+  glfwSetScrollCallback(window, scroll_callback);
+
+  // UI Controller
+  ui::Simple_Controller controller;
+
   {
   // Make an OpenGL driver.
   gfx::gl::Driver driver{Vec<int>{1000, 1000}};
@@ -159,9 +191,6 @@ int main(int argc, char** argv)
   auto grass_tex = driver.make_texture_repr();
   load_png("tex/grass.png", *grass_tex);
 
-  // Make an isometric camera.
-  auto cam = gfx::make_isometric_camera();
-
   // Load the image
   Software_Texture terrain_image;
   load_png("map/default.png", terrain_image);
@@ -182,8 +211,11 @@ int main(int argc, char** argv)
 
   // Map + structures.
   Maybe_Owned<Mesh> structure_mesh = driver.make_mesh_repr();
-  Map map({1000, 1000}); // <-- Map size for now
-  strat::Player_State player_state{strat::Player_State_Type::Nothing};
+
+  Game_State game_state{&driver, gfx::make_isometric_camera(),
+                        Map{{1000, 1000}}}; // <-- Map size for now
+
+  strat::Player_State player_state{game_state};
 
   auto structures = load_structures("structure/structures.json",
                                     ref_mo(structure_mesh),
@@ -208,67 +240,41 @@ int main(int argc, char** argv)
   auto ui_load_params = ui::Load_Params{freetype_font, ui_adapter};
   auto hud = ui::load("ui/hud.json", ui_load_params);
 
-  auto controller = ui::Simple_Controller{};
-
   hud->find_child_r("build_house")->add_click_listener([&](auto const& pt)
   {
-    player_state.type = strat::Player_State_Type::Building;
-    player_state.building.to_build = &structures[0];
+    player_state.switch_state<strat::Building_State>(structures[0]);
   });
   hud->find_child_r("build_gvn_build")->add_click_listener([&](auto const& pt)
   {
-    player_state.type = strat::Player_State_Type::Building;
-    player_state.building.to_build = &structures[1];
+    player_state.switch_state<strat::Building_State>(structures[1]);
   });
 
   hud->layout(driver.window_extents());
 
-  controller.add_drag_listener([&](auto const& np, auto const& op)
-  {
-    // Only drag if we don't have anything else to do.
-    if(player_state.type != strat::Player_State_Type::Nothing) return;
-
-    gfx::apply_pan(cam, np, op, driver);
-  });
-
-  Glfw_User_Data data{driver, cam};
-
+  auto cur_mouse = ui::Mouse_State{};
+  Glfw_User_Data data{driver, game_state.cam, cur_mouse, player_state};
   glfwSetWindowUserPointer(window, &data);
-  glfwSetScrollCallback(window, scroll_callback);
-
-  //water_obj.material->diffuse_color = Color{0xaa, 0xaa, 0xff};
-
-  ui::Mouse_State old_mouse = gen_mouse_state(window);
-
-  ui::Pie_Menu pie_menu;
-  pie_menu.radius(200);
-  pie_menu.font_renderer(freetype_font);
-  pie_menu.num_buttons(3);
-  pie_menu.center_button("Place");
-  pie_menu.radial_button(0, "Analyze");
-  pie_menu.radial_button(1, "Rotate");
-  pie_menu.radial_button(2, "Cancel");
-
-  bool render_pie = false;
-
-  int action_countdown = 0;
-
-  gfx::Immediate_Renderer ir{driver};
 
   while(!glfwWindowShouldClose(window))
   {
-    action_countdown = std::max(action_countdown - 1, 0);
-
-    // TODO: Combine button and mouse state or something, this is terrible.
-    auto mouse_state = gen_mouse_state(window);
-    data.mouse_state = mouse_state;
-
     ++fps;
+
+    // Reset the scroll delta
+    cur_mouse.scroll_delta = 0.0;
+
+    // Update the mouse state.
     glfwPollEvents();
+
+    controller.step(hud, cur_mouse);
+    player_state.step_mouse(cur_mouse);
+
+    // Handle zoom
+    gfx::apply_zoom(game_state.cam, cur_mouse.scroll_delta, cur_mouse.position,
+                    driver);
 
     // Clear the screen and render the terrain.
     driver.clear();
-    use_camera(driver, cam);
+    use_camera(driver, game_state.cam);
 
     driver.bind_texture(*grass_tex, 0);
 
@@ -283,113 +289,35 @@ int main(int argc, char** argv)
 
     // We only want to be able to pan the terrain for now. That's why we need
     // to do this before any structure rendering.
-    auto mouse_world = gfx::unproject_screen(driver, cam, glm::mat4(1.0f),
-                                             mouse_state.position);
-    controller.step(hud, mouse_state);
+    //auto mouse_world = gfx::unproject_screen(driver, game_state.cam,
+                                             //glm::mat4(1.0f),
+                                             //mouse_state.position);
 
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS &&
-       player_state.type == strat::Player_State_Type::Building &&
-       action_countdown == 0)
+    //player_state.handle_mouse(Vec<float>{mouse_world.x, mouse_world.z});
+
+    //if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS &&
+       //player_state.type == strat::Player_State_Type::Nothing)
+    //{
+      //glfwSetWindowShouldClose(window, true);
+    //}
+
+    auto& pending_st = game_state.map.pending_structure;
+    if(pending_st)
     {
-      player_state.type = strat::Player_State_Type::Nothing;
-      action_countdown = 500;
-    }
-    else if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS &&
-            player_state.type == strat::Player_State_Type::Nothing &&
-            action_countdown == 0)
-    {
-      glfwSetWindowShouldClose(window, true);
-    }
-
-    if(player_state.type == strat::Player_State_Type::Building)
-    {
-      auto& st = *player_state.building.to_build;
-
-      // TODO: Put this stuff somewhere to access it a bunch
-
-      auto mouse_map = Vec<float>{mouse_world.x, mouse_world.z};
-      //auto new_pos = st.on_snap(mouse_map);
-      render_structure(driver, st, mouse_map);
+      render_structure_instance(driver, pending_st.value());
     }
 
     // Render all the other structures.
-    for(auto const& st : map.structures)
+    for(auto const& st : game_state.map.structures)
     {
       // TODO: Find/store correct y somehow?
       render_structure_instance(driver, st);
     }
 
-    // If we release the mouse find the item of the pie menu the user selected.
-    if(ui::is_click(mouse_state, old_mouse, true) &&
-       player_state.type == strat::Player_State_Type::Building)
-    {
-      // Enable viewing of the pie menu
-      render_pie = true;
-
-      pie_menu.center(mouse_state.position);
-
-      // Make sure we don't pan or build or whatever
-      player_state.type = strat::Player_State_Type::Pie_Menu;
-
-      // But place the object down.
-      auto st_pos = Vec<float>{};
-      st_pos.x = mouse_world.x;
-      st_pos.y = mouse_world.z;
-
-      ir.reset();
-      if(!try_structure_place(map, *player_state.building.to_build,st_pos,&ir))
-      {
-        // Tell the user!
-      }
-    }
-    else if(ui::is_release(mouse_state, old_mouse, true) &&
-            player_state.type == strat::Player_State_Type::Pie_Menu)
-    {
-      // Disable viewing of the pie menu
-      render_pie = false;
-
-      // Get current button
-      auto cur_radial = pie_menu.current_radial_button();
-
-      // It was either the center button
-      if(pie_menu.active_center_button())
-      {
-        // For now we know the center button places the object. Also, since the
-        // map already has it as a structure, we can just let things be.
-      }
-      // Or a radial button.
-      else if(cur_radial)
-      {
-        // For now brute force it.
-        switch(cur_radial.value())
-        {
-          case 0:
-            break;
-          case 1:
-            break;
-          case 2:
-            // Cancel
-            map.structures.erase(map.structures.end() - 1);
-            break;
-          default: break;
-        }
-      }
-      else
-      {
-        // No button, reverse the initial placement.
-        map.structures.erase(map.structures.end() - 1);
-      }
-      player_state.type = strat::Player_State_Type::Building;
-    }
-
-    ir.render(cam);
-
-    if(render_pie) pie_menu.handle_event(mouse_state);
+    //ir.render(cam);
 
     {
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
-
-      if(render_pie) pie_menu.render(ui_adapter);
 
       hud->render(ui_adapter);
     }
@@ -403,8 +331,6 @@ int main(int argc, char** argv)
     }
 
     flush_log();
-
-    old_mouse = mouse_state;
   }
   }
   glfwTerminate();

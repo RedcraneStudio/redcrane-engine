@@ -40,22 +40,6 @@ namespace game { namespace ui
       }
     }
 
-    if(ret == false)
-    {
-      if(is_click(new_mouse, old_mouse_))
-      {
-        on_click_(new_mouse.position);
-      }
-      if(is_hover(new_mouse, old_mouse_))
-      {
-        on_hover_(new_mouse.position);
-      }
-      if(is_drag(new_mouse, old_mouse_))
-      {
-        on_drag_(new_mouse.position, old_mouse_.position);
-      }
-    }
-
     old_mouse_ = new_mouse;
 
     return ret;
