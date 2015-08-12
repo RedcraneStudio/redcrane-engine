@@ -101,20 +101,6 @@ void log_gl_limits(game::Log_Severity s) noexcept
   log(s, "GL_MAX_ELEMENTS_VERTICES: %", i);
 }
 
-struct Command_Options
-{
-};
-
-Command_Options parse_command_line(int argc, char**)
-{
-  Command_Options opt;
-  for(int i = 0; i < argc; ++i)
-  {
-    //auto option = argv[i];
-  }
-  return opt;
-}
-
 int main(int argc, char** argv)
 {
   using namespace game;
@@ -125,9 +111,6 @@ int main(int argc, char** argv)
 
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
-
-  // Parse command line arguments.
-  auto options = parse_command_line(argc - 1, argv+1);
 
   // Init glfw.
   if(!glfwInit())
