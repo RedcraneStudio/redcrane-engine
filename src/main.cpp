@@ -78,7 +78,14 @@ game::ui::Mouse_State gen_mouse_state(GLFWwindow* w)
 {
   game::ui::Mouse_State ret;
 
-  ret.button_down =glfwGetMouseButton(w, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+  if(glfwGetMouseButton(w,GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+  {
+    ret.buttons = game::ui::Mouse_Button_Left;
+  }
+  else
+  {
+    ret.buttons = 0x00;
+  }
 
   game::Vec<double> pos;
   glfwGetCursorPos(w, &pos.x, &pos.y);

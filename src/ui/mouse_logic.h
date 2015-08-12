@@ -9,10 +9,17 @@
 #include "../common/vec.h"
 namespace game { namespace ui
 {
+  enum Mouse_Button
+  {
+    Mouse_Button_Left = 0x01, Mouse_Button_Middle = 0x02,
+    Mouse_Button_Right = 0x04
+  };
+
   struct Mouse_State
   {
-    bool button_down;
+    unsigned int buttons = 0x00;
     Vec<int> position;
+    double scroll_delta = 0.0f;
   };
 
   // Bool - True: Ignore mouse movement, False: Only consider it a click if

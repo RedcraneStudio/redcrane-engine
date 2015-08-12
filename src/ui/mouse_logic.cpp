@@ -10,30 +10,35 @@ namespace game { namespace ui
   // later but for now probably won't be an issue since anything accepting drag
   // events won't care about click events, and vise versa.
 
+  bool left_button(Mouse_State const& ms) noexcept
+  {
+    return ms.buttons & Mouse_Button_Left;
+  }
+
   bool is_click(Mouse_State const& ns, Mouse_State const& os, bool s) noexcept
   {
     // If we have the user clicked the mouse button down without moving the
     // cursor position that's a click.
     if(s)
-      return ns.button_down && !os.button_down;
+      return left_button(ns) && !left_button(os);
     else
-      return ns.button_down && !os.button_down && ns.position == os.position;
+      return left_button(ns) && !left_button(os) && ns.position == os.position;
   }
   bool is_release(Mouse_State const& ns, Mouse_State const& os, bool s)noexcept
   {
     if(s)
-      return !ns.button_down && os.button_down;
+      return !left_button(ns) && left_button(os);
     else
-      return !ns.button_down && os.button_down && ns.position == os.position;
+      return !left_button(ns) && left_button(os) && ns.position == os.position;
   }
   bool is_hover(Mouse_State const& ns, Mouse_State const& os) noexcept
   {
     // We have a changed position and no mouse button down.
-    return !ns.button_down && !os.button_down && ns.position != os.position;
+    return !left_button(ns) && !left_button(os) && ns.position != os.position;
   }
   bool is_drag(Mouse_State const& ns, Mouse_State const& os) noexcept
   {
     // Like a hover but the buttons must have been down already.
-    return ns.button_down && os.button_down && ns.position != os.position;
+    return left_button(ns) && left_button(os) && ns.position != os.position;
   }
 } }
