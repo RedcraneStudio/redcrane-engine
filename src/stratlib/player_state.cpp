@@ -34,7 +34,7 @@ namespace game { namespace strat
         g_state_->map.pending_structure = boost::none;
         g_state_->map.structures.push_back({*st_, ms.position});
 
-        p_state_->switch_state<Nothing_State>();
+        p_state_->switch_state<Nothing_State>(ms.position);
       }
     }
   }

@@ -66,8 +66,9 @@ namespace game
 
     struct Nothing_State : public Player_State_Impl
     {
-      Nothing_State(Player_State& p_state, Game_State& g_state) noexcept
-        : Player_State_Impl(p_state, g_state) {}
+      Nothing_State(Player_State& p_state, Game_State& g_state,
+                    Vec<float> op = Vec<float>{0.0f,0.0f}) noexcept
+        : Player_State_Impl(p_state, g_state), op_(op) {}
 
       void step_mouse(Mouse_State const& state) noexcept override;
 
