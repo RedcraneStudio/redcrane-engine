@@ -250,14 +250,17 @@ int main(int argc, char** argv)
   auto ui_load_params = ui::Load_Params{freetype_font, ui_adapter};
   auto hud = ui::load("ui/hud.json", ui_load_params);
 
-  hud->find_child_r("build_house")->add_click_listener([&](auto const& pt)
-  {
-    player_state.switch_state<strat::Building_State>(structures[0]);
-  });
-  hud->find_child_r("build_gvn_build")->add_click_listener([&](auto const& pt)
-  {
-    player_state.switch_state<strat::Building_State>(structures[1]);
-  });
+  hud->find_child_r("build_house")->on_step_mouse(
+    ui::On_Release_Handler{[&](auto const& ms)
+    {
+      player_state.switch_state<strat::Building_State>(structures[0]);
+    }});
+
+  hud->find_child_r("build_gvn_build")->on_step_mouse(
+    ui::On_Release_Handler{[&](auto const& ms)
+    {
+      player_state.switch_state<strat::Building_State>(structures[1]);
+    }});
 
   hud->layout(driver.window_extents());
 
@@ -290,8 +293,10 @@ int main(int argc, char** argv)
     // These functions are bound to get the depth from the framebuffer. Make
     // sure the depth value is only based on the terrain.
     {
-      controller.step(hud, cur_mouse);
-      player_state.step_mouse(cur_mouse);
+      if(!controller.step(hud, cur_mouse))
+      {
+        player_state.step_mouse(cur_mouse);
+      }
 
       // Handle zoom
       gfx::apply_zoom(game_state.cam, cur_mouse.scroll_delta,

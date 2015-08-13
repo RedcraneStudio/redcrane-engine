@@ -7,6 +7,7 @@
  */
 #pragma once
 #include "../common/vec.h"
+#include <functional>
 namespace game { namespace ui
 {
   enum Mouse_Button
@@ -22,12 +23,31 @@ namespace game { namespace ui
     double scroll_delta = 0.0f;
   };
 
-  // Bool - True: Ignore mouse movement, False: Only consider it a click if
-  // position before and after is the same.
-  bool is_click(Mouse_State const& ns, Mouse_State const& os,
-                bool = false) noexcept;
-  bool is_release(Mouse_State const& ns, Mouse_State const& os,
-                  bool = false) noexcept;
-  bool is_hover(Mouse_State const& ns, Mouse_State const& os) noexcept;
-  bool is_drag(Mouse_State const& ns, Mouse_State const& os) noexcept;
+  using mouse_state_fn_t = void (Mouse_State const&);
+  using mouse_state_cb_t = std::function<mouse_state_fn_t>;
+
+  struct On_Click_Handler
+  {
+    On_Click_Handler(mouse_state_cb_t const& cb,
+                     Mouse_Button button = Mouse_Button_Left) noexcept
+                     : cb_(cb), button_(button) {}
+
+    void operator()(Mouse_State const&) noexcept;
+  private:
+    mouse_state_cb_t cb_;
+    Mouse_Button button_;
+  };
+  struct On_Release_Handler
+  {
+    On_Release_Handler(mouse_state_cb_t const& cb,
+                       Mouse_Button button = Mouse_Button_Left) noexcept
+                       : cb_(cb), button_(button) {}
+
+    void operator()(Mouse_State const&) noexcept;
+  private:
+    mouse_state_cb_t cb_;
+
+    Mouse_Button button_;
+    bool clicked_;
+  };
 } }

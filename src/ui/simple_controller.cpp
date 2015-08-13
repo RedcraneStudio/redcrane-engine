@@ -7,7 +7,7 @@
 namespace game { namespace ui
 {
   bool Simple_Controller::step(Shared_Element root,
-                               Mouse_State new_mouse) noexcept
+                               Mouse_State mouse_state) noexcept
   {
     bool ret = false;
 
@@ -18,29 +18,13 @@ namespace game { namespace ui
       auto& cur_elem = *iter;
       if(cur_elem.handle_events())
       {
-        auto pt = new_mouse.position;
-        if(is_in(cur_elem.this_volume(), pt))
+        if(is_in(cur_elem.this_volume(), mouse_state.position))
         {
-          if(is_click(new_mouse, old_mouse_))
-          {
-            cur_elem.on_click(pt);
-            ret = true;
-          }
-          if(is_hover(new_mouse, old_mouse_))
-          {
-            cur_elem.on_hover(pt);
-            ret = true;
-          }
-          if(is_drag(new_mouse, old_mouse_))
-          {
-            cur_elem.on_drag(new_mouse.position, old_mouse_.position);
-            ret = true;
-          }
+          cur_elem.step_mouse(mouse_state);
+          ret = true;
         }
       }
     }
-
-    old_mouse_ = new_mouse;
 
     return ret;
   }

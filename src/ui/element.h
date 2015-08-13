@@ -10,8 +10,8 @@
 #include "../common/vec.h"
 #include "../common/color.h"
 
+#include "mouse_logic.h"
 #include "cast.h"
-
 #include "renderer.h"
 
 #include <boost/signals2.hpp>
@@ -105,26 +105,14 @@ namespace game { namespace ui
     void render(Renderer&) const noexcept;
 
     // Event handling interface.
-    void on_click(Vec<int> pt) noexcept { on_click_(pt); }
-    void on_hover(Vec<int> pt) noexcept { on_hover_(pt); };
-    void on_drag(Vec<int> np, Vec<int> op) noexcept { on_drag_(np, op); }
+    void step_mouse(Mouse_State const& ms) noexcept
+    { if(handle_events_) step_mouse_(ms); }
 
-    using click_signal_t = signals2::signal<void (Vec<int>) >;
-
-    signals2::connection
-    add_click_listener(click_signal_t::slot_type s) noexcept
-    { return on_click_.connect(s); }
-
-    using hover_signal_t = signals2::signal<void (Vec<int>) >;
+    using mouse_signal_t = signals2::signal<mouse_state_fn_t>;
 
     signals2::connection
-    add_hover_listener(hover_signal_t::slot_type s) noexcept
-    { return on_hover_.connect(s); }
-
-    using drag_signal_t = signals2::signal<void (Vec<int>, Vec<int>) >;
-
-    signals2::connection add_drag_listener(drag_signal_t::slot_type s) noexcept
-    { return on_drag_.connect(s); }
+    on_step_mouse(mouse_signal_t::slot_type s) noexcept
+    { return step_mouse_.connect(s); }
   protected:
     Volume<int> parent_vol_;
     Volume<int> this_vol_;
@@ -157,8 +145,6 @@ namespace game { namespace ui
 
     virtual void render_(Renderer&) const noexcept = 0;
 
-    click_signal_t on_click_;
-    hover_signal_t on_hover_;
-    drag_signal_t on_drag_;
+    mouse_signal_t step_mouse_;
   };
 } }
