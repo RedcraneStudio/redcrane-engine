@@ -14,3 +14,5 @@ Big:
     - Check out the normalize function, the way it returns a double, which
       makes sense but still could be clearer.
   - Define when to use our lib and when to use glm, or just only use glm.
+
+Fix any const& vs value parameters.
