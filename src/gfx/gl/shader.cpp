@@ -33,7 +33,8 @@ namespace game { namespace gfx { namespace gl
     }
     return ret;
   }
-  void compile_shader(GLuint shade, std::string const& data)
+  void compile_shader(GLuint shade, std::string const& data,
+                      std::string filename = "")
   {
     int len = data.size();
     auto data_cstr = data.data();
@@ -52,7 +53,8 @@ namespace game { namespace gfx { namespace gl
       glGetShaderInfoLog(shade, info_log_length - 1, NULL, info_log);
 
       info_log[info_log_length - 1] = '\0';
-      log_e("Shader compilation failed (info log):\n%", info_log);
+      log_e("Shader compilation failed in '%' (info log):\n%", filename,
+            info_log);
 
       delete[] info_log;
     }
@@ -73,7 +75,7 @@ namespace game { namespace gfx { namespace gl
     glAttachShader(prog_, v_shade_);
 
     std::ifstream file{str};
-    compile_shader(v_shade_, load_stream(file));
+    compile_shader(v_shade_, load_stream(file), str);
 
     try_load_();
   }
@@ -83,7 +85,7 @@ namespace game { namespace gfx { namespace gl
     glAttachShader(prog_, f_shade_);
 
     std::ifstream file{str};
-    compile_shader(f_shade_, load_stream(file));
+    compile_shader(f_shade_, load_stream(file), str);
 
     try_load_();
   }
