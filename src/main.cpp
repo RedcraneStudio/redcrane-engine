@@ -125,6 +125,11 @@ void log_gl_limits(game::Log_Severity s) noexcept
   log(s, "GL_MAX_ELEMENTS_VERTICES: %", i);
 }
 
+void error_callback(int error, const char* description)
+{
+  game::log_d("GLFW Error: % (Code = %)", description, error);
+}
+
 int main(int argc, char** argv)
 {
   using namespace game;
@@ -135,6 +140,9 @@ int main(int argc, char** argv)
 
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
+
+  // Error callback
+  glfwSetErrorCallback(error_callback);
 
   // Init glfw.
   if(!glfwInit())
