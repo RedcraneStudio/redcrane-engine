@@ -29,11 +29,16 @@ namespace game { namespace strat
     // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     if(ms.buttons & ui::Mouse_Button_Left)
     {
-      if(try_structure_place(g_state_->map, *st_, ms.position))
+      // Convert mouse to map coordinates
+      auto mouse_world = unproject(*g_state_, ms.position);
+      auto map_pos = Vec<float>{mouse_world.x, mouse_world.z};
+      if(try_structure_place(g_state_->map, *st_, map_pos))
       {
         g_state_->map.pending_structure = boost::none;
-        g_state_->map.structures.push_back({*st_, ms.position});
+        g_state_->map.structures.push_back({*st_, map_pos});
 
+        // Tell the nothing state where the mouse *was* so we don't get weird
+        // jumps and zooms right after the switch.
         p_state_->switch_state<Nothing_State>(ms.position);
       }
     }
