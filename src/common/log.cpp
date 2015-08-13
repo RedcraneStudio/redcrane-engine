@@ -7,6 +7,7 @@
 #include <ctime>
 #include <cstring>
 #include <uv.h>
+#include "thread_local.h"
 namespace game
 {
   Scoped_Log_Init::Scoped_Log_Init() noexcept
@@ -18,7 +19,7 @@ namespace game
     uninit_log();
   }
 
-  thread_local uv_loop_t* loop_ = nullptr;
+  GAME_THREAD_LOCAL uv_loop_t* loop_ = nullptr;
   Log_Severity level_ = Log_Severity::Info;
 
   void init_log() noexcept
