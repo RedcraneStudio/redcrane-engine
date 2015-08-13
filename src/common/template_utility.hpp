@@ -27,10 +27,13 @@ namespace game
   struct has_equality : public
                std::integral_constant<bool, detail::has_equality<T>::value> {};
 
+  template <std::size_t I, class T>
+    using tuple_element_t = typename std::tuple_element<I, T>::type;
+
   template <int N, typename... Params>
   struct pack_element
   {
-    using type = std::tuple_element_t<N, std::tuple<Params...> >;
+    using type = tuple_element_t<N, std::tuple<Params...> >;
   };
 
   template <int N, typename... Params>
