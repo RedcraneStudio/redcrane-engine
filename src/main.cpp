@@ -72,9 +72,6 @@ void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
 
   auto& data = *static_cast<Glfw_User_Data*>(glfwGetWindowUserPointer(window));
 
-  auto mouse_world = game::gfx::unproject_screen(data.driver, data.cam,
-                                                 glm::mat4(1.0f),
-                                                 data.mouse_state.position);
   bool down = (action == GLFW_PRESS);
 
   using namespace game::ui;
