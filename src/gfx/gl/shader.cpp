@@ -25,7 +25,11 @@ namespace game { namespace gfx { namespace gl
     std::string ret;
     while(!stream.eof() && stream.good())
     {
-      ret.push_back(stream.get());
+      auto c = stream.get();
+      if(std::istream::traits_type::not_eof(c))
+      {
+        ret.push_back(c);
+      }
     }
     return ret;
   }
