@@ -3,6 +3,9 @@
  * All rights reserved.
  */
 #pragma once
+
+#include <vector>
+
 #include "../common/vec.h"
 #include "../common/volume.h"
 #include "../common/color.h"
