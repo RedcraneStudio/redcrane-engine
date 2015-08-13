@@ -21,7 +21,10 @@ namespace game { namespace strat
 
   void Building_State::step_mouse(Mouse_State const& ms) noexcept
   {
-    g_state_->map.pending_structure = Structure_Instance{*st_, ms.position};
+    auto mouse_world = unproject(*g_state_, ms.position);
+    auto map_pos = Vec<float>{mouse_world.x, mouse_world.z};
+
+    g_state_->map.pending_structure = Structure_Instance{*st_, map_pos};
     // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     // TODO Put this check in a function along with other buttons so we TODO
     // TODO can't screw it up. Put this someplace accessible like       TODO
@@ -30,8 +33,6 @@ namespace game { namespace strat
     if(ms.buttons & ui::Mouse_Button_Left)
     {
       // Convert mouse to map coordinates
-      auto mouse_world = unproject(*g_state_, ms.position);
-      auto map_pos = Vec<float>{mouse_world.x, mouse_world.z};
       if(try_structure_place(g_state_->map, *st_, map_pos))
       {
         g_state_->map.pending_structure = boost::none;
