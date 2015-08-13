@@ -25,11 +25,6 @@ namespace game { namespace strat
     auto map_pos = Vec<float>{mouse_world.x, mouse_world.z};
 
     g_state_->map.pending_structure = Structure_Instance{*st_, map_pos};
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    // TODO Put this check in a function along with other buttons so we TODO
-    // TODO can't screw it up. Put this someplace accessible like       TODO
-    // TODO mouse_logic file itself.                                    TODO
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     if(ms.buttons & ui::Mouse_Button_Left)
     {
       // Convert mouse to map coordinates
