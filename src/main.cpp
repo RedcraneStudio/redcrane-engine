@@ -58,19 +58,12 @@ glm::vec4 project_point(glm::vec4 pt,
   return pt;
 }
 
-struct Glfw_User_Data
-{
-  game::gfx::IDriver& driver;
-  game::gfx::Camera& cam;
-  game::ui::Mouse_State& mouse_state;
-  game::strat::Player_State& player_state;
-};
-
 void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
 {
-  using game::Vec;
+  using game::Vec; using game::ui::Mouse_State;
 
-  auto& data = *static_cast<Glfw_User_Data*>(glfwGetWindowUserPointer(window));
+  auto user_ptr = glfwGetWindowUserPointer(window);
+  auto& mouse_state = *static_cast<Mouse_State*>(user_ptr);
 
   bool down = (action == GLFW_PRESS);
 
@@ -95,24 +88,29 @@ void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
     }
   }
 
-  if(down) data.mouse_state.buttons |= button;
-  else data.mouse_state.buttons &= ~button;
+  if(down) mouse_state.buttons |= button;
+  else mouse_state.buttons &= ~button;
 }
 
 void mouse_motion_callback(GLFWwindow* window, double x, double y)
 {
-  auto& data = *static_cast<Glfw_User_Data*>(glfwGetWindowUserPointer(window));
+  using game::ui::Mouse_State;
 
-  data.mouse_state.position.x = x;
-  data.mouse_state.position.y = y;
+  auto user_ptr = glfwGetWindowUserPointer(window);
+  auto& mouse_state = *static_cast<Mouse_State*>(user_ptr);
+
+  mouse_state.position.x = x;
+  mouse_state.position.y = y;
 }
 
 void scroll_callback(GLFWwindow* window, double, double deltay)
 {
-  auto ptr = glfwGetWindowUserPointer(window);
-  auto& data = *((Glfw_User_Data*) ptr);
+  using game::ui::Mouse_State;
 
-  data.mouse_state.scroll_delta = deltay;
+  auto user_ptr = glfwGetWindowUserPointer(window);
+  auto& mouse_state = *static_cast<Mouse_State*>(user_ptr);
+
+  mouse_state.scroll_delta = deltay;
 }
 
 void log_gl_limits(game::Log_Severity s) noexcept
@@ -265,8 +263,7 @@ int main(int argc, char** argv)
   hud->layout(driver.window_extents());
 
   auto cur_mouse = ui::Mouse_State{};
-  Glfw_User_Data data{driver, game_state.cam, cur_mouse, player_state};
-  glfwSetWindowUserPointer(window, &data);
+  glfwSetWindowUserPointer(window, &cur_mouse);
 
   while(!glfwWindowShouldClose(window))
   {
