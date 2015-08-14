@@ -7,7 +7,7 @@
 #include "../common/log.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace game
+namespace game { namespace strat
 {
   Structure_Instance::Structure_Instance(Structure const& s, pos_t p) noexcept
     : position(p), s_type_(&s){}
@@ -81,4 +81,4 @@ namespace game
 
     return true;
   }
-}
+} }

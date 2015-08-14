@@ -11,7 +11,7 @@
 #include <string>
 #include <sstream>
 
-#include "stratlib/event.h"
+#include "strat/event.h"
 
 constexpr char const* const RESET_C = "\x1b[0m";
 constexpr char const* const RED_C = "\x1b[95m";

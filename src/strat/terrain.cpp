@@ -6,7 +6,7 @@
 #include "../common/grid_iterator.h"
 
 #include "../common/debugging.h"
-namespace game
+namespace game { namespace strat
 {
   void Heightmap::allocate(Vec<int> e) noexcept
   {
@@ -159,5 +159,4 @@ namespace game
 
     return tmesh;
   }
-}
-
+} }

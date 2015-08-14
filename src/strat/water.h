@@ -3,8 +3,8 @@
  * All rights reserved.
  */
 #pragma once
-namespace game
+namespace game { namespace strat
 {
   struct Heightmap;
   void set_noise_heightmap(Heightmap&, double time) noexcept;
-}
+} }

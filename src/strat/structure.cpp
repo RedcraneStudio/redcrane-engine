@@ -13,7 +13,7 @@
 #include "../gfx/support/generate_aabb.h"
 #include "../gfx/support/write_data_to_mesh.h"
 #include "../gfx/support/texture_load.h"
-namespace game
+namespace game { namespace strat
 {
   Structure::Structure(Mesh_Chunk&& m, AABB aabb, Maybe_Owned<Texture> tex,
                        std::string name, std::string desc) noexcept
@@ -121,4 +121,4 @@ namespace game
   {
     return ray_to_aabb_bottom_center(s.aabb());
   }
-}
+} }

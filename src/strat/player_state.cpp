@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "player_state.h"
-#include "../map/map.h"
+#include "map.h"
 namespace game { namespace strat
 {
   Player_State::Player_State(Game_State& g_state) noexcept

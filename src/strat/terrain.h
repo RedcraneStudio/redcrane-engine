@@ -9,7 +9,7 @@
 #include "../gfx/support/software_texture.h"
 #include "../gfx/mesh_data.h"
 #include "../gfx/mesh_chunk.h"
-namespace game
+namespace game { namespace strat
 {
   struct Heightmap
   {
@@ -48,4 +48,4 @@ namespace game
                                  double flat_scale = 1,
                                  bool gen_aabbs = false) noexcept;
 
-}
+} }

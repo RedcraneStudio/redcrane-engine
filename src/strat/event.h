@@ -8,7 +8,7 @@
 #pragma once
 #include <list>
 #include <vector>
-#include "value_map.h"
+#include "../common/value_map.h"
 namespace game { namespace strat
 {
   // An ________ is used to decide when an event is ready to spread out.

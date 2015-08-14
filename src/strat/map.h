@@ -7,7 +7,7 @@
 #include "structure.h"
 
 #include "../gfx/immediate_renderer.h"
-namespace game
+namespace game { namespace strat
 {
   using pos_t = Vec<float>;
 
@@ -44,4 +44,4 @@ namespace game
 
   bool try_structure_place(Map& map, Structure const& st, pos_t pos,
                            gfx::Immediate_Renderer* = nullptr) noexcept;
-}
+} }

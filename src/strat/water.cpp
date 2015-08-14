@@ -5,7 +5,7 @@
 #include "water.h"
 #include "../common/noise.h"
 #include "terrain.h"
-namespace game
+namespace game { namespace strat
 {
   void set_noise_heightmap(Heightmap& h, double time) noexcept
   {
@@ -17,4 +17,4 @@ namespace game
       h.vals[i] = perlin_noise(x / 10.0f, y / 10.0f, time) * 100;
     }
   }
-}
+} }

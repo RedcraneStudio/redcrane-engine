@@ -30,11 +30,10 @@
 #include "ui/simple_controller.h"
 #include "ui/pie_menu.h"
 
-#include "map/map.h"
-#include "map/water.h"
-#include "map/terrain.h"
-
-#include "stratlib/player_state.h"
+#include "strat/map.h"
+#include "strat/water.h"
+#include "strat/terrain.h"
+#include "strat/player_state.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -206,7 +205,7 @@ int main(int argc, char** argv)
   // Convert it into a heightmap
   Maybe_Owned<Mesh> terrain = driver.make_mesh_repr();
 
-  auto terrain_heightmap = make_heightmap_from_image(terrain_image);
+  auto terrain_heightmap = strat::make_heightmap_from_image(terrain_image);
   auto terrain_data =
     make_terrain_mesh(terrain_heightmap, {20, 20}, .001f, .01);
 
@@ -220,14 +219,14 @@ int main(int argc, char** argv)
   // Map + structures.
   Maybe_Owned<Mesh> structure_mesh = driver.make_mesh_repr();
 
-  Game_State game_state{&driver, gfx::make_isometric_camera(),
-                        Map{{1000, 1000}}}; // <-- Map size for now
+  strat::Game_State game_state{&driver, gfx::make_isometric_camera(),
+                        strat::Map{{1000, 1000}}}; // <-- Map size for now
 
   strat::Player_State player_state{game_state};
 
-  auto structures = load_structures("structure/structures.json",
-                                    ref_mo(structure_mesh),
-                                    driver);
+  auto structures = strat::load_structures("structure/structures.json",
+                                           ref_mo(structure_mesh),
+                                           driver);
 
   int fps = 0;
   int time = glfwGetTime();
