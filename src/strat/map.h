@@ -4,6 +4,8 @@
  */
 #pragma once
 #include "../common/vec.h"
+
+#include "wall.h"
 #include "structure.h"
 
 #include "../gfx/immediate_renderer.h"
@@ -40,6 +42,9 @@ namespace game { namespace strat
     std::vector<Structure_Instance> structures;
 
     Vec<float> extents;
+
+    boost::optional<Pending_Wall> pending_wall;
+    std::vector<Wall> walls;
   };
 
   bool try_structure_place(Map& map, Structure const& st, pos_t pos,

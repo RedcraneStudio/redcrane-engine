@@ -10,5 +10,11 @@
     "desc": "A goat's home.",
     "model": "obj/govnm_building.obj",
     "texture": "tex/combined_building_textures.png"
+  },
+  {
+    "name": "Log",
+    "desc": "Log",
+    "model": "obj/vertical_log.obj",
+    "texture": "tex/bark.png"
   }
 ]

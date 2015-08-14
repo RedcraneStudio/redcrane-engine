@@ -28,6 +28,17 @@
           "this_border": "white",
 
           "handle_events": true
+        },
+        {
+          "id": "build_wall",
+          "type": "sprite",
+          "src": "ui/build_icon.png",
+          "scale": 1.0,
+          "color": "white",
+          "this_background": "black",
+          "this_border": "white",
+
+          "handle_events": true
         }
       ],
 

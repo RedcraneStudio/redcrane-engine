@@ -31,6 +31,7 @@
 #include "ui/pie_menu.h"
 
 #include "strat/map.h"
+#include "strat/wall.h"
 #include "strat/water.h"
 #include "strat/terrain.h"
 #include "strat/player_state.h"
@@ -258,6 +259,12 @@ int main(int argc, char** argv)
     {
       player_state.switch_state<strat::Building_State>(structures[1]);
     }});
+  hud->find_child_r("build_wall")->on_step_mouse(
+    ui::On_Release_Handler{[&](auto const& ms)
+    {
+      strat::Wall_Type type{1, .5f};
+      player_state.switch_state<strat::Wall_Building_State>(type);
+    }});
 
   hud->layout(driver.window_extents());
 
@@ -326,6 +333,21 @@ int main(int argc, char** argv)
     {
       // TODO: Find/store correct y somehow?
       render_structure_instance(driver, st);
+    }
+
+    // Render walls
+    if(game_state.map.pending_wall)
+    {
+      // Render the structure at the pending wall point.
+      render_structure(driver,structures[2],game_state.map.pending_wall->pos);
+    }
+    for(auto const& wall : game_state.map.walls)
+    {
+      for(auto pt : wall.points)
+      {
+        // For every point in the wall, render a lot.
+        render_structure(driver, structures[2], pt);
+      }
     }
 
     //ir.render(cam);

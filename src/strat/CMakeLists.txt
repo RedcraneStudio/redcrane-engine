@@ -3,5 +3,5 @@
 # All rights reserved.
 
 add_library(stratlib event.cpp map.cpp player_state.cpp structure.cpp
-                     terrain.cpp water.cpp)
+                     terrain.cpp wall.cpp water.cpp)
 target_link_libraries(stratlib gfxlib gfxsupportlib collisionlib)

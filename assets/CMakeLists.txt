@@ -4,6 +4,7 @@
 
 add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     obj/govnm_building.obj obj/fps_terrain.obj
+                    obj/vertical_log.obj
                     scene/default.json structure/structures.json
                     shader/basic/f shader/basic/v
                     shader/hud/f shader/hud/v

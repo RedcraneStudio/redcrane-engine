@@ -7,6 +7,7 @@
 #include "../gfx/support/unproject.h"
 #include "../ui/mouse_logic.h"
 
+#include "wall.h"
 #include "map.h"
 #include "structure.h"
 namespace game { namespace strat
@@ -85,5 +86,17 @@ namespace game { namespace strat
     void step_mouse(Mouse_State const& state) noexcept override;
   private:
     Structure* st_;
+  };
+
+  struct Wall_Building_State : public Player_State_Impl
+  {
+    Wall_Building_State(Player_State& p_state, Game_State& g_state,
+                        Wall_Type const& wall_type) noexcept
+                        : Player_State_Impl(p_state, g_state),
+                          wall_type_(wall_type) {}
+    void step_mouse(Mouse_State const& state) noexcept override;
+  private:
+    int click_index_ = 0;
+    Wall_Type wall_type_;
   };
 } }
