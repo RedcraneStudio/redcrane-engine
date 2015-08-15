@@ -15,13 +15,13 @@
 namespace game { namespace ui
 {
   template <class T>
-  std::string typeof(T const& obj) noexcept
+  std::string typeof_json(T const& obj) noexcept
   {
     return obj["type"].GetString();
   }
 
   template <class T>
-  Linear_Layout::Orient orientof(T const& doc)
+  Linear_Layout::Orient orientof_json(T const& doc)
   {
     if(strcmp(doc["orientation"].GetString(), "vertical") == 0)
     {
@@ -157,11 +157,11 @@ namespace game { namespace ui
   {
     auto ret_ptr = Shared_Element{};
 
-    if(typeof(doc) == "linear_layout")
+    if(typeof_json(doc) == "linear_layout")
     {
       Linear_Layout view{};
 
-      view.orientation = orientof(doc);
+      view.orientation = orientof_json(doc);
       if_has_member(doc, "force_fill", [&view](auto const& val)
       {
         view.force_fill = val.GetBool();
@@ -177,7 +177,7 @@ namespace game { namespace ui
       }
       ret_ptr = std::make_shared<Linear_Layout>(std::move(view));
     }
-    else if(typeof(doc) == "side_layout")
+    else if(typeof_json(doc) == "side_layout")
     {
       Side_Layout view{};
 
@@ -194,7 +194,7 @@ namespace game { namespace ui
 
       ret_ptr = std::make_shared<Side_Layout>(std::move(view));
     }
-    else if(typeof(doc) == "grid_layout")
+    else if(typeof_json(doc) == "grid_layout")
     {
       Grid_Layout view{};
 
@@ -220,7 +220,7 @@ namespace game { namespace ui
 
       ret_ptr = std::make_shared<Grid_Layout>(std::move(view));
     }
-    else if(typeof(doc) == "label")
+    else if(typeof_json(doc) == "label")
     {
       Label label{p.font_render};
 
@@ -235,7 +235,7 @@ namespace game { namespace ui
 
       ret_ptr = std::make_shared<Label>(std::move(label));
     }
-    else if(typeof(doc) == "sprite")
+    else if(typeof_json(doc) == "sprite")
     {
       auto sprite = Sprite{};
 
@@ -253,7 +253,7 @@ namespace game { namespace ui
 
       ret_ptr = std::make_shared<Sprite>(std::move(sprite));
     }
-    else if(typeof(doc) == "bar")
+    else if(typeof_json(doc) == "bar")
     {
       auto bar = Bar{};
 
@@ -269,11 +269,11 @@ namespace game { namespace ui
 
       ret_ptr = std::make_shared<Bar>(std::move(bar));
     }
-    else if(typeof(doc) == "empty")
+    else if(typeof_json(doc) == "empty")
     {
       ret_ptr = std::make_shared<Empty>();
     }
-    else if(typeof(doc) == "embed")
+    else if(typeof_json(doc) == "embed")
     {
       ret_ptr = load(doc["src"].GetString(), p);
       // This will use the id of the file that inherited (using embed) unless
