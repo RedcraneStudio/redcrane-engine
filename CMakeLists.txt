@@ -7,6 +7,8 @@ project(Red_Crane_Engine VERSION 0.0 LANGUAGES C CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
 
+set(CMAKE_CXX_STANDARD 14)
+
 include(data_target)
 
 add_subdirectory(gl)
