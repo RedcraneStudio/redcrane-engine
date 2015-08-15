@@ -19,3 +19,5 @@ target_link_libraries(gfxlib commonlib)
 
 target_link_libraries(gfxlib ${GLFW_LIBRARY})
 target_include_directories(gfxlib PUBLIC ${GLFW_INCLUDE_DIR})
+
+target_include_directories(gfxlib PUBLIC ${GLM_INCLUDE_DIR})

@@ -9,6 +9,7 @@ find_package(LibUV REQUIRED)
 add_subdirectory(common)
 add_subdirectory(io)
 
+find_package(GLM REQUIRED)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 

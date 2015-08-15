@@ -4,3 +4,4 @@
 
 add_library(collisionlib STATIC triangle_conversion.cpp triangle.cpp
                                 sweep_and_prune.cpp)
+target_include_directories(collisionlib PUBLIC ${GLM_INCLUDE_DIR})
