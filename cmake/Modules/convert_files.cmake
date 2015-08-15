@@ -9,8 +9,7 @@ function(convert_to_png target dir in_file out_file)
                      ${CMAKE_CURRENT_BINARY_DIR}/${dir})
 
   # Find imagemagick
-  find_package(ImageMagick COMPONENTS Magick++)
-  # find_package(ImageMagick COMPONENTS convert REQUIRED)
+  find_package(ImageMagick COMPONENTS convert REQUIRED)
   # Actually convert the image.
   add_custom_command(TARGET ${target} POST_BUILD COMMAND
                      ${ImageMagick_convert_EXECUTABLE}
