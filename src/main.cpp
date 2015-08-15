@@ -61,6 +61,7 @@ glm::vec4 project_point(glm::vec4 pt,
 struct Glfw_User_Data
 {
   game::gfx::IDriver& driver;
+  game::gfx::Camera& camera;
   game::ui::Mouse_State& mouse_state;
 };
 
@@ -133,10 +134,19 @@ void error_callback(int error, const char* description)
 
 void resize_callback(GLFWwindow* window, int width, int height)
 {
+  // Change OpenGL viewport
   glViewport(0, 0, width, height);
+
   auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
   auto& idriver = user_ptr.driver;
+
+  // Inform the driver of this change
   idriver.window_extents({width,height});
+
+  // Change the camera aspect ratio
+  user_ptr.camera.perspective.aspect = width / (float) height;
+
+  // Perhaps relayout the hud here?
 }
 
 
@@ -286,7 +296,9 @@ int main(int argc, char** argv)
 
   auto cur_mouse = ui::Mouse_State{};
 
-  auto glfw_user_data = Glfw_User_Data{driver, cur_mouse};
+  // TODO: Put the camera somewhere else / Otherwise clean up the distinction
+  // and usage of Glfw_User_Data, Game_State and Player_State.
+  auto glfw_user_data = Glfw_User_Data{driver, game_state.cam, cur_mouse};
   glfwSetWindowUserPointer(window, &glfw_user_data);
 
   while(!glfwWindowShouldClose(window))
