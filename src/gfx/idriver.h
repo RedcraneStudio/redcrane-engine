@@ -22,6 +22,7 @@ namespace game
 
     struct IDriver
     {
+      IDriver(Vec<int> size) noexcept : extents_(size) {}
       virtual ~IDriver() noexcept {}
 
       virtual std::unique_ptr<Shader> make_shader_repr() noexcept = 0;
@@ -53,9 +54,15 @@ namespace game
 
       virtual float read_pixel(Framebuffer fr, Vec<int> vec) noexcept = 0;
 
-      virtual Vec<int> window_extents() const noexcept = 0;
+      Vec<int> window_extents() const noexcept
+      { return extents_; }
+      void window_extents(Vec<int> extents)
+      { extents_ = extents; }
 
       virtual void check_error() noexcept = 0;
+
+    private:
+      Vec<int> extents_;
     };
   }
 }

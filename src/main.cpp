@@ -131,6 +131,15 @@ void error_callback(int error, const char* description)
   game::log_d("GLFW Error: % (Code = %)", description, error);
 }
 
+void resize_callback(GLFWwindow* window, int width, int height)
+{
+  glViewport(0, 0, width, height);
+  auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
+  auto& idriver = user_ptr.driver;
+  idriver.window_extents({width,height});
+}
+
+
 int main(int argc, char** argv)
 {
   using namespace game;
@@ -179,6 +188,7 @@ int main(int argc, char** argv)
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, mouse_motion_callback);
   glfwSetScrollCallback(window, scroll_callback);
+  glfwSetWindowSizeCallback(window, resize_callback);
 
   // UI Controller
   ui::Simple_Controller controller;

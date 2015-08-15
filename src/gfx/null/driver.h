@@ -10,7 +10,7 @@ namespace game { namespace gfx
   {
     struct Driver : public IDriver
     {
-      Driver(Vec<int> extents) noexcept : extents_(extents) {}
+      Driver(Vec<int> extents) noexcept : IDriver(extents) {}
 
       std::unique_ptr<Shader> make_shader_repr() noexcept override;
       void use_shader(Shader&) noexcept override;
@@ -36,12 +36,10 @@ namespace game { namespace gfx
       float read_pixel(Framebuffer, Vec<int>) noexcept override
       { return 0.0f; }
 
-      Vec<int> window_extents() const noexcept override { return extents_; }
-
       void check_error() noexcept override {}
 
     private:
-      Vec<int> extents_;
+
       Shader* cur_shader_;
     };
   }

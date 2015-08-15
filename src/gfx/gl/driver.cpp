@@ -26,7 +26,7 @@ namespace game
   {
     namespace gl
     {
-      Driver::Driver(Vec<int> size) noexcept : extents_(size)
+      Driver::Driver(Vec<int> size) noexcept : IDriver(size)
       {
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
@@ -127,7 +127,7 @@ namespace game
         auto f = get_gl_pixel_format(fb);
 
         float ret;
-        glReadPixels(pt.x, extents_.y - pt.y, 1, 1, f, GL_FLOAT, &ret);
+        glReadPixels(pt.x, window_extents().y - pt.y, 1, 1, f, GL_FLOAT, &ret);
         return ret;
       }
       void Driver::check_error() noexcept

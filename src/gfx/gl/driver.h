@@ -43,11 +43,9 @@ namespace game
 
     float read_pixel(Framebuffer, Vec<int> pt) noexcept override;
 
-    Vec<int> window_extents() const noexcept override { return extents_; }
-
     void check_error() noexcept override;
+
   private:
-    Vec<int> extents_;
 
     Shader* cur_shader_;
     Mesh* cur_mesh_;
