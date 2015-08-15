@@ -58,12 +58,18 @@ glm::vec4 project_point(glm::vec4 pt,
   return pt;
 }
 
+struct Glfw_User_Data
+{
+  game::gfx::IDriver& driver;
+  game::ui::Mouse_State& mouse_state;
+};
+
 void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
 {
   using game::Vec; using game::ui::Mouse_State;
 
-  auto user_ptr = glfwGetWindowUserPointer(window);
-  auto& mouse_state = *static_cast<Mouse_State*>(user_ptr);
+  auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
+  auto& mouse_state = user_ptr.mouse_state;
 
   bool down = (action == GLFW_PRESS);
 
@@ -96,8 +102,8 @@ void mouse_motion_callback(GLFWwindow* window, double x, double y)
 {
   using game::ui::Mouse_State;
 
-  auto user_ptr = glfwGetWindowUserPointer(window);
-  auto& mouse_state = *static_cast<Mouse_State*>(user_ptr);
+  auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
+  auto& mouse_state = user_ptr.mouse_state;
 
   mouse_state.position.x = x;
   mouse_state.position.y = y;
@@ -107,8 +113,8 @@ void scroll_callback(GLFWwindow* window, double, double deltay)
 {
   using game::ui::Mouse_State;
 
-  auto user_ptr = glfwGetWindowUserPointer(window);
-  auto& mouse_state = *static_cast<Mouse_State*>(user_ptr);
+  auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
+  auto& mouse_state = user_ptr.mouse_state;
 
   mouse_state.scroll_delta = deltay;
 }
@@ -269,7 +275,9 @@ int main(int argc, char** argv)
   hud->layout(driver.window_extents());
 
   auto cur_mouse = ui::Mouse_State{};
-  glfwSetWindowUserPointer(window, &cur_mouse);
+
+  auto glfw_user_data = Glfw_User_Data{driver, cur_mouse};
+  glfwSetWindowUserPointer(window, &glfw_user_data);
 
   while(!glfwWindowShouldClose(window))
   {
