@@ -9,6 +9,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(CMAKE_FIND_FRAMEWORK LAST)
+
 include(data_target)
 
 add_subdirectory(gl)
