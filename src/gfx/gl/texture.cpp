@@ -19,11 +19,14 @@ namespace game { namespace gfx { namespace gl
     glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, NULL);
 
-    glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER,
+                    GL_NEAREST_MIPMAP_NEAREST);
     glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    // These are actually set to their respective values by default anyway, but
+    // this is more clear.
     glTexParameteri(texture_type, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(texture_type, GL_TEXTURE_MAX_LEVEL, 0);
+    glTexParameteri(texture_type, GL_TEXTURE_MAX_LEVEL, 1000);
 
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
@@ -91,6 +94,7 @@ namespace game { namespace gfx { namespace gl
                     allocated_extents().y - vol.pos.y - vol.height,
                     vol.width, vol.height, GL_RGBA, GL_UNSIGNED_BYTE,
                     &data[0]);
+    glGenerateMipmap(texture_type);
   }
 
   void GL_Texture::bind(unsigned int loc) const noexcept
