@@ -43,37 +43,9 @@ namespace game { namespace strat
   Vec<float> pending_wall_end_pt(Pending_Wall const& pending_wall,
                                  Vec<float> const& map) noexcept
   {
-    // The point from the start of the pending wall to the map point.
-    auto mouse_dir = normalize(map - pending_wall.pos);
-
-    // Get that angle.
-    auto angle = std::atan2(mouse_dir.y, mouse_dir.x);
-
-    Vec<float> dir{};
-
-    if(-M_PI / 4 < angle && angle < M_PI / 4)
-    {
-      dir.x = 1.0f;
-      dir.y = 0.0f;
-    }
-    else if(M_PI / 4 < angle && angle < M_PI * 3 / 4)
-    {
-      dir.x = 0.0f;
-      dir.y = 1.0f;
-    }
-    else if(-M_PI * 3 / 4 < angle && angle < -M_PI / 4)
-    {
-      dir.x = 0.0f;
-      dir.y = -1.0f;
-    }
-    else
-    {
-      dir.x = -1.0f;
-      dir.y = 0.0f;
-    }
-
-    return (dir * length(map - pending_wall.pos)) + pending_wall.pos;
+    return project_onto_pt_axes(pending_wall.pos, map);
   }
+
 #if 0
   void Wall_Structure::on_place(Vec<float> pos) noexcept
   {

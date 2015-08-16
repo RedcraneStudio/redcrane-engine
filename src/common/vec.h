@@ -153,4 +153,41 @@ namespace game
   {
     return v1.x * v2.x + v1.y * v2.y;
   }
+
+  template <typename T> inline auto
+  project_onto_pt_axes(Vec<T> initial, Vec<T> endpt) noexcept -> decltype(auto)
+  {
+    // Direction to end point from initial.
+    auto to_endpt_dir = normalize(endpt - initial);
+
+    // Find that angle.
+    auto angle = std::atan2(to_endpt_dir.y, to_endpt_dir.x);
+
+    Vec<float> ret{};
+
+    if(-M_PI / 4 < angle && angle < M_PI / 4)
+    {
+      ret.x = 1.0f;
+      ret.y = 0.0f;
+    }
+    else if(M_PI / 4 < angle && angle < M_PI * 3 / 4)
+    {
+      ret.x = 0.0f;
+      ret.y = 1.0f;
+    }
+    else if(-M_PI * 3 / 4 < angle && angle < -M_PI / 4)
+    {
+      ret.x = 0.0f;
+      ret.y = -1.0f;
+    }
+    else
+    {
+      ret.x = -1.0f;
+      ret.y = 0.0f;
+    }
+
+    // We don't want to normalize this one
+    auto to_endpt_full = endpt - initial;
+    return ret * dot(ret, to_endpt_full) + initial;
+  }
 }
