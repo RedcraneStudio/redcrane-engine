@@ -208,7 +208,12 @@ int main(int argc, char** argv)
 
   {
   // Make an OpenGL driver.
-  gfx::gl::Driver driver{Vec<int>{1000, 1000}};
+
+  // Don't rely on any window resolution. Query it again.
+  // After this, we'll query the driver for the real size.
+  int window_width, window_height;
+  glfwGetWindowSize(window, &window_width, &window_height);
+  gfx::gl::Driver driver{Vec<int>{window_width, window_height}};
 
   // Load our default shader.
   auto default_shader = driver.make_shader_repr();
