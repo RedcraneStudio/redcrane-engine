@@ -72,13 +72,16 @@ namespace game
       }
       return glm::mat4(1.0);
     }
-    Camera make_isometric_camera() noexcept
+    Camera make_isometric_camera(IDriver const& driver) noexcept
     {
       auto cam = Camera{};
 
+      auto win_size = driver.window_extents();
+
       cam.projection_mode = Camera_Type::Perspective;
       cam.perspective = Perspective_Cam_Params{glm::radians(50.0f),
-                                               1.0f, .01f, 100.0f};
+                                               win_size.x / (float) win_size.y,
+                                               .01f, 100.0f};
 
       cam.definition = Camera_Definition::Pitch_Yaw_Pos;
       cam.fp.pos = glm::vec3(5, 5, 5);
@@ -87,13 +90,16 @@ namespace game
 
       return cam;
     }
-    Camera make_fps_camera() noexcept
+    Camera make_fps_camera(IDriver const& driver) noexcept
     {
       auto cam = Camera{};
 
+      auto win_size = driver.window_extents();
+
       cam.projection_mode = Camera_Type::Perspective;
       cam.perspective = Perspective_Cam_Params{glm::radians(50.0f),
-                                               1.0f, .01f, 25.0f};
+                                               win_size.x / (float) win_size.y,
+                                               .01f, 25.0f};
 
       cam.definition = Camera_Definition::Pitch_Yaw_Pos;
       cam.fp.pos = glm::vec3(0.0);

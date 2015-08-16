@@ -118,7 +118,7 @@ int main(int argc, char** argv)
     auto scene = gfx::load_scene("scene/fps.json", std::move(scene_mesh));
 
     // Make an fps camera.
-    auto cam = gfx::make_fps_camera();
+    auto cam = gfx::make_fps_camera(driver);
     cam.fp.pos = scene.player_pos;
 
     auto cam_controller = fps::Camera_Controller{};

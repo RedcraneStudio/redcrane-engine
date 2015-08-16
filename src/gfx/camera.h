@@ -77,10 +77,10 @@ namespace game
     glm::mat4 camera_view_matrix(Camera const& cam) noexcept;
     glm::mat4 camera_proj_matrix(Camera const& cam) noexcept;
 
-    Camera make_isometric_camera() noexcept;
-    Camera make_fps_camera() noexcept;
-
     struct IDriver;
+    Camera make_isometric_camera(IDriver const& driver) noexcept;
+    Camera make_fps_camera(IDriver const& driver) noexcept;
+
     void use_camera(IDriver& driver, Camera const& cam) noexcept;
 
     /*!
