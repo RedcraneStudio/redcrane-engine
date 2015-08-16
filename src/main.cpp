@@ -383,11 +383,7 @@ int main(int argc, char** argv)
     }
     for(auto const& wall : game_state.map.walls)
     {
-      for(auto pt : wall.points)
-      {
-        // For every point in the wall, render a lot.
-        render_structure(driver, structures[2], pt);
-      }
+      render_wall(driver, wall, structures[2]);
     }
 
     //ir.render(cam);

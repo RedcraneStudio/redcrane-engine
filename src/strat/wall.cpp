@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <cmath>
 
+#include "map.h"
+#include "structure.h"
+
 #include "../common/log.h"
 
 #include <glm/glm.hpp>
@@ -38,6 +41,8 @@ namespace game { namespace strat
 
     use_segment_point(segment.indices.first, wall, pending_wall.pos);
     use_segment_point(segment.indices.second, wall, map_end);
+
+    wall.segments.push_back(segment);
   }
 
   Vec<float> pending_wall_end_pt(Pending_Wall const& pending_wall,
@@ -71,6 +76,32 @@ namespace game { namespace strat
     distance += unit_size * units;
 
     return normalize(pt - pending_wall.pos) * distance + pending_wall.pos;
+  }
+
+  void render_wall(gfx::IDriver& driver, Wall const& wall,
+                   Structure const& wall_struct) noexcept
+  {
+    for(auto const& segment : wall.segments)
+    {
+      auto fp = wall.points[segment.indices.first];
+      auto sp = wall.points[segment.indices.second];
+
+      auto vec = sp - fp;
+      auto distance = length(vec);
+
+      // How many things do we render?
+      auto unit_size = segment.type.unit_size;
+      auto units = (int) std::round(distance / unit_size);
+
+      auto normal_vec = normalize(vec);
+      // TODO: Make this much more efficient
+      auto accum = 0.0;
+      for(int unit_i = 0; unit_i < units; ++unit_i)
+      {
+        render_structure(driver, wall_struct, (normal_vec * accum) + fp);
+        accum += unit_size;
+      }
+    }
   }
 
 #if 0

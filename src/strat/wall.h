@@ -9,6 +9,8 @@
 
 #include "../common/vec.h"
 
+#include "../gfx/idriver.h"
+
 namespace game { namespace strat
 {
   struct Wall_Type
@@ -55,4 +57,9 @@ namespace game { namespace strat
   // point.
   Vec<float> pending_wall_end_pt(Pending_Wall const& pending_wall,
                                  Vec<float> const& map_pt) noexcept;
+
+  // TODO: Move all the render_* somewhere other than scattering them across
+  // stratlib
+  struct Structure;
+  void render_wall(gfx::IDriver&, Wall const&, Structure const&) noexcept;
 } }
