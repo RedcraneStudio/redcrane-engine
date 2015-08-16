@@ -62,6 +62,7 @@ struct Glfw_User_Data
 {
   game::gfx::IDriver& driver;
   game::gfx::Camera& camera;
+  game::ui::Element& root_hud;
   game::ui::Mouse_State& mouse_state;
 };
 
@@ -147,6 +148,8 @@ void resize_callback(GLFWwindow* window, int width, int height)
   user_ptr.camera.perspective.aspect = width / (float) height;
 
   // Perhaps relayout the hud here?
+  user_ptr.root_hud.layout(game::Vec<int>{width, height});
+
 }
 
 
@@ -298,7 +301,7 @@ int main(int argc, char** argv)
 
   // TODO: Put the camera somewhere else / Otherwise clean up the distinction
   // and usage of Glfw_User_Data, Game_State and Player_State.
-  auto glfw_user_data = Glfw_User_Data{driver, game_state.cam, cur_mouse};
+  auto glfw_user_data = Glfw_User_Data{driver,game_state.cam, *hud, cur_mouse};
   glfwSetWindowUserPointer(window, &glfw_user_data);
 
   while(!glfwWindowShouldClose(window))
