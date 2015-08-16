@@ -43,7 +43,34 @@ namespace game { namespace strat
   Vec<float> pending_wall_end_pt(Pending_Wall const& pending_wall,
                                  Vec<float> const& map) noexcept
   {
-    return project_onto_pt_axes(pending_wall.pos, map);
+    // Project the point onto an axis aligned with the pending wall origin
+    auto pt = project_onto_pt_axes(pending_wall.pos, map);
+
+    // Round the value to the nearest log, distance wise
+    auto distance = length(pt - pending_wall.pos);
+
+    auto unit_size = pending_wall.type.unit_size;
+    int units = 0;
+    while(distance > unit_size)
+    {
+      distance -= unit_size;
+      ++units;
+    }
+    // Distance is between 0 and unit_size.
+    if(distance < unit_size / 2)
+    {
+      // Distance is closer to 0
+      distance = 0;
+    }
+    else
+    {
+      // It's closer to unit size.
+      distance = unit_size;
+    }
+    // Add back all that we subtracted to get the final distance.
+    distance += unit_size * units;
+
+    return normalize(pt - pending_wall.pos) * distance + pending_wall.pos;
   }
 
 #if 0

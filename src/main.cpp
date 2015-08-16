@@ -298,7 +298,7 @@ int main(int argc, char** argv)
   hud->find_child_r("build_wall")->on_step_mouse(
     ui::On_Release_Handler{[&](auto const& ms)
     {
-      strat::Wall_Type type{1, .5f};
+      strat::Wall_Type type{1, structures[2].aabb().width};
       player_state.switch_state<strat::Wall_Building_State>(type);
     }});
 
