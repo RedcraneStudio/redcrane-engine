@@ -257,7 +257,7 @@ int main(int argc, char** argv)
   Maybe_Owned<Mesh> structure_mesh = driver.make_mesh_repr();
 
   strat::Game_State game_state{&driver, gfx::make_isometric_camera(driver),
-                        strat::Map{{1000, 1000}}}; // <-- Map size for now
+                               strat::Map{{1000, 1000}}}; // <-Map size for now
 
   strat::Player_State player_state{game_state};
 
