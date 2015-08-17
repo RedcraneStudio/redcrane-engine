@@ -75,4 +75,30 @@ namespace ui
     Vec<float> prev_pos_;
     Vec<float> map_pos_;
   };
+
+  struct Camera_Orientation_Helper
+  {
+    explicit Camera_Orientation_Helper(gfx::Camera& c, float x_speed = .001,
+                                       float y_speed = .001,
+                                       Mouse_Button btn = Mouse_Button_Middle)
+                                       noexcept : camera_(c), btn_(btn),
+                                      x_speed_(x_speed), y_speed_(y_speed) {}
+    void step_mouse(Mouse_State const& ms) noexcept;
+
+    void reset() noexcept { cur_state_ = Cur_State::Start; }
+    bool done() noexcept { return cur_state_ == Cur_State::Done; }
+  private:
+    gfx::Camera& camera_;
+    Mouse_Button btn_;
+
+    enum class Cur_State
+    {
+      Start, Clicked, Released, Almost_Done, Done
+    } cur_state_ = Cur_State::Start;
+
+    float x_speed_;
+    float y_speed_;
+
+    Vec<float> old_pos_;
+  };
 } }

@@ -69,7 +69,7 @@ namespace game { namespace strat
     Nothing_State(Player_State& p_state, Game_State& g_state,
                   Vec<float> op = Vec<float>{0.0f,0.0f}) noexcept
       : Player_State_Impl(p_state, g_state), op_(op),
-        cam_rot_(*g_state.driver, g_state.cam) {}
+        cam_rot_(*g_state.driver, g_state.cam), cam_orient_(g_state.cam) {}
     //-----TODO: ^ Should be a reference like camera, etc probably.
     void step_mouse(Mouse_State const& state) noexcept override;
 
@@ -78,6 +78,7 @@ namespace game { namespace strat
     Vec<float> op_;
 
     ui::Camera_Rotation_Helper cam_rot_;
+    ui::Camera_Orientation_Helper cam_orient_;
   };
 
   struct Building_State : public Player_State_Impl

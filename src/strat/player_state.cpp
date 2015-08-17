@@ -20,6 +20,8 @@ namespace game { namespace strat
     op_ = ns.position;
 
     cam_rot_.step_mouse(ns);
+    cam_orient_.step_mouse(ns);
+    if(cam_orient_.done()) cam_orient_.reset();
   }
 
   void Building_State::step_mouse(Mouse_State const& ms) noexcept

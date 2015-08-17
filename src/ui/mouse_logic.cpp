@@ -88,4 +88,33 @@ namespace game { namespace ui
       prev_pos_ = ms.position;
     }
   }
+  void Camera_Orientation_Helper::step_mouse(Mouse_State const& ms) noexcept
+  {
+    if(ms.buttons & btn_ && cur_state_ == Cur_State::Start)
+    {
+      cur_state_ = Cur_State::Clicked;
+    }
+    else if(~ms.buttons & btn_ && cur_state_ == Cur_State::Clicked)
+    {
+      cur_state_ = Cur_State::Released;
+    }
+    else if(ms.buttons & btn_ && cur_state_ == Cur_State::Released)
+    {
+      cur_state_ = Cur_State::Almost_Done;
+    }
+    else if(~ms.buttons & btn_ && cur_state_ == Cur_State::Almost_Done)
+    {
+      cur_state_ = Cur_State::Done;
+    }
+
+    if(cur_state_ == Cur_State::Released || cur_state_ == Cur_State::Clicked)
+    {
+      auto dif = ms.position - old_pos_;
+
+      camera_.fp.pitch += dif.y * y_speed_;
+      camera_.fp.yaw += dif.x * x_speed_;
+    }
+
+    old_pos_ = ms.position;
+  }
 } }
