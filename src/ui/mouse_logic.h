@@ -50,4 +50,29 @@ namespace game { namespace ui
     Mouse_Button button_;
     bool clicked_;
   };
+}
+// Forward declare this stuff.
+namespace gfx { struct IDriver; struct Camera; }
+namespace ui
+{
+  // Requires first person mode in camera. TODO Assert this in code.
+  struct Camera_Rotation_Helper
+  {
+    // Speed is in radians/pixel of mouse movement, I think.
+    Camera_Rotation_Helper(gfx::IDriver& d, gfx::Camera& c,
+                           float speed = .001f,
+                           Mouse_Button btn = Mouse_Button_Right) noexcept
+                           : driver_(d), camera_(c), speed_(speed), btn_(btn){}
+    void step_mouse(Mouse_State const& ms) noexcept;
+  private:
+    gfx::IDriver& driver_;
+    gfx::Camera& camera_;
+    float speed_;
+    Mouse_Button btn_;
+
+    bool clicked_;
+
+    Vec<float> prev_pos_;
+    Vec<float> map_pos_;
+  };
 } }

@@ -18,6 +18,8 @@ namespace game { namespace strat
       gfx::apply_pan(g_state_->cam, ns.position, op_, *g_state_->driver);
     }
     op_ = ns.position;
+
+    cam_rot_.step_mouse(ns);
   }
 
   void Building_State::step_mouse(Mouse_State const& ms) noexcept
