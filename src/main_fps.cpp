@@ -91,8 +91,8 @@ int main(int argc, char** argv)
     gfx::gl::Driver driver{Vec<int>{1000, 1000}};
 
     auto shader = driver.make_shader_repr();
-    shader->load_vertex_part("shader/basic/v");
-    shader->load_fragment_part("shader/basic/f");
+    shader->load_vertex_part("shader/basic/vs");
+    shader->load_fragment_part("shader/basic/fs");
 
     // We need to get rid of dependency on these in the future.
     shader->set_diffuse_name("dif");

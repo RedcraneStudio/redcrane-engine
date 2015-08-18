@@ -219,8 +219,8 @@ int main(int argc, char** argv)
 
   // Load our default shader.
   auto default_shader = driver.make_shader_repr();
-  default_shader->load_vertex_part("shader/basic/v");
-  default_shader->load_fragment_part("shader/basic/f");
+  default_shader->load_vertex_part("shader/basic/vs");
+  default_shader->load_fragment_part("shader/basic/fs");
 
   default_shader->set_projection_name("proj");
   default_shader->set_view_name("view");

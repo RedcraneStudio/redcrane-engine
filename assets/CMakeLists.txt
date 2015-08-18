@@ -6,14 +6,14 @@ add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     obj/govnm_building.obj obj/fps_terrain.obj
                     obj/vertical_log.obj
                     scene/default.json structure/structures.json
-                    shader/basic/f shader/basic/v
-                    shader/hud/f shader/hud/v
+                    shader/basic/fs shader/basic/vs
+                    shader/hud/fs shader/hud/vs
+                    shader/debug/vs shader/debug/fs
                     tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
                     tex/bark.png
                     ui/hud.json obj/terrain.obj mat/terrain.json
                     map/default.png scene/fps.json tex/yurt_skin.png
-                    tex/combined_building_textures.png
-                    shader/debug/v shader/debug/f)
+                    tex/combined_building_textures.png)
 
 include(convert_files)
 

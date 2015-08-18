@@ -12,8 +12,8 @@ namespace game { namespace gfx
   {
     // Somehow manage these resources in a better way?
     // Or otherwise declare this data in json?
-    hud_shader_->load_vertex_part("shader/hud/v");
-    hud_shader_->load_fragment_part("shader/hud/f");
+    hud_shader_->load_vertex_part("shader/hud/vs");
+    hud_shader_->load_fragment_part("shader/hud/fs");
 
     hud_shader_->set_projection_name("ortho");
     hud_shader_->set_diffuse_name("dif");
