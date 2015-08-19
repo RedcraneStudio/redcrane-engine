@@ -29,9 +29,10 @@ namespace game { namespace strat
     return texture_;
   }
 
-  std::vector<Structure> load_structures(std::string filename,
-                                         Maybe_Owned<Mesh> mesh,
-                                         gfx::IDriver& driver) noexcept
+  std::vector<Structure>
+  load_structures(std::string filename, Maybe_Owned<Mesh> mesh,
+                  gfx::IDriver& driver,
+                  std::vector<Indexed_Mesh_Data>* imd) noexcept
   {
     GAME_LOG_ATTEMPT_INIT();
 
@@ -106,6 +107,9 @@ namespace game { namespace strat
       // Record how far off we went into the mesh.
       accum_vertex_off += structure_data[i].vertices.size();
       accum_element_off += structure_data[i].elements.size();
+
+      // Add the mesh data to the vector if the client code wants that.
+      if(imd) imd->push_back(std::move(structure_data[i]));
 
       log_d("Loaded structure: '%' - '%'", name, desc);
 

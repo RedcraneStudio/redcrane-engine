@@ -379,7 +379,10 @@ int main(int argc, char** argv)
     if(game_state.map.pending_wall)
     {
       // Render the structure at the pending wall point.
-      render_structure(driver,structures[2],game_state.map.pending_wall->pos);
+      auto pos = game_state.map.pending_wall->pos;
+      glm::mat4 model = glm::translate(glm::mat4(1.0f),
+                                       glm::vec3(pos.x, 0.0f, pos.y));
+      render_structure(driver, structures[2], model);
     }
     for(auto const& wall : game_state.map.walls)
     {

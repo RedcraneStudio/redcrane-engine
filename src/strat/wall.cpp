@@ -13,6 +13,7 @@
 #include "../common/log.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace game { namespace strat
 {
@@ -98,7 +99,10 @@ namespace game { namespace strat
       auto accum = 0.0;
       for(int unit_i = 0; unit_i < units; ++unit_i)
       {
-        render_structure(driver, wall_struct, (normal_vec * accum) + fp);
+        auto pos = (normal_vec * accum) + fp;
+        glm::mat4 model = glm::translate(glm::mat4(1.0f),
+                                        glm::vec3(pos.x, 0.0f, pos.y));
+        render_structure(driver, wall_struct, model);
         accum += unit_size;
       }
     }

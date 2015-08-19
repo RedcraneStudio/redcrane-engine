@@ -10,7 +10,7 @@
 namespace game { namespace strat
 {
   Structure_Instance::Structure_Instance(Structure const& s, pos_t p) noexcept
-    : position(p), s_type_(&s){}
+    : pos_(p), s_type_(&s){}
 
   void Structure_Instance::set_structure_type(Structure const& s) noexcept
   {
@@ -21,15 +21,46 @@ namespace game { namespace strat
     return *s_type_;
   }
 
-  void render_structure(gfx::IDriver& d, Structure const& st,
-                        pos_t pos) noexcept
+  pos_t Structure_Instance::position() const noexcept
   {
-    glm::mat4 model = glm::translate(glm::mat4(1.0f),
-                      glm::vec3(pos.x, 0.0f, pos.y));
+    return pos_;
+  }
+  void Structure_Instance::position(pos_t const& pos) noexcept
+  {
+    pos_ = pos;
+    model_cache_ = boost::none;
+  }
 
-    auto ray = ray_to_structure_bottom_center(st);
-    model = glm::translate(model, -ray);
+  float Structure_Instance::y_rot() const noexcept
+  {
+    return y_rot_;
+  }
+  void Structure_Instance::y_rot(float y) noexcept
+  {
+    y_rot_ = y;
+    model_cache_ = boost::none;
+  }
 
+  glm::mat4 Structure_Instance::model_matrix() const noexcept
+  {
+    if(!model_cache_)
+    {
+      auto model = glm::mat4(1.0f);
+
+      auto ray = ray_to_structure_bottom_center(structure());
+      model = glm::translate(model, -ray);
+
+      model = glm::translate(model, glm::vec3(pos_.x, 0.0f, pos_.y));
+      model = glm::rotate(model, y_rot_, glm::vec3(0.0f, 1.0f, 0.0f));
+
+      model_cache_ = model;
+    }
+    return *model_cache_;
+  }
+
+  void render_structure(gfx::IDriver& d, Structure const& st,
+                        glm::mat4 model) noexcept
+  {
     d.bind_texture(*st.texture(), 0);
     d.active_shader()->set_model(model);
 
@@ -45,8 +76,8 @@ namespace game { namespace strat
     for(auto const& other_st : map.structures)
     {
       auto aabb = other_st.structure().aabb();
-      aabb.min.x += other_st.position.x;
-      aabb.min.z += other_st.position.y;
+      aabb.min.x += other_st.position().x;
+      aabb.min.z += other_st.position().y;
       aabb.min.y = 0.0f;
       ids.push_back(sap.insert(aabb));
 

@@ -7,6 +7,7 @@
 #include <vector>
 #include "../common/aabb.h"
 #include "../gfx/mesh_chunk.h"
+#include "../gfx/mesh_data.h"
 #include "../gfx/texture.h"
 namespace game
 {
@@ -45,8 +46,9 @@ namespace game
 
     glm::vec3 ray_to_structure_bottom_center(Structure const& s) noexcept;
 
-    std::vector<Structure> load_structures(std::string filename,
-                                           Maybe_Owned<Mesh> mesh,
-                                           gfx::IDriver& driver) noexcept;
+    std::vector<Structure>
+    load_structures(std::string filename, Maybe_Owned<Mesh> mesh,
+                    gfx::IDriver& driver,
+                    std::vector<Indexed_Mesh_Data>* imd=nullptr) noexcept;
   }
 }
