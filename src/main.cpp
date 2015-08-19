@@ -311,6 +311,8 @@ int main(int argc, char** argv)
   auto glfw_user_data = Glfw_User_Data{driver,game_state.cam, *hud, cur_mouse};
   glfwSetWindowUserPointer(window, &glfw_user_data);
 
+  auto shader_light_dir_pos = default_shader->get_location("light_dir");
+
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
@@ -324,6 +326,11 @@ int main(int argc, char** argv)
     // Clear the screen and render the terrain.
     driver.clear();
     use_camera(driver, game_state.cam);
+
+    glm::vec3 shader_light_dir = glm::vec3(camera_proj_matrix(game_state.cam) *
+                                           camera_view_matrix(game_state.cam) *
+                                           glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    default_shader->set_vec3(shader_light_dir_pos, shader_light_dir);
 
     driver.bind_texture(*grass_tex, 0);
 
