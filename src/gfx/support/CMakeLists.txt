@@ -7,7 +7,8 @@ add_library(gfxsupportlib STATIC load_wavefront.cpp software_texture.cpp
                                  location_cache.cpp scoped_shader_lock.cpp
                                  mesh_conversion.cpp write_data_to_mesh.cpp
                                  generate_aabb.cpp allocate.cpp format.cpp
-                                 unproject.cpp load_scene.cpp)
+                                 unproject.cpp load_scene.cpp
+                                 render_normals.cpp)
 target_link_libraries(gfxsupportlib gfxlib commonlib)
 
 target_link_libraries(gfxsupportlib ${LIBPNG_LIBRARIES})
