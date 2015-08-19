@@ -19,7 +19,7 @@ namespace game { namespace gfx
 
     mesh_ = d_->make_mesh_repr();
 
-    pos_buf_ = mesh_->allocate_buffer(4096, Usage_Hint::Draw,
+    pos_buf_ = mesh_->allocate_buffer(50000, Usage_Hint::Draw,
                                       Upload_Hint::Stream);
     mesh_->format_buffer(pos_buf_, 0, 3, Buffer_Format::Float, 0, 0);
     mesh_->enable_vertex_attrib(0);
