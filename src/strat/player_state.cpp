@@ -36,7 +36,10 @@ namespace game { namespace strat
       if(try_structure_place(g_state_->map, *st_, map_pos))
       {
         g_state_->map.pending_structure = boost::none;
-        g_state_->map.structures.push_back({*st_, map_pos});
+
+        // We don't need to insert the structure here because the try structure
+        // place function already does that.
+        // g_state_->map.structures.push_back({*st_, map_pos});
 
         // Tell the nothing state where the mouse *was* so we don't get weird
         // jumps and zooms right after the switch.
