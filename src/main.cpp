@@ -22,6 +22,7 @@
 #include "gfx/support/texture_load.h"
 #include "gfx/support/software_texture.h"
 #include "gfx/support/unproject.h"
+#include "gfx/support/render_normals.h"
 #include "gfx/immediate_renderer.h"
 
 #include "ui/load.h"
@@ -261,9 +262,10 @@ int main(int argc, char** argv)
 
   strat::Player_State player_state{game_state};
 
+  std::vector<Indexed_Mesh_Data> imd_vec;
   auto structures = strat::load_structures("structure/structures.json",
                                            ref_mo(structure_mesh),
-                                           driver);
+                                           driver, &imd_vec);
 
   int fps = 0;
   int time = glfwGetTime();
@@ -313,12 +315,16 @@ int main(int argc, char** argv)
 
   auto shader_light_dir_pos = default_shader->get_location("light_dir");
 
+  gfx::Immediate_Renderer ir{driver};
+  std::size_t st_size = game_state.map.structures.size();
   while(!glfwWindowShouldClose(window))
   {
     ++fps;
 
     // Reset the scroll delta
     cur_mouse.scroll_delta = 0.0;
+
+    if(st_size != game_state.map.structures.size()) ir.reset();
 
     // Update the mouse state.
     glfwPollEvents();
@@ -380,6 +386,18 @@ int main(int argc, char** argv)
     {
       // TODO: Find/store correct y somehow?
       render_structure_instance(driver, st);
+
+      if(st_size != game_state.map.structures.size())
+      {
+        if(&st.structure() == &structures[0])
+        {
+          gfx::render_normals(ir, imd_vec[0], st.model_matrix());
+        }
+        else if(&st.structure() == &structures[1])
+        {
+          gfx::render_normals(ir, imd_vec[1], st.model_matrix());
+        }
+      }
     }
 
     // Render walls
@@ -396,7 +414,7 @@ int main(int argc, char** argv)
       render_wall(driver, wall, structures[2]);
     }
 
-    //ir.render(cam);
+    ir.render(game_state.cam);
 
     {
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
@@ -413,6 +431,8 @@ int main(int argc, char** argv)
     }
 
     flush_log();
+
+    st_size = game_state.map.structures.size();
   }
   }
   glfwTerminate();
