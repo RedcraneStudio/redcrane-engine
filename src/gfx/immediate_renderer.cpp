@@ -79,9 +79,11 @@ namespace game { namespace gfx
       aabb.min.x,              aabb.min.y+aabb.height, aabb.min.z + aabb.depth,
     };
 
-    auto count_bytes = sizeof(float) * positions.size();
-    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
-    pos_pos_ += count_bytes;
+    mesh_->buffer_data(pos_buf_,
+                       pos_pos_ * 3 * sizeof(float), // Each indice = 3 floats.
+                       sizeof(float) * positions.size(), // Size in bytes
+                       &positions[0]);
+    pos_pos_ += 24;
   }
   void Immediate_Renderer::draw_line(glm::vec3 const& pt1,
                                      glm::vec3 const& pt2) noexcept
@@ -91,9 +93,10 @@ namespace game { namespace gfx
       pt1.x, pt1.y, pt1.z,
       pt2.x, pt2.y, pt2.z
     };
-    auto count_bytes = sizeof(float) * positions.size();
-    mesh_->buffer_data(pos_buf_, pos_pos_, count_bytes, &positions[0]);
-    pos_pos_ += count_bytes;
+
+    mesh_->buffer_data(pos_buf_, pos_pos_ * 3 * sizeof(float),
+                       sizeof(float) * positions.size(), &positions[0]);
+    pos_pos_ += 2;
   }
 
   void Immediate_Renderer::reset() noexcept
