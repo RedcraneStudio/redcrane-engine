@@ -31,5 +31,7 @@ namespace game { namespace gfx
     std::unique_ptr<Mesh> mesh_;
 
     Color cur_dif_;
+
+    std::size_t buf_size_;
   };
 } }

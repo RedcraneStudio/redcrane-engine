@@ -19,7 +19,8 @@ namespace game { namespace gfx
 
     mesh_ = d_->make_mesh_repr();
 
-    pos_buf_ = mesh_->allocate_buffer(50000, Usage_Hint::Draw,
+    buf_size_ = 50000;
+    pos_buf_ = mesh_->allocate_buffer(buf_size_, Usage_Hint::Draw,
                                       Upload_Hint::Stream);
     mesh_->format_buffer(pos_buf_, 0, 3, Buffer_Format::Float, 0, 0);
     mesh_->enable_vertex_attrib(0);
@@ -79,10 +80,12 @@ namespace game { namespace gfx
       aabb.min.x,              aabb.min.y+aabb.height, aabb.min.z + aabb.depth,
     };
 
-    mesh_->buffer_data(pos_buf_,
-                       pos_pos_ * 3 * sizeof(float), // Each indice = 3 floats.
-                       sizeof(float) * positions.size(), // Size in bytes
-                       &positions[0]);
+    auto offset = pos_pos_ * 3 * sizeof(float); // Each indice = 3 floats.
+    auto count = positions.size() * sizeof(float); // Size in bytes
+
+    if(buf_size_ < offset + count) return; // Overflow!
+
+    mesh_->buffer_data(pos_buf_, offset, count, &positions[0]);
     pos_pos_ += 24;
   }
   void Immediate_Renderer::draw_line(glm::vec3 const& pt1,
@@ -94,8 +97,12 @@ namespace game { namespace gfx
       pt2.x, pt2.y, pt2.z
     };
 
-    mesh_->buffer_data(pos_buf_, pos_pos_ * 3 * sizeof(float),
-                       sizeof(float) * positions.size(), &positions[0]);
+    auto offset = pos_pos_ * 3 * sizeof(float);
+    auto count = positions.size() * sizeof(float);
+
+    if(buf_size_ < offset + count) return; // Overflow!
+
+    mesh_->buffer_data(pos_buf_, offset, count, &positions[0]);
     pos_pos_ += 2;
   }
 
