@@ -2,13 +2,12 @@
 
 layout(location = 0) out vec4 diffuse_out;
 
-in vec3 normal;
 in vec2 uv;
-
-uniform vec4 dif;
-uniform sampler2D tex;
+in vec3 normal_world;
 
 uniform vec3 light_dir;
+uniform vec4 dif;
+uniform sampler2D tex;
 
 void main()
 {
@@ -18,5 +17,7 @@ void main()
   diffuse_out.b *= dif.b;
   diffuse_out.a = 1.0;
 
-  diffuse_out *= max(.7, dot(normalize(normal), normalize(light_dir)));
+  float light_intensity = dot(normalize(normal_world), light_dir);
+  float ambient_intensity = .85f;
+  diffuse_out *= max(light_intensity, ambient_intensity);
 }
