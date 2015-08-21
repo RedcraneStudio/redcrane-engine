@@ -26,6 +26,7 @@ find_package(Freetype REQUIRED)
 add_subdirectory(ui)
 
 add_subdirectory(strat)
+add_subdirectory(procedural)
 
 add_subdirectory(collisionlib)
 
