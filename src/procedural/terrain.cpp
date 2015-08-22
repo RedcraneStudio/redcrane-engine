@@ -16,17 +16,28 @@ extern "C"
 
 namespace game { namespace strat
 {
-  void gen_noise_heightmap(int64_t seed, Value_Map<float>& map) noexcept
+  void gen_noise_heightmap(Value_Map<float>& map, Terrain_Params tp) noexcept
   {
     osn_context* context;
-    open_simplex_noise(seed, &context);
+    open_simplex_noise(tp.seed, &context);
 
-    for(int i = 0; i < map.extents.x * map.extents.y; ++i)
+    auto half_extents = map.extents / 2;
+
+    auto freq = tp.base_frequency;
+    auto amplitude = tp.base_amplitude;
+    for(int octave_i = 0; octave_i < tp.octaves; ++octave_i)
     {
-      auto x = i % map.extents.x;
-      auto y = i / map.extents.x;
+      for(int map_i = 0; map_i < map.extents.x * map.extents.y; ++map_i)
+      {
+        auto x = map_i % map.extents.x;
+        auto y = map_i / map.extents.x;
 
-      open_simplex_noise2(context, x, y);
+        map.values[map_i] +=
+          open_simplex_noise2(context, x * freq, y * freq) * amplitude;
+      }
+
+      freq *= 2;
+      amplitude /= 2;
     }
 
     open_simplex_noise_free(context);
