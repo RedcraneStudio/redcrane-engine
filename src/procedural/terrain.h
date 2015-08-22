@@ -10,4 +10,7 @@ namespace game { namespace strat
 {
   // The value map should have been allocated.
   void gen_noise_heightmap(int64_t seed, Value_Map<float>& map) noexcept;
+
+  void write_png_heightmap(Value_Map<float> const& map,
+                           std::string const&) noexcept;
 } }
