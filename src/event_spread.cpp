@@ -79,7 +79,7 @@ int main(int argc, char** argv) noexcept
   // Could this be part of the interface of Event_Map?
   event_map.event_timer_map.at({0,0}).active = true;
 
-  strat::Value_Map<char> cmap;
+  Value_Map<char> cmap;
   cmap.allocate(map_size);
 
   using clock_t = chrono::high_resolution_clock;

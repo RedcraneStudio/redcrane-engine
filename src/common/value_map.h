@@ -5,7 +5,7 @@
 #pragma once
 #include <cstring>
 #include "../common/vec.h"
-namespace game { namespace strat
+namespace game
 {
   template <class T>
   struct Value_Map
@@ -48,4 +48,4 @@ namespace game { namespace strat
     return 0 <= pos.x && pos.x < vm.extents.x &&
            0 <= pos.y && pos.y < vm.extents.y;
   };
-} }
+}
