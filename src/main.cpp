@@ -10,6 +10,7 @@
 #include <future>
 
 #include "common/log.h"
+#include "common/value_map.h"
 
 #include "gfx/gl/driver.h"
 #include "gfx/camera.h"
@@ -36,6 +37,8 @@
 #include "strat/water.h"
 #include "strat/terrain.h"
 #include "strat/player_state.h"
+
+#include "procedural/terrain.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -164,6 +167,14 @@ int main(int argc, char** argv)
 
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
+
+  Value_Map<float> ter_height;
+  ter_height.allocate({128,128});
+
+  strat::Terrain_Params params{std::rand(), 1, 1.0f / 64.0f, 1.5f};
+
+  strat::gen_noise_heightmap(ter_height, params);
+  strat::write_png_heightmap(ter_height, "../output.png");
 
   // Error callback
   glfwSetErrorCallback(error_callback);

@@ -33,7 +33,8 @@ add_subdirectory(collisionlib)
 find_package(Threads REQUIRED)
 
 add_executable(strategy main.cpp)
-target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib)
+target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
+                               procedurallib)
 target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
 
 
