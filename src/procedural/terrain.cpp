@@ -8,42 +8,89 @@
 
 #include "../common/log.h"
 
-extern "C"
-{
-  #include "open-simplex-noise.h"
-}
 #include <png.h>
+
+#include "../common/debugging.h"
 
 namespace game { namespace strat
 {
-  void gen_noise_heightmap(Value_Map<float>& map, Terrain_Params tp) noexcept
+  Noise_Raii::Noise_Raii(int64_t seed, osn_context** ptr) noexcept
   {
-    osn_context* context;
-    open_simplex_noise(tp.seed, &context);
-
-    auto half_extents = map.extents / 2;
-
-    auto freq = tp.base_frequency;
-    auto amplitude = tp.base_amplitude;
-    for(int octave_i = 0; octave_i < tp.octaves; ++octave_i)
+    // Pointer to an empty pointer given, allocate it and point our parameter
+    // to it.
+    if(!(*ptr))
     {
-      for(int map_i = 0; map_i < map.extents.x * map.extents.y; ++map_i)
-      {
-        auto x = map_i % map.extents.x;
-        auto y = map_i / map.extents.x;
-
-        map.values[map_i] +=
-          open_simplex_noise2(context, x * freq, y * freq) * amplitude;
-      }
-
-      freq *= 2;
-      amplitude /= 2;
+      open_simplex_noise(seed, ptr);
+      ptr_ = *ptr;
+      allocated_ = true;
     }
+    else allocated_ = false;
 
-    open_simplex_noise_free(context);
+    // If the ptr was valid it doesn't need to be initialized so don't do it.
+
+  }
+  Noise_Raii::~Noise_Raii() noexcept
+  {
+    if(allocated_) open_simplex_noise_free(ptr_);
   }
 
-  void write_png_heightmap(Value_Map<float> const& map,
+  // This function could be run alone.
+  void terrain_v1_radial_land(Grid_Map& map, Terrain_Params const& tp) noexcept
+  {
+    osn_context* osn = nullptr;
+    auto noise_init = Noise_Raii{tp.seed, &osn};
+
+    for(int i = 0; i < map.extents.y; ++i)
+    {
+      for(int j = 0; j < map.extents.x; ++j)
+      {
+        // Point from the continent origin to here.
+        Vec<float> to_here = Vec<int>{j, i} - tp.origin;
+        auto to_here_dir = normalize(to_here);
+
+        // Tp size is more like diameter, but not necessarily any particular
+        // value.
+        auto radius = tp.size / 2.0f;
+
+        // Given the direction and radius find the circle edge. This value
+        // should be the same for every vector with equal direction, but not
+        // necessarily length.
+        auto circle_edge = tp.origin + to_here_dir * radius;
+
+        // Angle from origin
+        auto angle = std::atan2(to_here_dir.y, to_here_dir.x);
+        // Get a small delta from the angle. We will use this to modify the
+        auto delta = open_simplex_noise2(osn, to_here_dir.y,
+                                         to_here_dir.x) * tp.radial.amplitude;
+
+        auto modified_radius = radius + delta;
+
+        // This tile is land.
+        if(length(to_here) < modified_radius)
+        {
+          map.values[i * map.extents.x + j].type = Cell_Type::Land;
+        }
+        else
+        {
+          map.values[i * map.extents.x + j].type = Cell_Type::Water;
+        }
+      }
+    }
+  }
+
+  void terrain_v1_map(Grid_Map& map, Terrain_Params const& ter_params) noexcept
+  {
+    switch(ter_params.algorithm)
+    {
+    case Landmass_Algorithm::Radial:
+      terrain_v1_radial_land(map, ter_params);
+      break;
+    case Landmass_Algorithm::Other:
+      ter_params.other.gen_fn(map, ter_params);
+    }
+  }
+
+  void write_png_heightmap(Grid_Map const& map,
                            std::string const& filename) noexcept
   {
     // All this code is pretty much based completely on the libpng manual so
@@ -93,8 +140,11 @@ namespace game { namespace strat
       ptrs.push_back(new uint8_t[map.extents.x * 3]);
       for(int j = 0; j < map.extents.x; ++j)
       {
-        auto fl_val = (map.values[i * map.extents.x + j] + 1.0f) / 2.0f;
-        uint8_t value = std::max(0.0f, std::min(fl_val * 0xff, (float) 0xff));
+        uint8_t value = 0xff;
+        if(map.values[i * map.extents.x + j].type == Cell_Type::Water)
+        {
+          value = 0;
+        }
         ptrs.back()[j * 3] = value;
         ptrs.back()[j * 3 + 1] = value;
         ptrs.back()[j * 3 + 2] = value;

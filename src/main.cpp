@@ -168,13 +168,20 @@ int main(int argc, char** argv)
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
 
-  Value_Map<float> ter_height;
-  ter_height.allocate({128,128});
+  strat::Grid_Map grid_map;
+  grid_map.allocate({128,128});
 
-  strat::Terrain_Params params{std::rand(), 1, 1.0f / 64.0f, 1.5f};
+  std::random_device rnd{};
+  auto prng = std::mt19937{rnd()};
 
-  strat::gen_noise_heightmap(ter_height, params);
-  strat::write_png_heightmap(ter_height, "../output.png");
+  strat::Terrain_Params params{(int64_t) prng(), {64,64}, 88.0f,
+                              strat::Landmass_Algorithm::Radial,
+                              strat::Radial_Landmass{30.0f}};
+
+  log_i("Seeding with %", params.seed);
+
+  strat::terrain_v1_map(grid_map, params);
+  strat::write_png_heightmap(grid_map, "../output.png");
 
   // Error callback
   glfwSetErrorCallback(error_callback);
