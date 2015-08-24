@@ -52,8 +52,10 @@ namespace game { namespace strat
         // value.
         auto radius = tp.size / 2.0f;
 
-        // Angle from origin
-        auto angle = std::atan2(to_here_dir.y, to_here_dir.x);
+        // Angle is not used or passed into the noise function because at 2pi
+        // radians it goes from +pi to -pi causing a discontinuity in the land
+        // mass.
+
         // Get a small delta from the angle. We will use this to modify the
         auto delta = open_simplex_noise2(osn, to_here_dir.y,
                                          to_here_dir.x) * tp.radial.amplitude;
