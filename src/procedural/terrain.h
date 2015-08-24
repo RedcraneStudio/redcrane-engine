@@ -46,6 +46,15 @@ namespace game { namespace strat
   struct Radial_Landmass
   {
     float amplitude;
+    float frequency;
+
+    // Multiplied by amplitude after each octave
+    float persistence;
+
+    // Multiplied by frequency after each octave
+    float lacunarity;
+
+    int octaves;
   };
   struct Other_Landmass
   {

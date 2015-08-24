@@ -57,8 +57,16 @@ namespace game { namespace strat
         // mass.
 
         // Get a small delta from the angle. We will use this to modify the
-        auto delta = open_simplex_noise2(osn, to_here_dir.y,
-                                         to_here_dir.x) * tp.radial.amplitude;
+        auto delta = 0.0f;
+        auto amplitude = tp.radial.amplitude;
+        auto frequency = tp.radial.frequency;
+        for(int octave_i = 0; octave_i < tp.radial.octaves; ++octave_i)
+        {
+          delta += open_simplex_noise2(osn, to_here_dir.y * frequency,
+                                       to_here_dir.x * frequency) * amplitude;
+          amplitude *= tp.radial.persistence;
+          frequency *= tp.radial.lacunarity;
+        }
 
         auto modified_radius = radius + delta;
 
