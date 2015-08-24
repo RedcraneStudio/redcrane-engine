@@ -4,4 +4,5 @@
 
 add_library(procedurallib terrain.cpp)
 
-target_link_libraries(procedurallib opensimplex)
+target_link_libraries(procedurallib opensimplex commonlib ${LIBPNG_LIBRARIES})
+target_include_directories(gfxsupportlib PUBLIC ${LIBPNG_INCLUDE_DIRS})
