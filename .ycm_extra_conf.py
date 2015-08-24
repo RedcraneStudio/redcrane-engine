@@ -54,7 +54,8 @@ flags = [
 'gl/include',
 '-I',
 '/usr/include/bullet',
-'-I', '/usr/include/freetype2'
+'-I', '/usr/include/freetype2',
+'-I', 'opensimplex'
 ]
 
 
