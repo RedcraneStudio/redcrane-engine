@@ -52,11 +52,6 @@ namespace game { namespace strat
         // value.
         auto radius = tp.size / 2.0f;
 
-        // Given the direction and radius find the circle edge. This value
-        // should be the same for every vector with equal direction, but not
-        // necessarily length.
-        auto circle_edge = tp.origin + to_here_dir * radius;
-
         // Angle from origin
         auto angle = std::atan2(to_here_dir.y, to_here_dir.x);
         // Get a small delta from the angle. We will use this to modify the
