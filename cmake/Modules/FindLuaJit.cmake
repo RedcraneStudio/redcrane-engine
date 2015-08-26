@@ -5,8 +5,6 @@
 find_library(LuaJit_LIBRARY luajit-5.1)
 find_path(LuaJit_INCLUDE_DIR luajit-2.0/lua.h)
 
-message("Found lua - ${LuaJit_LIBRARY}")
-
 if(APPLE)
   set(LuaJit_COMPILE_OPTIONS "-pagezero_size 10000 -image_base 100000000")
 else()
