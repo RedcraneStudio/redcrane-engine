@@ -15,5 +15,6 @@ include(data_target)
 
 add_subdirectory(gl)
 add_subdirectory(opensimplex)
+add_subdirectory(mods)
 add_subdirectory(src)
 add_subdirectory(assets)
