@@ -14,3 +14,16 @@ function(add_data target all_or_nah)
     install(FILES ${filename} DESTINATION share/${PROJECT_NAME})
   endforeach(filename)
 endfunction()
+
+function(add_data_directory target all)
+  add_custom_target(${target} ${all})
+
+  foreach(dirname ${ARGN})
+    add_custom_command(TARGET ${target} COMMAND ${CMAKE_COMMAND}
+                       ARGS -E copy_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/${dirname}
+                       ${CMAKE_CURRENT_BINARY_DIR}/${dirname}
+                       MAIN_DEPENDENCY ${dirname})
+    install(DIRECTORY ${dirname} DESTINATION share/${PROJECT_NAME})
+  endforeach()
+endfunction()
