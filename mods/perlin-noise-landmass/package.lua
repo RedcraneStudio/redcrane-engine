@@ -3,10 +3,8 @@
 
 terrain_gen = require('terrain_gen')
 
-terrain = {}
-terrain.landmass = {
-    gen = terrain_gen,
-    config = {
-      octaves = 8
-    }
-}
+rc = require('redcrane')
+
+rc.register_terrain_landmass_func(terrain_gen, {
+  octaves = 8
+});
