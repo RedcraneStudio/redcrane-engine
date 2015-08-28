@@ -3,9 +3,10 @@
 
 terrain_gen = require('terrain_gen')
 
+terrain = {}
 terrain.landmass = {
-    gen: terrain_gen,
-    config: {
-      octaves: 8
+    gen = terrain_gen,
+    config = {
+      octaves = 8
     }
 }
