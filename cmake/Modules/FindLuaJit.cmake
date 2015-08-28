@@ -3,7 +3,7 @@
 # All rights reserved.
 
 find_library(LuaJit_LIBRARY luajit-5.1)
-find_path(LuaJit_INCLUDE_DIR luajit-2.0/lua.h)
+find_path(LuaJit_INCLUDE_DIR lua.h PATH_SUFFIXES luajit-2.0)
 
 if(APPLE)
   set(LuaJit_COMPILE_OPTIONS "-pagezero_size 10000 -image_base 100000000")
