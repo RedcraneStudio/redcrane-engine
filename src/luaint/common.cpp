@@ -4,7 +4,7 @@
  */
 #include "common.h"
 
-#include <vector>
+#include <algorithm>
 
 #include "../common/log.h"
 
@@ -19,11 +19,14 @@ extern "C"
 
 namespace game { namespace luaint
 {
+  using Mods = std::vector<Mod_List>;
   struct Lua
   {
     lua_State* state;
+    Mods mods;
   };
 
+#define RC_LANDMASS_GEN 0;
   Lua* init_lua() noexcept
   {
     auto lua = new Lua{luaL_newstate()};
@@ -31,6 +34,12 @@ namespace game { namespace luaint
     {
       log_e("Failed to initialize Lua");
     }
+
+    // Initialize mod types
+    lua->mods.emplace_back("Landmass_Gen");
+    lua->mods.back().set_parameter(0, "func", LUA_TFUNCTION);
+    lua->mods.back().set_parameter(1, "config", LUA_TTABLE);
+
     return lua;
   }
   void uninit_lua(Lua* lua) noexcept
@@ -38,26 +47,48 @@ namespace game { namespace luaint
     if(lua->state) lua_close(lua->state);
     delete lua;
   }
-
-  struct Mod_Decl
+  size_t num_mod_types(Lua& lua) noexcept
   {
-    size_t table_index;
-  };
-  using Mod_List = std::vector<Mod_Decl>;
-
-  // No return value
-  // Parameters:
-  // - Gen function taking two parameters (grid, terrain params)
-  // - Configuration table.
-  int register_terrain_landmass_func(lua_State* L)
+    return lua.mods.size();
+  }
+  size_t registered_mods(Lua& lua) noexcept
   {
-    // Check parameters
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-    luaL_checktype(L, 2, LUA_TTABLE);
+    size_t sum = 0;
 
-    // Landmass gen mod registry (type: list of tables containing function and
-    // the configuration table)
-    lua_getfield(L, LUA_REGISTRYINDEX, "Redcrane.Terrain_Landmass_Mods");
+    auto accum = [&sum](auto const& mod)
+    {
+      sum += mod.num_registered();
+    };
+    for(auto const& mod : lua.mods) accum(mod);
+
+    return sum;
+  }
+
+  void Mod_List::set_parameter(size_t index, std::string const& name,
+                               int type_lua) noexcept
+  {
+    if(parameters_.size() <= index)
+    {
+      parameters_.resize(index + 1);
+    }
+    parameters_[index].name = name;
+    parameters_[index].type = type_lua;
+  }
+
+  int Mod_List::register_mod_fn(lua_State* L)
+  {
+    // Get our light user data pointer to our mod list
+    Mod_List& mod_list =
+      *static_cast<Mod_List*>(lua_touserdata(L, lua_upvalueindex(1)));
+
+    // Check each parameter
+    for(auto i = 0; i < mod_list.parameters_.size(); ++i)
+    {
+      luaL_checktype(L, i+1, mod_list.parameters_[i].type);
+    }
+
+    // Load the table in the registry, or create it if it isn't already there.
+    lua_getfield(L, LUA_REGISTRYINDEX, mod_list.registry_name_.data());
     if(lua_isnil(L, -1))
     {
       // Remove nil
@@ -87,20 +118,48 @@ namespace game { namespace luaint
     lua_insert(L, 1);
 
     // Set the parameters to this table
-    lua_setfield(L, 1, "config");
-    lua_setfield(L, 1, "func");
+    for(auto i = 0; i < mod_list.parameters_.size(); ++i)
+    {
+      // Do so in reverse order
+      auto index = mod_list.parameters_.size() - 1 - i;
+      lua_setfield(L, 1, mod_list.parameters_[index].name.data());
+    }
+
+    // Push our unregister function with the mod list and index of this table.
+    // Our mod list is also being passed as the first upvalue.
+    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_pushinteger(L, table_index);
+    lua_pushcclosure(L, &Mod_List::unregister_mod_fn, 2);
+    lua_setfield(L, -2, "unregister");
 
     // We are left with our new mod table, which has already been inserted into
-    // the terrain landmass mods list.
+    // the mods list.
 
-    // Get our light user data pointer to our mod list
-    Mod_List& mod_list =
-      *static_cast<Mod_List*>(lua_touserdata(L, lua_upvalueindex(1)));
-    mod_list.push_back({table_index});
+    mod_list.indices_.push_back(table_index);
 
-    // Return the table
+    // Return it.
     return 1;
   }
+  int Mod_List::unregister_mod_fn(lua_State* L)
+  {
+    // Upvalues: mod list instance, index
+    auto mod_list = (Mod_List*) lua_touserdata(L, lua_upvalueindex(1));
+    auto index = (size_t) lua_tointeger(L, lua_upvalueindex(2));
+
+    // There is an invariant here: Each value in the indices_ vector is unique.
+
+    using std::begin; using std::end;
+    auto find_index =
+      std::find(begin(mod_list->indices_), end(mod_list->indices_), index);
+
+    if(find_index != end(mod_list->indices_))
+    {
+      mod_list->indices_.erase(find_index);
+    }
+
+    return 0;
+  }
+
 
   static luaL_Reg redcrane_lua_functions[] =
   {
@@ -113,9 +172,35 @@ namespace game { namespace luaint
     lua_newtable(L);
 
     // Populate it
-    lua_pushvalue(L, lua_upvalueindex(1));
-    lua_pushcclosure(L, register_terrain_landmass_func, 1);
-    lua_setfield(L, -2, "register_terrain_landmass_func");
+    auto& mods = *static_cast<Mods*>(lua_touserdata(L, lua_upvalueindex(1)));
+
+    for(auto& mod : mods)
+    {
+      // Use the registry name (without the prefix): Make it lowercase,
+      // possibly ensure no bad usage of characters (such as a dot) and then
+      // use it as a function name.
+      auto name = mod.registry_name();
+
+      for(char& c : name)
+      {
+        if(c == '.')
+        {
+          c = '_';
+        }
+        else
+        {
+          c = std::tolower(c);
+        }
+      }
+
+      // Name is a reasonable name to use. Prepend the register word and call
+      // it a function!
+      name = "register_" + name;
+
+      lua_pushlightuserdata(L, &mod);
+      lua_pushcclosure(L, &Mod_List::register_mod_fn, 1);
+      lua_setfield(L, -2, name.data());
+    }
 
     luaL_register(L, NULL, redcrane_lua_functions);
 
@@ -144,9 +229,7 @@ namespace game { namespace luaint
     }
     lua_getfield(L, 1, "preload");
 
-    Mod_List mod_list;
-
-    lua_pushlightuserdata(L, &mod_list);
+    lua_pushlightuserdata(L, &lua.mods);
     lua_pushcclosure(L, luaopen_redcrane, 1);
 
     lua_setfield(L, 2, "redcrane");

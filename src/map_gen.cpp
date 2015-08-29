@@ -35,7 +35,11 @@ int main(int argc, char** argv)
     std::string dir_name = argv[1];
 
     auto L = luaint::init_lua();
+    log_w("Amount of mod types %", luaint::num_mod_types(*L));
+
     luaint::load_mod(*L, dir_name);
+    log_w("Number of registered mods %", luaint::registered_mods(*L));
+
     luaint::uninit_lua(L);
   }
 
