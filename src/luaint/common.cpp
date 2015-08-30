@@ -26,7 +26,7 @@ namespace game { namespace luaint
     Mods mods;
   };
 
-#define RC_LANDMASS_GEN 0;
+#define REDC_LANDMASS_GEN 0;
   Lua* init_lua() noexcept
   {
     auto lua = new Lua{luaL_newstate()};
