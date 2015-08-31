@@ -8,6 +8,7 @@
 
 #include "common/log.h"
 #include "procedural/terrain.h"
+#include "procedural/radial_algorithm.h"
 
 #include "luaint/common.h"
 

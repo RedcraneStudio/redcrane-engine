@@ -49,27 +49,6 @@ namespace game { namespace strat
     int64_t seed;
   };
 
-  struct Radial_Algorithm : public Terrain_Algorithm
-  {
-    void gen(Grid_Map&) noexcept override;
-
-    Vec<int> origin;
-
-    float radius;
-
-    float amplitude;
-    float frequency;
-
-    // Multiplied by amplitude after each octave
-    float persistence;
-
-    // Multiplied by frequency after each octave
-    float lacunarity;
-
-    int octaves;
-
-    Cell_Type type;
-  };
   struct Terrain_Params
   {
     // Initialize the seed of each algorithm with this seed.v
