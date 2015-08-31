@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <memory>
 #include <string>
 #include <cstdint>
 
@@ -39,12 +40,23 @@ namespace game { namespace strat
   // Forward declare this for the Other_Landmass.
   struct Terrain_Params;
 
-  enum class Landmass_Algorithm
+  struct Terrain_Algorithm
   {
-    Radial, Other
+    virtual ~Terrain_Algorithm() noexcept {}
+    virtual void gen(Grid_Map&) noexcept = 0;
+
+    // Should be set before the call to gen.
+    int64_t seed;
   };
-  struct Radial_Landmass
+
+  struct Radial_Algorithm : public Terrain_Algorithm
   {
+    void gen(Grid_Map&) noexcept override;
+
+    Vec<int> origin;
+
+    float radius;
+
     float amplitude;
     float frequency;
 
@@ -55,25 +67,15 @@ namespace game { namespace strat
     float lacunarity;
 
     int octaves;
-  };
-  struct Other_Landmass
-  {
-    void (*gen_fn)(Grid_Map&, Terrain_Params const&) noexcept;
-    void* user_data;
+
+    Cell_Type type;
   };
   struct Terrain_Params
   {
+    // Initialize the seed of each algorithm with this seed.v
     int64_t seed;
 
-    Vec<int> origin;
-    float size;
-
-    Landmass_Algorithm algorithm;
-    union
-    {
-      Radial_Landmass radial;
-      Other_Landmass other;
-    };
+    std::unique_ptr<Terrain_Algorithm> landmass_gen;
   };
 
   void terrain_v1_map(Grid_Map& map, Terrain_Params const&) noexcept;

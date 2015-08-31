@@ -35,22 +35,18 @@ namespace game { namespace strat
   }
 
   // This function could be run alone.
-  void terrain_v1_radial_land(Grid_Map& map, Terrain_Params const& tp) noexcept
+  void Radial_Algorithm::gen(Grid_Map& map) noexcept
   {
     osn_context* osn = nullptr;
-    auto noise_init = Noise_Raii{tp.seed, &osn};
+    auto noise_init = Noise_Raii{this->seed, &osn};
 
     for(int i = 0; i < map.extents.y; ++i)
     {
       for(int j = 0; j < map.extents.x; ++j)
       {
         // Point from the continent origin to here.
-        Vec<float> to_here = Vec<int>{j, i} - tp.origin;
+        Vec<float> to_here = Vec<int>{j, i} - this->origin;
         auto to_here_dir = normalize(to_here);
-
-        // Tp size is more like diameter, but not necessarily any particular
-        // value.
-        auto radius = tp.size / 2.0f;
 
         // Angle is not used or passed into the noise function because at 2pi
         // radians it goes from +pi to -pi causing a discontinuity in the land
@@ -58,14 +54,15 @@ namespace game { namespace strat
 
         // Get a small delta from the angle. We will use this to modify the
         auto delta = 0.0f;
-        auto amplitude = tp.radial.amplitude;
-        auto frequency = tp.radial.frequency;
-        for(int octave_i = 0; octave_i < tp.radial.octaves; ++octave_i)
+        auto cur_amplitude = this->amplitude;
+        auto cur_frequency = this->frequency;
+        for(int octave_i = 0; octave_i < this->octaves; ++octave_i)
         {
-          delta += open_simplex_noise2(osn, to_here_dir.y * frequency,
-                                       to_here_dir.x * frequency) * amplitude;
-          amplitude *= tp.radial.persistence;
-          frequency *= tp.radial.lacunarity;
+          delta += open_simplex_noise2(osn, to_here_dir.y * cur_frequency,
+                                       to_here_dir.x * cur_frequency) *
+                   cur_amplitude;
+          cur_amplitude *= this->persistence;
+          cur_frequency *= this->lacunarity;
         }
 
         auto modified_radius = radius + delta;
@@ -83,16 +80,10 @@ namespace game { namespace strat
     }
   }
 
-  void terrain_v1_map(Grid_Map& map, Terrain_Params const& ter_params) noexcept
+  void terrain_v1_map(Grid_Map& map, Terrain_Params const& tp) noexcept
   {
-    switch(ter_params.algorithm)
-    {
-    case Landmass_Algorithm::Radial:
-      terrain_v1_radial_land(map, ter_params);
-      break;
-    case Landmass_Algorithm::Other:
-      ter_params.other.gen_fn(map, ter_params);
-    }
+    if(tp.landmass_gen) tp.landmass_gen->seed = tp.seed;
+    tp.landmass_gen->gen(map);
   }
 
   void write_png_heightmap(Grid_Map const& map,

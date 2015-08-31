@@ -25,10 +25,18 @@ int main(int argc, char** argv)
 
   strat::Terrain_Params terrain_params;
   terrain_params.seed = prng();
-  terrain_params.origin = map.extents / 2;
-  terrain_params.size = 1448.0f;
-  terrain_params.algorithm = strat::Landmass_Algorithm::Radial;
-  terrain_params.radial = strat::Radial_Landmass{300.0f, 1.0f, .5f, 2.0f, 8};
+
+  auto landmass_gen = std::make_unique<strat::Radial_Algorithm>();
+  landmass_gen->origin = map.extents / 2;
+  landmass_gen->radius = 724.0f;
+  landmass_gen->amplitude = 300.0f;
+  landmass_gen->frequency = 1.0f;
+  landmass_gen->persistence = .5f;
+  landmass_gen->lacunarity = 2.0f;
+  landmass_gen->octaves = 8;
+  landmass_gen->type = strat::Cell_Type::Land;
+
+  terrain_params.landmass_gen = std::move(landmass_gen);
 
   if(argc >= 2)
   {
