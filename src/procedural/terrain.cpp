@@ -36,8 +36,16 @@ namespace game { namespace strat
 
   void terrain_v1_map(Grid_Map& map, Terrain_Params const& tp) noexcept
   {
-    if(tp.landmass_gen) tp.landmass_gen->seed = tp.seed;
-    tp.landmass_gen->gen(map);
+    if(tp.landmass_gen)
+    {
+      tp.landmass_gen->seed = tp.seed;
+      tp.landmass_gen->gen(map);
+    }
+    if(tp.natural_gen)
+    {
+      tp.natural_gen->seed = tp.seed;
+      tp.natural_gen->gen(map);
+    }
   }
 
   void write_png_heightmap(Grid_Map const& map,

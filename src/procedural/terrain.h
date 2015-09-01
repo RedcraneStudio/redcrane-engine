@@ -55,6 +55,8 @@ namespace game { namespace strat
     int64_t seed;
 
     std::unique_ptr<Terrain_Algorithm> landmass_gen;
+
+    std::unique_ptr<Terrain_Algorithm> natural_gen;
   };
 
   void terrain_v1_map(Grid_Map& map, Terrain_Params const&) noexcept;
