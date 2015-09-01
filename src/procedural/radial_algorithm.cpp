@@ -41,11 +41,7 @@ namespace game { namespace strat
         // This tile is land.
         if(length(to_here) < modified_radius)
         {
-          map.values[i * map.extents.x + j].type = Cell_Type::Land;
-        }
-        else
-        {
-          map.values[i * map.extents.x + j].type = Cell_Type::Water;
+          map.values[i * map.extents.x + j].type = this->type;
         }
       }
     }
