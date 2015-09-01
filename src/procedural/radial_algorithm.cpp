@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #include "radial_algorithm.h"
+#include "../common/volume.h"
 namespace game { namespace strat
 {
   // This function could be run alone.
@@ -11,9 +12,21 @@ namespace game { namespace strat
     osn_context* osn = nullptr;
     auto noise_init = Noise_Raii{this->seed, &osn};
 
-    for(int i = 0; i < map.extents.y; ++i)
+    // Figure out what area we actually *could* modify. I think technically it
+    // could be big larger if we are dealing with multiple octaves, but
+    // whatever.
+    Volume<int> active_area;
+    active_area.pos.x = std::ceil(origin.x - radius - amplitude);
+    active_area.pos.y = std::ceil(origin.y - radius - amplitude);
+    active_area.width = (radius + amplitude) * 2;
+    active_area.height = (radius + amplitude) * 2;
+
+    active_area = contain_inside_extents(active_area, map.extents);
+
+    auto& aa = active_area;
+    for(int i = aa.pos.y; i < aa.height + aa.pos.y; ++i)
     {
-      for(int j = 0; j < map.extents.x; ++j)
+      for(int j = aa.pos.x; j < aa.width + aa.pos.x; ++j)
       {
         // Point from the continent origin to here.
         Vec<float> to_here = Vec<int>{j, i} - this->origin;
