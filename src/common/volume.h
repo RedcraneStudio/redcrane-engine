@@ -101,6 +101,30 @@ namespace game
     return ret;
   }
 
+  template <typename T>
+  Volume<T> contain_inside(Volume<T> vol, Volume<T> const& inside) noexcept
+  {
+    // Get the actual positions of the right and bottom edge (rather, whatever
+    // edges are not represented by the position vector)
+    Vec<int> extent_sides{vol.pos.x + vol.width, vol.pos.y + vol.height};
+
+    vol.pos.x = std::max(inside.pos.x, vol.pos.x);
+    vol.pos.y = std::max(inside.pos.y, vol.pos.y);
+
+    extent_sides.x = std::min(extent_sides.x, inside.pos.x + inside.width);
+    extent_sides.y = std::min(extent_sides.y, inside.pos.y + inside.height);
+
+    vol.width = extent_sides.x - vol.pos.x;
+    vol.height = extent_sides.y - vol.pos.y;
+
+    return vol;
+  }
+  template <typename T>
+  Volume<T> contain_inside_extents(Volume<T> vol, Vec<T> const& in) noexcept
+  {
+    return contain_inside(vol, vol_from_extents(in));
+  }
+
   template <typename T1, typename T2>
   bool operator==(Volume<T1> const& v1, Volume<T2> const& v2) noexcept
   {
