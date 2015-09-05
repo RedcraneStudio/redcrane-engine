@@ -41,12 +41,12 @@ int main(int argc, char** argv)
   terrain_params.landmass_gen = std::move(landmass_gen);
 
   auto natural_gen = std::make_unique<strat::Lake_Radial_Algorithm>();
-  natural_gen->max_lakes = 100;
-  natural_gen->lake_probability = .9f;
-  natural_gen->min_radius = 10.0f;
-  natural_gen->max_radius = 60.0f;
-  natural_gen->amplitude = 9.0f;
-  natural_gen->frequency = .7f;
+  natural_gen->max_lakes = 30;
+  natural_gen->lake_probability = .333f;
+  natural_gen->min_radius = 40.0f;
+  natural_gen->max_radius = 100.0f;
+  natural_gen->amplitude = 35.0f;
+  natural_gen->frequency = .8f;
   natural_gen->persistence = .5f;
   natural_gen->lacunarity = 2.0f;
   natural_gen->octaves = 3;
