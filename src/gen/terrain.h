@@ -57,7 +57,7 @@ namespace game { namespace gen
 
   struct Terrain_Params
   {
-    // Initialize the seed of each algorithm with this seed.v
+    // Initialize the seed of each algorithm with this seed.
     int64_t seed;
 
     std::unique_ptr<Terrain_Algorithm> landmass_gen;
