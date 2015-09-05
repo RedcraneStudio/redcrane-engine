@@ -26,7 +26,7 @@ find_package(Freetype REQUIRED)
 add_subdirectory(ui)
 
 add_subdirectory(strat)
-add_subdirectory(procedural)
+add_subdirectory(gen)
 
 add_subdirectory(collisionlib)
 
@@ -34,7 +34,7 @@ find_package(Threads REQUIRED)
 
 add_executable(strategy main.cpp)
 target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
-                               procedurallib)
+                               genlib)
 target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
 
 
@@ -49,7 +49,7 @@ find_package(LuaJit REQUIRED)
 add_subdirectory(luaint)
 
 add_executable(map_gen map_gen.cpp)
-target_link_libraries(map_gen procedurallib luaintlib)
+target_link_libraries(map_gen genlib luaintlib)
 
 add_executable(event_spread_test event_spread.cpp)
 target_link_libraries(event_spread_test stratlib commonlib)

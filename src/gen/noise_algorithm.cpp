@@ -4,7 +4,7 @@
  */
 #include "noise_algorithm.h"
 #include "../common/log.h"
-namespace game { namespace strat
+namespace game { namespace gen
 {
   void Noise_Algorithm::gen(Grid_Map& map) noexcept
   {

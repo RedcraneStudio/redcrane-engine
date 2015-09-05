@@ -7,9 +7,9 @@
 #include <iostream>
 
 #include "common/log.h"
-#include "procedural/terrain.h"
-#include "procedural/radial_algorithm.h"
-#include "procedural/lake_radial.h"
+#include "gen/terrain.h"
+#include "gen/radial_algorithm.h"
+#include "gen/lake_radial.h"
 
 #include "luaint/common.h"
 
@@ -19,16 +19,16 @@ int main(int argc, char** argv)
 
   Scoped_Log_Init log_init{};
 
-  strat::Grid_Map map;
+  gen::Grid_Map map;
   map.allocate({2048, 2048});
 
   std::random_device rand_dev;
   std::mt19937 prng{rand_dev()};
 
-  strat::Terrain_Params terrain_params;
+  gen::Terrain_Params terrain_params;
   terrain_params.seed = prng();
 
-  auto landmass_gen = std::make_unique<strat::Radial_Algorithm>();
+  auto landmass_gen = std::make_unique<gen::Radial_Algorithm>();
   landmass_gen->origin = map.extents / 2;
   landmass_gen->radius = 724.0f;
   landmass_gen->amplitude = 300.0f;
@@ -36,11 +36,11 @@ int main(int argc, char** argv)
   landmass_gen->persistence = .5f;
   landmass_gen->lacunarity = 2.0f;
   landmass_gen->octaves = 8;
-  landmass_gen->type = strat::Cell_Type::Land;
+  landmass_gen->type = gen::Cell_Type::Land;
 
   terrain_params.landmass_gen = std::move(landmass_gen);
 
-  auto natural_gen = std::make_unique<strat::Lake_Radial_Algorithm>();
+  auto natural_gen = std::make_unique<gen::Lake_Radial_Algorithm>();
   natural_gen->max_lakes = 30;
   natural_gen->lake_probability = .333f;
   natural_gen->min_radius = 40.0f;
@@ -66,8 +66,8 @@ int main(int argc, char** argv)
     luaint::uninit_lua(L);
   }
 
-  strat::terrain_v1_map(map, terrain_params);
-  strat::write_png_heightmap(map, "terrain.png");
+  gen::terrain_v1_map(map, terrain_params);
+  gen::write_png_heightmap(map, "terrain.png");
 
   return 0;
 }

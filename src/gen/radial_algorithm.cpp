@@ -4,7 +4,7 @@
  */
 #include "radial_algorithm.h"
 #include "../common/volume.h"
-namespace game { namespace strat
+namespace game { namespace gen
 {
   // This function could be run alone.
   void Radial_Algorithm::gen(Grid_Map& map) noexcept

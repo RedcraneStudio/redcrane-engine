@@ -38,7 +38,7 @@
 #include "strat/terrain.h"
 #include "strat/player_state.h"
 
-#include "procedural/terrain.h"
+#include "gen/terrain.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"

@@ -13,7 +13,7 @@ extern "C"
 }
 
 #include "../common/value_map.h"
-namespace game { namespace strat
+namespace game { namespace gen
 {
   struct Noise_Raii
   {
@@ -31,9 +31,15 @@ namespace game { namespace strat
     Water, Land
   };
 
+  enum class Cell_Contents
+  {
+    None, Tree
+  };
+
   struct Map_Cell
   {
     Cell_Type type = Cell_Type::Land;
+    Cell_Contents contents = Cell_Contents::None;
   };
   using Grid_Map = Value_Map<Map_Cell>;
 

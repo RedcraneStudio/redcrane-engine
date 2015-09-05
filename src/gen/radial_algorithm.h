@@ -4,26 +4,27 @@
  */
 #pragma once
 #include "terrain.h"
-namespace game { namespace strat
+namespace game { namespace gen
 {
-  struct Lake_Radial_Algorithm : public Terrain_Algorithm
+  struct Radial_Algorithm : public Terrain_Algorithm
   {
     void gen(Grid_Map&) noexcept override;
 
-    // Maximum amount of lakes
-    int max_lakes;
+    Vec<int> origin;
 
-    // Probably of lakes spawning out of max_lakes.
-    float lake_probability;
-
-    float min_radius;
-    float max_radius;
+    float radius;
 
     float amplitude;
     float frequency;
+
+    // Multiplied by amplitude after each octave
     float persistence;
+
+    // Multiplied by frequency after each octave
     float lacunarity;
 
     int octaves;
+
+    Cell_Type type;
   };
 } }

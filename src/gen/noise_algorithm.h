@@ -5,7 +5,7 @@
 #pragma once
 #include "terrain.h"
 #include "../common/volume.h"
-namespace game { namespace strat
+namespace game { namespace gen
 {
   struct Noise_Algorithm : public Terrain_Algorithm
   {
