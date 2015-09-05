@@ -16,20 +16,7 @@ namespace game { namespace gen
     {
       for(int j = use_area.pos.x; j < use_area.pos.x + use_area.width; ++j)
       {
-        float value = 0.0f;
-
-        // Start from the default amplitude and frequency.
-        auto cur_amplitude = this->amplitude;
-        auto cur_frequency = this->frequency;
-        for(int octave_i = 0; octave_i < this->octaves; ++octave_i)
-        {
-          value += open_simplex_noise2(osn, j * cur_frequency,
-                                            i * cur_frequency) * cur_amplitude;
-
-          // Modify both values as we continue on to the next octave.
-          cur_amplitude *= this->persistence;
-          cur_frequency *= this->lacunarity;
-        }
+        float value = gen_noise(osn, Vec<int>{j, i}, *this);
 
         // Find our distance from the origin point.
 

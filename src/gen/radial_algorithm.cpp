@@ -37,17 +37,8 @@ namespace game { namespace gen
         // mass.
 
         // Get a small delta from the angle. We will use this to modify the
-        auto delta = 0.0f;
-        auto cur_amplitude = this->amplitude;
-        auto cur_frequency = this->frequency;
-        for(int octave_i = 0; octave_i < this->octaves; ++octave_i)
-        {
-          delta += open_simplex_noise2(osn, to_here_dir.y * cur_frequency,
-                                       to_here_dir.x * cur_frequency) *
-                   cur_amplitude;
-          cur_amplitude *= this->persistence;
-          cur_frequency *= this->lacunarity;
-        }
+
+        auto delta = gen_noise(osn, to_here_dir, *this);
 
         auto modified_radius = radius + delta;
 
