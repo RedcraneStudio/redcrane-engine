@@ -106,6 +106,13 @@ namespace game { namespace gen
         ptrs.back()[j * 3] = value;
         ptrs.back()[j * 3 + 1] = value;
         ptrs.back()[j * 3 + 2] = value;
+
+        // This logic is stupid and will be hard to maintain
+        if(map.values[i * map.extents.x + j].contents == Cell_Contents::Tree)
+        {
+          ptrs.back()[j * 3] = 0x00;
+          ptrs.back()[j * 3 + 2] = 0x00;
+        }
       }
     }
 
