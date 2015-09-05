@@ -9,7 +9,7 @@
 #include "common/log.h"
 #include "gen/terrain.h"
 #include "gen/radial_algorithm.h"
-#include "gen/lake_radial.h"
+#include "gen/tree_gen.h"
 
 #include "luaint/common.h"
 
@@ -40,16 +40,13 @@ int main(int argc, char** argv)
 
   terrain_params.landmass_gen = std::move(landmass_gen);
 
-  auto natural_gen = std::make_unique<gen::Lake_Radial_Algorithm>();
-  natural_gen->max_lakes = 30;
-  natural_gen->lake_probability = .333f;
-  natural_gen->min_radius = 40.0f;
-  natural_gen->max_radius = 100.0f;
-  natural_gen->amplitude = 35.0f;
-  natural_gen->frequency = .8f;
+  auto natural_gen = std::make_unique<gen::Tree_Gen_Algorithm>();
+  natural_gen->amplitude = 1.0f;
+  natural_gen->frequency = 0.01f;
   natural_gen->persistence = .5f;
   natural_gen->lacunarity = 2.0f;
   natural_gen->octaves = 3;
+  natural_gen->tree_altitude = 0.4f;
 
   terrain_params.natural_gen = std::move(natural_gen);
 
