@@ -386,18 +386,6 @@ int main(int argc, char** argv)
     {
       // TODO: Find/store correct y somehow?
       render_structure_instance(driver, st);
-
-      if(st_size != game_state.map.structures.size())
-      {
-        if(&st.structure() == &structures[0])
-        {
-          gfx::render_normals(ir, imd_vec[0], st.model_matrix());
-        }
-        else if(&st.structure() == &structures[1])
-        {
-          gfx::render_normals(ir, imd_vec[1], st.model_matrix());
-        }
-      }
     }
 
     // Render walls
