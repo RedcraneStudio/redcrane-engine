@@ -5,7 +5,7 @@ terrain_gen = require('terrain_gen')
 
 rc = require('redcrane')
 
-mod = rc.register_landmass_gen(terrain_gen, {
+mod = rc.register_terrain_algorithm(terrain_gen, {
   octaves = 8
 });
 

@@ -36,7 +36,7 @@ namespace game { namespace luaint
     }
 
     // Initialize mod types
-    lua->mods.emplace_back("Landmass_Gen");
+    lua->mods.emplace_back("Terrain_Algorithm");
     lua->mods.back().set_parameter(0, "func", LUA_TFUNCTION);
     lua->mods.back().set_parameter(1, "config", LUA_TTABLE);
 
