@@ -189,6 +189,8 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
+  glfwSwapInterval(0);
+
   // Init context + load gl functions.
   glfwMakeContextCurrent(window);
   gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
