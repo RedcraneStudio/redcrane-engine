@@ -97,18 +97,19 @@ namespace game { namespace luaint
     if(lua_isnil(L, -1)) goto err;
 
     // Remove the package table.
-    lua_pop(L, -2);
+    lua_remove(L, -2);
 
     // Push the value to return
     push_value(L, val);
+
     // Push our small wrapper of that value for preload
-    lua_pushcclosure(L, open_value, 1);
+    lua_pushcclosure(L, &open_value, 1);
 
     // Set a field in preload.
     lua_setfield(L, -2, name.data());
 
     // Remove preload
-    lua_pop(L, -1);
+    lua_remove(L, -1);
 
     return;
   err:
