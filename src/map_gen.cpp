@@ -12,6 +12,7 @@
 #include "gen/tree_gen.h"
 
 #include "luaint/common.h"
+#include "luaint/gen.h"
 
 int main(int argc, char** argv)
 {
@@ -55,10 +56,17 @@ int main(int argc, char** argv)
     std::string dir_name = argv[1];
 
     auto L = luaint::init_lua();
+    luaint::load_package_lib(L);
+
+    luaint::Terrain_Gen_Mod_Vector mod_list;
+    auto t_table = luaint::terrain_preload_table(mod_list);
+
+    luaint::add_require(L, "redcrane", t_table);
+
     //log_w("Amount of mod types %", luaint::num_mod_types(*L));
 
     luaint::load_mod(*L, dir_name);
-    //log_w("Number of registered mods %", luaint::registered_mods(*L));
+    log_w("Number of registered mods %", mod_list.size());
 
     luaint::uninit_lua(L);
   }
