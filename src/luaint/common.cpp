@@ -4,285 +4,123 @@
  */
 #include "common.h"
 
-#include <algorithm>
-
 #include "../common/log.h"
 
-#include <uv.h>
-
-extern "C"
-{
-  #include <lua.h>
-  #include <lauxlib.h>
-  #include <lualib.h>
-}
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 namespace game { namespace luaint
 {
-  using Mods = std::vector<Mod_List>;
-  struct Lua
+  struct Push_Value_Visitor : public boost::static_visitor<>
   {
-    lua_State* state;
-    Mods mods;
+    Push_Value_Visitor(lua_State* L) noexcept : L(L) {}
+
+    void operator()(Table const& table) const;
+    void operator()(Number const& number) const;
+    void operator()(String const& string) const;
+    void operator()(Userdata const& userdata) const;
+    void operator()(Function const& func) const;
+
+    lua_State* L;
   };
 
-#define REDC_LANDMASS_GEN 0;
-  Lua* init_lua() noexcept
+  void Push_Value_Visitor::operator()(Table const& table) const
   {
-    auto lua = new Lua{luaL_newstate()};
-    if(!lua->state)
+    for(auto const& pair : table.values)
     {
-      log_e("Failed to initialize Lua");
+      boost::apply_visitor(*this, pair.first);
+      boost::apply_visitor(*this, pair.second);
+      lua_settable(L, -3);
     }
-
-    // Initialize mod types
-    lua->mods.emplace_back("Terrain_Algorithm");
-    lua->mods.back().set_parameter(0, "func", LUA_TFUNCTION);
-    lua->mods.back().set_parameter(1, "config", LUA_TTABLE);
-
-    return lua;
   }
-  void uninit_lua(Lua* lua) noexcept
+  void Push_Value_Visitor::operator()(Number const& number) const
   {
-    if(lua->state) lua_close(lua->state);
-    delete lua;
+    lua_pushnumber(L, number.num);
   }
-  size_t num_mod_types(Lua& lua) noexcept
+  void Push_Value_Visitor::operator()(String const& string) const
   {
-    return lua.mods.size();
+    lua_pushstring(L, string.str.data());
   }
-  size_t registered_mods(Lua& lua) noexcept
+  void Push_Value_Visitor::operator()(Userdata const& userdata) const
   {
-    size_t sum = 0;
-
-    auto accum = [&sum](auto const& mod)
+    if(userdata.light)
     {
-      sum += mod.num_registered();
-    };
-    for(auto const& mod : lua.mods) accum(mod);
-
-    return sum;
+      lua_pushlightuserdata(L, userdata.ptr);
+    }
+    else
+    {
+      void** dest_ptr = (void**) lua_newuserdata(L, sizeof(void*));
+      *dest_ptr = userdata.ptr;
+    }
+  }
+  void Push_Value_Visitor::operator()(Function const& func) const
+  {
+    lua_pushcfunction(L, func.func);
   }
 
-  void Mod_List::set_parameter(size_t index, std::string const& name,
-                               int type_lua) noexcept
+  void push_value(lua_State* L, Value const& val)
   {
-    if(parameters_.size() <= index)
-    {
-      parameters_.resize(index + 1);
-    }
-    parameters_[index].name = name;
-    parameters_[index].type = type_lua;
+    boost::apply_visitor(Push_Value_Visitor{L}, val);
   }
 
-  int Mod_List::register_mod_fn(lua_State* L)
+  int open_value(lua_State* L)
   {
-    // Get our light user data pointer to our mod list
-    Mod_List& mod_list =
-      *static_cast<Mod_List*>(lua_touserdata(L, lua_upvalueindex(1)));
-
-    // Check each parameter
-    for(auto i = 0; i < mod_list.parameters_.size(); ++i)
-    {
-      luaL_checktype(L, i+1, mod_list.parameters_[i].type);
-    }
-
-    // Load the table in the registry, or create it if it isn't already there.
-    lua_getfield(L, LUA_REGISTRYINDEX, mod_list.registry_name_.data());
-    if(lua_isnil(L, -1))
-    {
-      // Remove nil
-      lua_remove(L, -1);
-
-      // Add the registry
-      lua_newtable(L);
-    }
-
-    // We have our mod registry at the top of the stack
-
-    // Use the next available index in the mod list
-    auto table_index = lua_objlen(L, -1) + 1;
-
-    // Insert a table into the mod registry
-    lua_newtable(L);
-
-    // Push the table twice so it remains at the top of the stack after being
-    // set to the mod list
-    lua_pushvalue(L, -1);
-    lua_rawseti(L, -3, table_index);
-
-    // Remove the mod list
-    lua_remove(L, -2);
-
-    // Move our new table to the bottom of the stack (index 1)
-    lua_insert(L, 1);
-
-    // Set the parameters to this table
-    for(auto i = 0; i < mod_list.parameters_.size(); ++i)
-    {
-      // Do so in reverse order
-      auto index = mod_list.parameters_.size() - 1 - i;
-      lua_setfield(L, 1, mod_list.parameters_[index].name.data());
-    }
-
-    // Push our unregister function with the mod list and index of this table.
-    // Our mod list is also being passed as the first upvalue.
+    // Push the actual value.
     lua_pushvalue(L, lua_upvalueindex(1));
-    lua_pushinteger(L, table_index);
-    lua_pushcclosure(L, &Mod_List::unregister_mod_fn, 2);
-    lua_setfield(L, -2, "unregister");
-
-    // We are left with our new mod table, which has already been inserted into
-    // the mods list.
-
-    mod_list.indices_.push_back(table_index);
-
     // Return it.
     return 1;
   }
-  int Mod_List::unregister_mod_fn(lua_State* L)
+
+  // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+  // TODO Not actually a todo, just make sure you use relative indices,    TODO
+  // TODO since these functions won't be called from lua and therefore     TODO
+  // TODO won't necessarily have an empty stack to begin with. It's        TODO
+  // TODO important not to clobber the stack at all.                       TODO
+  // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
+  void add_require(lua_State* L, std::string name, Value const& val)
   {
-    // Upvalues: mod list instance, index
-    auto mod_list = (Mod_List*) lua_touserdata(L, lua_upvalueindex(1));
-    auto index = (size_t) lua_tointeger(L, lua_upvalueindex(2));
+    lua_getglobal(L, "package");
+    if(lua_isnil(L, -1)) goto err;
 
-    // There is an invariant here: Each value in the indices_ vector is unique.
+    lua_getfield(L, -1, "preload");
+    if(lua_isnil(L, -1)) goto err;
 
-    using std::begin; using std::end;
-    auto find_index =
-      std::find(begin(mod_list->indices_), end(mod_list->indices_), index);
+    // Remove the package table.
+    lua_pop(L, -2);
 
-    if(find_index != end(mod_list->indices_))
-    {
-      mod_list->indices_.erase(find_index);
-    }
+    // Push the value to return
+    push_value(L, val);
+    // Push our small wrapper of that value for preload
+    lua_pushcclosure(L, open_value, 1);
 
-    return 0;
+    // Set a field in preload.
+    lua_setfield(L, -2, name.data());
+
+    // Remove preload
+    lua_pop(L, -1);
+
+    return;
+  err:
+    log_w("Cannot add module because luaopen_package hasn't been called!");
   }
 
-
-  static luaL_Reg redcrane_lua_functions[] =
+  lua_State* init_lua() noexcept
   {
-      {NULL, NULL}
-  };
-
-  int luaopen_redcrane(lua_State* L)
-  {
-    // New table
-    lua_newtable(L);
-
-    // Populate it
-    auto& mods = *static_cast<Mods*>(lua_touserdata(L, lua_upvalueindex(1)));
-
-    for(auto& mod : mods)
-    {
-      // Use the registry name (without the prefix): Make it lowercase,
-      // possibly ensure no bad usage of characters (such as a dot) and then
-      // use it as a function name.
-      auto name = mod.registry_name();
-
-      for(char& c : name)
-      {
-        if(c == '.')
-        {
-          c = '_';
-        }
-        else
-        {
-          c = std::tolower(c);
-        }
-      }
-
-      // Name is a reasonable name to use. Prepend the register word and call
-      // it a function!
-      name = "register_" + name;
-
-      lua_pushlightuserdata(L, &mod);
-      lua_pushcclosure(L, &Mod_List::register_mod_fn, 1);
-      lua_setfield(L, -2, name.data());
-    }
-
-    luaL_register(L, NULL, redcrane_lua_functions);
-
-    return 1;
-  }
-
-  void load_mod(Lua& lua, std::string mod_name)
-  {
-    lua_State* L = lua.state;
+    auto L = luaL_newstate();
     if(!L)
     {
-      log_e("Cannot load mod - bad Lua state");
-      return;
+      log_e("Failed to initialize Lua");
     }
+    return L;
+  }
+  void uninit_lua(lua_State* L) noexcept
+  {
+    if(L) lua_close(L);
+  }
 
-    // Load 'require' and friends
+  void load_mod(lua_State& L_ref, std::string mod_dir)
+  {
 
-    lua_pushcfunction(L, luaopen_package);
-    lua_call(L, 0, 0);
-
-    // Add our loader to be potentially 'require'd
-    lua_getglobal(L, "package");
-    if(lua_isnil(L, 1))
-    {
-      log_w("Bah, null value!");
-    }
-    lua_getfield(L, 1, "preload");
-
-    lua_pushlightuserdata(L, &lua.mods);
-    lua_pushcclosure(L, luaopen_redcrane, 1);
-
-    lua_setfield(L, 2, "redcrane");
-
-    if(uv_chdir(mod_name.data()))
-    {
-      log_e("Error changing to mod directory");
-    }
-
-    auto err = luaL_loadfile(L, "package.lua");
-    if(err != 0)
-    {
-      std::string err_msg{lua_tostring(L, -1)};
-      switch(err)
-      {
-      case LUA_ERRSYNTAX:
-        log_e("Lua syntax error: %", err_msg);
-        break;
-      case LUA_ERRMEM:
-        log_e("Lua memory error: %", err_msg);
-        break;
-      case LUA_ERRFILE:
-        log_e("Error loading Lua file: %", err_msg);
-        break;
-      default: // Future errors
-        log_e("Unknown Lua error: %", err_msg);
-        break;
-      }
-
-      return;
-    }
-
-    err = lua_pcall(L, 0, 0, 0);
-    if(err != 0)
-    {
-      std::string err_msg{lua_tostring(L, -1)};
-      switch(err)
-      {
-      case LUA_ERRRUN:
-        log_e("Lua runtime error: %", err_msg);
-        break;
-      case LUA_ERRMEM:
-        log_e("Lua memory error: %", err_msg);
-        break;
-      case LUA_ERRERR:
-        log_e("Error in Lua error handling: %", err_msg);
-        break;
-      default: // Future errors
-        log_e("Unknown Lua error: %", err_msg);
-        break;
-      }
-
-      return;
-    }
   }
 } }

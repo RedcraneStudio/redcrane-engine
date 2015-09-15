@@ -3,60 +3,121 @@
  * All rights reserved.
  */
 #pragma once
-#include <string>
-#include <vector>
-
 extern "C"
 {
-  #include <lua.h>
-  #include <lauxlib.h>
-  #include <lualib.h>
+  #include "lua.h"
+  #include "lauxlib.h"
 }
+#include <string>
+
+#include <boost/variant/variant.hpp>
+#include <boost/variant/recursive_wrapper.hpp>
 
 namespace game { namespace luaint
 {
-  struct Lua;
-
-  Lua* init_lua() noexcept;
-  void uninit_lua(Lua* lua) noexcept;
-
-  size_t num_mod_types(Lua& lua) noexcept;
-  size_t registered_mods(Lua& lua) noexcept;
-
-  struct Mod_Param
+  inline std::string get_string(lua_State* L, size_t index)
   {
-    std::string name;
-    int type;
+    if(lua_type(L, index) == LUA_TSTRING)
+    {
+      return lua_tostring(L, index);
+    }
+    luaL_typerror(L, index, "string");
+    return "";
+  }
+
+  inline double get_number(lua_State* L, size_t index)
+  {
+    if(lua_type(L, index) == LUA_TNUMBER)
+    {
+      return lua_tonumber(L, index);
+    }
+    luaL_typerror(L, index, "number");
+    return 0.0;
+  }
+
+  // Don't remove the table from the stack!
+  struct Table_Ref
+  {
+    lua_State* L;
+    size_t index;
+
+    inline std::string get_string(std::string const& name)
+    {
+      lua_getfield(L, index, name.data());
+      std::string ret = luaint::get_string(L, -1);
+      lua_pop(L, -1);
+      return ret;
+    }
+    inline double get_number(std::string const& name)
+    {
+      lua_getfield(L, index, name.data());
+      double ret = luaint::get_number(L, -1);
+      lua_pop(L, -1);
+      return ret;
+    }
   };
 
-  struct Mod_List
+  inline Table_Ref get_table(lua_State* L, size_t index)
   {
-    Mod_List(std::string reg_name) noexcept : registry_name_(reg_name) {}
+    if(lua_type(L, index) == LUA_TTABLE)
+    {
+      return {L, index};
+    }
+    luaL_typerror(L, index, "table");
+    return {L, (size_t) -1};
+  }
 
-    void set_parameter(size_t index, std::string const& name,
-                       int type_lua) noexcept;
+  template <class T>
+  inline T& get_instance(lua_State* L) noexcept
+  {
+    return *static_cast<T*>(lua_touserdata(L, lua_upvalueindex(1)));
+  }
 
-    // Pass this to lua, we expect a pointer of an mod_list instance as a value
-    // associated to the function (aka closure).
-    static int register_mod_fn(lua_State* lua_state);
+  template <class Func, class T>
+  void set_member(lua_State* L, std::string name, Func f, T& value) noexcept
+  {
+    lua_pushlightuserdata(L, &value);
+    lua_pushcclosure(L, f, 1);
+    lua_setfield(L, -2, name.data());
+  }
 
-    // Upvalues: Mod list instance, index in array to remove
-    static int unregister_mod_fn(lua_State* lua_state);
-
-    // This string is used in the name used as index into the registry.
-    // It is combined with a prefix currently fixed as a macro in our impl.
-    // file.
-    std::string registry_name() const noexcept { return registry_name_; }
-
-    size_t num_registered() const noexcept { return indices_.size(); }
-  private:
-    std::string registry_name_;
-
-    // vector of indices into table at registry_name.
-    std::vector<size_t> indices_;
-
-    std::vector<Mod_Param> parameters_;
+  struct Number
+  {
+    double num = 0.0;
+  };
+  struct String
+  {
+    std::string str = "";
+  };
+  struct Userdata
+  {
+    bool light = true;
+    void* ptr = nullptr;
+  };
+  struct Function
+  {
+    lua_CFunction func;
   };
 
-  void load_mod(Lua& L, std::string mod_name);
+  struct Table;
+  using Value = boost::variant<boost::recursive_wrapper<Table>, Number, String,
+                               Userdata, Function>;
+
+  struct Table
+  {
+    using key_t = Value;
+    using value_t = Value;
+
+    std::vector<std::pair<key_t, value_t> > values;
+  };
+
+  void push_value(lua_State* L, Value const&);
+
+  // This function assumes luaopen_package has been called.
+  void add_require(lua_State* L, std::string name, Value const& t);
+
+  lua_State* init_lua() noexcept;
+  void uninit_lua(lua_State* L) noexcept;
+
+  void load_mod(lua_State& L, std::string mod_dir);
 } }
