@@ -31,6 +31,7 @@ namespace game { namespace luaint
 
   void Push_Value_Visitor::operator()(Table const& table) const
   {
+    lua_newtable(L);
     for(auto const& pair : table.values)
     {
       boost::apply_visitor(*this, pair.first);
