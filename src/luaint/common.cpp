@@ -9,6 +9,11 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
+extern "C"
+{
+  #include "lualib.h"
+}
+
 namespace game { namespace luaint
 {
   struct Push_Value_Visitor : public boost::static_visitor<>
@@ -107,6 +112,12 @@ namespace game { namespace luaint
     return;
   err:
     log_w("Cannot add module because luaopen_package hasn't been called!");
+  }
+
+  void load_package_lib(lua_State* L)
+  {
+    lua_pushcfunction(L, &luaopen_package);
+    lua_call(L, 0, 0);
   }
 
   lua_State* init_lua() noexcept

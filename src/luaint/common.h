@@ -117,6 +117,8 @@ namespace game { namespace luaint
 
   void push_value(lua_State* L, Value const&);
 
+  void load_package_lib(lua_State* L);
+
   // This function assumes luaopen_package has been called.
   void add_require(lua_State* L, std::string name, Value const& t);
 
