@@ -14,6 +14,8 @@ extern "C"
   #include "lualib.h"
 }
 
+#include <uv.h>
+
 namespace game { namespace luaint
 {
   struct Push_Value_Visitor : public boost::static_visitor<>
@@ -138,6 +140,58 @@ namespace game { namespace luaint
 
   void load_mod(lua_State& L_ref, std::string mod_dir)
   {
+    auto L = &L_ref;
 
+    // Switch into that directory
+    if(uv_chdir(mod_dir.data()))
+    {
+      log_w("Failed to switch into mod directory");
+      return;
+    }
+
+    // Load the main package file.
+    auto err = luaL_loadfile(L, "package.lua");
+    if(err != 0)
+    {
+      std::string err_msg{lua_tostring(L, -1)};
+      switch(err)
+      {
+      case LUA_ERRSYNTAX:
+        log_e("Lua syntax error: %", err_msg);
+        break;
+      case LUA_ERRMEM:
+        log_e("Lua memory error: %", err_msg);
+        break;
+      case LUA_ERRFILE:
+        log_e("Error loading Lua file: %", err_msg);
+        break;
+      default: // Future errors
+        log_e("Unknown Lua error: %", err_msg);
+        break;
+      }
+
+      return;
+    }
+
+    err = lua_pcall(L, 0, 0, 0);
+    if(err != 0)
+    {
+      std::string err_msg{lua_tostring(L, -1)};
+      switch(err)
+      {
+      case LUA_ERRRUN:
+        log_e("Lua runtime error: %", err_msg);
+        break;
+      case LUA_ERRMEM:
+        log_e("Lua memory error: %", err_msg);
+        break;
+      case LUA_ERRERR:
+        log_e("Lua error running error handler: %", err_msg);
+        break;
+      default: // Future errors
+        log_e("Unknown Lua error: %", err_msg);
+        break;
+      }
+    }
   }
 } }
