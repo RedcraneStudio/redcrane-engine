@@ -94,14 +94,11 @@ namespace game { namespace luaint
     bool light = true;
     void* ptr = nullptr;
   };
-  struct Function
-  {
-    lua_CFunction func;
-  };
 
   struct Table;
+  struct Function;
   using Value = boost::variant<boost::recursive_wrapper<Table>, Number, String,
-                               Userdata, Function>;
+                               Userdata, boost::recursive_wrapper<Function> >;
 
   struct Table
   {
@@ -109,6 +106,13 @@ namespace game { namespace luaint
     using value_t = Value;
 
     std::vector<std::pair<key_t, value_t> > values;
+  };
+
+  struct Function
+  {
+    lua_CFunction func;
+
+    std::vector<Value> upvalues;
   };
 
   void push_value(lua_State* L, Value const&);

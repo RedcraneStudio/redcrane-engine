@@ -55,7 +55,11 @@ namespace game { namespace luaint
   }
   void Push_Value_Visitor::operator()(Function const& func) const
   {
-    lua_pushcfunction(L, func.func);
+    for(auto const& value : func.upvalues)
+    {
+      boost::apply_visitor(*this, value);
+    }
+    lua_pushcclosure(L, func.func, func.upvalues.size());
   }
 
   void push_value(lua_State* L, Value const& val)
