@@ -40,6 +40,28 @@ namespace game { namespace luaint
     // We are left with the table in registry[name] on the top of the stack.
   }
 
+  int unregister_terrain_algorithm(lua_State* L)
+  {
+    // Get our bound parameters
+    auto* mod_list_ptr = lua_touserdata(L, lua_upvalueindex(1));
+    auto& mod_list = *static_cast<Terrain_Gen_Mod_Vector*>(mod_list_ptr);
+
+    auto* mod_ptr = lua_touserdata(L, lua_upvalueindex(2));
+    auto& mod_ref = *static_cast<Terrain_Gen_Mod*>(mod_ptr);
+
+    // Remove all the mods with this index, there should only be one.
+    using std::begin; using std::end;
+    auto new_end = std::remove_if(begin(mod_list), end(mod_list),
+    [&mod_ref](auto const& mod)
+    {
+      return mod.table_index == mod_ref.table_index;
+    });
+
+    mod_list.erase(new_end, end(mod_list));
+
+    return 0;
+  }
+
   int register_terrain_algorithm(lua_State* L)
   {
     // Parameters
@@ -81,9 +103,17 @@ namespace game { namespace luaint
 
     mod_list.push_back({table_index, config});
 
-    // Push a wrapper to allow the lua code to unregister the mod.
-    lua_pushnumber(L, 5.0);
+    // Build the meta-table that includes an unregister function, for example
 
+    Table ret;
+
+    Function unregister_func{&unregister_terrain_algorithm,
+                             {Userdata{true, &mod_list},
+                              Userdata{true, &mod_list.back()}}};
+
+    ret.values.emplace_back(String{"unregister"}, std::move(unregister_func));
+
+    push_value(L, ret);
     return 1;
   }
 
