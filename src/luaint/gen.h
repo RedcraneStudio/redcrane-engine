@@ -40,6 +40,7 @@ namespace game { namespace luaint
   {
     // Index into registry[naeme] where naeme is some implementation (?)
     // defined string.
+    // The value of the registry[naeme][table_index] is the mod lua function.
     size_t table_index;
     Terrain_Gen_Config config;
   };
