@@ -70,6 +70,12 @@ namespace game { namespace luaint
     lua_pushcclosure(L, func.func, func.upvalues.size());
   }
 
+  void set_field(lua_State* L, std::string name, Value const& val)
+  {
+    push_value(L, val);
+    lua_setfield(L, -2, name.data());
+  }
+
   void push_value(lua_State* L, Value const& val)
   {
     boost::apply_visitor(Push_Value_Visitor{L}, val);

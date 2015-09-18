@@ -115,6 +115,8 @@ namespace game { namespace luaint
     std::vector<Value> upvalues;
   };
 
+  void set_field(lua_State* L, std::string name, Value const&);
+
   void push_value(lua_State* L, Value const&);
 
   void load_package_lib(lua_State* L);
