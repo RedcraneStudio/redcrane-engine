@@ -10,6 +10,9 @@ extern "C"
 {
   #include "lauxlib.h"
 }
+
+#define RC_GEN_GRID_METATABLE_NAME "Redcrane.Gen.Grid.Metatable"
+
 namespace game { namespace luaint
 {
   void Terrain_Gen_Config::add_option(std::string const& name,
@@ -130,9 +133,10 @@ namespace game { namespace luaint
 
   int grid_set_tile(lua_State* L)
   {
-    auto& grid = get_instance<gen::Grid_Map>(L);
+    auto& grid = *(gen::Grid_Map*)
+      luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
 
-    auto pos = get_table(L, 1);
+    auto pos = get_table(L, 2);
 
     auto x = pos.get_number("x");
     auto y = pos.get_number("y");
@@ -146,7 +150,7 @@ namespace game { namespace luaint
 
     auto vec = Vec<int>(x,y);
 
-    int ind = luaL_checkoption(L, 2, NULL, opts);
+    int ind = luaL_checkoption(L, 3, NULL, opts);
     if(ind == 0)
     {
       grid.at(vec).type == gen::Cell_Type::Land;
@@ -161,9 +165,10 @@ namespace game { namespace luaint
 
   int grid_set_contents(lua_State* L)
   {
-    auto& grid = get_instance<gen::Grid_Map>(L);
+    auto& grid = *(gen::Grid_Map*)
+      luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
 
-    auto pos = get_table(L, 1);
+    auto pos = get_table(L, 2);
 
     auto x = pos.get_number("x");
     auto y = pos.get_number("y");
@@ -181,7 +186,7 @@ namespace game { namespace luaint
       "tree",
       NULL
     };
-    int ind = luaL_checkoption(L, 2, NULL, opts);
+    int ind = luaL_checkoption(L, 3, NULL, opts);
     if(ind == 0)
     {
       grid.at(vec).contents == gen::Cell_Contents::None;
@@ -194,10 +199,92 @@ namespace game { namespace luaint
     return 0;
   }
 
-  void push_grid_table(lua_State* L, gen::Grid_Map& grid) noexcept
+  int grid_get_tile(lua_State* L)
   {
-    lua_newtable(L);
-    set_member(L, "set_tile", grid_set_tile, grid);
-    set_member(L, "set_contents", grid_set_contents, grid);
+    auto& grid = *(gen::Grid_Map*)
+      luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
+
+    auto pos = get_table(L, 2);
+
+    auto x = pos.get_number("x");
+    auto y = pos.get_number("y");
+
+    auto vec = Vec<int>(x,y);
+
+    switch(grid.at(vec).type)
+    {
+    case gen::Cell_Type::Land:
+      lua_pushstring(L, "land");
+      break;
+    case gen::Cell_Type::Water:
+      lua_pushstring(L, "water");
+      break;
+    default:
+      lua_pushstring(L, "unknown");
+      break;
+    }
+
+    return 1;
+  }
+  int grid_get_contents(lua_State* L)
+  {
+    auto& grid = *(gen::Grid_Map*)
+      luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
+
+    auto pos = get_table(L, 2);
+
+    auto x = pos.get_number("x");
+    auto y = pos.get_number("y");
+
+    auto vec = Vec<int>(x,y);
+
+    auto const& grid_cell = grid.at(vec);
+    if(grid_cell.type == gen::Cell_Type::Land)
+    {
+      switch(grid_cell.contents)
+      {
+      case gen::Cell_Contents::None:
+        lua_pushstring(L, "none");
+        break;
+      case gen::Cell_Contents::Tree:
+        lua_pushstring(L, "tree");
+        break;
+      default:
+        lua_pushstring(L, "unknown");
+        break;
+      }
+    }
+    else
+    {
+      lua_pushstring(L, "none");
+    }
+
+    return 1;
+  }
+
+  void push_grid(lua_State* L, gen::Grid_Map& grid) noexcept
+  {
+    // New user data.
+    auto ud = (gen::Grid_Map**) lua_newuserdata(L, sizeof(gen::Grid_Map**));
+    *ud = &grid;
+
+    // Set up the metatable.
+    if(luaL_newmetatable(L, RC_GEN_GRID_METATABLE_NAME))
+    {
+      // Populate it, because it didn't exist before.
+
+      // function(grid, pos, str type)
+      set_field(L, "set_tile", Function{grid_set_tile});
+      // function(grid, pos, str type)
+      set_field(L, "set_contents", Function{grid_set_contents});
+      // function(grid, pos)
+      set_field(L, "get_tile", Function{grid_get_tile});
+      // function(grid, pos)
+      set_field(L, "get_contents", Function{grid_get_contents});
+    }
+
+    lua_setmetatable(L, -2);
+
+    // We are left with the userdata at the top of the stack.
   }
 } }
