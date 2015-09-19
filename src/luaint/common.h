@@ -10,6 +10,8 @@ extern "C"
 }
 #include <string>
 
+#include "../common/log.h"
+
 #include <boost/variant/variant.hpp>
 #include <boost/variant/recursive_wrapper.hpp>
 
@@ -131,4 +133,39 @@ namespace game { namespace luaint
 
   // Return true on error, use return value to bail out.s
   bool handle_err(lua_State*, int);
+
+  template <class... Args>
+  bool handle_err(lua_State* L, int err, std::string fmt, Args&&... args)
+  {
+    std::string doing = format_str(fmt, std::forward<Args>(args)...);
+
+    if(err == 0) return false;
+
+    // Make sure not to let this get out of date with non-tmpl. handle_err
+    // implementation.
+    std::string err_msg{lua_tostring(L, -1)};
+    switch(err)
+    {
+    case LUA_ERRRUN:
+      log_e("Lua runtime error while '%': %", doing, err_msg);
+      break;
+    case LUA_ERRMEM:
+      log_e("Lua memory error while '%': %", doing, err_msg);
+      break;
+    case LUA_ERRERR:
+      log_e("Lua error running error handler while '%': %", doing, err_msg);
+      break;
+    case LUA_ERRSYNTAX:
+      log_e("Lua syntax error while '%': %", doing, err_msg);
+      break;
+    case LUA_ERRFILE:
+      log_e("Error loading Lua file while '%': %", doing, err_msg);
+      break;
+    default: // Future errors
+      log_e("Unknown Lua error while '%': %", doing, err_msg);
+      break;
+    }
+
+    return true;
+  }
 } }
