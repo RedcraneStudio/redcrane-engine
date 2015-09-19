@@ -128,4 +128,7 @@ namespace game { namespace luaint
   void uninit_lua(lua_State* L) noexcept;
 
   void load_mod(lua_State& L, std::string mod_dir);
+
+  // Return true on error, use return value to bail out.s
+  bool handle_err(lua_State*, int);
 } }
