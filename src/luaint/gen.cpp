@@ -11,6 +11,7 @@ extern "C"
   #include "lauxlib.h"
 }
 
+#define RC_TERRAIN_MODS_REGISTRY_NAME "Redcrane.Gen.Terrain_Mods"
 #define RC_GEN_GRID_METATABLE_NAME "Redcrane.Gen.Grid.Metatable"
 
 namespace game { namespace luaint
@@ -72,7 +73,7 @@ namespace game { namespace luaint
     // - Configuration object
 
     // Load the list of mods
-    push_registry_table(L, "Redcrane.Gen.Terrain_Mods");
+    push_registry_table(L, RC_TERRAIN_MODS_REGISTRY_NAME);
 
     // Our list of mods is at the top of the stack
     auto table_index = lua_objlen(L, -1) + 1;
@@ -291,5 +292,39 @@ namespace game { namespace luaint
     lua_setmetatable(L, -2);
 
     // We are left with the userdata at the top of the stack.
+  }
+
+  void run_mods(lua_State* L, Terrain_Gen_Mod_Vector const& ml,
+                gen::Grid_Map& map)
+  {
+    // First push the grid map userdata once, we can repush it on top when it's
+    // time to pass it in as a parameter.
+    push_grid(L, map);
+
+    // Push the function table in the registry
+
+    lua_getfield(L, LUA_REGISTRYINDEX, RC_TERRAIN_MODS_REGISTRY_NAME);
+    for(size_t i = 0; i < ml.size(); i++)
+    {
+      auto const& mod = ml[i];
+
+      // Push the function
+      lua_rawgeti(L, -1, mod.table_index);
+
+      // Push the grid
+      lua_pushvalue(L, -3);
+
+      // Push the configuration object
+      //push_config(L, mod.config);
+      lua_pushstring(L, "Way to fucking go Luke");
+
+      int err = lua_pcall(L, 2, 0, 0);
+      if(handle_err(L, err, "calling mod #%", i)) return;
+
+      // That's it
+    }
+
+    // Get rid of the boilerpot that we added
+    lua_pop(L, 2);
   }
 } }

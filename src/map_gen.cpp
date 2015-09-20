@@ -68,10 +68,15 @@ int main(int argc, char** argv)
     luaint::load_mod(*L, dir_name);
     log_w("Number of registered mods %", mod_list.size());
 
+    luaint::run_mods(L, mod_list, map);
+
     luaint::uninit_lua(L);
   }
+  else
+  {
+    gen::terrain_v1_map(map, terrain_params);
+  }
 
-  gen::terrain_v1_map(map, terrain_params);
   gen::write_png_heightmap(map, "terrain.png");
 
   return 0;

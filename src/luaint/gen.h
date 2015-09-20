@@ -51,4 +51,6 @@ namespace game { namespace luaint
 
   // Use this to push a grid
   void push_grid_table(lua_State*, gen::Grid_Map&) noexcept;
+
+  void run_mods(lua_State*, Terrain_Gen_Mod_Vector const&, gen::Grid_Map&);
 } }
