@@ -158,7 +158,9 @@ namespace game { namespace luaint
     if(handle_err(L, err)) return;
 
     err = lua_pcall(L, 0, 0, 0);
-    if(handle_if_err(L, err)) return;
+    if(handle_err(L, err)) return;
+
+    // TODO: Return to the directory we were in before.
   }
 
   bool handle_err(lua_State* L, int err)
