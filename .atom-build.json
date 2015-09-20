@@ -1,0 +1,22 @@
+{
+  "cmd": "ninja",
+  "name": "Ninja build",
+  "args": [],
+  "sh": false,
+  "cwd": "{PROJECT_PATH}/../build",
+  "env": {},
+  "errorMatch": [
+    "\n(?<file>[\\/0-9a-zA-Z\\._]+):(?<line>\\d+):(?<col>\\d+)"
+  ],
+  "targets": {
+    "clean": {
+      "cmd": "ninja",
+      "name": "Ninja clean",
+      "args": ["clean"],
+      "sh": false,
+      "cwd": "{PROJECT_PATH}/../build",
+      "env": {},
+      "errorMatch": []
+    }
+  }
+}
