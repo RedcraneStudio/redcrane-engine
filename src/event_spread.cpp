@@ -46,7 +46,7 @@ int main(int argc, char** argv) noexcept
       }
     }
 
-    map_size = {value_vector.front().size(), value_vector.size()};
+    map_size = {(int) value_vector.front().size(), (int) value_vector.size()};
 
     cm.allocate(map_size);
     for(int i = 0; i < cm.extents.y; ++i)

@@ -23,6 +23,8 @@ namespace game
     External_IO(read_cb r_cb = nullptr, read_cb e_cb = nullptr) noexcept
                 : read_cb_(r_cb), err_cb_(e_cb) {}
 
+    virtual ~External_IO() noexcept {}
+
     inline void set_read_callback(read_cb cb) noexcept;
     inline void set_error_callback(read_cb cb) noexcept;
     inline void post(std::vector<char> const& buf) noexcept;
@@ -98,7 +100,7 @@ namespace game
     void step_(bool recursive) noexcept;
 
     // Counterpart mode. Counter part is pointed to, not owned.
-    Pipe_IO(Pipe_IO& cp) noexcept : cp_(&cp, false) {}
+    Pipe_IO(Pipe_IO& cp) noexcept : External_IO(), cp_(&cp, false) {}
 
     // Represents a Pipe_IO object that is maybe owned.
     Maybe_Owned<Pipe_IO> cp_;

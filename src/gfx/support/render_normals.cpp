@@ -44,7 +44,7 @@ namespace game { namespace gfx
                       glm::mat4 const& model) noexcept
   {
     auto size = std::min(m.positions.size(), m.normals.size());
-    for(int i = 0; i < size; ++i)
+    for(size_t i = 0; i < size; ++i)
     {
       auto position = model * glm::vec4(m.positions[i], 1.0f);
       auto normal = model * glm::vec4(m.normals[i], 0.0f);

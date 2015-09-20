@@ -73,6 +73,9 @@ namespace game { namespace ui
         return parent_border_;
       }
     }
+
+    // We shouldn't get here.
+    return boost::none;
   }
   bool Element::remove_border(Elem_Volume v) noexcept
   {
@@ -117,6 +120,9 @@ namespace game { namespace ui
         return parent_background_;
       }
     }
+
+    // We shouldn't ever get here.
+    return boost::none;
   }
   bool Element::remove_background(Elem_Volume v) noexcept
   {

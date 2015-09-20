@@ -42,6 +42,9 @@ namespace game { namespace gfx { namespace gl
       case Primitive_Type::Triangle_Fan:
         return GL_TRIANGLE_FAN;
     }
+
+    // This should never return
+    return 0;
   }
 
   GLenum get_gl_buffer_format(Buffer_Format format) noexcept
@@ -55,6 +58,9 @@ namespace game { namespace gfx { namespace gl
       case Buffer_Format::Short:
         return GL_SHORT;
     }
+
+    // We should never get here.
+    return 0;
   }
   GLenum get_gl_pixel_format(Framebuffer) noexcept
   {

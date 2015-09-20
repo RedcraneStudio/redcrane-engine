@@ -84,7 +84,9 @@ namespace game { namespace ipc
     uv_pipe_init(loop, (uv_pipe_t*) &self->io.out, 1);
     uv_pipe_init(loop, (uv_pipe_t*) &self->err, 1);
 
-    uv_process_options_t options = {0};
+    uv_process_options_t options;
+
+    options.exit_cb = 0;
 
     // Specify executable.
     options.file = spawn_opt.args[0];

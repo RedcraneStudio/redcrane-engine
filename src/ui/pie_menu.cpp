@@ -30,7 +30,7 @@ namespace game { namespace ui
 
     // Update font renderer.
     auto dif = new_size - old_size;
-    for(int i = 0; i < dif; ++i)
+    for(size_t i = 0; i < dif; ++i)
     {
       radial_buttons_[i + old_size].font_renderer(*font_);
     }
@@ -155,7 +155,7 @@ namespace game { namespace ui
       auto angle = ((M_PI / 2) - segment_angle / 2) + (segment_angle * i);
 
       // TODO: Figure out why exactly we have to negate sin in this case.
-      Vec<float> dir{glm::cos(angle), -glm::sin(angle)};
+      Vec<float> dir{(float) glm::cos(angle), (float) -glm::sin(angle)};
       dir = normalize(dir);
 
       auto p1 = dir * (float) (radius_ / radius_factor + 10.0f) + center_;
@@ -186,7 +186,7 @@ namespace game { namespace ui
     {
       auto angle = (M_PI / 2) + (segment_angle * i);
 
-      Vec<float> dir{glm::cos(angle), -glm::sin(angle)};
+      Vec<float> dir{(float) glm::cos(angle), (float) -glm::sin(angle)};
       dir = normalize(dir);
 
       // The result of factoring `(rad - sr) / 2 + sr` where rad is radius, sr,

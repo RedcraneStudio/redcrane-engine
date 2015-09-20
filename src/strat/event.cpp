@@ -97,7 +97,6 @@ namespace game { namespace strat
     // it though it can't hurt.
     GAME_ASSERT(cost.extents == event_map.event_timer_map.extents);
 
-    auto orig_accum_time = event_map.accum_time;
     event_map.accum_time += dt;
 
     bool did_spread = false;

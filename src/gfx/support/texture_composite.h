@@ -35,6 +35,6 @@ namespace game
   Texture_Composite make_texture_composite(Args*... args) noexcept
   {
     std::vector<Maybe_Owned<Texture> > ts { Maybe_Owned<Args>(args, false)... };
-    Texture_Composite(std::move(ts));
+    return std::move(ts);
   }
 }
