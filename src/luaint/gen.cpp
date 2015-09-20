@@ -133,7 +133,7 @@ namespace game { namespace luaint
 
   int grid_set_tile(lua_State* L)
   {
-    auto& grid = *(gen::Grid_Map*)
+    auto& grid = **(gen::Grid_Map**)
       luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
 
     auto pos = get_table(L, 2);
@@ -153,11 +153,11 @@ namespace game { namespace luaint
     int ind = luaL_checkoption(L, 3, NULL, opts);
     if(ind == 0)
     {
-      grid.at(vec).type == gen::Cell_Type::Land;
+      grid.at(vec).type = gen::Cell_Type::Land;
     }
     else if(ind == 1)
     {
-      grid.at(vec).type == gen::Cell_Type::Water;
+      grid.at(vec).type = gen::Cell_Type::Water;
     }
 
     return 0;
@@ -165,7 +165,7 @@ namespace game { namespace luaint
 
   int grid_set_contents(lua_State* L)
   {
-    auto& grid = *(gen::Grid_Map*)
+    auto& grid = **(gen::Grid_Map**)
       luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
 
     auto pos = get_table(L, 2);
@@ -189,11 +189,11 @@ namespace game { namespace luaint
     int ind = luaL_checkoption(L, 3, NULL, opts);
     if(ind == 0)
     {
-      grid.at(vec).contents == gen::Cell_Contents::None;
+      grid.at(vec).contents = gen::Cell_Contents::None;
     }
     else if(ind == 1)
     {
-      grid.at(vec).contents == gen::Cell_Contents::Tree;
+      grid.at(vec).contents = gen::Cell_Contents::Tree;
     }
 
     return 0;
@@ -201,7 +201,7 @@ namespace game { namespace luaint
 
   int grid_get_tile(lua_State* L)
   {
-    auto& grid = *(gen::Grid_Map*)
+    auto& grid = **(gen::Grid_Map**)
       luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
 
     auto pos = get_table(L, 2);
@@ -228,7 +228,7 @@ namespace game { namespace luaint
   }
   int grid_get_contents(lua_State* L)
   {
-    auto& grid = *(gen::Grid_Map*)
+    auto& grid = **(gen::Grid_Map**)
       luaL_checkudata(L, 1, RC_GEN_GRID_METATABLE_NAME);
 
     auto pos = get_table(L, 2);
