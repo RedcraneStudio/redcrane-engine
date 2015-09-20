@@ -278,13 +278,13 @@ namespace game { namespace luaint
       lua_newtable(L);
 
       // function(grid, pos, str type)
-      set_field(L, "set_tile", Function{grid_set_tile});
+      set_field(L, "set_tile", Function{grid_set_tile, {}});
       // function(grid, pos, str type)
-      set_field(L, "set_contents", Function{grid_set_contents});
+      set_field(L, "set_contents", Function{grid_set_contents, {}});
       // function(grid, pos)
-      set_field(L, "get_tile", Function{grid_get_tile});
+      set_field(L, "get_tile", Function{grid_get_tile, {}});
       // function(grid, pos)
-      set_field(L, "get_contents", Function{grid_get_contents});
+      set_field(L, "get_contents", Function{grid_get_contents, {}});
 
       lua_setfield(L, -2, "__index");
     }
