@@ -17,7 +17,7 @@ extern "C"
 
 namespace game { namespace luaint
 {
-  inline std::string get_string(lua_State* L, size_t index)
+  inline std::string get_string(lua_State* L, int index)
   {
     if(lua_type(L, index) == LUA_TSTRING)
     {
@@ -27,7 +27,7 @@ namespace game { namespace luaint
     return "";
   }
 
-  inline double get_number(lua_State* L, size_t index)
+  inline double get_number(lua_State* L, int index)
   {
     if(lua_type(L, index) == LUA_TNUMBER)
     {
@@ -41,32 +41,32 @@ namespace game { namespace luaint
   struct Table_Ref
   {
     lua_State* L;
-    size_t index;
+    int index;
 
     inline std::string get_string(std::string const& name)
     {
       lua_getfield(L, index, name.data());
       std::string ret = luaint::get_string(L, -1);
-      lua_pop(L, -1);
+      lua_pop(L, 1);
       return ret;
     }
     inline double get_number(std::string const& name)
     {
       lua_getfield(L, index, name.data());
       double ret = luaint::get_number(L, -1);
-      lua_pop(L, -1);
+      lua_pop(L, 1);
       return ret;
     }
   };
 
-  inline Table_Ref get_table(lua_State* L, size_t index)
+  inline Table_Ref get_table(lua_State* L, int index)
   {
     if(lua_type(L, index) == LUA_TTABLE)
     {
       return {L, index};
     }
     luaL_typerror(L, index, "table");
-    return {L, (size_t) -1};
+    return {L, -1};
   }
 
   template <class T>
