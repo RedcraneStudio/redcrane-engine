@@ -48,6 +48,30 @@ namespace game { namespace gen
     }
   }
 
+  Heightmap make_heightmap(Grid_Map const& map) noexcept
+  {
+    Heightmap ret;
+    ret.allocate(map.extents);
+
+    for(int i = 0; i < map.extents.x * map.extents.y; ++i)
+    {
+      float value = 0.0f;
+
+      switch(map.values[i].type)
+      {
+      case Cell_Type::Water:
+        value = 0.0f;
+        break;
+      case Cell_Type::Land:
+        value = 1.0f;
+      }
+
+      ret.values[i] = value;
+    }
+
+    return ret;
+  }
+
   void write_png_heightmap(Grid_Map const& map,
                            std::string const& filename) noexcept
   {
