@@ -11,5 +11,8 @@ add_library(gfxsupportlib STATIC load_wavefront.cpp software_texture.cpp
                                  render_normals.cpp)
 target_link_libraries(gfxsupportlib gfxlib commonlib)
 
+# We need this for boost::optional.
+target_include_directories(gfxsupportlib PUBLIC ${Boost_INCLUDE_DIRS})
+
 target_link_libraries(gfxsupportlib ${LIBPNG_LIBRARIES})
 target_include_directories(gfxsupportlib PUBLIC ${LIBPNG_INCLUDE_DIRS})

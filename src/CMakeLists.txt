@@ -6,10 +6,12 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 find_package(LibPNG REQUIRED)
 find_package(LibUV REQUIRED)
+find_package(GLM REQUIRED)
 add_subdirectory(common)
 add_subdirectory(io)
 
-find_package(GLM REQUIRED)
+find_package(Boost REQUIRED)
+
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
@@ -19,7 +21,6 @@ add_subdirectory(gfx)
 
 add_subdirectory(fps)
 
-#find_package(Boost REQUIRED COMPONENTS filesystem)
 #add_subdirectory(assets)
 
 find_package(Freetype REQUIRED)

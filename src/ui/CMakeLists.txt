@@ -11,5 +11,8 @@ add_library(uilib elements/layouts/grid_layout.cpp
 
 target_link_libraries(uilib commonlib)
 
+# We need this for boost::optional.
+target_include_directories(uilib PUBLIC ${Boost_INCLUDE_DIRS})
+
 target_include_directories(uilib PUBLIC ${FREETYPE_INCLUDE_DIRS})
 target_link_libraries(uilib ${FREETYPE_LIBRARIES})
