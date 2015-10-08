@@ -1,2 +1,4 @@
 *.pyc
 .ycm_extra_conf.*
+*.swp
+*.swo
