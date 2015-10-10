@@ -67,9 +67,6 @@ namespace game { namespace gen
 
   void terrain_v1_map(Grid_Map& map, Terrain_Params const&) noexcept;
 
-  using Heightmap = Value_Map<float>;
-  Heightmap make_heightmap(Grid_Map const&) noexcept;
-
   void write_png_heightmap(Grid_Map const& map, std::string const&) noexcept;
 
   // T must have the following members:

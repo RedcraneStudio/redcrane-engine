@@ -28,6 +28,7 @@ add_subdirectory(ui)
 
 add_subdirectory(strat)
 add_subdirectory(gen)
+add_subdirectory(terrain)
 
 add_subdirectory(collisionlib)
 
@@ -35,7 +36,7 @@ find_package(Threads REQUIRED)
 
 add_executable(strategy main.cpp)
 target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
-                               genlib)
+                               genlib terrainlib)
 target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
 
 
