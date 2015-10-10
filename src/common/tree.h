@@ -107,13 +107,17 @@ namespace game
     // there is a lot of resizing, but the intended usage of this class is
     // for a somewhat statically sized quadtree (as varying depths on different
     // paths down the tree is not implementated, that may be obvious).
+
+    //! Contigious block of nodes stored in breadth-first order.
     node_vector_t nodes_;
 
     // Technically this could be calculated from the size of nodes, but ehhh.
     // Keeping it cached is all around better, as it could only really ever
     // change from calls to set_depth in which case saving the input makes
     // complete sense.
-    depth_t depth_;
+
+    //! Amount of depth levels (not zero-based).
+    depth_t depth_ = 0;
   };
 
   // Depth is not zero based, but level is.
