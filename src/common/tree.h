@@ -159,7 +159,7 @@ namespace game
     auto offset = tree_level_offset(N, depth);
 
     // Return that iterator.
-    return nodes_.begin() + tree_level_offset(N, depth);
+    return nodes_.begin() + offset;
   }
 
   // Identical implementation to the one above, so look at those comments.
