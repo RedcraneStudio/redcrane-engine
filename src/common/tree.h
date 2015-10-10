@@ -199,7 +199,6 @@ namespace game
     {
       return this->end();
     }
-    auto offset = tree_level_offset(N, depth);
     return nodes_.begin() + tree_level_offset(N, depth);
   }
 
