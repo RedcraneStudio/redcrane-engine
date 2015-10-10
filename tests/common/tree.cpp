@@ -20,6 +20,8 @@ TEST_CASE("tree returns valid iterators for allocated depth levels", "[Tree]")
   REQUIRE(tree.level_begin(2) != tree.end());
   REQUIRE(tree.level_begin(3) == tree.end());
 
+  REQUIRE(tree.begin() == tree.level_begin(0));
+
   SECTION("adding depth doesn't change previous levels")
   {
     constexpr int expect = 5;
