@@ -85,3 +85,66 @@ TEST_CASE("tree returns valid iterators for allocated depth levels", "[Tree]")
     REQUIRE((tree.level_begin(0) + 5)->val == expect);
   }
 }
+TEST_CASE("depth level is properly maintained in nodes", "[Tree]")
+{
+  using namespace game;
+  struct null_t {};
+
+  // The tree has 5 children per node per depth level.
+  Tree<null_t, 5> tree;
+
+  // Allocate a single depth level.
+  tree.set_depth(1);
+  REQUIRE(tree.begin()[0].depth() == 0);
+
+  // Add two more levels
+  tree.set_depth(3);
+
+  // Test each one
+
+  REQUIRE(tree.begin()[0].depth() == 0);
+  for(auto iter = tree.level_begin(1); iter < tree.level_end(1); ++iter)
+  {
+    REQUIRE(iter->depth() == 1);
+  }
+  for(auto iter = tree.level_begin(2); iter < tree.level_end(2); ++iter)
+  {
+    REQUIRE(iter->depth() == 2);
+  }
+
+  // Subtract a level
+  tree.set_depth(2);
+
+  REQUIRE(tree.begin()[0].depth() == 0);
+  for(auto iter = tree.level_begin(1); iter < tree.level_end(1); ++iter)
+  {
+    REQUIRE(iter->depth() == 1);
+  }
+
+  // Get rid of everything
+  tree.set_depth(0);
+
+  // Add a bunch of levels this time
+  tree.set_depth(5);
+
+  // Test them all
+  REQUIRE(tree.begin()[0].depth() == 0);
+  for(auto iter = tree.level_begin(1); iter < tree.level_end(1); ++iter)
+  {
+    REQUIRE(iter->depth() == 1);
+  }
+  for(auto iter = tree.level_begin(2); iter < tree.level_end(2); ++iter)
+  {
+    REQUIRE(iter->depth() == 2);
+  }
+  for(auto iter = tree.level_begin(3); iter < tree.level_end(3); ++iter)
+  {
+    REQUIRE(iter->depth() == 3);
+  }
+  for(auto iter = tree.level_begin(4); iter < tree.level_end(4); ++iter)
+  {
+    REQUIRE(iter->depth() == 4);
+  }
+
+  // That's probably fine :)
+}

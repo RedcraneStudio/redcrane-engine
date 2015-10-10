@@ -9,12 +9,8 @@
 
 namespace game
 {
-  //! The node currently just stores whatever data we want
   template <class T>
-  struct Node
-  {
-    T val;
-  };
+  struct Node;
 
   /*!
    * \brief A tree structure stored in breadth-first search order in memory.
@@ -120,6 +116,20 @@ namespace game
     depth_t depth_ = 0;
   };
 
+  //! The node stores the content and current depth level.
+  template <class T>
+  struct Node
+  {
+    std::size_t depth() const noexcept { return depth_; }
+
+    T val;
+  private:
+    std::size_t depth_ = 0;
+
+    template <class, unsigned int> friend struct Tree;
+  };
+
+
   // Depth is not zero based, but level is.
   unsigned int tree_amount_nodes(unsigned int N, std::size_t depth) noexcept;
   std::size_t tree_level_offset(unsigned int N, std::size_t level) noexcept;
@@ -129,9 +139,27 @@ namespace game
   {
     auto req_nodes = tree_amount_nodes(N, depth);
 
+    auto orig_depth = depth_;
     nodes_.resize(req_nodes);
-
     depth_ = depth;
+
+    // Only set the depth for every *new* node. This loop goes from any new
+    // depth levels (orig_depth + 1) to the new depth level.
+    // Resize 5 => 6 : Loop runs with i == 6
+    // Resize 6 => 8 : Loop runs with i == 7 and i == 8
+    // These are obviously not zero-based values.
+    for(depth_t i = orig_depth + 1; i <= depth; ++i)
+    {
+      // Get the zero-based depth-level to query iterators.
+      auto level = i - 1;
+
+      // It's important to preserve depth information in this loop, otherwise
+      // we could just use a single loop.
+      for(auto iter = level_begin(level); iter != level_end(level); ++iter)
+      {
+        iter->depth_ = level;
+      }
+    }
   }
 
   // Make sure to update the const implementation if this one ever changes. I'm
