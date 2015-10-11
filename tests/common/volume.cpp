@@ -7,7 +7,7 @@
 
 #include "common/volume.h"
 
-TEST_CASE("volume quad returns the proper quadrant", "[Tree]")
+TEST_CASE("volume quad returns the proper quadrant", "[volume]")
 {
   using namespace game;
 
@@ -72,22 +72,22 @@ TEST_CASE("volume quad returns the proper quadrant", "[Tree]")
 
     SECTION("top-left")
     {
-      expect = {{10.5, 20.5}, 15.25, 40.25};
+      expect = {{10.5, 20.5}, 15.25, 20.25};
       result = vol_quad(in_vol, 0);
     }
     SECTION("top-right")
     {
-      expect = {{15.75, 20.5}, 15.25, 40.25};
+      expect = {{25.75, 20.5}, 15.25, 20.25};
       result = vol_quad(in_vol, 1);
     }
     SECTION("bottom-left")
     {
-      expect = {{10.5, 40.75}, 15.25, 40.25};
+      expect = {{10.5, 40.75}, 15.25, 20.25};
       result = vol_quad(in_vol, 2);
     }
     SECTION("bottom-right")
     {
-      expect = {{15.75, 40.75}, 15.25, 40.25};
+      expect = {{25.75, 40.75}, 15.25, 20.25};
       result = vol_quad(in_vol, 3);
     }
 
