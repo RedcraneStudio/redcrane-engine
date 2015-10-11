@@ -136,4 +136,39 @@ namespace game
   {
     return !(v1 == v2);
   }
+
+  /*! Returns the respective quad in a corner of a given volume.
+   *
+   * \param in_vol The input volume.
+   * \param corner The corner of input_volume that must be returned. Possible
+   * corners are:<br/>
+   * _Top left => 0_<br/>
+   * _Top right => 1_<br/>
+   * _Bottom left => 2_<br/>
+   * _Bottom right => 3_<br/>
+   */
+  template <class T>
+  Volume<T> vol_quad(Volume<T> const& in_vol, short corner) noexcept
+  {
+    switch(corner)
+    {
+    case 0:
+      return {in_vol.pos, in_vol.width / 2, in_vol.height / 2};
+      break;
+    case 1:
+      return {{in_vol.pos.x / 2, in_vol.pos.y},
+              in_vol.width / 2, in_vol.height / 2};
+      break;
+    case 2:
+      return {{in_vol.pos.x, in_vol.pos.y / 2},
+              in_vol.width / 2, in_vol.height / 2};
+      break;
+    case 3:
+      return {{in_vol.pos.x / 2, in_vol.pos.y / 2},
+              in_vol.width / 2, in_vol.height / 2};
+      break;
+    default:
+      return in_vol;
+    }
+  }
 }
