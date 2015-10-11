@@ -156,15 +156,16 @@ namespace game
       return {in_vol.pos, in_vol.width / 2, in_vol.height / 2};
       break;
     case 1:
-      return {{in_vol.pos.x / 2, in_vol.pos.y},
+      return {{in_vol.pos.x + in_vol.width / 2, in_vol.pos.y},
               in_vol.width / 2, in_vol.height / 2};
       break;
     case 2:
-      return {{in_vol.pos.x, in_vol.pos.y / 2},
+      return {{in_vol.pos.x, in_vol.pos.y + in_vol.height / 2},
               in_vol.width / 2, in_vol.height / 2};
       break;
     case 3:
-      return {{in_vol.pos.x / 2, in_vol.pos.y / 2},
+      return {{in_vol.pos.x + in_vol.width / 2,
+               in_vol.pos.y + in_vol.height / 2},
               in_vol.width / 2, in_vol.height / 2};
       break;
     default:
