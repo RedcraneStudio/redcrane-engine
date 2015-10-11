@@ -2,12 +2,11 @@
 # Copyright (C) 2015 Luke San Antonio
 # All rights reserved.
 
-function(add_tests subdirectory)
+macro(add_tests subdirectory)
   foreach(filename ${ARGN})
-    set(RED_CRANE_TEST_FILES "${RED_CRANE_TEST_FILES}" "${subdirectory}/${filename}"
-        PARENT_SCOPE)
+    set(RED_CRANE_TEST_FILES ${RED_CRANE_TEST_FILES} "${subdirectory}/${filename}")
   endforeach()
-endfunction()
+endmacro()
 
 add_tests(common tree.cpp volume.cpp)
 add_executable(run_all_tests main.cpp ${RED_CRANE_TEST_FILES})
