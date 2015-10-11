@@ -98,6 +98,8 @@ namespace game
     //! Returns the node at a given index from the start of block of nodes.
     node_t& node_at_index(std::size_t i) noexcept
     { return nodes_[i]; }
+
+    constexpr unsigned int children_per_node() const noexcept { return N; }
   private:
     // Dynamically sized contigous block of nodes. This is kind of hefty if
     // there is a lot of resizing, but the intended usage of this class is
