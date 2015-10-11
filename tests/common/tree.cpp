@@ -7,7 +7,7 @@
 
 #include "common/tree.h"
 
-TEST_CASE("tree returns valid iterators for allocated depth levels", "[Tree]")
+TEST_CASE("tree returns valid iterators for allocated depth levels", "[tree]")
 {
   using namespace game;
   Quadtree<int> tree;
@@ -85,7 +85,7 @@ TEST_CASE("tree returns valid iterators for allocated depth levels", "[Tree]")
     REQUIRE((tree.level_begin(0) + 5)->val == expect);
   }
 }
-TEST_CASE("depth level is properly maintained in nodes", "[Tree]")
+TEST_CASE("depth level is properly maintained in nodes", "[tree]")
 {
   using namespace game;
   struct null_t {};
