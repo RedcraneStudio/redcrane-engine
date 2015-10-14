@@ -14,6 +14,10 @@ namespace game
     void allocate(Vec<int> const& extents) noexcept;
     ~Value_Map() noexcept;
 
+    // We could be using std::size_t here instead of int and it would probably
+    // be more correct, but that is a breaking change and dealing with unsigned
+    // numbers is a pain. It's probably better to have good faith negative
+    // numbers won't be used for the sake of simplicity.
     inline T& at(Vec<int> pos) noexcept
     {
       return values[pos.y * extents.x + pos.x];
