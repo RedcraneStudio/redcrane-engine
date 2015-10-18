@@ -143,4 +143,40 @@ namespace game { namespace terrain
 
     return ret;
   }
+
+  void set_levels_volumes(Quadtree<Chunk>& tree, Vec<int> extents,
+                          std::size_t levels) noexcept
+  {
+    tree.set_depth(levels);
+
+    // The volume of the root node is the entire heightmap.
+    tree.node_at_depth(0,0).val.vol = vol_from_extents<int>(extents);
+
+    // Don't start at the first node, since we dealt with that one.
+    for(auto iter = tree.level_begin(1); iter != tree.end(); ++iter)
+    {
+      // Find the offset of the current iter from the beginning node of the
+      // current depth level.
+      auto offset_from_level = iter - tree.level_begin(iter->depth());
+
+      // Children per node is definitely equal to four.
+      // Results in something like this. Corner =
+      // _____
+      // |0|1|
+      // -----
+      // |2|3|
+      // -----
+      auto corner = offset_from_level % tree.children_per_node();
+
+      // This is the index from the beginning of the previous depth level
+      // representing the parent.
+      auto parent_off = offset_from_level / tree.children_per_node();
+
+      // This is the parent node of the current node.
+      auto& parent_node = tree.node_at_depth(iter->depth() - 1, parent_off);
+
+      // Get the proper volume for this current node.
+      iter->val.vol = vol_quad(parent_node.val.vol, corner);
+    }
+  }
 } }

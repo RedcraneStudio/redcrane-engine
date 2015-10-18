@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../common/tree.h"
+#include "../common/volume.h"
 
 #include "../gen/terrain.h"
 
@@ -27,6 +28,9 @@ namespace game { namespace terrain
 
     // The amount of vertices in the mesh grid.
     Vec<std::size_t> mesh_size;
+
+    // The area of the heightmap that we cover in its coordinate system.
+    Volume<int> vol;
 
     // The root chunk should own it's mesh, the rest should point to it.
     Mesh_Chunk mesh_chunk;
@@ -48,5 +52,11 @@ namespace game { namespace terrain
 
   // Each level of this quadtree is a more detailed mesh containing one-fourth
   // of the area of it's parent. (Each level has the same amount of vertices.
-  Quadtree<Chunk> cache_terrain_levels() noexcept;
+
+  /*!
+   * \brief Creates a quadtree with the proper levels and volumes.
+   * for each depth level.
+   */
+  void set_levels_volumes(Quadtree<Chunk>& tree, Vec<int> extents,
+                          std::size_t levels) noexcept;
 } }
