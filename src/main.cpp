@@ -189,11 +189,13 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
-  glfwSwapInterval(0);
-
   // Init context + load gl functions.
   glfwMakeContextCurrent(window);
   gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+  // This has got to be located _after_ making the gl context current. Ie after
+  // a call to the glfwMakeContextCurrent function.
+  glfwSwapInterval(0);
 
   // Log glfw version.
   log_i("Initialized GLFW %", glfwGetVersionString());
