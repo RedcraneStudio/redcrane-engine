@@ -16,3 +16,5 @@ Big:
   - Define when to use our lib and when to use glm, or just only use glm.
 
 Fix any const& vs value parameters.
+
+Figure out serialization before it is too late
