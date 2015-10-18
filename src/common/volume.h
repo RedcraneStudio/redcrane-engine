@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include <ostream>
 #include "center.hpp"
 #include "vec.h"
 #include <algorithm>
@@ -171,5 +172,14 @@ namespace game
     default:
       return in_vol;
     }
+  }
+
+  template <class T>
+  std::ostream& operator<<(std::ostream& out, Volume<T> const& vol) noexcept
+  {
+    out << "{{" + std::to_string(vol.pos.x) + ", " << std::to_string(vol.pos.y)
+        << "}, " + std::to_string(vol.width) + ", "
+        << std::to_string(vol.height) << "}";
+    return out;
   }
 }
