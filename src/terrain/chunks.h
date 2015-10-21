@@ -22,12 +22,12 @@ namespace game { namespace terrain
 
   struct Chunk
   {
-    // In local space? world space? I don't believe we should apply any scaling
-    // so this size would be the same both ways.
+    // World space dimensions of this object.
     Vec<float> physical_size;
 
-    // The amount of vertices in the mesh grid.
-    Vec<std::size_t> mesh_size;
+    // The dimensions in vertices / cells of this node's mesh / grid.
+    // This should never be negative, but size_t makes me scared of underflow.
+    Vec<int> grid_size;
 
     // The area of the heightmap that we cover in its coordinate system.
     Volume<int> vol;
