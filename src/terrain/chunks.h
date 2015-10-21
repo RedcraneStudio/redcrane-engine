@@ -36,6 +36,8 @@ namespace game { namespace terrain
     Mesh_Chunk mesh_chunk;
   };
 
+  using terrain_tree_t = Quadtree<Chunk>;
+
   // We should make sure we remember that some levels could simply lack
   // generated vertices (such as the root note) because rendering at that low
   // quality could be useless.
@@ -57,6 +59,6 @@ namespace game { namespace terrain
    * \brief Creates a quadtree with the proper levels and volumes.
    * for each depth level.
    */
-  void set_levels_volumes(Quadtree<Chunk>& tree, Vec<int> extents,
+  void set_levels_volumes(terrain_tree_t& tree, Vec<int> extents,
                           std::size_t levels) noexcept;
 } }

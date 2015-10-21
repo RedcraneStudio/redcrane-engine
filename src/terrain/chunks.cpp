@@ -144,7 +144,7 @@ namespace game { namespace terrain
     return ret;
   }
 
-  void set_levels_volumes(Quadtree<Chunk>& tree, Vec<int> extents,
+  void set_levels_volumes(terrain_tree_t& tree, Vec<int> extents,
                           std::size_t levels) noexcept
   {
     tree.set_depth(levels);
