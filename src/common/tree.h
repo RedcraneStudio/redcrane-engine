@@ -7,6 +7,8 @@
 #include <vector>
 #include <cmath>
 
+#include "null_t.h"
+
 namespace game
 {
   template <class T>
@@ -17,8 +19,10 @@ namespace game
    *
    * \tparam N The fixed amount of children for each new depth level. AKA for a
    * Quadtree N should be 4.
+   * \tparam R Any data associated with the root node, more importantly only
+   * a single instance of this type will be created by the tree.
    */
-  template <class T, unsigned int N>
+  template <class T, unsigned int N, class R = null_t>
   struct Tree
   {
     //! The type of node.
@@ -100,6 +104,9 @@ namespace game
     { return nodes_[i]; }
 
     constexpr unsigned int children_per_node() const noexcept { return N; }
+
+    R const& root_data() const noexcept { return root_data_; }
+    R& root_data() noexcept { return root_data_; }
   private:
     // Dynamically sized contigous block of nodes. This is kind of hefty if
     // there is a lot of resizing, but the intended usage of this class is
@@ -116,6 +123,10 @@ namespace game
 
     //! Amount of depth levels (not zero-based).
     depth_t depth_ = 0;
+
+    //! Root data associated with the tree, not any particular node.
+    R root_data_;
+
   };
 
   //! The node stores the content and current depth level.
@@ -128,7 +139,7 @@ namespace game
   private:
     std::size_t depth_ = 0;
 
-    template <class, unsigned int> friend struct Tree;
+    template <class, unsigned int, class> friend struct Tree;
   };
 
 
@@ -136,8 +147,8 @@ namespace game
   unsigned int tree_amount_nodes(unsigned int N, std::size_t depth) noexcept;
   std::size_t tree_level_offset(unsigned int N, std::size_t level) noexcept;
 
-  template <class T, unsigned int N>
-  void Tree<T, N>::set_depth(depth_t depth) noexcept
+  template <class T, unsigned int N, class R>
+  void Tree<T, N, R>::set_depth(depth_t depth) noexcept
   {
     auto req_nodes = tree_amount_nodes(N, depth);
 
@@ -167,9 +178,9 @@ namespace game
   // Make sure to update the const implementation if this one ever changes. I'm
   // not really sure how to implement them in terms of each other since
   // iterator_t and const_iterator_t aren't our types.
-  template <class T, unsigned int N>
-  typename Tree<T, N>::iterator_t
-  Tree<T, N>::level_begin(depth_t depth) noexcept
+  template <class T, unsigned int N, class R>
+  typename Tree<T, N, R>::iterator_t
+  Tree<T, N, R>::level_begin(depth_t depth) noexcept
   {
     // If the user requests a depth level that we don't have, return our end
     // iterator.
@@ -193,9 +204,9 @@ namespace game
   }
 
   // Identical implementation to the one above, so look at those comments.
-  template <class T, unsigned int N>
-  typename Tree<T, N>::const_iterator_t
-  Tree<T, N>::level_begin(depth_t depth) const noexcept
+  template <class T, unsigned int N, class R>
+  typename Tree<T, N, R>::const_iterator_t
+  Tree<T, N, R>::level_begin(depth_t depth) const noexcept
   {
     if(this->depth_ <= depth)
     {
@@ -204,9 +215,9 @@ namespace game
     return nodes_.begin() + tree_level_offset(N, depth);
   }
 
-  template <class T, unsigned int N>
-  typename Tree<T, N>::iterator_t
-  Tree<T, N>::level_end(depth_t depth) noexcept
+  template <class T, unsigned int N, class R>
+  typename Tree<T, N, R>::iterator_t
+  Tree<T, N, R>::level_end(depth_t depth) noexcept
   {
     // Return the begin iterator to the next depth level. This works because
     // if we go out of our valid depth levels, the iterator to the end of the
@@ -214,13 +225,14 @@ namespace game
     return level_begin(depth+1);
   }
   // Identical implementation to the previous function exception const.
-  template <class T, unsigned int N>
-  typename Tree<T, N>::const_iterator_t
-  Tree<T, N>::level_end(depth_t depth) const noexcept
+  template <class T, unsigned int N, class R>
+  typename Tree<T, N, R>::const_iterator_t
+  Tree<T, N, R>::level_end(depth_t depth) const noexcept
   {
     return level_begin(depth+1);
   }
 
-  template <class T>
-  using Quadtree = Tree<T, 4>;
+  template <class T, class R = null_t>
+  using Quadtree = Tree<T, 4, R>;
+
 }
