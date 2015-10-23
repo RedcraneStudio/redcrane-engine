@@ -179,4 +179,21 @@ namespace game { namespace terrain
       iter->val.vol = vol_quad(parent_node.val.vol, corner);
     }
   }
+  void set_physical_size(terrain_tree_t& tree, Vec<float> physical_size)
+  {
+    // Set the physical size of each and every node in the quadtree.
+
+    // We may be able to make this faster by combining this function / loop in
+    // initialize_vertices and not going through the entire tree. We could only
+    // iterate through [begin(), level_end(start_level-1)) and then add the
+    // same code to the mesh-gen loop which would cover the rest of the depth
+    // levels. It would be a simple form of loop unrolling I guess. For now
+    // this is the simplest implementation.
+    for(auto iter = tree.level_begin(0); iter != tree.end(); ++iter)
+    {
+      iter->val.physical_size =
+        {physical_size.x / (float) std::pow(4, iter->depth()),
+         physical_size.y / (float) std::pow(4, iter->depth())};
+    }
+  }
 } }

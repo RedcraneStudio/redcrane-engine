@@ -23,6 +23,7 @@ namespace game { namespace terrain
   struct Chunk
   {
     // World space dimensions of this object.
+    // Set in set_physical_size
     Vec<float> physical_size;
 
     // The dimensions in vertices / cells of this node's mesh / grid.
@@ -71,4 +72,11 @@ namespace game { namespace terrain
    */
   void set_levels_volumes(terrain_tree_t& tree, Vec<int> extents,
                           std::size_t levels) noexcept;
+
+  /*!
+   * \brief Set the physical_size member of each node given it's volume and
+   * depth in the quadtree.
+   */
+  void set_physical_size(terrain_tree_t& tree, Vec<float> physical_size);
+
 } }
