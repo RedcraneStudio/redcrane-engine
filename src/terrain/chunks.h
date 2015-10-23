@@ -55,6 +55,16 @@ namespace game { namespace terrain
   // Each level of this quadtree is a more detailed mesh containing one-fourth
   // of the area of it's parent. (Each level has the same amount of vertices.
 
+  namespace detail
+  {
+    /*!
+     * \brief Returns the amount of vertices for a mesh that would contain a
+     * grid of vertices x vertices for each node in levels [start_level, depth).
+     */
+    std::size_t mesh_vertices(std::size_t start_level, std::size_t depth,
+                              std::size_t vertices) noexcept;
+  }
+
   /*!
    * \brief Creates a quadtree with the proper levels and volumes.
    * for each depth level.
