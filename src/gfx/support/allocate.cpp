@@ -15,4 +15,11 @@ namespace game { namespace gfx
 
     m.allocate_element_array(elements, us, up);
   }
+  void allocate_standard_mesh_buffers(int vertices, Mesh& m, Usage_Hint us,
+                                      Upload_Hint up) noexcept
+  {
+    m.allocate_buffer(vertices * sizeof(Vertex::position), us, up);
+    m.allocate_buffer(vertices * sizeof(Vertex::normal), us, up);
+    m.allocate_buffer(vertices * sizeof(Vertex::uv), us, up);
+  }
 } }

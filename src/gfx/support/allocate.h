@@ -8,4 +8,6 @@ namespace game { namespace gfx
 {
   void allocate_standard_mesh_buffers(int vertices, int elements, Mesh& m,
                                       Usage_Hint, Upload_Hint) noexcept;
+  void allocate_standard_mesh_buffers(int vertices, Mesh& m, Usage_Hint us,
+                                      Upload_Hint up) noexcept;
 } }
