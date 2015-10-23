@@ -3,6 +3,9 @@
  * All rights reserved.
  */
 #include "chunks.h"
+#include "../gfx/mesh_data.h"
+#include "../gfx/support/allocate.h"
+#include "../gfx/support/write_data_to_mesh.h"
 namespace game { namespace terrain
 {
   //! Wat
@@ -194,6 +197,85 @@ namespace game { namespace terrain
       iter->val.physical_size =
         {physical_size.x / (float) std::pow(4, iter->depth()),
          physical_size.y / (float) std::pow(4, iter->depth())};
+    }
+  }
+  void initialize_vertices(terrain_tree_t& tree, Vec<float> physical_size,
+                           gfx::IDriver& idriver, std::size_t level,
+                           std::size_t vertices) noexcept
+  {
+    // Create a mesh and give the root node ownership.
+    auto mesh = Maybe_Owned<Mesh>{idriver.make_mesh_repr()};
+
+    // Figure out the final size of the mesh.
+    auto final_verts =detail::mesh_vertices(level, tree.get_depth(), vertices);
+    gfx::allocate_standard_mesh_buffers(final_verts, *mesh, Usage_Hint::Draw,
+                                        Upload_Hint::Static);
+    gfx::format_mesh_buffers(*mesh);
+
+    // Since we know mesh is a maybe owned, we can guarantee that moving from
+    // it will leave it in a consistent state of being unowned.
+    tree.node_at_index(0).val.mesh_chunk.mesh = std::move(mesh);
+
+    // Start at the first level to generate mesh for and go to the end of the
+    // tree.
+    for(auto iter = tree.level_begin(level); iter != tree.end(); ++iter)
+    {
+      // Initialize the grid size.
+      iter->val.grid_size = {(int) vertices, (int) vertices};
+
+      // What is the size of each cell? Physical size (of the current node) /
+      // the amount of vertices in the grid (that fully contains the node).
+      Vec<float> cell_size;
+      cell_size.x = iter->val.physical_size.x / iter->val.grid_size.x;
+      cell_size.y = iter->val.physical_size.y / iter->val.grid_size.y;
+
+      // For each level there is some mesh data.
+      Ordered_Mesh_Data mesh_data;
+      // For each grid cell, there are 2 triangles of three vertices.
+      for(int i = 0; i < (int) vertices * (int) vertices; ++i)
+      {
+
+        // TODO: UVs should match the heightmap texture.
+        // Normals for now should always be up
+        // TODO: Make sure we need CCW winding order.
+        // TODO: Add root data to the quadtree.
+
+        int x = i % vertices;
+        int y = i / vertices;
+
+        Vertex v0;
+        v0.position = glm::vec3((float) x, 0.0f, (float) y);
+        v0.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        //v0.uv = glm::vec2(0.0f, 0.0f);
+        mesh_data.vertices.push_back(std::move(v0));
+
+        Vertex v1;
+        v1.position = glm::vec3((float) x + cell_size.x, 0.0f, (float) y);
+        v1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        //v0.uv = glm::vec2(0.0f, 0.0f);
+        mesh_data.vertices.push_back(std::move(v1));
+
+        Vertex v2;
+        v2.position = glm::vec3((float) x + cell_size.x, 0.0f,
+                                (float) y + cell_size.y);
+        v2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        //v0.uv = glm::vec2(0.0f, 0.0f);
+        mesh_data.vertices.push_back(std::move(v2));
+
+        mesh_data.vertices.push_back(v0);
+        mesh_data.vertices.push_back(v2);
+
+        Vertex v3;
+        v3.position = glm::vec3((float) x, 0.0f, (float) y + cell_size.y);
+        v3.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        //v0.uv = glm::vec2(0.0f, 0.0f);
+        mesh_data.vertices.push_back(std::move(v3));
+      }
+
+      // Append this node's mesh data to the end of the mesh.
+
+      // Just reference the mesh, the root is going to own it.
+      iter->val.mesh_chunk = gfx::write_data_to_mesh(mesh_data, ref_mo(mesh),0);
     }
   }
 } }

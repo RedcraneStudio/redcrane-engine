@@ -3,4 +3,4 @@
 # All rights reserved.
 
 add_library(terrainlib chunks.cpp chunks_detail.cpp)
-target_link_libraries(terrainlib genlib commonlib gfxlib)
+target_link_libraries(terrainlib genlib commonlib gfxlib gfxsupportlib)

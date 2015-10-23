@@ -28,9 +28,11 @@ namespace game { namespace terrain
 
     // The dimensions in vertices / cells of this node's mesh / grid.
     // This should never be negative, but size_t makes me scared of underflow.
+    // Set in initialize_vertices only for nodes that have initialized mesh.
     Vec<int> grid_size;
 
     // The area of the heightmap that we cover in its coordinate system.
+    // Set for all nodes in set_levels_volumes.
     Volume<int> vol;
 
     // The root chunk should own it's mesh, the rest should point to it.
@@ -79,4 +81,20 @@ namespace game { namespace terrain
    */
   void set_physical_size(terrain_tree_t& tree, Vec<float> physical_size);
 
+  /*!
+   * \brief Initialize the vertices of the quadtree.
+   *
+   * The root node should own it's mesh.
+   * \param tree The quadtree to initialize with vertices. The tree should have
+   * at least two levels. (A root and a single set of children for a total of
+   * five nodes.)
+   * \param idriver The driver to use to allocate the mesh buffer.
+   * \param level Depth level to start at.
+   * \param vertices Grid size of each node. Note that each successive level
+   * means one-forth of the actual area. The grid size will be used for every
+   * node starting at level node.
+   */
+  void initialize_vertices(terrain_tree_t& tree, Vec<float> physical_size,
+                           gfx::IDriver& idriver, std::size_t level,
+                           std::size_t vertices) noexcept;
 } }
