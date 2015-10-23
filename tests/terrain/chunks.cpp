@@ -79,3 +79,19 @@ TEST_CASE("gen_levels_volumes works as expected", "[terrainlib]")
   expected = Volume<int>{{1024 + 512, 1024 + 512}, 512, 512};
   REQUIRE(tree.node_at_depth(2, 15).val.vol == expected);
 }
+
+TEST_CASE("correct vertex count for terrain grid", "[terrainlib]")
+{
+  using namespace game::terrain;
+  REQUIRE(detail::mesh_vertices(0, 1, 3) == 54);
+  REQUIRE(detail::mesh_vertices(1, 2, 3) == 216);
+  REQUIRE(detail::mesh_vertices(0, 2, 3) == 270);
+  REQUIRE(detail::mesh_vertices(2, 3, 3) == 864);
+  REQUIRE(detail::mesh_vertices(0, 3, 3) == 270 + 864);
+
+  REQUIRE(detail::mesh_vertices(0, 1, 5) == 150);
+  REQUIRE(detail::mesh_vertices(1, 2, 5) == 600);
+  REQUIRE(detail::mesh_vertices(0, 2, 5) == 750);
+  REQUIRE(detail::mesh_vertices(2, 3, 5) == 2400);
+  REQUIRE(detail::mesh_vertices(0, 3, 5) == 750 + 2400);
+}
