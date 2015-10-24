@@ -147,6 +147,8 @@ namespace game
   unsigned int tree_amount_nodes(unsigned int N, std::size_t depth) noexcept;
   std::size_t tree_level_offset(unsigned int N, std::size_t level) noexcept;
 
+  unsigned int tree_nodes_in_level(unsigned int N, std::size_t level) noexcept;
+
   template <class T, unsigned int N, class R>
   void Tree<T, N, R>::set_depth(depth_t depth) noexcept
   {
