@@ -10,6 +10,8 @@
 
 #include "terrain/chunks.h"
 
+#include "gfx/null/driver.h"
+
 TEST_CASE("set_volumes works as expected", "[terrainlib]")
 {
   using namespace game;
@@ -145,4 +147,26 @@ TEST_CASE("physical size distribution works", "[terrainlib]")
     REQUIRE(iter->val.physical_size.x == Approx(150.0));
     REQUIRE(iter->val.physical_size.y == Approx(300.0));
   }
+}
+TEST_CASE("initialize_vertices works as expected", "[terrainlib]")
+{
+  using namespace game;
+  using namespace game::terrain;
+
+  terrain_tree_t tree;
+
+  // Initialize the tree for the vertices.
+  tree.set_depth(3);
+
+  // The heightmap is 20 by 20
+  set_volumes(tree, {20,20});
+
+  // Physical size of 10 by 10.
+  set_physical_size(tree, {10.0f, 10.0f});
+
+  gfx::null::Driver null_driver{{1000,1000}};
+
+  // Only set vertices for the last level in this tree with three levels. A
+  // grid is 5x5 of vertices.
+  initialize_vertices(tree, null_driver, 2, 5);
 }
