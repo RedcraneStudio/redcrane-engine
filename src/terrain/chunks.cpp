@@ -212,6 +212,8 @@ namespace game { namespace terrain
     // it will leave it in a consistent state of being unowned.
     tree.node_at_index(0).val.mesh_chunk.mesh = std::move(mesh);
 
+    std::size_t cur_vertex_offset = 0;
+
     // Start at the first level to generate mesh for and go to the end of the
     // tree.
     for(auto iter = tree.level_begin(level); iter != tree.end(); ++iter)
@@ -271,7 +273,10 @@ namespace game { namespace terrain
       // Append this node's mesh data to the end of the mesh.
 
       // Just reference the mesh, the root is going to own it.
-      iter->val.mesh_chunk = gfx::write_data_to_mesh(mesh_data, ref_mo(mesh),0);
+      iter->val.mesh_chunk = gfx::write_data_to_mesh(mesh_data, ref_mo(mesh),
+                                                     cur_vertex_offset);
+      // Next time we start here.
+      cur_vertex_offset += mesh_data.vertices.size();
     }
   }
 } }
