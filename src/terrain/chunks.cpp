@@ -227,12 +227,11 @@ namespace game { namespace terrain
       cell_size.x = iter->val.physical_size.x / iter->val.grid_size.x;
       cell_size.y = iter->val.physical_size.y / iter->val.grid_size.y;
 
-      // For each level there is some mesh data.
+      // For each node there is some mesh data.
       Ordered_Mesh_Data mesh_data;
       // For each grid cell, there are 2 triangles of three vertices.
       for(int i = 0; i < (int) vertices * (int) vertices; ++i)
       {
-
         // TODO: UVs should match the heightmap texture.
         // Normals for now should always be up
         // TODO: Make sure we need CCW winding order.
@@ -241,21 +240,25 @@ namespace game { namespace terrain
         int x = i % vertices;
         int y = i / vertices;
 
+        float x_pos = (float) x * cell_size.x;
+        float y_pos = (float) y * cell_size.y;
+
         Vertex v0;
-        v0.position = glm::vec3((float) x, 0.0f, (float) y);
+        v0.position = glm::vec3((float) x_pos, 0.0f, (float) y_pos);
         v0.normal = glm::vec3(0.0f, 1.0f, 0.0f);
         //v0.uv = glm::vec2(0.0f, 0.0f);
         mesh_data.vertices.push_back(std::move(v0));
 
         Vertex v1;
-        v1.position = glm::vec3((float) x + cell_size.x, 0.0f, (float) y);
+        v1.position = glm::vec3((float) x_pos + cell_size.x, 0.0f,
+                                (float) y_pos);
         v1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
         //v0.uv = glm::vec2(0.0f, 0.0f);
         mesh_data.vertices.push_back(std::move(v1));
 
         Vertex v2;
-        v2.position = glm::vec3((float) x + cell_size.x, 0.0f,
-                                (float) y + cell_size.y);
+        v2.position = glm::vec3((float) x_pos + cell_size.x, 0.0f,
+                                (float) y_pos + cell_size.y);
         v2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
         //v0.uv = glm::vec2(0.0f, 0.0f);
         mesh_data.vertices.push_back(std::move(v2));
@@ -264,7 +267,8 @@ namespace game { namespace terrain
         mesh_data.vertices.push_back(v2);
 
         Vertex v3;
-        v3.position = glm::vec3((float) x, 0.0f, (float) y + cell_size.y);
+        v3.position = glm::vec3((float) x_pos, 0.0f,
+                                (float) y_pos + cell_size.y);
         v3.normal = glm::vec3(0.0f, 1.0f, 0.0f);
         //v0.uv = glm::vec2(0.0f, 0.0f);
         mesh_data.vertices.push_back(std::move(v3));
@@ -275,6 +279,7 @@ namespace game { namespace terrain
       // Just reference the mesh, the root is going to own it.
       iter->val.mesh_chunk = gfx::write_data_to_mesh(mesh_data, ref_mo(mesh),
                                                      cur_vertex_offset);
+      iter->val.mesh_chunk.type = Primitive_Type::Triangle;
       // Next time we start here.
       cur_vertex_offset += mesh_data.vertices.size();
     }
