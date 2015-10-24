@@ -119,4 +119,29 @@ TEST_CASE("physical size distribution works", "[terrainlib]")
     REQUIRE(iter->val.physical_size.x == Approx(150.0));
     REQUIRE(iter->val.physical_size.y == Approx(300.0));
   }
+
+  tree.set_depth(4);
+
+  terrain::set_physical_size(tree, {1200.0f, 2400.0f});
+
+  REQUIRE(tree.node_at_depth(0,0).val.physical_size.x == Approx(1200.0));
+  REQUIRE(tree.node_at_depth(0,0).val.physical_size.y == Approx(2400.0));
+
+  for(auto iter = tree.level_begin(1); iter < tree.level_end(1); ++iter)
+  {
+    REQUIRE(iter->val.physical_size.x == Approx(600.0));
+    REQUIRE(iter->val.physical_size.y == Approx(1200.0));
+  }
+
+  for(auto iter = tree.level_begin(2); iter < tree.level_end(2); ++iter)
+  {
+    REQUIRE(iter->val.physical_size.x == Approx(300.0));
+    REQUIRE(iter->val.physical_size.y == Approx(600.0));
+  }
+
+  for(auto iter = tree.level_begin(3); iter < tree.level_end(3); ++iter)
+  {
+    REQUIRE(iter->val.physical_size.x == Approx(150.0));
+    REQUIRE(iter->val.physical_size.y == Approx(300.0));
+  }
 }
