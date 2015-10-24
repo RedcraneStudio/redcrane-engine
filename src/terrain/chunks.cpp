@@ -195,8 +195,8 @@ namespace game { namespace terrain
     for(auto iter = tree.level_begin(0); iter != tree.end(); ++iter)
     {
       iter->val.physical_size =
-        {physical_size.x / (float) std::pow(4, iter->depth()),
-         physical_size.y / (float) std::pow(4, iter->depth())};
+        {physical_size.x / (float) std::pow(2, iter->depth()),
+         physical_size.y / (float) std::pow(2, iter->depth())};
     }
   }
   void initialize_vertices(terrain_tree_t& tree, Vec<float> physical_size,
