@@ -39,6 +39,10 @@
 #include "strat/player_state.h"
 
 #include "gen/terrain.h"
+#include "gen/radial_algorithm.h"
+#include "gen/tree_gen.h"
+
+#include "terrain/chunks.h"
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -321,6 +325,42 @@ int main(int argc, char** argv)
   glfwSetWindowUserPointer(window, &glfw_user_data);
 
   auto light_dir_pos = default_shader->get_location("light_dir");
+
+  gen::Grid_Map grid_map;
+  grid_map.allocate({2048,2048});
+
+  gen::Terrain_Params terrain_params;
+  terrain_params.seed = (std::random_device{})();
+
+  auto landmass_gen = std::make_unique<gen::Radial_Algorithm>();
+  landmass_gen->origin = grid_map.extents / 2;
+  landmass_gen->radius = 724.0f;
+  landmass_gen->amplitude = 300.0f;
+  landmass_gen->frequency = 1.0f;
+  landmass_gen->persistence = .5f;
+  landmass_gen->lacunarity = 2.0f;
+  landmass_gen->octaves = 8;
+  landmass_gen->type = gen::Cell_Type::Land;
+
+  terrain_params.landmass_gen = std::move(landmass_gen);
+
+  auto natural_gen = std::make_unique<gen::Tree_Gen_Algorithm>();
+  natural_gen->amplitude = 1.0f;
+  natural_gen->frequency = 0.01f;
+  natural_gen->persistence = .5f;
+  natural_gen->lacunarity = 2.0f;
+  natural_gen->octaves = 3;
+  natural_gen->tree_altitude = 0.4f;
+
+  terrain_params.natural_gen = std::move(natural_gen);
+
+  gen::terrain_v1_map(grid_map, terrain_params);
+  terrain::Heightmap heightmap = terrain::make_heightmap(grid_map);
+
+  terrain::terrain_tree_t terrain_tree;
+  terrain_tree.set_depth(5);
+  terrain::set_volumes(terrain_tree, heightmap.extents);
+  terrain::set_physical_size(terrain_tree, {50.0f, 50.0f});
 
   gfx::Immediate_Renderer ir{driver};
   std::size_t st_size = game_state.map.structures.size();
