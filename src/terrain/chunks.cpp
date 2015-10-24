@@ -147,11 +147,8 @@ namespace game { namespace terrain
     return ret;
   }
 
-  void set_levels_volumes(terrain_tree_t& tree, Vec<int> extents,
-                          std::size_t levels) noexcept
+  void set_volumes(terrain_tree_t& tree, Vec<int> extents) noexcept
   {
-    tree.set_depth(levels);
-
     // The volume of the root node is the entire heightmap.
     tree.node_at_depth(0,0).val.vol = vol_from_extents<int>(extents);
 

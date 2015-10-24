@@ -72,8 +72,7 @@ namespace game { namespace terrain
    * \brief Creates a quadtree with the proper levels and volumes.
    * for each depth level.
    */
-  void set_levels_volumes(terrain_tree_t& tree, Vec<int> extents,
-                          std::size_t levels) noexcept;
+  void set_volumes(terrain_tree_t& tree, Vec<int> extents) noexcept;
 
   /*!
    * \brief Set the physical_size member of each node given it's volume and

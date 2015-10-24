@@ -10,12 +10,13 @@
 
 #include "terrain/chunks.h"
 
-TEST_CASE("gen_levels_volumes works as expected", "[terrainlib]")
+TEST_CASE("set_volumes works as expected", "[terrainlib]")
 {
   using namespace game;
 
   Quadtree<terrain::Chunk> tree;
-  terrain::set_levels_volumes(tree, Vec<int>{2048,2048}, 3);
+  tree.set_depth(3);
+  terrain::set_volumes(tree, Vec<int>{2048,2048});
 
   auto expected = Volume<int>{{0,0},2048,2048};
   REQUIRE(tree.node_at_depth(0, 0).val.vol == expected);
