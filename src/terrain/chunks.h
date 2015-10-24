@@ -93,7 +93,6 @@ namespace game { namespace terrain
    * means one-forth of the actual area. The grid size will be used for every
    * node starting at level node.
    */
-  void initialize_vertices(terrain_tree_t& tree, Vec<float> physical_size,
-                           gfx::IDriver& idriver, std::size_t level,
-                           std::size_t vertices) noexcept;
+  void initialize_vertices(terrain_tree_t& tree, gfx::IDriver& idriver,
+                           std::size_t level, std::size_t vertices) noexcept;
 } }

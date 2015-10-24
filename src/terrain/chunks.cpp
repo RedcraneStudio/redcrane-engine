@@ -196,9 +196,8 @@ namespace game { namespace terrain
          physical_size.y / (float) std::pow(2, iter->depth())};
     }
   }
-  void initialize_vertices(terrain_tree_t& tree, Vec<float> physical_size,
-                           gfx::IDriver& idriver, std::size_t level,
-                           std::size_t vertices) noexcept
+  void initialize_vertices(terrain_tree_t& tree, gfx::IDriver& idriver,
+                           std::size_t level, std::size_t vertices) noexcept
   {
     // Create a mesh and give the root node ownership.
     auto mesh = Maybe_Owned<Mesh>{idriver.make_mesh_repr()};
