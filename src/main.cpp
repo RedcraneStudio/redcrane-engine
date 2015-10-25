@@ -359,8 +359,7 @@ int main(int argc, char** argv)
 
   terrain::terrain_tree_t terrain_tree;
   terrain_tree.set_depth(5);
-  terrain::set_volumes(terrain_tree, heightmap.extents);
-  terrain::set_physical_size(terrain_tree, {50.0f, 50.0f});
+  terrain::set_volumes(terrain_tree, {5.0f, 5.0f}, heightmap.extents);
 
   gfx::Immediate_Renderer ir{driver};
   std::size_t st_size = game_state.map.structures.size();

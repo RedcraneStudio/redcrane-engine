@@ -22,18 +22,18 @@ namespace game { namespace terrain
 
   struct Chunk
   {
-    // World space dimensions of this object.
-    // Set in set_physical_size
-    Vec<float> physical_size;
-
     // The dimensions in vertices / cells of this node's mesh / grid.
     // This should never be negative, but size_t makes me scared of underflow.
     // Set in initialize_vertices only for nodes that have initialized mesh.
     Vec<int> grid_size;
 
+    // World space volume of this object.
+    // Set in set_volumes.
+    Volume<float> world_vol;
+
     // The area of the heightmap that we cover in its coordinate system.
-    // Set for all nodes in set_levels_volumes.
-    Volume<int> vol;
+    // Set for all nodes in set_volumes.
+    Volume<int> uv_vol;
 
     // The root chunk should own it's mesh, the rest should point to it.
     Mesh_Chunk mesh_chunk;
@@ -72,13 +72,7 @@ namespace game { namespace terrain
    * \brief Creates a quadtree with the proper levels and volumes.
    * for each depth level.
    */
-  void set_volumes(terrain_tree_t& tree, Vec<int> extents) noexcept;
-
-  /*!
-   * \brief Set the physical_size member of each node given it's volume and
-   * depth in the quadtree.
-   */
-  void set_physical_size(terrain_tree_t& tree, Vec<float> physical_size);
+  void set_volumes(terrain_tree_t& tr, Vec<float> world, Vec<int> uv) noexcept;
 
   /*!
    * \brief Initialize the vertices of the quadtree.

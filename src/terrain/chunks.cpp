@@ -147,10 +147,11 @@ namespace game { namespace terrain
     return ret;
   }
 
-  void set_volumes(terrain_tree_t& tree, Vec<int> extents) noexcept
+  void set_volumes(terrain_tree_t& tree, Vec<float> world, Vec<int> uv) noexcept
   {
     // The volume of the root node is the entire heightmap.
-    tree.node_at_depth(0,0).val.vol = vol_from_extents<int>(extents);
+    tree.node_at_depth(0,0).val.uv_vol = vol_from_extents<int>(uv);
+    tree.node_at_depth(0,0).val.world_vol = vol_from_extents<float>(world);
 
     // Don't start at the first node, since we dealt with that one.
     for(auto iter = tree.level_begin(1); iter != tree.end(); ++iter)
@@ -176,24 +177,8 @@ namespace game { namespace terrain
       auto& parent_node = tree.node_at_depth(iter->depth() - 1, parent_off);
 
       // Get the proper volume for this current node.
-      iter->val.vol = vol_quad(parent_node.val.vol, corner);
-    }
-  }
-  void set_physical_size(terrain_tree_t& tree, Vec<float> physical_size)
-  {
-    // Set the physical size of each and every node in the quadtree.
-
-    // We may be able to make this faster by combining this function / loop in
-    // initialize_vertices and not going through the entire tree. We could only
-    // iterate through [begin(), level_end(start_level-1)) and then add the
-    // same code to the mesh-gen loop which would cover the rest of the depth
-    // levels. It would be a simple form of loop unrolling I guess. For now
-    // this is the simplest implementation.
-    for(auto iter = tree.level_begin(0); iter != tree.end(); ++iter)
-    {
-      iter->val.physical_size =
-        {physical_size.x / (float) std::pow(2, iter->depth()),
-         physical_size.y / (float) std::pow(2, iter->depth())};
+      iter->val.uv_vol = vol_quad(parent_node.val.uv_vol, corner);
+      iter->val.world_vol = vol_quad(parent_node.val.world_vol, corner);
     }
   }
   void initialize_vertices(terrain_tree_t& tree, gfx::IDriver& idriver,
@@ -221,11 +206,11 @@ namespace game { namespace terrain
       // Initialize the grid size.
       iter->val.grid_size = {(int) vertices, (int) vertices};
 
-      // What is the size of each cell? Physical size (of the current node) /
-      // the amount of vertices in the grid (that fully contains the node).
+      // What is the size of each cell? world size (of the current node) / the
+      // amount of vertices in the grid (that fully contains the node).
       Vec<float> cell_size;
-      cell_size.x = iter->val.physical_size.x / iter->val.grid_size.x;
-      cell_size.y = iter->val.physical_size.y / iter->val.grid_size.y;
+      cell_size.x = iter->val.world_vol.width / iter->val.grid_size.x;
+      cell_size.y = iter->val.world_vol.height / iter->val.grid_size.y;
 
       // For each node there is some mesh data.
       Ordered_Mesh_Data mesh_data;
@@ -240,8 +225,8 @@ namespace game { namespace terrain
         int x = i % vertices;
         int y = i / vertices;
 
-        float x_pos = (float) x * cell_size.x;
-        float y_pos = (float) y * cell_size.y;
+        float x_pos = (float) x * cell_size.x + iter->val.world_vol.pos.x;
+        float y_pos = (float) y * cell_size.y + iter->val.world_vol.pos.y;
 
         Vertex v0;
         v0.position = glm::vec3((float) x_pos, 0.0f, (float) y_pos);
