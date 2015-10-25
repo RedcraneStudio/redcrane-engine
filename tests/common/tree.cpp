@@ -148,3 +148,66 @@ TEST_CASE("depth level is properly maintained in nodes", "[tree]")
 
   // That's probably fine :)
 }
+TEST_CASE("amount of nodes in an entire tree", "[tree]")
+{
+  using namespace game;
+
+  REQUIRE(tree_amount_nodes(4, 0) == 0);
+  REQUIRE(tree_amount_nodes(4, 1) == 1);
+  REQUIRE(tree_amount_nodes(4, 2) == 5);
+  REQUIRE(tree_level_offset(4, 3) == 21);
+
+  REQUIRE(tree_amount_nodes(3, 0) == 0);
+  REQUIRE(tree_amount_nodes(3, 1) == 1);
+  REQUIRE(tree_amount_nodes(3, 2) == 4);
+  REQUIRE(tree_amount_nodes(3, 3) == 13);
+
+  REQUIRE(tree_amount_nodes(2, 0) == 0);
+  REQUIRE(tree_amount_nodes(2, 1) == 1);
+  REQUIRE(tree_amount_nodes(2, 2) == 3);
+  REQUIRE(tree_amount_nodes(2, 3) == 7);
+  REQUIRE(tree_amount_nodes(2, 4) == 15);
+  REQUIRE(tree_amount_nodes(2, 5) == 31);
+}
+TEST_CASE("offset into level", "[tree]")
+{
+  using namespace game;
+
+  REQUIRE(tree_level_offset(4, 0) == 0);
+  REQUIRE(tree_level_offset(4, 1) == 1);
+  REQUIRE(tree_level_offset(4, 2) == 5);
+  REQUIRE(tree_level_offset(4, 3) == 21);
+
+  REQUIRE(tree_level_offset(3, 0) == 0);
+  REQUIRE(tree_level_offset(3, 1) == 1);
+  REQUIRE(tree_level_offset(3, 2) == 4);
+  REQUIRE(tree_level_offset(3, 3) == 13);
+
+  REQUIRE(tree_level_offset(2, 0) == 0);
+  REQUIRE(tree_level_offset(2, 1) == 1);
+  REQUIRE(tree_level_offset(2, 2) == 3);
+  REQUIRE(tree_level_offset(2, 3) == 7);
+  REQUIRE(tree_level_offset(2, 4) == 15);
+  REQUIRE(tree_level_offset(2, 5) == 31);
+}
+TEST_CASE("amount of tree nodes in a level", "[tree]")
+{
+  using namespace game;
+
+  REQUIRE(tree_nodes_in_level(4, 0) == 1);
+  REQUIRE(tree_nodes_in_level(4, 1) == 4);
+  REQUIRE(tree_nodes_in_level(4, 2) == 16);
+  REQUIRE(tree_nodes_in_level(4, 3) == 64);
+
+  REQUIRE(tree_nodes_in_level(3, 0) == 1);
+  REQUIRE(tree_nodes_in_level(3, 1) == 3);
+  REQUIRE(tree_nodes_in_level(3, 2) == 9);
+  REQUIRE(tree_nodes_in_level(3, 3) == 27);
+
+  REQUIRE(tree_nodes_in_level(2, 0) == 1);
+  REQUIRE(tree_nodes_in_level(2, 1) == 2);
+  REQUIRE(tree_nodes_in_level(2, 2) == 4);
+  REQUIRE(tree_nodes_in_level(2, 3) == 8);
+  REQUIRE(tree_nodes_in_level(2, 4) == 16);
+  REQUIRE(tree_nodes_in_level(2, 5) == 32);
+}
