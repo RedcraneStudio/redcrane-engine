@@ -89,4 +89,6 @@ namespace game { namespace terrain
    */
   void initialize_vertices(terrain_tree_t& tree, gfx::IDriver& idriver,
                            std::size_t level, std::size_t vertices) noexcept;
+  void render_level(terrain_tree_t& tree, gfx::IDriver& idriver,
+                    std::size_t level) noexcept;
 } }
