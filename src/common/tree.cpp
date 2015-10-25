@@ -30,6 +30,6 @@ namespace game
 
   unsigned int tree_nodes_in_level(unsigned int N, std::size_t level) noexcept
   {
-    return pow(N, level-1);
+    return pow(N, level);
   }
 }
