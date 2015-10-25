@@ -358,8 +358,9 @@ int main(int argc, char** argv)
   terrain::Heightmap heightmap = terrain::make_heightmap(grid_map);
 
   terrain::terrain_tree_t terrain_tree;
-  terrain_tree.set_depth(5);
+  terrain_tree.set_depth(2);
   terrain::set_volumes(terrain_tree, {5.0f, 5.0f}, heightmap.extents);
+  terrain::initialize_vertices(terrain_tree, driver, 0, 25);
 
   gfx::Immediate_Renderer ir{driver};
   std::size_t st_size = game_state.map.structures.size();
@@ -452,6 +453,9 @@ int main(int argc, char** argv)
 
       hud->render(ui_adapter);
     }
+
+    glDisable(GL_CULL_FACE);
+    terrain::render_level(terrain_tree, driver, 1);
     glfwSwapBuffers(window);
 
     if(int(glfwGetTime()) != time)
