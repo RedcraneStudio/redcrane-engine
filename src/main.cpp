@@ -243,6 +243,20 @@ int main(int argc, char** argv)
 
   default_shader->set_sampler(0);
 
+  // Load our terrain shader.
+  auto terrain_shader = driver.make_shader_repr();
+  terrain_shader->load_vertex_part("shader/terrain/vs.glsl");
+  terrain_shader->load_fragment_part("shader/terrain/fs.glsl");
+
+  terrain_shader->set_projection_name("proj");
+  terrain_shader->set_view_name("view");
+  terrain_shader->set_model_name("model");
+  terrain_shader->set_sampler_name("heightmap");
+  terrain_shader->set_diffuse_name("dif");
+
+  auto terrain_height_adjust_loc =
+                            terrain_shader->get_location("max_height_adjust");
+
   // Load our textures.
   auto grass_tex = driver.make_texture_repr();
   load_png("tex/grass.png", *grass_tex);
@@ -362,6 +376,11 @@ int main(int argc, char** argv)
   terrain::set_volumes(terrain_tree, {5.0f, 5.0f}, heightmap.extents);
   terrain::initialize_vertices(terrain_tree, driver, 0, 5);
 
+  auto heightmap_texture = driver.make_texture_repr();
+  heightmap_texture->allocate(heightmap.extents, Texture_Format::Grayscale);
+  heightmap_texture->blit_data(vol_from_extents(heightmap.extents),
+                                heightmap.values);
+
   gfx::Immediate_Renderer ir{driver};
   std::size_t st_size = game_state.map.structures.size();
   while(!glfwWindowShouldClose(window))
@@ -448,14 +467,24 @@ int main(int argc, char** argv)
 
     ir.render(game_state.cam);
 
+    driver.face_culling(false);
+    driver.use_shader(*terrain_shader);
+    terrain_shader->set_model(glm::mat4(1.0f));
+    terrain_shader->set_view(gfx::camera_view_matrix(game_state.cam));
+    terrain_shader->set_projection(gfx::camera_proj_matrix(game_state.cam));
+    terrain_shader->set_diffuse(colors::white);
+    terrain_shader->set_float(terrain_height_adjust_loc, 0.2f);
+    terrain_shader->set_sampler(0);
+    driver.bind_texture(*heightmap_texture, 0);
+    terrain::render_level(terrain_tree, driver, 4);
+    driver.face_culling(true);
+
     {
       ui::Draw_Scoped_Lock scoped_draw_lock{ui_adapter};
 
       hud->render(ui_adapter);
     }
 
-    glDisable(GL_CULL_FACE);
-    terrain::render_level(terrain_tree, driver, 1);
     glfwSwapBuffers(window);
 
     if(int(glfwGetTime()) != time)
