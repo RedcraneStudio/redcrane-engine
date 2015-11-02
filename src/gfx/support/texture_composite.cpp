@@ -13,15 +13,24 @@ namespace game
     ts_ = std::move(rhs.ts_);
     return *this;
   }
-  void Texture_Composite::allocate_(Vec<int> const& extents) noexcept
+  void Texture_Composite::allocate_(Vec<int> const& extents,
+                                    Texture_Format form) noexcept
   {
     for(auto& ptr : ts_)
     {
-      ptr->allocate(extents);
+      ptr->allocate(extents, form);
     }
   }
   void Texture_Composite::
   blit_data_(Volume<int> const& vol, Color const* data) noexcept
+  {
+    for(auto& ptr : ts_)
+    {
+      ptr->blit_data(vol, data);
+    }
+  }
+  void Texture_Composite::blit_data_(Volume<int> const& vol,
+                                     float const* data) noexcept
   {
     for(auto& ptr : ts_)
     {

@@ -5,7 +5,8 @@
 #include "texture.h"
 namespace game { namespace gfx { namespace gl
 {
-  void GL_Texture::allocate_(Vec<int> const& extents) noexcept
+  void GL_Texture::allocate_(Vec<int> const& extents,
+                             Texture_Format form) noexcept
   {
     glGenTextures(1, &tex_id);
 
@@ -16,8 +17,16 @@ namespace game { namespace gfx { namespace gl
 
     glBindTexture(texture_type, tex_id);
 
-    glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, NULL);
+    if(form == Texture_Format::Rgba)
+    {
+      glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y, 0, GL_RGBA,
+                   GL_UNSIGNED_BYTE, NULL);
+    }
+    else if(form == Texture_Format::Grayscale)
+    {
+      glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y, 0, GL_RED,
+                   GL_FLOAT, NULL);
+    }
 
     glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER,
                     GL_NEAREST_MIPMAP_NEAREST);
@@ -93,6 +102,48 @@ namespace game { namespace gfx { namespace gl
     glTexSubImage2D(texture_type, 0, vol.pos.x,
                     allocated_extents().y - vol.pos.y - vol.height,
                     vol.width, vol.height, GL_RGBA, GL_UNSIGNED_BYTE,
+                    &data[0]);
+    glGenerateMipmap(texture_type);
+  }
+
+  inline void GL_Texture::blit_data_(Volume<int> const& vol,
+                                     float const* gray_data) noexcept
+  {
+    // Bail out if the volume isn't valid, we want to avoid the
+    // GL_INVALID_OPERATION if we can.
+    if(vol.width == 0 || vol.height == 0) return;
+
+    std::vector<float> data;
+    data.reserve(vol.width * vol.height);
+
+    // Go from the end to the beginning adding each byte to the end of the
+    // vector.
+    for(int i = 0; i < vol.width * vol.height; ++i)
+    {
+      // Use that offset to determine our coordinate (relative to subtexture
+      // origin).
+      int x = i % vol.width;
+      int y = i / vol.width;
+
+      // Use the row from the bottom first, relative to the given sub-volume.
+      y = vol.height - y - 1;
+
+      // Now recalculate our position **in our colors array** to get that
+      // coordinate calculated above.
+      auto pos = y * vol.width + x;
+
+      data.push_back(gray_data[pos]);
+    }
+
+    // We have a good array of data, where each successive row is going from
+    // bottom to top, but we need to figure out our sub-region on the opengl
+    // texture.
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(texture_type, tex_id);
+    glTexSubImage2D(texture_type, 0, vol.pos.x,
+                    allocated_extents().y - vol.pos.y - vol.height,
+                    vol.width, vol.height, GL_RED, GL_FLOAT,
                     &data[0]);
     glGenerateMipmap(texture_type);
   }
