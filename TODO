@@ -17,4 +17,7 @@ Big:
 
 Fix any const& vs value parameters.
 
-Figure out serialization before it is too late
+Figure out serialization before it is too late.
+Figure out why the ui buttons are not properly textured.
+Simplify texture system.
+Fix terrain gen system. Distance from water is painfully slow.
