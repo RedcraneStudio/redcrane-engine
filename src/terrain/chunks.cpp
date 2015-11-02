@@ -200,6 +200,16 @@ namespace game { namespace terrain
 
     std::size_t cur_vertex_offset = 0;
 
+    // The extents of heightmap, basically. We'll use this to normalize the
+    // uv coordinates between [0.0, 1.0].
+    Vec<float> root_uv_extents;
+    {
+      // Don't pollute the outer scope with this temporary.
+      auto root_uv_vol = tree.begin()->val.uv_vol;
+      root_uv_extents.x = root_uv_vol.width;
+      root_uv_extents.y = root_uv_vol.height;
+    }
+
     // Start at the first level to generate mesh for and go to the end of the
     // tree.
     for(auto iter = tree.level_begin(level); iter != tree.end(); ++iter)
@@ -213,12 +223,21 @@ namespace game { namespace terrain
       cell_size.x = iter->val.world_vol.width / iter->val.grid_size.x;
       cell_size.y = iter->val.world_vol.height / iter->val.grid_size.y;
 
+      // This is the normalized size of the grid in terms of texture
+      // coordinates of the heightmap.
+      Vec<float> uv_cell_size;
+      uv_cell_size.x = iter->val.uv_vol.width
+                       / root_uv_extents.x
+                       / iter->val.grid_size.x;
+      uv_cell_size.y = iter->val.uv_vol.height
+                       / root_uv_extents.y
+                       / iter->val.grid_size.y;
+
       // For each node there is some mesh data.
       Ordered_Mesh_Data mesh_data;
       // For each grid cell, there are 2 triangles of three vertices.
       for(int i = 0; i < (int) vertices * (int) vertices; ++i)
       {
-        // TODO: UVs should match the heightmap texture.
         // Normals for now should always be up
         // TODO: Make sure we need CCW winding order.
         // TODO: Add root data to the quadtree.
@@ -226,27 +245,34 @@ namespace game { namespace terrain
         int x = i % vertices;
         int y = i / vertices;
 
+        // Where are we in the world?
         float x_pos = (float) x * cell_size.x + iter->val.world_vol.pos.x;
         float y_pos = (float) y * cell_size.y + iter->val.world_vol.pos.y;
+
+        // Where are we on the heightmap? These are normalized also.
+        float x_uv = x * uv_cell_size.x +
+                     iter->val.uv_vol.pos.x / root_uv_extents.x;
+        float y_uv = y * uv_cell_size.y +
+                     iter->val.uv_vol.pos.y / root_uv_extents.y;
 
         Vertex v0;
         v0.position = glm::vec3((float) x_pos, 0.0f, (float) y_pos);
         v0.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-        //v0.uv = glm::vec2(0.0f, 0.0f);
+        v0.uv = glm::vec2(x_uv, y_uv);
         mesh_data.vertices.push_back(std::move(v0));
 
         Vertex v1;
         v1.position = glm::vec3((float) x_pos + cell_size.x, 0.0f,
                                 (float) y_pos);
         v1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-        //v0.uv = glm::vec2(0.0f, 0.0f);
+        v1.uv = glm::vec2(x_uv + uv_cell_size.x, y_uv);
         mesh_data.vertices.push_back(std::move(v1));
 
         Vertex v2;
         v2.position = glm::vec3((float) x_pos + cell_size.x, 0.0f,
                                 (float) y_pos + cell_size.y);
         v2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-        //v0.uv = glm::vec2(0.0f, 0.0f);
+        v2.uv = glm::vec2(x_uv + uv_cell_size.x, y_uv + uv_cell_size.y);
         mesh_data.vertices.push_back(std::move(v2));
 
         mesh_data.vertices.push_back(v0);
@@ -256,7 +282,7 @@ namespace game { namespace terrain
         v3.position = glm::vec3((float) x_pos, 0.0f,
                                 (float) y_pos + cell_size.y);
         v3.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-        //v0.uv = glm::vec2(0.0f, 0.0f);
+        v3.uv = glm::vec2(x_uv, y_uv + uv_cell_size.y);
         mesh_data.vertices.push_back(std::move(v3));
       }
 
