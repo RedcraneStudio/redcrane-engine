@@ -9,8 +9,8 @@ namespace game { namespace gfx
   Immediate_Renderer::Immediate_Renderer(IDriver& d) noexcept : d_(&d)
   {
     shader_ = d_->make_shader_repr();
-    shader_->load_vertex_part("shader/debug/vs");
-    shader_->load_fragment_part("shader/debug/fs");
+    shader_->load_vertex_part("shader/debug/vs.glsl");
+    shader_->load_fragment_part("shader/debug/fs.glsl");
 
     shader_->set_view_name("view");
     shader_->set_projection_name("proj");

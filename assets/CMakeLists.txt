@@ -6,9 +6,9 @@ add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     obj/govnm_building.obj obj/fps_terrain.obj
                     obj/vertical_log.obj
                     scene/default.json structure/structures.json
-                    shader/basic/fs shader/basic/vs
-                    shader/hud/fs shader/hud/vs
-                    shader/debug/vs shader/debug/fs
+                    shader/basic/fs.glsl shader/basic/vs.glsl
+                    shader/hud/fs.glsl shader/hud/vs.glsl
+                    shader/debug/vs.glsl shader/debug/fs.glsl
                     tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
                     tex/bark.png
                     ui/hud.json obj/terrain.obj mat/terrain.json
