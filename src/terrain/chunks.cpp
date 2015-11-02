@@ -135,8 +135,9 @@ namespace game { namespace terrain
           // If it returns zero that means we are not close at all.
           if(!distance) value = 1.0f;
           // Otherwise the shorter the distance the less height we give the
-          // location on the heightmap.
-          else value = 1.0f - distance / 5.0f;
+          // location on the heightmap. That is, they are directly related so
+          // there is no reason to subtract from one.
+          else value = distance / 5.0f;
           break;
         }
       }
