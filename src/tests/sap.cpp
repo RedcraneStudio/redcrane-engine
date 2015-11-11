@@ -10,7 +10,7 @@ TEST_CASE("SAP algorithm detects AABB collision", "[SAP]")
 {
   using namespace game;
 
-  SAP sap{};
+  collis::SAP sap{};
 
   AABB a1;
 
@@ -86,7 +86,7 @@ TEST_CASE("MO TESTS", "[SAP]")
             std::get<1>(fp) == std::get<0>(sp));
   };
 
-  SAP sap;
+  collis::SAP sap;
 
   SECTION("Test #1")
   {

@@ -5,7 +5,7 @@
 #pragma once
 #include <array>
 #include <glm/glm.hpp>
-namespace game
+namespace game { namespace collis
 {
   struct Triangle
   {
@@ -17,4 +17,4 @@ namespace game
   // twice.
   bool is_contained(Triangle const& t, glm::vec3 pt) noexcept;
   glm::vec3 to_barycentric_coord(Triangle const& t, glm::vec3 pos) noexcept;
-}
+} }

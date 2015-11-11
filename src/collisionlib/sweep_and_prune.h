@@ -11,7 +11,7 @@
 #include "../common/aabb.h"
 
 #include "../common/ID_Gen.hpp"
-namespace game
+namespace game { namespace collis
 {
   using SAP_AABB_Ref = uint16_t;
 
@@ -53,4 +53,4 @@ namespace game
 
     pair_res_t collisions() const noexcept;
   };
-}
+} }

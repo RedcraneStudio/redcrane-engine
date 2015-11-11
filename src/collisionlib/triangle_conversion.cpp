@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "triangle_conversion.h"
-namespace game
+namespace game { namespace collis
 {
   std::vector<Triangle>
     triangles_from_mesh_data(Indexed_Mesh_Data const& data) noexcept
@@ -29,4 +29,4 @@ namespace game
 
     return triangles;
   }
-}
+} }

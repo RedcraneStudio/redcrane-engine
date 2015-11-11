@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "triangle.h"
-namespace game
+namespace game { namespace collis
 {
   bool is_contained(Triangle const& t, glm::vec3 pt) noexcept
   {
@@ -47,4 +47,4 @@ namespace game
     auto w = 1 - u - v;
     return glm::vec3(u, v, w);
   }
-}
+} }

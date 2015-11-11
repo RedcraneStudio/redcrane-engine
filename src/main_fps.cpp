@@ -138,7 +138,7 @@ int main(int argc, char** argv)
     auto ter_chunk = gfx::write_data_to_mesh(terrain_data, std::move(terrain));
     gfx::format_standard_mesh_buffers(*terrain);
 
-    auto triangles = triangles_from_mesh_data(terrain_data);
+    auto triangles = collis::triangles_from_mesh_data(terrain_data);
 
     auto terrain_model = glm::mat4(1.0f);
 
@@ -213,9 +213,9 @@ int main(int argc, char** argv)
       // Find the height at cam.fp.pos.
       for(auto const& triangle : triangles)
       {
-        if(is_contained(triangle, cam.fp.pos))
+        if(collis::is_contained(triangle, cam.fp.pos))
         {
-          auto bary = to_barycentric_coord(triangle, cam.fp.pos);
+          auto bary = collis::to_barycentric_coord(triangle, cam.fp.pos);
           // The order goes u v w, w is the one we found from the others, so
           // it is the first point on the triangle. u is towards 2 and v is
           // towards 1.

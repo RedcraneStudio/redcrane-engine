@@ -71,8 +71,8 @@ namespace game { namespace strat
                            gfx::Immediate_Renderer* debug) noexcept
   {
     // Check collision with every other structure.
-    SAP sap;
-    std::vector<SAP_AABB_Ref> ids;
+    collis::SAP sap;
+    std::vector<collis::SAP_AABB_Ref> ids;
     for(auto const& other_st : map.structures)
     {
       auto aabb = other_st.structure().aabb();
@@ -89,7 +89,7 @@ namespace game { namespace strat
     aabb.min.x += pos.x;
     aabb.min.z += pos.y;
     aabb.min.y = 0.0f;
-    SAP_AABB_Ref this_id = sap.insert(aabb);
+    collis::SAP_AABB_Ref this_id = sap.insert(aabb);
     if(debug) debug->draw_aabb(aabb);
 
     auto pairs = sap.collisions();
