@@ -11,7 +11,25 @@ namespace game { namespace collis
   {
     std::array<glm::vec3, 3> positions;
     glm::vec3 normal;
+
+    float plane_constant;
   };
+
+  inline float plane_constant(glm::vec3 pt, glm::vec3 norm) noexcept
+  {
+    return glm::dot(norm, -pt);
+  }
+
+  inline Triangle make_triangle(std::array<glm::vec3, 3> pts,
+                                glm::vec3 normal) noexcept
+  {
+    return Triangle{pts, normal, plane_constant(pts[0], normal)};
+  }
+
+  inline float plane_signed_distance(Triangle const& t, glm::vec3 pt) noexcept
+  {
+    return glm::dot(t.normal, pt) + t.plane_constant;
+  }
 
   // TODO: Combine these so we are not recalculating barycentric coordinates
   // twice.
