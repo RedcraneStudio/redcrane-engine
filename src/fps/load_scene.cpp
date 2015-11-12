@@ -6,16 +6,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
-#include "../mesh_data.h"
+#include "../gfx/mesh_data.h"
 
-#include "allocate.h"
-#include "format.h"
-#include "write_data_to_mesh.h"
+#include "../gfx/support/allocate.h"
+#include "../gfx/support/format.h"
+#include "../gfx/support/write_data_to_mesh.h"
 
-#include "json.h"
-#include "mesh_conversion.h"
-#include "load_wavefront.h"
-namespace game { namespace gfx
+#include "../gfx/support/json.h"
+#include "../gfx/support/mesh_conversion.h"
+#include "../gfx/support/load_wavefront.h"
+
+#include "../collisionlib/triangle_conversion.h"
+namespace game { namespace fps
 {
   Scene load_scene(std::string fn, std::unique_ptr<game::Mesh> msh) noexcept
   {
@@ -118,6 +120,14 @@ namespace game { namespace gfx
 
       // Construct the structure.
       scene.objects.push_back(Object{std::move(chunk), std::get<1>(metas[i])});
+    }
+
+    // Before discarding the indexed mesh data, lets copy it into scene.
+    // Unfortunately it's a different representation so it must be copied.
+    for(auto iter = metas.begin(); iter != metas.end(); ++iter)
+    {
+      collis::append_triangles(scene.collision_triangles,
+                               std::get<0>(*iter), true);
     }
 
     return scene;

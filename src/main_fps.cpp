@@ -23,7 +23,7 @@
 #include "gfx/support/format.h"
 #include "gfx/support/allocate.h"
 #include "gfx/support/json.h"
-#include "gfx/support/load_scene.h"
+#include "fps/load_scene.h"
 
 #include "collisionlib/triangle_conversion.h"
 #include "collisionlib/triangle.h"
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     load_png("tex/topdown_terrain.png", *terrain_tex);
 
     auto scene_mesh = driver.make_mesh_repr();
-    auto scene = gfx::load_scene("scene/fps.json", std::move(scene_mesh));
+    auto scene = fps::load_scene("scene/fps.json", std::move(scene_mesh));
 
     // Make an fps camera.
     auto cam = gfx::make_fps_camera(driver);
