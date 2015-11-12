@@ -7,7 +7,6 @@
 #include "../gfx/mesh_data.h"
 namespace game { namespace collis
 {
-  // Assumes triangles are given in ccw order.
-  std::vector<Triangle>
-    triangles_from_mesh_data(Indexed_Mesh_Data const&) noexcept;
+  void append_triangles(std::vector<Triangle>& triangles,
+                        Indexed_Mesh_Data const& data, bool ccw=true) noexcept;
 } }

@@ -29,7 +29,8 @@ TEST_CASE("Correct triangle normals are generated",
   md.elements.push_back(1);
   md.elements.push_back(2);
 
-  auto triangles = collis::triangles_from_mesh_data(md);
+  auto triangles = std::vector<collis::Triangle>{};
+  collis::append_triangles(triangles, md, true);
 
   REQUIRE(triangles.size() == 1);
 

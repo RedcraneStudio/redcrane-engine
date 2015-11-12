@@ -190,7 +190,8 @@ int main(int argc, char** argv)
     auto ter_chunk = gfx::write_data_to_mesh(terrain_data, std::move(terrain));
     gfx::format_standard_mesh_buffers(*terrain);
 
-    auto triangles = collis::triangles_from_mesh_data(terrain_data);
+    auto triangles = std::vector<collis::Triangle>();
+    collis::append_triangles(triangles, terrain_data, true);
 
     auto terrain_model = glm::mat4(1.0f);
 
