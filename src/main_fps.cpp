@@ -46,6 +46,37 @@
 
 #define PI 3.141592653589793238463
 
+void error_callback(int error, const char* description)
+{
+  game::log_d("GLFW Error: % (Code = %)", description, error);
+}
+
+struct Glfw_User_Data
+{
+  game::gfx::IDriver& driver;
+  game::gfx::Camera& camera;
+};
+void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
+{
+}
+void mouse_motion_callback(GLFWwindow* window, double x, double y)
+{
+}
+void resize_callback(GLFWwindow* window, int width, int height)
+{
+  // Change OpenGL viewport
+  glViewport(0, 0, width, height);
+
+  auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
+  auto& idriver = user_ptr.driver;
+
+  // Inform the driver of this change
+  idriver.window_extents({width,height});
+
+  // Change the camera aspect ratio
+  user_ptr.camera.perspective.aspect = width / (float) height;
+}
+
 int main(int argc, char** argv)
 {
   using namespace game;
@@ -57,9 +88,19 @@ int main(int argc, char** argv)
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
 
+  // Error callback
+  glfwSetErrorCallback(error_callback);
+
   // Init glfw.
   if(!glfwInit())
     return EXIT_FAILURE;
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+  glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
   auto window = glfwCreateWindow(1000, 1000, "Hello World", NULL, NULL);
   if(!window)
@@ -71,6 +112,9 @@ int main(int argc, char** argv)
   // Init context + load gl functions.
   glfwMakeContextCurrent(window);
   gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+  // Disable vsync
+  glfwSwapInterval(0);
 
   // Log glfw version.
   log_i("Initialized GLFW %", glfwGetVersionString());
@@ -85,10 +129,15 @@ int main(int argc, char** argv)
   // Hide the mouse and capture it
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+  glfwSetWindowSizeCallback(window, resize_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, mouse_motion_callback);
 
   {
     // Make an OpenGL driver.
-    gfx::gl::Driver driver{Vec<int>{1000, 1000}};
+    int window_width, window_height;
+    glfwGetWindowSize(window, &window_width, &window_height);
+    gfx::gl::Driver driver{Vec<int>{window_width, window_height}};
 
     auto shader = driver.make_shader_repr();
     shader->load_vertex_part("shader/basic/vs.glsl");
@@ -125,6 +174,9 @@ int main(int argc, char** argv)
     cam_controller.camera(cam);
 
     cam_controller.set_pitch_limit(PI / 2);
+
+    auto glfw_user_data = Glfw_User_Data{driver, cam};
+    glfwSetWindowUserPointer(window, &glfw_user_data);
 
     // TODO put the house on the scene at a fixed location.
     Maybe_Owned<Mesh> terrain = driver.make_mesh_repr();
