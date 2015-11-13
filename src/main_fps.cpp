@@ -178,23 +178,6 @@ int main(int argc, char** argv)
     auto glfw_user_data = Glfw_User_Data{driver, cam};
     glfwSetWindowUserPointer(window, &glfw_user_data);
 
-    // TODO put the house on the scene at a fixed location.
-    Maybe_Owned<Mesh> terrain = driver.make_mesh_repr();
-    auto terrain_data =
-      gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/fps_terrain.obj"));
-
-    gfx::allocate_standard_mesh_buffers(terrain_data.vertices.size(),
-                                        terrain_data.elements.size(),
-                                        *terrain, Usage_Hint::Draw,
-                                        Upload_Hint::Static);
-    auto ter_chunk = gfx::write_data_to_mesh(terrain_data, std::move(terrain));
-    gfx::format_standard_mesh_buffers(*terrain);
-
-    auto triangles = std::vector<collis::Triangle>();
-    collis::append_triangles(triangles, terrain_data, true);
-
-    auto terrain_model = glm::mat4(1.0f);
-
     int fps = 0;
     int time = glfwGetTime();
 
@@ -210,7 +193,6 @@ int main(int argc, char** argv)
     glfwGetCursorPos(window, &prev_x, &prev_y);
 
     shader->set_diffuse(colors::white);
-    driver.bind_texture(*terrain_tex, 0);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -264,7 +246,7 @@ int main(int argc, char** argv)
       cam.fp.pos.z += delta_movement.z;
 
       // Find the height at cam.fp.pos.
-      for(auto const& triangle : triangles)
+      for(auto const& triangle : scene.collision_triangles)
       {
         if(collis::is_contained(triangle, cam.fp.pos))
         {
@@ -282,9 +264,6 @@ int main(int argc, char** argv)
 
       // Clear the screen
       driver.clear();
-
-      shader->set_model(terrain_model);
-      gfx::render_chunk(ter_chunk);
 
       for(auto const& obj : scene.objects)
       {
