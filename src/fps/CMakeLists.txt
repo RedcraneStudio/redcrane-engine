@@ -4,4 +4,4 @@
 
 add_library(fpslib STATIC camera_controller.cpp load_scene.cpp)
 
-target_link_libraries(fpslib gfxlib collisionlib commonlib)
+target_link_libraries(fpslib gfxlib gfxsupportlib collisionlib commonlib)
