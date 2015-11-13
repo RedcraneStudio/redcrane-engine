@@ -150,8 +150,11 @@ int main(int argc, char** argv)
     shader->set_model_name("model");
     shader->set_sampler_name("tex");
 
+    auto light_pos_loc = shader->get_location("light_pos");
+
     driver.use_shader(*shader);
 
+    shader->set_vec3(light_pos_loc, glm::vec3(0.0f, 1.0f, 0.0f));
     shader->set_sampler(0);
 
     // Get all our textures
@@ -185,7 +188,7 @@ int main(int argc, char** argv)
     driver.clear_color_value(Color{0x55, 0x66, 0x77});
     driver.clear_depth_value(1.0);
 
-    glEnable(GL_DEPTH_TEST);
+    driver.depth_test(true);
     glDepthFunc(GL_LEQUAL);
 
     double prev_x, prev_y;
