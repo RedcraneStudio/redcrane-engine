@@ -251,15 +251,9 @@ int main(int argc, char** argv)
       // Find the height at cam.fp.pos.
       for(auto const& triangle : scene.collision_triangles)
       {
-        if(collis::is_contained(triangle, cam.fp.pos))
+        while(collis::espace_is_intersecting(triangle, cam.fp.pos))
         {
-          auto bary = collis::to_barycentric_coord(triangle, cam.fp.pos);
-          // The order goes u v w, w is the one we found from the others, so
-          // it is the first point on the triangle. u is towards 2 and v is
-          // towards 1.
-          cam.fp.pos.y = triangle.positions[2].y * bary.x +
-                         triangle.positions[1].y * bary.y +
-                         triangle.positions[0].y * bary.z + 0.5f;
+          cam.fp.pos.y += .01f;
         }
       }
 
