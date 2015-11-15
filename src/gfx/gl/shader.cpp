@@ -47,12 +47,12 @@ namespace game { namespace gfx { namespace gl
     if(result == GL_FALSE)
     {
       // Compilation failed.
-      constexpr size_t info_log_length = 2048;
+      GLint info_log_length = 0;
+      glGetShaderiv(shade, GL_INFO_LOG_LENGTH, &info_log_length);
       auto info_log = new char[info_log_length];
 
-      glGetShaderInfoLog(shade, info_log_length - 1, NULL, info_log);
+      glGetShaderInfoLog(shade, info_log_length, NULL, info_log);
 
-      info_log[info_log_length - 1] = '\0';
       log_e("Shader compilation failed in '%' (info log):\n%", filename,
             info_log);
 
@@ -92,10 +92,31 @@ namespace game { namespace gfx { namespace gl
 
   void GL_Shader::try_load_() noexcept
   {
+    // We'll need to rework this logic if we plan on supporting geometry
+    // shaders.
     if(!v_shade_ || !f_shade_) return;
 
     glLinkProgram(prog_);
-    linked_ = true;
+
+    GLint result = 0;
+    glGetProgramiv(prog_, GL_LINK_STATUS, &result);
+    if(result == GL_FALSE)
+    {
+      // Compilation failed.
+      GLint info_log_length = 0;
+      glGetProgramiv(prog_, GL_INFO_LOG_LENGTH, &info_log_length);
+      auto info_log = new char[info_log_length];
+
+      glGetProgramInfoLog(prog_, info_log_length, NULL, info_log);
+
+      log_e("Program link failed (info log):\n%", info_log);
+
+      delete[] info_log;
+    }
+    else
+    {
+      linked_ = true;
+    }
   }
 
   int GL_Shader::get_location(std::string const& str) noexcept
