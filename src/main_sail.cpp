@@ -9,6 +9,9 @@
 #include <thread>
 #include <chrono>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+
 #include "common/maybe_owned.hpp"
 #include "common/log.h"
 
@@ -28,6 +31,7 @@
 
 #include "collisionlib/triangle_conversion.h"
 #include "collisionlib/triangle.h"
+#include "collisionlib/motion.h"
 
 #include "common/json.h"
 
@@ -56,12 +60,65 @@ struct Glfw_User_Data
 {
   game::gfx::IDriver& driver;
   game::gfx::Camera& camera;
+  bool forward_pressed = false;
+  bool left_pressed = false;
+  bool back_pressed = false;
+  bool right_pressed = false;
 };
-void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
+void mouse_button_callback(GLFWwindow*, int, int, int)
 {
 }
-void mouse_motion_callback(GLFWwindow* window, double x, double y)
+void mouse_motion_callback(GLFWwindow*, double, double)
 {
+}
+void key_callback(GLFWwindow* window, int key, int, int action, int)
+{
+  using namespace game;
+
+  auto user_ptr = (Glfw_User_Data*) glfwGetWindowUserPointer(window);
+
+  if(action == GLFW_PRESS)
+  {
+    switch(key)
+    {
+      case GLFW_KEY_ESCAPE:
+        glfwSetWindowShouldClose(window, true);
+        break;
+      case GLFW_KEY_W:
+        user_ptr->forward_pressed = true;
+        break;
+      case GLFW_KEY_A:
+        user_ptr->left_pressed = true;
+        break;
+      case GLFW_KEY_S:
+        user_ptr->back_pressed = true;
+        break;
+      case GLFW_KEY_D:
+        user_ptr->right_pressed = true;
+        break;
+    }
+  }
+  else if(action == GLFW_RELEASE)
+  {
+    switch(key)
+    {
+      case GLFW_KEY_ESCAPE:
+        glfwSetWindowShouldClose(window, true);
+        break;
+      case GLFW_KEY_W:
+        user_ptr->forward_pressed = false;
+        break;
+      case GLFW_KEY_A:
+        user_ptr->left_pressed = false;
+        break;
+      case GLFW_KEY_S:
+        user_ptr->back_pressed = false;
+        break;
+      case GLFW_KEY_D:
+        user_ptr->right_pressed = false;
+        break;
+    }
+  }
 }
 void resize_callback(GLFWwindow* window, int width, int height)
 {
@@ -133,6 +190,7 @@ int main(int argc, char** argv)
   glfwSetWindowSizeCallback(window, resize_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, mouse_motion_callback);
+  glfwSetKeyCallback(window, key_callback);
 
   {
     // Make an OpenGL driver.
@@ -179,6 +237,11 @@ int main(int argc, char** argv)
     auto boat_chunk = gfx::write_data_to_mesh(boat_data, ref_mo(boat_mesh),
                                               0, 0);
 
+    auto boat_motion = collis::Motion{};
+    boat_motion.mass = 340; // 340 N is about the weight of a small sailboat.
+    boat_motion.angular.radius = 1;
+    glm::mat4 boat_model{1.0f};
+
     // Make an fps camera.
     auto cam = gfx::make_fps_camera(driver);
     cam.fp.pos = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -208,47 +271,52 @@ int main(int argc, char** argv)
     shader->set_diffuse(colors::white);
     shader->set_model(glm::mat4(1.0f));
 
+    float prev_time = glfwGetTime();
     while(!glfwWindowShouldClose(window))
     {
       ++fps;
 
+      // Clear the forces on the boat
+      collis::reset_force(boat_motion.displacement);
+      collis::reset_torque(boat_motion.angular);
+
+      // Handle events (likely will add a force or two.
       glfwPollEvents();
 
-      if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+      // This only works if the torque is only vertical, which in our case it
+      // is. That is, we are assuming that the axis of rotation is up or down.
+      glm::vec3 boat_dir = glm::vec3(0.0f, 0.0f, 1.0f);
+      // TODO: Find a better way to handle nan
+      if(boat_motion.angular.displacement.x != 0)
       {
-        glfwSetWindowShouldClose(window, true);
+        boat_dir = glm::rotate(boat_dir, glm::length(boat_motion.angular.displacement),
+                               glm::normalize(boat_motion.angular.displacement));
       }
+#if 0
+      glm::vec3 boat_dir = glm::vec3(-glm::sin(boat_angle), 0.0f,
+                                     glm::cos(boat_angle));
+#endif
 
-      glm::vec4 delta_movement;
-      if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+      if(glfw_user_data.forward_pressed == true)
       {
-        delta_movement.z -= 1.0f;
+        collis::apply_force(boat_motion.displacement, boat_dir * -100.0f);
       }
-      if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+      if(glfw_user_data.back_pressed == true)
       {
-        delta_movement.x -= 1.0f;
+        collis::apply_force(boat_motion.displacement, boat_dir * 100.0f);
       }
-      if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+      if(glfw_user_data.left_pressed == true)
       {
-        delta_movement.z += 1.0f;
+        collis::apply_torque(boat_motion.angular,
+                             glm::vec3(0.0f, 0.0f, 1.0f),// Apply it to the front
+                             glm::vec3(50.0f, 0.0f, 0.0f)); // of the boat
       }
-      if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+      if(glfw_user_data.right_pressed == true)
       {
-        delta_movement.x += 1.0f;
+        collis::apply_torque(boat_motion.angular,
+                             glm::vec3(0.0f, 0.0f, 1.0f),
+                             glm::vec3(-50.0f, 0.0f, 0.0f));
       }
-
-      // Temporary replacement for shift, I just didn't feel like looking it up
-      if(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-      {
-        delta_movement *= .0005;
-      }
-      else
-      {
-        delta_movement *= .005;
-      }
-
-      delta_movement = delta_movement *
-        glm::rotate(glm::mat4(1.0f), cam.fp.yaw, glm::vec3(0.0f, 1.0f, 0.0f));
 
       double x, y;
       glfwGetCursorPos(window, &x, &y);
@@ -256,14 +324,46 @@ int main(int argc, char** argv)
       cam_controller.apply_delta_yaw(x / 250.0 - prev_x / 250.0);
       prev_x = x, prev_y = y;
 
-      cam.fp.pos.x += delta_movement.x;
-      cam.fp.pos.z += delta_movement.z;
+      // Take the velocity of the boat and use it to calculate a drag force.
+      // Just for shits n' giggles lets simply set a maximum velocity like this
+      auto p = 971.8f; // Density of water at 80 deg C I think. kg / m^3
+      auto v = glm::length(boat_motion.displacement.velocity); // m/s
+      auto C_d = 0.10f; // I think a boat should be pretty low. No unit?
+      auto A = 5.0f; // This is almost a random guess.
+      glm::vec3 f_d = (.5f * p * v * v * C_d * A) *
+        glm::normalize(-boat_motion.displacement.velocity);
+
+      // Apply the drag force.
+      if(!std::isnan(f_d.x) && !std::isnan(f_d.y) && !std::isnan(f_d.z))
+      {
+        collis::apply_force(boat_motion.displacement, f_d);
+        log_i("%", glm::length(f_d));
+      }
+
+      // Solve the motion
+      auto new_time = glfwGetTime();
+      solve_motion(new_time - prev_time, boat_motion);
+      prev_time = new_time;
+
+      // Calculate a model
+      boat_model = glm::mat4(1.0f);
+      boat_model = glm::translate(boat_model,
+        boat_motion.displacement.displacement);
+      if(glm::length(boat_motion.angular.displacement) > .001)
+      {
+        boat_model = glm::rotate(boat_model,
+          glm::length(boat_motion.angular.displacement),
+          glm::normalize(boat_motion.angular.displacement));
+      }
 
       use_camera(driver, cam);
 
       // Clear the screen
       driver.clear();
 
+      // Set the boat model matrix
+      shader->set_model(boat_model);
+      // Render the boat
       gfx::render_chunk(boat_chunk);
 
       glfwSwapBuffers(window);
