@@ -8,10 +8,10 @@ namespace game { namespace collis
 {
   struct Displacement_Desc
   {
-    glm::vec3 net_force;
-    glm::vec3 acceleration;
-    glm::vec3 velocity;
-    glm::vec3 displacement;
+    glm::vec3 net_force{0.0f, 0.0f, 0.0f};
+    glm::vec3 acceleration{0.0f, 0.0f, 0.0f};
+    glm::vec3 velocity{0.0f, 0.0f, 0.0f};
+    glm::vec3 displacement{0.0f, 0.0f, 0.0f};
   };
 
   void reset_force(Displacement_Desc&) noexcept;
@@ -23,10 +23,10 @@ namespace game { namespace collis
   {
     float radius;
 
-    glm::vec3 net_torque;
-    glm::vec3 acceleration;
-    glm::vec3 velocity;
-    glm::vec3 displacement;
+    glm::vec3 net_torque{0.0f, 0.0f, 0.0f};
+    glm::vec3 acceleration{0.0f, 0.0f, 0.0f};
+    glm::vec3 velocity{0.0f, 0.0f, 0.0f};
+    glm::vec3 displacement{0.0f, 0.0f, 0.0f};
   };
 
   void reset_torque(Angular_Desc&) noexcept;
