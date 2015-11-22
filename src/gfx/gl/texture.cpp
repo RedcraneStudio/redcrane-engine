@@ -35,7 +35,7 @@ namespace game { namespace gfx { namespace gl
     // These are actually set to their respective values by default anyway, but
     // this is more clear.
     glTexParameteri(texture_type, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(texture_type, GL_TEXTURE_MAX_LEVEL, 1000);
+    glTexParameteri(texture_type, GL_TEXTURE_MAX_LEVEL, 5);
 
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
