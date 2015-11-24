@@ -296,7 +296,7 @@ int main(int argc, char** argv)
       // is. That is, we are assuming that the axis of rotation is up or down.
       glm::vec3 boat_dir = glm::vec3(0.0f, 0.0f, 1.0f);
       // TODO: Find a better way to handle nan
-      if(boat_motion.angular.displacement.x != 0)
+      if(boat_motion.angular.displacement.y != 0)
       {
         boat_dir = glm::rotate(boat_dir, glm::length(boat_motion.angular.displacement),
                                glm::normalize(boat_motion.angular.displacement));
