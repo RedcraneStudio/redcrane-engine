@@ -43,6 +43,7 @@
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 #include "uv.h"
 
@@ -242,14 +243,22 @@ int main(int argc, char** argv)
     boat_motion.angular.radius = 1;
     glm::mat4 boat_model{1.0f};
 
+
     // Make an fps camera.
-    auto cam = gfx::make_fps_camera(driver);
-    cam.fp.pos = glm::vec3(0.0f, 1.0f, 0.0f);
+    gfx::Camera cam;
+    cam.projection_mode = gfx::Camera_Type::Perspective;
+    cam.perspective =
+      gfx::Perspective_Cam_Params{glm::radians(50.0f),
+                                  driver.window_extents().x /
+                                    (float) driver.window_extents().y,
+                                  .001f, 1000.0f};
+    cam.definition = gfx::Camera_Definition::Look_At;
+    cam.look_at.up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    auto cam_controller = fps::Camera_Controller{};
-    cam_controller.camera(cam);
-
-    cam_controller.set_pitch_limit(PI / 2);
+    // The eye will be rotated around the boat.
+    glm::quat eye_dir;
+    cam.look_at.eye = glm::vec3(1.0f, 0.0f, 0.0f);
+    cam.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
 
     auto glfw_user_data = Glfw_User_Data{driver, cam};
     glfwSetWindowUserPointer(window, &glfw_user_data);
@@ -318,12 +327,6 @@ int main(int argc, char** argv)
                              glm::vec3(-50.0f, 0.0f, 0.0f));
       }
 
-      double x, y;
-      glfwGetCursorPos(window, &x, &y);
-      cam_controller.apply_delta_pitch(y / 250.0 - prev_y / 250.0);
-      cam_controller.apply_delta_yaw(x / 250.0 - prev_x / 250.0);
-      prev_x = x, prev_y = y;
-
       // Take the velocity of the boat and use it to calculate a drag force.
       // Just for shits n' giggles lets simply set a maximum velocity like this
       auto p = 971.8f; // Density of water at 80 deg C I think. kg / m^3
@@ -344,6 +347,38 @@ int main(int argc, char** argv)
       auto new_time = glfwGetTime();
       solve_motion(new_time - prev_time, boat_motion);
       prev_time = new_time;
+
+      // Calculate the camera position and look direction based on the location
+      // of the boat
+      cam.look_at.look = boat_motion.displacement.displacement;
+
+      double x, y;
+      glfwGetCursorPos(window, &x, &y);
+
+      float dif_x = (x - prev_x) / 250.0f;
+      float dif_y = (y - prev_y) / 250.0f;
+
+      eye_dir = glm::normalize(eye_dir);
+
+      auto cross_eye = glm::cross(glm::normalize(cam.look_at.look -
+                                  cam.look_at.eye), cam.look_at.up);
+      //eye_dir = glm::quat();
+      //eye_dir = glm::rotate(eye_dir, dif_y, glm::normalize(cam.look_at.look - cam.look_at.eye));
+      eye_dir = eye_dir * glm::rotate(glm::quat(), dif_x, glm::inverse(eye_dir) * cam.look_at.up);
+      eye_dir = eye_dir * glm::rotate(glm::quat(), dif_y, glm::inverse(eye_dir) * cross_eye);
+      //eye_dir = eye_dir * glm::rotate(glm::quat(), dif_x, glm::vec3(glm::inverse(glm::mat4_cast(eye_dir)) * glm::vec4(cam.look_at.up, 1.0f)));
+      //eye_dir = eye_dir * glm::rotate(glm::quat(), dif_y, glm::vec3(glm::inverse(glm::mat4_cast(eye_dir)) * glm::vec4(cross_eye, 1.0f)));
+      //glm::vec3(1.0f, 0.0f, 0.0f));
+
+      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(3.0f, 0.0f, 0.0f, 1.0f)));
+      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 3.0f, 0.0f, 1.0f)));
+      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(3.0f, 3.0f, 0.0f, 1.0f)));
+      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), cross_eye);
+
+      prev_x = x, prev_y = y;
+
+      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 10.0f, 1.0f)) + cam.look_at.look;
+      //cam.look_at.up = eye_dir * glm::vec3(0.0f, 1.0f, 0.0f);
 
       // Calculate a model
       boat_model = glm::mat4(1.0f);
