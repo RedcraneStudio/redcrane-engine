@@ -331,7 +331,7 @@ int main(int argc, char** argv)
       // Just for shits n' giggles lets simply set a maximum velocity like this
       auto p = 971.8f; // Density of water at 80 deg C I think. kg / m^3
       auto v = glm::length(boat_motion.displacement.velocity); // m/s
-      auto C_d = 0.10f; // I think a boat should be pretty low. No unit?
+      auto C_d = 0.04f; // I think a boat should be pretty low. No unit?
       auto A = 5.0f; // This is almost a random guess.
       glm::vec3 f_d = (.5f * p * v * v * C_d * A) *
         glm::normalize(-boat_motion.displacement.velocity);
