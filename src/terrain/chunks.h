@@ -78,9 +78,7 @@ namespace game { namespace terrain
    * \brief Initialize the vertices of the quadtree.
    *
    * The root node should own it's mesh.
-   * \param tree The quadtree to initialize with vertices. The tree should have
-   * at least two levels. (A root and a single set of children for a total of
-   * five nodes.)
+   * \param tree The quadtree to initialize with vertices.
    * \param idriver The driver to use to allocate the mesh buffer.
    * \param level Depth level to start at.
    * \param vertices Grid size of each node. Note that each successive level

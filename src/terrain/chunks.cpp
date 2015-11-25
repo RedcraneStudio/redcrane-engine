@@ -289,6 +289,9 @@ namespace game { namespace terrain
       // Append this node's mesh data to the end of the mesh.
 
       // Just reference the mesh, the root is going to own it.
+      // This continues to work for the first level (which owns the mesh)
+      // because it relies on the fact that the maybe owned will not change
+      // ownership if the pointers are equal in operator=.
       iter->val.mesh_chunk = gfx::write_data_to_mesh(mesh_data, ref_mo(mesh),
                                                      cur_vertex_offset);
       iter->val.mesh_chunk.type = Primitive_Type::Triangle;
