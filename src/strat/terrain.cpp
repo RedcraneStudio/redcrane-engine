@@ -46,8 +46,8 @@ namespace game { namespace strat
       for(int j = 0; j < ret.extents.x; ++j)
       {
         // Just use the red color.
-        auto col = tex.get_pt({i, j});
-        ret.vals[i * ret.extents.x + j] = col.r + add;
+        int col = *tex.get_pt({i, j}) * 0xff;
+        ret.vals[i * ret.extents.x + j] = col + add;
       }
     }
     return ret;

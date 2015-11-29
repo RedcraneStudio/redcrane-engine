@@ -377,7 +377,7 @@ int main(int argc, char** argv)
   terrain::initialize_vertices(terrain_tree, driver, 0, 5);
 
   auto heightmap_texture = driver.make_texture_repr();
-  heightmap_texture->allocate(heightmap.extents, Texture_Format::Grayscale);
+  heightmap_texture->allocate(heightmap.extents, Image_Format::Depth);
   heightmap_texture->blit_data(vol_from_extents(heightmap.extents),
                                 heightmap.values);
 

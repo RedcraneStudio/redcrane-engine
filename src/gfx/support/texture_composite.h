@@ -24,11 +24,13 @@ namespace game
 
     virtual ~Texture_Composite() noexcept {}
   private:
-    void allocate_(Vec<int> const& extents, Texture_Format) noexcept override;
+    void allocate_(Vec<int> const& extents, Image_Format) noexcept override;
     void blit_data_(Volume<int> const& vol,
                     Color const* data) noexcept override;
     void blit_data_(Volume<int> const& vol,
                     float const* data) noexcept override;
+    void blit_data_(Volume<int> const& vol, Data_Type,
+                    void const* data) noexcept override;
 
     std::vector<Maybe_Owned<Texture> > ts_;
   };

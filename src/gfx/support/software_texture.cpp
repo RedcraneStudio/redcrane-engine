@@ -22,24 +22,17 @@ namespace game
     }
     impl_ = std::move(t);
   }
-  Color Software_Texture::get_pt(Vec<int> pt) const noexcept
+  float const* Software_Texture::get_pt(Vec<int> pt) const noexcept
   {
-    return data_[pt.y * allocated_extents().x + pt.x];
-  }
-  Color* Software_Texture::get_row(int row) const noexcept
-  {
-    return data_ + row * allocated_extents().x;
-  }
-  Color* Software_Texture::get_data() const noexcept
-  {
-    return data_;
+    return data_ + (pt.y * allocated_extents().x * elements_per_pixel() + pt.x);
   }
 
   void Software_Texture::allocate_to(Texture& t) const noexcept
   {
     // Allocate the other texture with our bounds to prepare it for blitting.
-    t.allocate(allocated_extents());
+    t.allocate(allocated_extents(), format_);
   }
+
   void Software_Texture::blit_to(Texture& t) const noexcept
   {
     // Blit all of our data to the given texture.
@@ -47,54 +40,75 @@ namespace game
   }
 
   void Software_Texture::allocate_(Vec<int> const& extents,
-                                   Texture_Format format) noexcept
+                                   Image_Format format) noexcept
   {
     // Ignore the format for ourselves.
+    data_ = new float[extents.x * extents.y * elements_per_pixel()];
+    format_ = format;
 
-    data_ = new Color[extents.x * extents.y];
     if(impl_)
     {
-      // Use RGBA as an internal format. This is really stupid so at some point
-      // we need to actually support the two formats somehow.
-      impl_->allocate(extents, Texture_Format::Rgba);
+      impl_->allocate(extents, format);
     }
   }
   void Software_Texture::blit_data_(Volume<int> const& vol,
                                     Color const* cd) noexcept
   {
-    auto extents = vol_extents(vol);
-    for(int i = 0; i < extents.y; ++i)
-    {
-      for(int j = 0; j < extents.x; ++j)
-      {
-        data_[(vol.pos.y + i) * allocated_extents().x + vol.pos.x + j] =
-          cd[i * extents.x + j];
-      }
-    }
-    if(impl_)
-    {
-      impl_->blit_data(vol, cd);
-    }
+    blit_data_(vol, Data_Type::Integer, cd);
   }
   void Software_Texture::blit_data_(Volume<int> const& vol,
                                     float const* cd) noexcept
   {
-    auto extents = vol_extents(vol);
-    for(int i = 0; i < extents.y; ++i)
+    blit_data_(vol, Data_Type::Float, cd);
+  }
+  void Software_Texture::blit_data_(Volume<int> const& vol, Data_Type type,
+                                    void const* in_data) noexcept
+  {
+    if(type == Data_Type::Float)
     {
-      for(int j = 0; j < extents.x; ++j)
+      auto cd = (float const*) in_data;
+
+      auto extents = vol_extents(vol);
+      for(int i = 0; i < extents.y; ++i)
       {
-        auto cur_data = data_ + ((vol.pos.y + i) * allocated_extents().x
-                                 + vol.pos.x + j);
-        cur_data->r = cd[i * extents.x + j];
-        cur_data->g = 0x00;
-        cur_data->b = 0x00;
-        cur_data->a = 0xff;
+        for(int j = 0; j < extents.x; ++j)
+        {
+          for(std::size_t elem = 0; elem < elements_per_pixel(); ++elem)
+          {
+            data_[(vol.pos.y + i) * allocated_extents().x + vol.pos.x + j+elem] =
+              cd[i * extents.x + j + elem];
+          }
+        }
+      }
+      if(impl_)
+      {
+        impl_->blit_data(vol, cd);
+      }
+    }
+    if(type == Data_Type::Integer)
+    {
+      auto cd = (uint8_t const*) in_data;
+
+      auto extents = vol_extents(vol);
+      for(int i = 0; i < extents.y; ++i)
+      {
+        for(int j = 0; j < extents.x; ++j)
+        {
+          for(std::size_t elem = 0; elem < elements_per_pixel(); ++elem)
+          {
+            data_[(vol.pos.y + i) * allocated_extents().x + vol.pos.x + j+elem] =
+              cd[i * extents.x + j + elem] / (float) 0xff;
+          }
+        }
       }
     }
     if(impl_)
     {
-      impl_->blit_data(vol, cd);
+      impl_->blit_data(vol, type, in_data);
     }
+  }
+  std::size_t Software_Texture::elements_per_pixel() const noexcept
+  {
+    return format_ == Image_Format::Rgba? 4 : 1;
   }
 }

@@ -14,7 +14,7 @@ namespace game
     return *this;
   }
   void Texture_Composite::allocate_(Vec<int> const& extents,
-                                    Texture_Format form) noexcept
+                                    Image_Format form) noexcept
   {
     for(auto& ptr : ts_)
     {
@@ -35,6 +35,14 @@ namespace game
     for(auto& ptr : ts_)
     {
       ptr->blit_data(vol, data);
+    }
+  }
+  void Texture_Composite::blit_data_(Volume<int> const& vol, Data_Type type,
+                                     void const* data) noexcept
+  {
+    for(auto& ptr : ts_)
+    {
+      ptr->blit_data(vol, type, data);
     }
   }
 }

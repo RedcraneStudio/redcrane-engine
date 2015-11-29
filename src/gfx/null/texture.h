@@ -8,8 +8,13 @@ namespace game { namespace gfx { namespace null
 {
   class Null_Texture : public Texture
   {
-    void allocate_(Vec<int> const&, Texture_Format) noexcept override {}
+    void allocate_(Vec<int> const&, Image_Format) noexcept override {}
+
     void blit_data_(Volume<int> const&, Color const*) noexcept override {}
+
     void blit_data_(Volume<int> const&, float const*) noexcept override {}
+
+    void blit_data_(Volume<int> const&, Data_Type,
+                    void const*) noexcept override {}
   };
 } } }

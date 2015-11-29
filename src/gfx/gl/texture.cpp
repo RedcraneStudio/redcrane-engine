@@ -3,13 +3,15 @@
  * All rights reserved.
  */
 #include "texture.h"
+#include <cstring>
 namespace game { namespace gfx { namespace gl
 {
   void GL_Texture::allocate_(Vec<int> const& extents,
-                             Texture_Format form) noexcept
+                             Image_Format form) noexcept
   {
     glGenTextures(1, &tex_id);
 
+    // TODO: Figure something out, this is unexpected.
     glActiveTexture(GL_TEXTURE0);
 
     texture_type = GL_TEXTURE_2D;
@@ -17,15 +19,27 @@ namespace game { namespace gfx { namespace gl
 
     glBindTexture(texture_type, tex_id);
 
-    if(form == Texture_Format::Rgba)
+    if(form == Image_Format::Rgba)
     {
       glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y, 0, GL_RGBA,
                    GL_UNSIGNED_BYTE, NULL);
     }
-    else if(form == Texture_Format::Grayscale)
+    else if(form == Image_Format::Depth)
     {
-      glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y, 0, GL_RED,
-                   GL_FLOAT, NULL);
+      glTexImage2D(texture_type, 0, GL_DEPTH_COMPONENT, extents.x, extents.y,
+                   0, GL_RGBA, GL_FLOAT, NULL);
+    }
+    switch(form)
+    {
+      case Image_Format::Rgba:
+        // We don't care about the format, type, and data yet.
+        glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y, 0,
+                     GL_RGBA, GL_FLOAT, NULL);
+        break;
+      case Image_Format::Depth:
+        glTexImage2D(texture_type, 0, GL_DEPTH_COMPONENT, extents.x, extents.y,
+                     0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        break;
     }
 
     glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER,
@@ -39,58 +53,60 @@ namespace game { namespace gfx { namespace gl
 
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+    // Save the format for later.
+    format_ = form;
   }
-  void GL_Texture::blit_data_(Volume<int> const& vol,
-                  Color const* colors) noexcept
+  void GL_Texture::blit_data_(Volume<int> const& vol, Data_Type type,
+                              void const* in_data) noexcept
   {
     // Bail out if the volume isn't valid, we want to avoid the
     // GL_INVALID_OPERATION if we can.
     if(vol.width == 0 || vol.height == 0) return;
 
-    std::vector<unsigned char> data;
-    data.reserve(vol.width * vol.height * 4);
+    std::size_t type_size;
+    GLenum data_type;
 
-    // Go from the end to the beginning adding each byte to the end of the
-    // vector.
-    for(int i = 0; i < vol.width * vol.height * 4; ++i)
+    switch(type)
     {
-      Color::c_t value;
+      case Data_Type::Float:
+        type_size = sizeof(float);
+        data_type = GL_FLOAT;
+        break;
+      case Data_Type::Integer:
+        type_size = sizeof(uint8_t);
+        data_type = GL_UNSIGNED_BYTE;
+        break;
+    }
 
-      // Basically find our offset into the array so far.
-      int pos = i / 4;
-      // Use that offset to determine our coordinate (relative to subtexture
-      // origin).
-      int x = pos % vol.width;
-      int y = pos / vol.width;
+    // Row size in bytes
+    std::size_t row_size;
+    GLenum data_format;
 
-      // Use the row from the bottom first, relative to the given sub-volume.
-      y = vol.height - y - 1;
+    switch(format_)
+    {
+      case Image_Format::Rgba:
+        row_size = type_size * 4 * vol.width;
+        data_format = GL_RGBA;
+        break;
+      case Image_Format::Depth:
+        row_size = type_size * vol.width;
+        data_format = GL_DEPTH_COMPONENT;
+        break;
+    }
 
-      // Now recalculate our position **in our colors array** to get that
-      // coordinate calculated above.
-      pos = y * vol.width + x;
+    // Allocate our data
+    uint8_t* out_data = new uint8_t[row_size * vol.height];
 
-      // Our component just keeps repeating 0-3 and again, it's independent of
-      // the coordinate.
-      int component = i % 4;
-      switch(component)
-      {
-        case 0:
-          value = colors[pos].r;
-          break;
-        case 1:
-          value = colors[pos].g;
-          break;
-        case 2:
-          value = colors[pos].b;
-          break;
-        case 3:
-          value = colors[pos].a;
-          break;
-        default:
-          value = 0x00;
-      }
-      data.push_back(value);
+    // Go backwards by row.
+    for(int i = 0; i < vol.height; ++i)
+    {
+      // dest: output data starting from first row
+      // src: input data starting from the bottom row
+      // size: row_size
+      std::memcpy(out_data + i * row_size,
+                  (uint8_t*) in_data + row_size*vol.height - i*row_size - 1,
+                  row_size);
     }
 
     // We have a good array of data, where each successive row is going from
@@ -101,51 +117,10 @@ namespace game { namespace gfx { namespace gl
     glBindTexture(texture_type, tex_id);
     glTexSubImage2D(texture_type, 0, vol.pos.x,
                     allocated_extents().y - vol.pos.y - vol.height,
-                    vol.width, vol.height, GL_RGBA, GL_UNSIGNED_BYTE,
-                    &data[0]);
+                    vol.width, vol.height, data_format, data_type, &out_data[0]);
     glGenerateMipmap(texture_type);
-  }
 
-  inline void GL_Texture::blit_data_(Volume<int> const& vol,
-                                     float const* gray_data) noexcept
-  {
-    // Bail out if the volume isn't valid, we want to avoid the
-    // GL_INVALID_OPERATION if we can.
-    if(vol.width == 0 || vol.height == 0) return;
-
-    std::vector<float> data;
-    data.reserve(vol.width * vol.height);
-
-    // Go from the end to the beginning adding each byte to the end of the
-    // vector.
-    for(int i = 0; i < vol.width * vol.height; ++i)
-    {
-      // Use that offset to determine our coordinate (relative to subtexture
-      // origin).
-      int x = i % vol.width;
-      int y = i / vol.width;
-
-      // Use the row from the bottom first, relative to the given sub-volume.
-      y = vol.height - y - 1;
-
-      // Now recalculate our position **in our colors array** to get that
-      // coordinate calculated above.
-      auto pos = y * vol.width + x;
-
-      data.push_back(gray_data[pos]);
-    }
-
-    // We have a good array of data, where each successive row is going from
-    // bottom to top, but we need to figure out our sub-region on the opengl
-    // texture.
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(texture_type, tex_id);
-    glTexSubImage2D(texture_type, 0, vol.pos.x,
-                    allocated_extents().y - vol.pos.y - vol.height,
-                    vol.width, vol.height, GL_RED, GL_FLOAT,
-                    &data[0]);
-    glGenerateMipmap(texture_type);
+    delete[] out_data;
   }
 
   void GL_Texture::bind(unsigned int loc) const noexcept
