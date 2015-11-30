@@ -15,6 +15,8 @@ namespace game { namespace gfx { namespace gl
                            Color const* data) noexcept override
     {
       // Fuck it, it might work.
+      static_assert(sizeof(Color) == sizeof(Color::c_t) * 4,
+                    "Color struct must not have any padding.");
       blit_data_(vol, Data_Type::Integer, data);
     }
 
