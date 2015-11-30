@@ -21,3 +21,9 @@ Figure out serialization before it is too late.
 Figure out why the ui buttons are not properly textured.
 Simplify texture system.
 Fix terrain gen system. Distance from water is painfully slow.
+
+Using a value map is much easier to use than a texture, consider using that as
+primary storage. Plus a value map of floats is pretty much completely
+compatible with a texture::blit_data call. Maybe if value maps for rgba images
+had a interface for that specific situation everything would fall into place
+better.
