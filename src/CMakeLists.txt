@@ -29,6 +29,7 @@ add_subdirectory(ui)
 add_subdirectory(strat)
 add_subdirectory(gen)
 add_subdirectory(terrain)
+add_subdirectory(water)
 
 add_subdirectory(collisionlib)
 
@@ -45,7 +46,8 @@ target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
                               collisionlib)
 
 add_executable(sail main_sail.cpp)
-target_link_libraries(sail gfxlib gfxsupportlib commonlib fpslib collisionlib)
+target_link_libraries(sail gfxlib gfxsupportlib commonlib fpslib collisionlib
+                           waterlib terrainlib)
 
 # add_executable(play_snd play_snd.cpp)
 # target_link_libraries(play_snd sndlib commonlib)

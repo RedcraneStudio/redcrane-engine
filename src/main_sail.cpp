@@ -33,6 +33,9 @@
 #include "collisionlib/triangle.h"
 #include "collisionlib/motion.h"
 
+#include "water/grid.h"
+#include "terrain/chunks.h"
+
 #include "common/json.h"
 
 #include "fps/camera_controller.h"
@@ -217,6 +220,32 @@ int main(int argc, char** argv)
     shader->set_vec3(light_pos_loc, glm::vec3(0.0f, 1.0f, 0.0f));
     shader->set_sampler(0);
 
+    auto terrain_shader = driver.make_shader_repr();
+    terrain_shader->load_vertex_part("shader/terrain/vs.glsl");
+    terrain_shader->load_fragment_part("shader/terrain/fs.glsl");
+
+    terrain_shader->set_model_name("model");
+    terrain_shader->set_view_name("view");
+    terrain_shader->set_projection_name("proj");
+
+    auto height_loc = terrain_shader->get_location("heightmap");
+    auto ampl_loc = terrain_shader->get_location("max_height_adjust");
+
+    auto amb_int_loc = terrain_shader->get_location("ambient_intensity");
+    auto terr_light_pos_loc = terrain_shader->get_location("light_pos");
+    auto norm_map_loc = terrain_shader->get_location("normalmap");
+    auto diff_map_loc = terrain_shader->get_location("diffusemap");
+
+    terrain_shader->set_model(glm::mat4(1.0f));
+
+    terrain_shader->set_float(amb_int_loc, .1f);
+    terrain_shader->set_vec3(terr_light_pos_loc, glm::vec3(2.0f, 3.0f, 2.0f));
+    terrain_shader->set_float(ampl_loc, 1.0f);
+
+    terrain_shader->set_integer(height_loc, 0);
+    terrain_shader->set_integer(norm_map_loc, 1);
+    terrain_shader->set_integer(diff_map_loc, 2);
+
     // Get all our textures
     auto brick = driver.make_texture_repr();
     load_png("tex/cracked_soil.png", *brick);
@@ -225,6 +254,34 @@ int main(int argc, char** argv)
 
     auto terrain_tex = driver.make_texture_repr();
     load_png("tex/topdown_terrain.png", *terrain_tex);
+
+    water::Water water_ctx(std::random_device{}(), {50, 50});
+
+    water::Noise_Gen_Params noise_params;
+    noise_params.amplitude = 1.0f;
+    noise_params.frequency = 0.01f;
+    noise_params.persistence = .5f;
+    noise_params.lacunarity = 2.0f;
+    noise_params.octaves = 5;
+
+    water::gen_heightmap(water_ctx, .5f, noise_params);
+    water::gen_normalmap(water_ctx);
+    water::write_normalmap_png("normalmap.png", water_ctx);
+
+    auto normalmap_tex = driver.make_texture_repr();
+    water::blit_normalmap(*normalmap_tex, water_ctx);
+
+    auto heightmap_tex = driver.make_texture_repr();
+    water::blit_heightmap(*heightmap_tex, water_ctx);
+
+    auto diffusemap_tex = driver.make_texture_repr();
+    load_png("tex/grass.png", *diffusemap_tex, true);
+
+    terrain::terrain_tree_t terrain_tree;
+    terrain_tree.set_depth(1);
+    terrain::set_volumes(terrain_tree, water_ctx.extents,
+                         water_ctx.normalmap.extents);
+    terrain::initialize_vertices(terrain_tree, driver, 0, 200);
 
     auto boat_mesh = Maybe_Owned<Mesh>{driver.make_mesh_repr()};
     auto boat_data =
@@ -279,6 +336,12 @@ int main(int argc, char** argv)
 
     shader->set_diffuse(colors::white);
     shader->set_model(glm::mat4(1.0f));
+
+    // This only needs to be done once since the boat shader doesn't use any
+    // textures.
+    driver.bind_texture(*heightmap_tex, 0);
+    driver.bind_texture(*normalmap_tex, 1);
+    driver.bind_texture(*diffusemap_tex, 2);
 
     float prev_time = glfwGetTime();
     while(!glfwWindowShouldClose(window))
@@ -400,6 +463,12 @@ int main(int argc, char** argv)
       shader->set_model(boat_model);
       // Render the boat
       gfx::render_chunk(boat_chunk);
+
+      driver.use_shader(*terrain_shader);
+      use_camera(driver, cam);
+      terrain::render_level(terrain_tree, driver, 0);
+
+      driver.use_shader(*shader);
 
       glfwSwapBuffers(window);
 

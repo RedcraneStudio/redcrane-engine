@@ -1,17 +1,30 @@
 #version 330
 
-layout(location = 0) out vec4 diffuse_out;
+layout(location = 0) out vec4 dif;
 
+// Uv coordinates of fragment
 in vec2 uv;
 
-uniform vec4 dif;
-uniform sampler2D heightmap;
+// World position of fragment
+in vec3 world_pos;
+
+uniform float ambient_intensity;
+
+// Light position in world space
+uniform vec3 light_pos;
+
+uniform sampler2D normalmap;
+uniform sampler2D diffusemap;
+
+// Model matrix to transform normals into world space.
+uniform mat4 model;
 
 void main()
 {
-  diffuse_out = texture(heightmap, uv);
-  diffuse_out.r *= dif.r;
-  diffuse_out.g *= dif.g;
-  diffuse_out.b *= dif.b;
-  diffuse_out.a *= 1.0;
+  dif = texture(diffusemap, uv);
+
+  vec3 normal_world = vec3(model * texture(normalmap, uv));
+  float light_intensity = dot(normalize(normal_world),
+                              normalize(light_pos - world_pos));
+  dif.rgb *= max(light_intensity, ambient_intensity);
 }

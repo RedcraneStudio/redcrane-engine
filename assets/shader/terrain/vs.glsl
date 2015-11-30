@@ -4,6 +4,7 @@ layout(location = 1) in vec3 normal_in;
 layout(location = 2) in vec2 uv_in;
 
 out vec2 uv;
+out vec3 world_pos;
 
 // Multiplied by heightmap value to get value to add.
 uniform float max_height_adjust;
@@ -16,10 +17,11 @@ uniform mat4 model;
 
 void main()
 {
-  vec3 adjusted_vert = vertex +
-                       vec3(0.0, texture(heightmap, uv_in).r * max_height_adjust,
-                            0.0);
-  gl_Position = proj * view * model * vec4(adjusted_vert, 1.0);
+  float height = texture(heightmap, uv_in).r * max_height_adjust;
+  vec3 adj_vert = vertex + vec3(0.0, height, 0.0);
+
+  world_pos = vec3(model * vec4(adj_vert, 1.0));
+  gl_Position = proj * view * vec4(world_pos, 1.0);
 
   uv = uv_in;
 }
