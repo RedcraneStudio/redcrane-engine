@@ -105,7 +105,7 @@ namespace game { namespace gfx { namespace gl
       // src: input data starting from the bottom row
       // size: row_size
       std::memcpy(out_data + i * row_size,
-                  (uint8_t*) in_data + row_size*vol.height - i*row_size - 1,
+                  (uint8_t*) in_data + row_size*vol.height - (i+1)*row_size,
                   row_size);
     }
 
