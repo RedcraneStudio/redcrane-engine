@@ -217,7 +217,7 @@ int main(int argc, char** argv)
 
     driver.use_shader(*shader);
 
-    shader->set_vec3(light_pos_loc, glm::vec3(0.0f, 1.0f, 0.0f));
+    shader->set_vec3(light_pos_loc, glm::vec3(10.0f, 3.0f, 10.0f));
     shader->set_sampler(0);
 
     auto terrain_shader = driver.make_shader_repr();
@@ -235,11 +235,12 @@ int main(int argc, char** argv)
     auto terr_light_pos_loc = terrain_shader->get_location("light_pos");
     auto norm_map_loc = terrain_shader->get_location("normalmap");
     auto diff_map_loc = terrain_shader->get_location("diffusemap");
+    auto cam_pos_loc = terrain_shader->get_location("camera_pos");
 
     terrain_shader->set_model(glm::mat4(1.0f));
 
     terrain_shader->set_float(amb_int_loc, .1f);
-    terrain_shader->set_vec3(terr_light_pos_loc, glm::vec3(2.0f, 3.0f, 2.0f));
+    terrain_shader->set_vec3(terr_light_pos_loc, glm::vec3(10.0f, 3.0f, 10.0f));
     terrain_shader->set_float(ampl_loc, 1.0f);
 
     terrain_shader->set_integer(height_loc, 0);
@@ -466,6 +467,7 @@ int main(int argc, char** argv)
 
       driver.use_shader(*terrain_shader);
       use_camera(driver, cam);
+      terrain_shader->set_vec3(cam_pos_loc, cam.look_at.eye);
       terrain::render_level(terrain_tree, driver, 0);
 
       driver.use_shader(*shader);
