@@ -315,7 +315,7 @@ int main(int argc, char** argv)
 
     // The eye will be rotated around the boat.
     glm::quat eye_dir;
-    cam.look_at.eye = glm::vec3(1.0f, 0.0f, 0.0f);
+    cam.look_at.eye = glm::vec3(20.0f, 0.0f, 0.0f);
     cam.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
 
     auto glfw_user_data = Glfw_User_Data{driver, cam};
@@ -441,7 +441,7 @@ int main(int argc, char** argv)
 
       prev_x = x, prev_y = y;
 
-      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 10.0f, 1.0f)) + cam.look_at.look;
+      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 20.0f, 1.0f)) + cam.look_at.look;
       //cam.look_at.up = eye_dir * glm::vec3(0.0f, 1.0f, 0.0f);
 
       // Calculate a model
