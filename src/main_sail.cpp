@@ -33,6 +33,8 @@
 #include "collisionlib/triangle.h"
 #include "collisionlib/motion.h"
 
+#include "use/mesh.h"
+
 #include "water/grid.h"
 #include "terrain/chunks.h"
 
@@ -284,17 +286,7 @@ int main(int argc, char** argv)
                          water_ctx.normalmap.extents);
     terrain::initialize_vertices(terrain_tree, driver, 0, 200);
 
-    auto boat_mesh = Maybe_Owned<Mesh>{driver.make_mesh_repr()};
-    auto boat_data =
-      gfx::to_indexed_mesh_data(gfx::load_wavefront("obj/boat.obj"));
-    gfx::allocate_standard_mesh_buffers(boat_data.vertices.size(),
-                                        boat_data.elements.size(),
-                                        *boat_mesh,
-                                        Usage_Hint::Draw,
-                                        Upload_Hint::Static);
-    gfx::format_standard_mesh_buffers(*boat_mesh);
-    auto boat_chunk = gfx::write_data_to_mesh(boat_data, ref_mo(boat_mesh),
-                                              0, 0);
+    auto boat_mesh = gfx::load_mesh(driver, {"obj/boat.obj", false});
 
     auto boat_motion = collis::Motion{};
     boat_motion.mass = 340; // 340 N is about the weight of a small sailboat.
@@ -463,7 +455,7 @@ int main(int argc, char** argv)
       // Set the boat model matrix
       shader->set_model(boat_model);
       // Render the boat
-      gfx::render_chunk(boat_chunk);
+      gfx::render_chunk(boat_mesh.chunk);
 
       driver.use_shader(*terrain_shader);
       use_camera(driver, cam);
