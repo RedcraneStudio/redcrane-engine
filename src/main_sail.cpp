@@ -364,23 +364,23 @@ int main(int argc, char** argv)
 
       if(glfw_user_data.forward_pressed == true)
       {
-        collis::apply_force(boat_motion.displacement, boat_dir * -100.0f);
+        collis::apply_force(boat_motion.displacement, boat_dir * -10000.0f);
       }
       if(glfw_user_data.back_pressed == true)
       {
-        collis::apply_force(boat_motion.displacement, boat_dir * 100.0f);
+        collis::apply_force(boat_motion.displacement, boat_dir * 10000.0f);
       }
       if(glfw_user_data.left_pressed == true)
       {
         collis::apply_torque(boat_motion.angular,
                              glm::vec3(0.0f, 0.0f, 1.0f),// Apply it to the front
-                             glm::vec3(50.0f, 0.0f, 0.0f)); // of the boat
+                             glm::vec3(10000.0f, 0.0f, 0.0f)); // of the boat
       }
       if(glfw_user_data.right_pressed == true)
       {
         collis::apply_torque(boat_motion.angular,
                              glm::vec3(0.0f, 0.0f, 1.0f),
-                             glm::vec3(-50.0f, 0.0f, 0.0f));
+                             glm::vec3(-10000.0f, 0.0f, 0.0f));
       }
 
       // Take the velocity of the boat and use it to calculate a drag force.
@@ -397,6 +397,14 @@ int main(int argc, char** argv)
       {
         collis::apply_force(boat_motion.displacement, f_d);
         log_i("%", glm::length(f_d));
+      }
+
+      if(glm::length(boat_motion.angular.velocity) > .01)
+      {
+        v = glm::length(boat_motion.angular.velocity);
+        f_d = (.5f * p * v * v * .7f * A) *
+          glm::normalize(-boat_motion.angular.velocity);
+        boat_motion.angular.net_torque += f_d;
       }
 
       // Solve the motion
