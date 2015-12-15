@@ -291,8 +291,9 @@ int main(int argc, char** argv)
     auto boat_motion = collis::Motion{};
     boat_motion.mass = 340; // 340 N is about the weight of a small sailboat.
     boat_motion.angular.radius = 1;
+    // Start the boat off in the middle of our water
+    boat_motion.displacement.displacement = glm::vec3(25.0f, 0.0f, 25.0f);
     glm::mat4 boat_model{1.0f};
-
 
     // Make an fps camera.
     gfx::Camera cam;
@@ -307,7 +308,7 @@ int main(int argc, char** argv)
 
     // The eye will be rotated around the boat.
     glm::quat eye_dir;
-    cam.look_at.eye = glm::vec3(20.0f, 0.0f, 0.0f);
+    cam.look_at.eye = glm::vec3(6.0f, 0.0f, 0.0f);
     cam.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
 
     auto glfw_user_data = Glfw_User_Data{driver, cam};
@@ -441,7 +442,7 @@ int main(int argc, char** argv)
 
       prev_x = x, prev_y = y;
 
-      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 20.0f, 1.0f)) + cam.look_at.look;
+      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 6.0f, 1.0f)) + cam.look_at.look;
       //cam.look_at.up = eye_dir * glm::vec3(0.0f, 1.0f, 0.0f);
 
       // Calculate a model
