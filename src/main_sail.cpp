@@ -70,6 +70,7 @@ struct Glfw_User_Data
   bool left_pressed = false;
   bool back_pressed = false;
   bool right_pressed = false;
+  bool should_spawn_projectile = false;
 };
 void mouse_button_callback(GLFWwindow*, int, int, int)
 {
@@ -101,6 +102,9 @@ void key_callback(GLFWwindow* window, int key, int, int action, int)
         break;
       case GLFW_KEY_D:
         user_ptr->right_pressed = true;
+        break;
+      case GLFW_KEY_SPACE:
+        user_ptr->should_spawn_projectile = true;
         break;
     }
   }
@@ -286,6 +290,7 @@ int main(int argc, char** argv)
                          water_ctx.normalmap.extents);
     terrain::initialize_vertices(terrain_tree, driver, 0, 200);
 
+    auto projectile_mesh = gfx::load_mesh(driver, {"obj/projectile.obj", false});
     auto boat_mesh = gfx::load_mesh(driver, {"obj/boat.obj", false});
 
     auto boat_motion = collis::Motion{};
@@ -336,6 +341,8 @@ int main(int argc, char** argv)
     driver.bind_texture(*heightmap_tex, 0);
     driver.bind_texture(*normalmap_tex, 1);
     driver.bind_texture(*diffusemap_tex, 2);
+
+    std::vector<collis::Motion> projectiles;
 
     float prev_time = glfwGetTime();
     while(!glfwWindowShouldClose(window))
@@ -408,9 +415,29 @@ int main(int argc, char** argv)
         boat_motion.angular.net_torque += f_d;
       }
 
+      // Do any projectiles
+      if(glfw_user_data.should_spawn_projectile)
+      {
+        glfw_user_data.should_spawn_projectile = false;
+
+        projectiles.emplace_back();
+        projectiles.back().mass = 1000;
+        projectiles.back().displacement.velocity =
+          glm::rotate(glm::vec3(6.0f, 24.5f, 0.0f),
+                      glm::length(boat_motion.angular.displacement),
+                      glm::normalize(boat_motion.angular.displacement));
+        projectiles.back().displacement.displacement = boat_motion.displacement.displacement;
+        collis::apply_force(projectiles.back().displacement,
+                            projectiles.back().mass * glm::vec3(0.0f, -9.81, 0.0f));
+      }
+
       // Solve the motion
       auto new_time = glfwGetTime();
       solve_motion(new_time - prev_time, boat_motion);
+      for(auto& proj : projectiles)
+      {
+        solve_motion(new_time - prev_time, proj);
+      }
       prev_time = new_time;
 
       // Calculate the camera position and look direction based on the location
@@ -465,6 +492,13 @@ int main(int argc, char** argv)
       shader->set_model(boat_model);
       // Render the boat
       gfx::render_chunk(boat_mesh.chunk);
+
+      for(auto const& proj : projectiles)
+      {
+        glm::mat4 proj_model = glm::translate(glm::mat4(1.0f), proj.displacement.displacement);
+        shader->set_model(proj_model);
+        gfx::render_chunk(projectile_mesh.chunk);
+      }
 
       driver.use_shader(*terrain_shader);
       use_camera(driver, cam);
