@@ -404,7 +404,6 @@ int main(int argc, char** argv)
       if(!std::isnan(f_d.x) && !std::isnan(f_d.y) && !std::isnan(f_d.z))
       {
         collis::apply_force(boat_motion.displacement, f_d);
-        log_i("%", glm::length(f_d));
       }
 
       if(glm::length(boat_motion.angular.velocity) > .01)
