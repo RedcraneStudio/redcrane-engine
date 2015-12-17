@@ -223,7 +223,7 @@ int main(int argc, char** argv)
 
     driver.use_shader(*shader);
 
-    shader->set_vec3(light_pos_loc, glm::vec3(10.0f, 3.0f, 10.0f));
+    shader->set_vec3(light_pos_loc, glm::vec3(10.0f, 4.0f, 10.0f));
     shader->set_sampler(0);
 
     auto terrain_shader = driver.make_shader_repr();
@@ -246,8 +246,8 @@ int main(int argc, char** argv)
     terrain_shader->set_model(glm::mat4(1.0f));
 
     terrain_shader->set_float(amb_int_loc, .1f);
-    terrain_shader->set_vec3(terr_light_pos_loc, glm::vec3(10.0f, 3.0f, 10.0f));
-    terrain_shader->set_float(ampl_loc, 1.0f);
+    terrain_shader->set_vec3(terr_light_pos_loc, glm::vec3(10.0f, 4.0f, 10.0f));
+    terrain_shader->set_float(ampl_loc, .25f);
 
     terrain_shader->set_integer(height_loc, 0);
     terrain_shader->set_integer(norm_map_loc, 1);
@@ -262,17 +262,17 @@ int main(int argc, char** argv)
     auto terrain_tex = driver.make_texture_repr();
     load_png("tex/topdown_terrain.png", *terrain_tex);
 
-    water::Water water_ctx(std::random_device{}(), {50, 50});
+    water::Water water_ctx(std::random_device{}(), {1000, 1000});
 
     water::Noise_Gen_Params noise_params;
     noise_params.amplitude = 1.0f;
-    noise_params.frequency = 0.01f;
+    noise_params.frequency = 0.05f;
     noise_params.persistence = .5f;
     noise_params.lacunarity = 2.0f;
-    noise_params.octaves = 5;
+    noise_params.octaves = 3;
 
-    water::gen_heightmap(water_ctx, .5f, noise_params);
-    water::gen_normalmap(water_ctx);
+    water::gen_heightmap(water_ctx, .6f, noise_params);
+    water::gen_normalmap(water_ctx, .35f);
     water::write_normalmap_png("normalmap.png", water_ctx);
 
     auto normalmap_tex = driver.make_texture_repr();
@@ -286,9 +286,9 @@ int main(int argc, char** argv)
 
     terrain::terrain_tree_t terrain_tree;
     terrain_tree.set_depth(1);
-    terrain::set_volumes(terrain_tree, water_ctx.extents,
+    terrain::set_volumes(terrain_tree, water_ctx.extents / 10,
                          water_ctx.normalmap.extents);
-    terrain::initialize_vertices(terrain_tree, driver, 0, 200);
+    terrain::initialize_vertices(terrain_tree, driver, 0, 500);
 
     auto projectile_mesh = gfx::load_mesh(driver, {"obj/projectile.obj", false});
     auto boat_mesh = gfx::load_mesh(driver, {"obj/boat.obj", false});
@@ -298,6 +298,7 @@ int main(int argc, char** argv)
     boat_motion.angular.radius = 1;
     // Start the boat off in the middle of our water
     boat_motion.displacement.displacement = glm::vec3(25.0f, 0.0f, 25.0f);
+    boat_motion.displacement.displacement.y += .5f;
     glm::mat4 boat_model{1.0f};
 
     // Make an fps camera.
@@ -313,7 +314,7 @@ int main(int argc, char** argv)
 
     // The eye will be rotated around the boat.
     glm::quat eye_dir;
-    cam.look_at.eye = glm::vec3(6.0f, 0.0f, 0.0f);
+    cam.look_at.eye = glm::vec3(12.0f, 0.0f, 0.0f);
     cam.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
 
     auto glfw_user_data = Glfw_User_Data{driver, cam};
@@ -468,7 +469,7 @@ int main(int argc, char** argv)
 
       prev_x = x, prev_y = y;
 
-      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 6.0f, 1.0f)) + cam.look_at.look;
+      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 12.0f, 1.0f)) + cam.look_at.look;
       //cam.look_at.up = eye_dir * glm::vec3(0.0f, 1.0f, 0.0f);
 
       // Calculate a model
