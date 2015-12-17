@@ -66,7 +66,7 @@ namespace game { namespace water
       water.heightmap.at({x, y}) = value_clamped;
     }
   }
-  void gen_normalmap(Water& water) noexcept;
+  void gen_normalmap(Water& water, float scale = 1.0f) noexcept;
 
   void blit_normalmap(Texture& tex, Water& water) noexcept;
   void blit_heightmap(Texture& tex, Water& water) noexcept;

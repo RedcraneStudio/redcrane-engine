@@ -57,7 +57,7 @@ namespace game { namespace water
     return scale * -(s_6 - s_0 + 2 * (s_7 - s_1) + s_8 - s_2);
   }
 
-  void gen_normalmap(Water& water) noexcept
+  void gen_normalmap(Water& water, float scale) noexcept
   {
     // Assert the extents of the normalmap are expected? (in comparison to the
     // heightmap)
@@ -73,8 +73,8 @@ namespace game { namespace water
       auto pt = Vec<int>{x + 1, y + 1};
 
       auto& dir = water.normalmap.at({x, y});
-      dir.x = apply_sobel_kernel_x(pt, water.heightmap);
-      dir.z = apply_sobel_kernel_y(pt, water.heightmap);
+      dir.x = apply_sobel_kernel_x(pt, water.heightmap, scale);
+      dir.z = apply_sobel_kernel_y(pt, water.heightmap, scale);
       dir.y = 1.0f;
       dir = glm::normalize(dir);
     }
