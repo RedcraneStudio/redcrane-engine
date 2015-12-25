@@ -35,6 +35,9 @@ add_subdirectory(collisionlib)
 
 add_subdirectory(use)
 
+# find_package(ENet REQUIRED)
+add_subdirectory(sail)
+
 find_package(Threads REQUIRED)
 
 add_executable(strategy main.cpp)
@@ -47,9 +50,9 @@ add_executable(fps_exe main_fps.cpp)
 target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
                               collisionlib)
 
-add_executable(sail main_sail.cpp)
-target_link_libraries(sail gfxlib gfxsupportlib commonlib fpslib collisionlib
-                           waterlib terrainlib uselib)
+add_executable(sl main_sail.cpp)
+target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
+                         waterlib terrainlib uselib saillib)
 
 # add_executable(play_snd play_snd.cpp)
 # target_link_libraries(play_snd sndlib commonlib)

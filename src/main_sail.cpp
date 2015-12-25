@@ -33,6 +33,8 @@
 #include "collisionlib/triangle.h"
 #include "collisionlib/motion.h"
 
+#include "sail/player_data.h"
+
 #include "use/mesh.h"
 
 #include "water/grid.h"
