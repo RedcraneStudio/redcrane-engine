@@ -294,8 +294,8 @@ int main(int argc, char** argv)
     auto boat_mesh = gfx::load_mesh(driver, {"obj/boat.obj", false});
 
     auto boat_motion = collis::Motion{};
-    boat_motion.mass = 340; // 340 N is about the weight of a small sailboat.
-    boat_motion.angular.radius = 1;
+    boat_motion.mass = 64; // kilograms
+    boat_motion.angular.radius = 0.5f; // Radius of about half a meter
     // Start the boat off in the middle of our water
     boat_motion.displacement.displacement = glm::vec3(25.0f, 0.0f, 25.0f);
     boat_motion.displacement.displacement.y += .5f;
@@ -351,45 +351,34 @@ int main(int argc, char** argv)
       ++fps;
 
       // Clear the forces on the boat
-      collis::reset_force(boat_motion.displacement);
-      collis::reset_torque(boat_motion.angular);
+      collis::reset_force(boat_motion);
 
       // Handle events (likely will add a force or two.
       glfwPollEvents();
 
-      // This only works if the torque is only vertical, which in our case it
-      // is. That is, we are assuming that the axis of rotation is up or down.
-      glm::vec3 boat_dir = glm::vec3(0.0f, 0.0f, 1.0f);
-      // TODO: Find a better way to handle nan
-      if(boat_motion.angular.displacement.y != 0)
-      {
-        boat_dir = glm::rotate(boat_dir, glm::length(boat_motion.angular.displacement),
-                               glm::normalize(boat_motion.angular.displacement));
-      }
-#if 0
-      glm::vec3 boat_dir = glm::vec3(-glm::sin(boat_angle), 0.0f,
-                                     glm::cos(boat_angle));
-#endif
+      // Use last frame's model matrix to calculate the boat's direction.
+      glm::vec3 boat_dir =
+        glm::vec3(boat_model * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
       if(glfw_user_data.forward_pressed == true)
       {
-        collis::apply_force(boat_motion.displacement, boat_dir * -10000.0f);
+        collis::apply_force(boat_motion, boat_dir * -90.0f);
       }
       if(glfw_user_data.back_pressed == true)
       {
-        collis::apply_force(boat_motion.displacement, boat_dir * 10000.0f);
+        collis::apply_force(boat_motion, boat_dir * 90.0f);
       }
       if(glfw_user_data.left_pressed == true)
       {
-        collis::apply_torque(boat_motion.angular,
-                             glm::vec3(0.0f, 0.0f, 1.0f),// Apply it to the front
-                             glm::vec3(10000.0f, 0.0f, 0.0f)); // of the boat
+        boat_motion.angular.net_torque +=
+          glm::cross(glm::vec3(0.0f, 0.0f, 1.0f),
+                     glm::vec3(18.0f * 3.14f, 0.0f, 0.0f));
       }
       if(glfw_user_data.right_pressed == true)
       {
-        collis::apply_torque(boat_motion.angular,
-                             glm::vec3(0.0f, 0.0f, 1.0f),
-                             glm::vec3(-10000.0f, 0.0f, 0.0f));
+        boat_motion.angular.net_torque +=
+          glm::cross(glm::vec3(0.0f, 0.0f, 1.0f),
+                     glm::vec3(-18.0f * 3.14f, 0.0f, 0.0f));
       }
 
       // Take the velocity of the boat and use it to calculate a drag force.
@@ -397,21 +386,24 @@ int main(int argc, char** argv)
       auto p = 971.8f; // Density of water at 80 deg C I think. kg / m^3
       auto v = glm::length(boat_motion.displacement.velocity); // m/s
       auto C_d = 0.04f; // I think a boat should be pretty low. No unit?
-      auto A = 5.0f; // This is almost a random guess.
+      auto A = 0.12f; // This less of a random guess
       glm::vec3 f_d = (.5f * p * v * v * C_d * A) *
         glm::normalize(-boat_motion.displacement.velocity);
 
       // Apply the drag force.
-      if(!std::isnan(f_d.x) && !std::isnan(f_d.y) && !std::isnan(f_d.z))
+      if(!std::isnan(glm::length(f_d)))
       {
-        collis::apply_force(boat_motion.displacement, f_d);
+        collis::apply_force(boat_motion, f_d);
       }
 
-      if(glm::length(boat_motion.angular.velocity) > .01)
+      // Add rotational drag
+      v = glm::length(boat_motion.angular.velocity);
+      // We are moving sideways so there should be more area.
+      A = 0.36f;
+      f_d = (.5f * p * v * v * .7f * A) *
+        glm::normalize(-boat_motion.angular.velocity);
+      if(!std::isnan(glm::length(f_d)))
       {
-        v = glm::length(boat_motion.angular.velocity);
-        f_d = (.5f * p * v * v * .7f * A) *
-          glm::normalize(-boat_motion.angular.velocity);
         boat_motion.angular.net_torque += f_d;
       }
 
@@ -421,25 +413,45 @@ int main(int argc, char** argv)
         glfw_user_data.should_spawn_projectile = false;
 
         projectiles.emplace_back();
-        projectiles.back().mass = 1000;
+        projectiles.back().mass = 270;
+        // We should instead retrieve this from the model.
+        projectiles.back().angular.radius = 0.14f;
+
+        projectiles.back().displacement = boat_motion.displacement;
+        projectiles.back().angular = boat_motion.angular;
+
+        collis::reset_force(projectiles.back());
+
+        // Give the cannonball an initial velocity.
+        // We should determine this using energy calculations later.
         projectiles.back().displacement.velocity =
           glm::rotate(glm::vec3(6.0f, 24.5f, 0.0f),
                       glm::length(boat_motion.angular.displacement),
-                      glm::normalize(boat_motion.angular.displacement));
-        projectiles.back().displacement.displacement = boat_motion.displacement.displacement;
-        collis::apply_force(projectiles.back().displacement,
-                            projectiles.back().mass * glm::vec3(0.0f, -9.81, 0.0f));
+                      glm::normalize(boat_motion.angular.displacement)) +
+          boat_motion.displacement.velocity;
+
+        // Apply the force of gravity
+        collis::apply_force(projectiles.back(), projectiles.back().mass *
+                            glm::vec3(0.0f, -9.81, 0.0f));
+
+        // Apply the opposite momentum to the boat
       }
 
       // Solve the motion
       auto new_time = glfwGetTime();
+
+      // For the boat
       solve_motion(new_time - prev_time, boat_motion);
+
+      // For the projectiles
       for(auto& proj : projectiles)
       {
         solve_motion(new_time - prev_time, proj);
       }
       prev_time = new_time;
 
+      // First mark the distance the camera was from the boat.
+      auto cam_dist = glm::length(cam.look_at.eye - cam.look_at.look);
       // Calculate the camera position and look direction based on the location
       // of the boat
       cam.look_at.look = boat_motion.displacement.displacement;
@@ -452,35 +464,29 @@ int main(int argc, char** argv)
 
       eye_dir = glm::normalize(eye_dir);
 
-      auto cross_eye = glm::cross(glm::normalize(cam.look_at.look -
-                                  cam.look_at.eye), cam.look_at.up);
-      //eye_dir = glm::quat();
-      //eye_dir = glm::rotate(eye_dir, dif_y, glm::normalize(cam.look_at.look - cam.look_at.eye));
+
+      auto cross_eye =
+        glm::cross(glm::normalize(cam.look_at.look - cam.look_at.eye),
+                   cam.look_at.up);
       eye_dir = eye_dir * glm::rotate(glm::quat(), dif_x, glm::inverse(eye_dir) * cam.look_at.up);
       eye_dir = eye_dir * glm::rotate(glm::quat(), dif_y, glm::inverse(eye_dir) * cross_eye);
-      //eye_dir = eye_dir * glm::rotate(glm::quat(), dif_x, glm::vec3(glm::inverse(glm::mat4_cast(eye_dir)) * glm::vec4(cam.look_at.up, 1.0f)));
-      //eye_dir = eye_dir * glm::rotate(glm::quat(), dif_y, glm::vec3(glm::inverse(glm::mat4_cast(eye_dir)) * glm::vec4(cross_eye, 1.0f)));
-      //glm::vec3(1.0f, 0.0f, 0.0f));
-
-      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(3.0f, 0.0f, 0.0f, 1.0f)));
-      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 3.0f, 0.0f, 1.0f)));
-      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(3.0f, 3.0f, 0.0f, 1.0f)));
-      //imm_rend.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), cross_eye);
-
       prev_x = x, prev_y = y;
 
-      cam.look_at.eye = glm::vec3(glm::mat4_cast(eye_dir) * glm::vec4(0.0f, 0.0f, 12.0f, 1.0f)) + cam.look_at.look;
-      //cam.look_at.up = eye_dir * glm::vec3(0.0f, 1.0f, 0.0f);
+      // Rotate the forward vector by the eye direction and ad it's location.
+      cam.look_at.eye =
+        glm::vec3(glm::mat4_cast(eye_dir) *
+                  glm::vec4(0.0f, 0.0f, cam_dist, 1.0f)) + cam.look_at.look;
 
       // Calculate a model
       boat_model = glm::mat4(1.0f);
       boat_model = glm::translate(boat_model,
         boat_motion.displacement.displacement);
-      if(glm::length(boat_motion.angular.displacement) > .001)
+      if(!std::isnan(glm::length(boat_motion.angular.displacement)) &&
+         glm::length(boat_motion.angular.displacement) != 0.0f)
       {
         boat_model = glm::rotate(boat_model,
-          glm::length(boat_motion.angular.displacement),
-          glm::normalize(boat_motion.angular.displacement));
+            glm::length(boat_motion.angular.displacement),
+            glm::normalize(boat_motion.angular.displacement));
       }
 
       use_camera(driver, cam);

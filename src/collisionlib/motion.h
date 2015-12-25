@@ -14,8 +14,6 @@ namespace game { namespace collis
     glm::vec3 displacement{0.0f, 0.0f, 0.0f};
   };
 
-  void reset_force(Displacement_Desc&) noexcept;
-  void apply_force(Displacement_Desc&, glm::vec3 force) noexcept;
   void solve_displacement_motion(float dt, float mass,
                                  Displacement_Desc&) noexcept;
 
@@ -29,11 +27,7 @@ namespace game { namespace collis
     glm::vec3 displacement{0.0f, 0.0f, 0.0f};
   };
 
-  void reset_torque(Angular_Desc&) noexcept;
-  void apply_torque(Angular_Desc&, glm::vec3 const& r,
-                         glm::vec3 const& force) noexcept;
-  void solve_angular_motion(float dt, float mass,
-                            Angular_Desc&) noexcept;
+  void solve_angular_motion(float dt, float mass, Angular_Desc&) noexcept;
 
   struct Motion
   {
@@ -43,5 +37,33 @@ namespace game { namespace collis
     Angular_Desc angular;
   };
 
-  void solve_motion(float dt, Motion&) noexcept;
+  inline void solve_motion(float dt, Motion& motion) noexcept
+  {
+    solve_displacement_motion(dt, motion.mass, motion.displacement);
+    solve_angular_motion(dt, motion.mass, motion.angular);
+  }
+
+  // Applies a force without a torque.
+  inline void apply_force(Motion& motion, glm::vec3 const& force) noexcept
+  {
+    motion.displacement.net_force += force;
+  }
+
+  // Applies a force to a point (model space).
+  inline void apply_force(Motion& motion, glm::vec3 const& force,
+                   glm::vec3 const& r) noexcept
+  {
+    apply_force(motion, force);
+
+    // Cross product yields the correct axis direction and magnitude (angle).
+    // Freakin' Cool!
+    motion.angular.net_torque += glm::cross(r, force);
+  }
+
+  // Resets net force to zero
+  inline void reset_force(Motion& m) noexcept
+  {
+    m.displacement.net_force = glm::vec3(0.0f);
+    m.angular.net_torque = glm::vec3(0.0f);
+  }
 } }
