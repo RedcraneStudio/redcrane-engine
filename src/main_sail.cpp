@@ -262,14 +262,14 @@ int main(int argc, char** argv)
     auto terrain_tex = driver.make_texture_repr();
     load_png("tex/topdown_terrain.png", *terrain_tex);
 
-    water::Water water_ctx(std::random_device{}(), {1000, 1000});
+    water::Water water_ctx(std::random_device{}(), {250, 250});
 
     water::Noise_Gen_Params noise_params;
     noise_params.amplitude = 1.0f;
     noise_params.frequency = 0.05f;
     noise_params.persistence = .5f;
     noise_params.lacunarity = 2.0f;
-    noise_params.octaves = 3;
+    noise_params.octaves = 1;
 
     water::gen_heightmap(water_ctx, .6f, noise_params);
     water::gen_normalmap(water_ctx, .35f);
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 
     terrain::terrain_tree_t terrain_tree;
     terrain_tree.set_depth(1);
-    terrain::set_volumes(terrain_tree, water_ctx.extents / 10,
+    terrain::set_volumes(terrain_tree, water_ctx.extents,
                          water_ctx.normalmap.extents);
     terrain::initialize_vertices(terrain_tree, driver, 0, 500);
 
