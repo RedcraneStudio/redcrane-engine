@@ -34,6 +34,7 @@
 #include "collisionlib/motion.h"
 
 #include "sail/player_data.h"
+#include "sail/boat.h"
 
 #include "use/mesh.h"
 
@@ -56,6 +57,8 @@
 
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
+
+#include <boost/program_options.hpp>
 
 #define PI 3.141592653589793238463
 
@@ -153,6 +156,27 @@ int main(int argc, char** argv)
 
   set_log_level(Log_Severity::Debug);
 
+  namespace po = boost::program_options;
+  po::options_description desc("Allowed Options");
+  desc.add_options()
+    ("help", "display help")
+    ("log-level", po::value<unsigned int>()->implicit_value(0),
+     "set minimum log level (if logging is enabled)")
+    ("hull", po::value<unsigned int>()->default_value(0), "set boat hull")
+    ("sail", po::value<unsigned int>()->default_value(0), "set boat sail")
+    ("rudder", po::value<unsigned int>()->default_value(0), "set boat rudder")
+    ("gun", po::value<unsigned int>()->default_value(1), "set boat gun")
+  ;
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if(vm.count("help"))
+  {
+    std::cerr << desc << std::endl;
+    return EXIT_SUCCESS;
+  }
+
   uv_chdir("assets/");
 
   // Initialize logger.
@@ -209,6 +233,24 @@ int main(int argc, char** argv)
     int window_width, window_height;
     glfwGetWindowSize(window, &window_width, &window_height);
     gfx::gl::Driver driver{Vec<int>{window_width, window_height}};
+
+    // Make a cache
+    gfx::Mesh_Cache mesh_cache(driver);
+
+    // Figure out what hulls, sails, rudders, and guns we have available.
+    Boat_Descs boat_descs = build_default_descs(mesh_cache);
+    log_boat_descs(boat_descs);
+
+    Boat_Config boat_config;
+
+    boat_config.hull = &boat_descs.hull_descs[vm["hull"].as<unsigned int>()];
+    boat_config.sail = &boat_descs.sail_descs[vm["sail"].as<unsigned int>()];
+    boat_config.rudder = &boat_descs.rudder_descs[vm["rudder"].as<unsigned int>()];
+    boat_config.gun = &boat_descs.gun_descs[vm["gun"].as<unsigned int>()];
+
+    log_i("Chosen boat configuration: % (Hull), % (Sail), % (Rudder), "
+          "% (Gun)", boat_config.hull->name, boat_config.sail->name,
+          boat_config.rudder->name, boat_config.gun->name);
 
     auto shader = driver.make_shader_repr();
     shader->load_vertex_part("shader/basic/vs.glsl");

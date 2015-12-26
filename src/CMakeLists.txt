@@ -10,7 +10,7 @@ find_package(GLM REQUIRED)
 add_subdirectory(common)
 add_subdirectory(io)
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
@@ -52,7 +52,8 @@ target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
 
 add_executable(sl main_sail.cpp)
 target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
-                         waterlib terrainlib uselib saillib)
+                         waterlib terrainlib uselib saillib
+                         ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 # add_executable(play_snd play_snd.cpp)
 # target_link_libraries(play_snd sndlib commonlib)
