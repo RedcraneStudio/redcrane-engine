@@ -13,8 +13,8 @@ namespace game
   {
     // All points in boat model space. They basically define the translation
     // from attachment space to boat space.
-    glm::vec3 rudder;
     glm::vec3 sail;
+    glm::vec3 rudder;
     glm::vec3 gun;
   };
   struct Hull_Desc

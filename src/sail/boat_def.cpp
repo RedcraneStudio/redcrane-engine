@@ -12,9 +12,9 @@ namespace game
 
     ret.hull_descs.push_back(
       build_hull_desc(mc, "Sailboat Hull", "obj/hulls/sailhull.obj",
-                      {{0.0f, +0.30366f, +0.07065f},
-                       {0.0f, -0.83811f, +0.26013f},
-                       {0.0f, +0.94225f, +0.23586f}})
+                      {{0.0f, +0.07065f, -0.30366f}, // Sail
+                       {0.0f, +0.26013f, +0.83811f}, // Rudder
+                       {0.0f, +0.23586f, -0.94225f}}) // Gun
     );
 
     ret.sail_descs.push_back(
