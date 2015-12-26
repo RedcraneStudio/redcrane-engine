@@ -68,6 +68,8 @@ namespace game
     glm::mat4 model;
   };
 
+  Boat_Render_Config build_boat_render_config(Boat_Config&) noexcept;
+
   struct Boat_Descs
   {
     std::vector<Hull_Desc> hull_descs;
