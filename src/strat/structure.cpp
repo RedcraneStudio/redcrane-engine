@@ -15,12 +15,13 @@
 #include "../gfx/support/texture_load.h"
 namespace game { namespace strat
 {
-  Structure::Structure(Mesh_Chunk&& m, AABB aabb, Maybe_Owned<Texture> tex,
-                       std::string name, std::string desc) noexcept
+  Structure::Structure(gfx::Mesh_Chunk&& m, AABB aabb,
+                       Maybe_Owned<Texture> tex, std::string name,
+                       std::string desc) noexcept
     : mesh_chunk_(std::move(m)), aabb_(aabb), texture_(std::move(tex)),
       name_(name), desc_(desc) { }
 
-  Mesh_Chunk const& Structure::mesh_chunk() const noexcept
+  gfx::Mesh_Chunk const& Structure::mesh_chunk() const noexcept
   {
     return mesh_chunk_;
   }
@@ -99,10 +100,10 @@ namespace game { namespace strat
 
       // Write the structure's data to the mesh and get the mesh chunk.
       // We still want to own our maybe owned to a mesh.
-      Mesh_Chunk chunk = gfx::write_data_to_mesh(structure_data[i],
-                                                 ref_mo(mesh),
-                                                 accum_vertex_off,
-                                                 accum_element_off);
+      gfx::Mesh_Chunk chunk = gfx::write_data_to_mesh(structure_data[i],
+                                                      ref_mo(mesh),
+                                                      accum_vertex_off,
+                                                      accum_element_off);
 
       // Record how far off we went into the mesh.
       accum_vertex_off += structure_data[i].vertices.size();

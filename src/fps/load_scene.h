@@ -12,7 +12,7 @@ namespace game { namespace fps
 {
   struct Object
   {
-    Mesh_Chunk mesh;
+    gfx::Mesh_Chunk mesh;
     glm::mat4 model;
   };
 

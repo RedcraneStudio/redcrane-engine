@@ -36,7 +36,7 @@ namespace game { namespace terrain
     Volume<int> uv_vol;
 
     // The root chunk should own it's mesh, the rest should point to it.
-    Mesh_Chunk mesh_chunk;
+    gfx::Mesh_Chunk mesh_chunk;
   };
 
   using terrain_tree_t = Quadtree<Chunk>;

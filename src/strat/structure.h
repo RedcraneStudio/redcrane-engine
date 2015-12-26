@@ -19,7 +19,7 @@ namespace game
     {
       // We request to own the mesh chunk so we can give out weak-ptr like
       // instances ourselves.
-      Structure(Mesh_Chunk&& m, AABB aabb, Maybe_Owned<Texture> tex,
+      Structure(gfx::Mesh_Chunk&& m, AABB aabb, Maybe_Owned<Texture> tex,
                 std::string name, std::string desc) noexcept;
 
       Structure(Structure&&) = default;
@@ -27,7 +27,7 @@ namespace game
 
       virtual ~Structure() noexcept {}
 
-      Mesh_Chunk const& mesh_chunk() const noexcept;
+      gfx::Mesh_Chunk const& mesh_chunk() const noexcept;
       AABB aabb() const noexcept { return aabb_; }
 
       Maybe_Owned<Texture> const& texture() const noexcept;
@@ -35,7 +35,7 @@ namespace game
       std::string name() const noexcept { return name_; }
       std::string desc() const noexcept { return desc_; }
     private:
-      Mesh_Chunk mesh_chunk_;
+      gfx::Mesh_Chunk mesh_chunk_;
       AABB aabb_;
 
       Maybe_Owned<Texture> texture_;

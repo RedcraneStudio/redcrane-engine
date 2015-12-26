@@ -20,7 +20,7 @@ namespace game
   struct Hull_Desc
   {
     std::string name;
-    Mesh_Chunk mesh;
+    gfx::Mesh_Chunk mesh;
     Hull_Attachment_Def attachments;
   };
 
@@ -33,7 +33,7 @@ namespace game
   struct Object_Desc
   {
     std::string name;
-    Mesh_Chunk mesh;
+    gfx::Mesh_Chunk mesh;
   };
 
   // Make these all not the same type
@@ -60,10 +60,10 @@ namespace game
   {
     Hull_Attachment_Def attachments;
 
-    Mesh_Chunk hull;
-    Mesh_Chunk rudder;
-    Mesh_Chunk sail;
-    Mesh_Chunk gun;
+    gfx::Mesh_Chunk hull;
+    gfx::Mesh_Chunk rudder;
+    gfx::Mesh_Chunk sail;
+    gfx::Mesh_Chunk gun;
 
     glm::mat4 model;
   };

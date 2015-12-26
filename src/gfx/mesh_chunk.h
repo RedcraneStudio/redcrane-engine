@@ -6,7 +6,7 @@
 #include "mesh.h"
 #include "../common/maybe_owned.hpp"
 #include <boost/optional.hpp>
-namespace game
+namespace game { namespace gfx
 {
   struct Mesh_Chunk
   {
@@ -29,8 +29,5 @@ namespace game
    */
   Mesh_Chunk copy_mesh_chunk_move_mesh(Mesh_Chunk&) noexcept;
 
-  namespace gfx
-  {
-    void render_chunk(Mesh_Chunk const&) noexcept;
-  }
-}
+  void render_chunk(Mesh_Chunk const&) noexcept;
+} }

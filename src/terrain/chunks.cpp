@@ -307,7 +307,7 @@ namespace game { namespace terrain
                                                 level)-1;
     auto& last_node = tree.node_at_depth(level, last_node_offset);
 
-    Mesh_Chunk mesh_render;
+    gfx::Mesh_Chunk mesh_render;
     mesh_render.mesh = ref_mo(first_node.val.mesh_chunk.mesh);
     mesh_render.start = first_node.val.mesh_chunk.start;
     mesh_render.count = last_node.val.mesh_chunk.start +

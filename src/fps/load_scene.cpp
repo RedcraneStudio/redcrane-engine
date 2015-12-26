@@ -109,10 +109,10 @@ namespace game { namespace fps
 
       // Write the object's data to the mesh and get the mesh chunk.
       // We still want to own our maybe owned to a mesh.
-      Mesh_Chunk chunk = gfx::write_data_to_mesh(std::get<0>(metas[i]),
-                                                 std::move(mesh_for_chunk),
-                                                 accum_vertex_off,
-                                                 accum_element_off);
+      gfx::Mesh_Chunk chunk = gfx::write_data_to_mesh(std::get<0>(metas[i]),
+                                                      std::move(mesh_for_chunk),
+                                                      accum_vertex_off,
+                                                      accum_element_off);
 
       // Record how far off we went into the mesh.
       accum_vertex_off += std::get<0>(metas[i]).vertices.size();

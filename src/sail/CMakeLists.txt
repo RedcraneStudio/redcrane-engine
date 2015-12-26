@@ -4,7 +4,7 @@
 
 add_library(saillib player_data.cpp boat.cpp boat_def.cpp)
 
-target_link_libraries(saillib uselib)
+target_link_libraries(saillib PUBLIC uselib)
 
 # target_include_directories(saillib PUBLIC ${ENet_INCLUDE_DIR})
 # target_link_libraries(saillib PUBLIC ${ENet_LIBRARY})
