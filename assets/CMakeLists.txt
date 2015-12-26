@@ -6,6 +6,13 @@ add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     obj/govnm_building.obj obj/fps_terrain.obj
                     obj/vertical_log.obj obj/map.obj obj/boat.obj
                     obj/projectile.obj
+
+                    obj/guns/cannon.obj
+                    obj/guns/gattlinggun.obj
+                    obj/hulls/sailhull.obj
+                    obj/rudders/rudder.obj
+                    obj/sails/sail.obj
+
                     scene/default.json structure/structures.json
                     shader/basic/fs.glsl shader/basic/vs.glsl
                     shader/hud/fs.glsl shader/hud/vs.glsl
