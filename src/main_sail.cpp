@@ -252,6 +252,8 @@ int main(int argc, char** argv)
           "% (Gun)", boat_config.hull->name, boat_config.sail->name,
           boat_config.rudder->name, boat_config.gun->name);
 
+    Boat_Render_Config boat_render = build_boat_render_config(boat_config);
+
     auto shader = driver.make_shader_repr();
     shader->load_vertex_part("shader/basic/vs.glsl");
     shader->load_fragment_part("shader/basic/fs.glsl");
@@ -402,7 +404,7 @@ int main(int argc, char** argv)
 
       // Use last frame's model matrix to calculate the boat's direction.
       glm::vec3 boat_dir =
-        glm::vec3(boat_model * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
+        glm::vec3(boat_render.model * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
       if(glfw_user_data.forward_pressed == true)
       {
@@ -522,13 +524,13 @@ int main(int argc, char** argv)
                   glm::vec4(0.0f, 0.0f, cam_dist, 1.0f)) + cam.look_at.look;
 
       // Calculate a model
-      boat_model = glm::mat4(1.0f);
-      boat_model = glm::translate(boat_model,
+      boat_render.model = glm::mat4(1.0f);
+      boat_render.model = glm::translate(boat_render.model,
         boat_motion.displacement.displacement);
       if(!std::isnan(glm::length(boat_motion.angular.displacement)) &&
          glm::length(boat_motion.angular.displacement) != 0.0f)
       {
-        boat_model = glm::rotate(boat_model,
+        boat_render.model = glm::rotate(boat_render.model,
             glm::length(boat_motion.angular.displacement),
             glm::normalize(boat_motion.angular.displacement));
       }
@@ -538,10 +540,16 @@ int main(int argc, char** argv)
       // Clear the screen
       driver.clear();
 
-      // Set the boat model matrix
-      shader->set_model(boat_model);
-      // Render the boat
-      gfx::render_chunk(boat_mesh.chunk);
+      // Render the hull
+      shader->set_model(boat_render.model);
+      gfx::render_chunk(boat_render.hull);
+
+      shader->set_model(glm::translate(boat_render.model, boat_render.attachments.sail));
+      gfx::render_chunk(boat_render.sail);
+      shader->set_model(glm::translate(boat_render.model, boat_render.attachments.rudder));
+      gfx::render_chunk(boat_render.rudder);
+      shader->set_model(glm::translate(boat_render.model, boat_render.attachments.gun));
+      gfx::render_chunk(boat_render.gun);
 
       for(auto const& proj : projectiles)
       {
