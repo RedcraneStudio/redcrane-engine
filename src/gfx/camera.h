@@ -77,6 +77,11 @@ namespace game
     glm::mat4 camera_view_matrix(Camera const& cam) noexcept;
     glm::mat4 camera_proj_matrix(Camera const& cam) noexcept;
 
+    inline glm::vec3 camera_forward(Camera const& cam) noexcept
+    {
+      return cam.look_at.look - cam.look_at.eye;
+    }
+
     struct IDriver;
     Camera make_isometric_camera(IDriver const& driver) noexcept;
     Camera make_fps_camera(IDriver const& driver) noexcept;
