@@ -149,7 +149,6 @@ void resize_callback(GLFWwindow* window, int width, int height)
   // Change the camera aspect ratio
   user_ptr.camera.perspective.aspect = width / (float) height;
 }
-
 int main(int argc, char** argv)
 {
   using namespace game;
@@ -269,72 +268,12 @@ int main(int argc, char** argv)
 
     driver.use_shader(*shader);
 
-    shader->set_vec3(light_pos_loc, glm::vec3(10.0f, 4.0f, 10.0f));
+    glm::vec3 light_pos(10.0f, 4.0f, 10.0f);
+    shader->set_vec3(light_pos_loc, light_pos);
     shader->set_sampler(0);
 
-    auto terrain_shader = driver.make_shader_repr();
-    terrain_shader->load_vertex_part("shader/terrain/vs.glsl");
-    terrain_shader->load_fragment_part("shader/terrain/fs.glsl");
-
-    terrain_shader->set_model_name("model");
-    terrain_shader->set_view_name("view");
-    terrain_shader->set_projection_name("proj");
-
-    auto height_loc = terrain_shader->get_location("heightmap");
-    auto ampl_loc = terrain_shader->get_location("max_height_adjust");
-
-    auto amb_int_loc = terrain_shader->get_location("ambient_intensity");
-    auto terr_light_pos_loc = terrain_shader->get_location("light_pos");
-    auto norm_map_loc = terrain_shader->get_location("normalmap");
-    auto diff_map_loc = terrain_shader->get_location("diffusemap");
-    auto cam_pos_loc = terrain_shader->get_location("camera_pos");
-
-    terrain_shader->set_model(glm::mat4(1.0f));
-
-    terrain_shader->set_float(amb_int_loc, .1f);
-    terrain_shader->set_vec3(terr_light_pos_loc, glm::vec3(10.0f, 4.0f, 10.0f));
-    terrain_shader->set_float(ampl_loc, .25f);
-
-    terrain_shader->set_integer(height_loc, 0);
-    terrain_shader->set_integer(norm_map_loc, 1);
-    terrain_shader->set_integer(diff_map_loc, 2);
-
-    // Get all our textures
-    auto brick = driver.make_texture_repr();
-    load_png("tex/cracked_soil.png", *brick);
-    auto grass = driver.make_texture_repr();
-    load_png("tex/grass.png", *grass);
-
-    auto terrain_tex = driver.make_texture_repr();
-    load_png("tex/topdown_terrain.png", *terrain_tex);
-
-    water::Water water_ctx(std::random_device{}(), {250, 250});
-
-    water::Noise_Gen_Params noise_params;
-    noise_params.amplitude = 1.0f;
-    noise_params.frequency = 0.05f;
-    noise_params.persistence = .5f;
-    noise_params.lacunarity = 2.0f;
-    noise_params.octaves = 1;
-
-    water::gen_heightmap(water_ctx, .6f, noise_params);
-    water::gen_normalmap(water_ctx, .35f);
-    water::write_normalmap_png("normalmap.png", water_ctx);
-
-    auto normalmap_tex = driver.make_texture_repr();
-    water::blit_normalmap(*normalmap_tex, water_ctx);
-
-    auto heightmap_tex = driver.make_texture_repr();
-    water::blit_heightmap(*heightmap_tex, water_ctx);
-
-    auto diffusemap_tex = driver.make_texture_repr();
-    load_png("tex/grass.png", *diffusemap_tex, true);
-
-    terrain::terrain_tree_t terrain_tree;
-    terrain_tree.set_depth(1);
-    terrain::set_volumes(terrain_tree, water_ctx.extents,
-                         water_ctx.normalmap.extents);
-    terrain::initialize_vertices(terrain_tree, driver, 0, 500);
+    // Find the depth of the four corner points.
+    // Unproject each point with the inverse proj * view matrix.
 
     auto projectile_mesh = gfx::load_mesh(driver, {"obj/projectile.obj", false});
     auto boat_mesh = gfx::load_mesh(driver, {"obj/boat.obj", false});
@@ -360,8 +299,54 @@ int main(int argc, char** argv)
 
     // The eye will be rotated around the boat.
     glm::quat eye_dir;
-    cam.look_at.eye = glm::vec3(12.0f, 0.0f, 0.0f);
+    cam.look_at.eye = glm::vec3(12.0f, 5.0f, 0.0f);
     cam.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    // Make a grid and upload it
+    auto water_grid = water::gen_grid(50);
+    water::Plane plane{{0.0f, 1.0f, 0.0f}, 0.0f};
+
+    auto grid_mesh = driver.make_mesh_repr();
+    auto grid_uv_buf =
+      grid_mesh->allocate_buffer(sizeof(float) * 3 * water_grid.size(),
+                                 game::Usage_Hint::Draw,
+                                 game::Upload_Hint::Static);
+    grid_mesh->format_buffer(grid_uv_buf, 0, 3, Buffer_Format::Float, 0, 0);
+    grid_mesh->enable_vertex_attrib(0);
+
+    grid_mesh->set_primitive_type(Primitive_Type::Triangle);
+
+    // Initialize the shader
+    auto water_shader = driver.make_shader_repr();
+    water_shader->load_vertex_part("shader/water/vs.glsl");
+    water_shader->load_fragment_part("shader/water/fs.glsl");
+
+    auto water_height_loc = water_shader->get_location("height");
+    water_shader->set_float(water_height_loc, 0.0f);
+
+    auto displ_loc = water_shader->get_location("disp");
+    water_shader->set_float(displ_loc, 0.5f);
+
+    auto time_loc = water_shader->get_location("time");
+    water_shader->set_float(time_loc, 0.0f);
+
+    water_shader->set_integer(water_shader->get_location("octaves"), 5);
+    water_shader->set_float(water_shader->get_location("amplitude"), 1.0f);
+    water_shader->set_float(water_shader->get_location("frequency"), 0.05f);
+    water_shader->set_float(water_shader->get_location("persistence"), 0.5f);
+    water_shader->set_float(water_shader->get_location("lacunarity"), 2.0f);
+
+    auto projector_loc = water_shader->get_location("projector");
+    water_shader->set_view_name("view");
+    water_shader->set_projection_name("proj");
+
+    water_shader->set_matrix(projector_loc, glm::mat4(1.0f));
+    water_shader->set_view(glm::mat4(1.0f));
+    water_shader->set_projection(glm::mat4(1.0f));
+
+    auto cam_pos_loc = water_shader->get_location("camera_pos");
+    water_shader->set_float(water_shader->get_location("ambient_intensity"), 0.2f);
+    water_shader->set_vec3(water_shader->get_location("light_pos"), light_pos);
 
     auto glfw_user_data = Glfw_User_Data{driver, cam};
     glfwSetWindowUserPointer(window, &glfw_user_data);
@@ -385,9 +370,9 @@ int main(int argc, char** argv)
 
     // This only needs to be done once since the boat shader doesn't use any
     // textures.
-    driver.bind_texture(*heightmap_tex, 0);
-    driver.bind_texture(*normalmap_tex, 1);
-    driver.bind_texture(*diffusemap_tex, 2);
+    //driver.bind_texture(*heightmap_tex, 0);
+    //driver.bind_texture(*normalmap_tex, 1);
+    //driver.bind_texture(*diffusemap_tex, 2);
 
     std::vector<collis::Motion> projectiles;
 
@@ -558,12 +543,32 @@ int main(int argc, char** argv)
         gfx::render_chunk(projectile_mesh.chunk);
       }
 
-      driver.use_shader(*terrain_shader);
-      use_camera(driver, cam);
-      terrain_shader->set_vec3(cam_pos_loc, cam.look_at.eye);
-      terrain::render_level(terrain_tree, driver, 0);
+      // Render water
 
-      driver.use_shader(*shader);
+      driver.use_shader(*water_shader);
+      use_camera(driver, cam);
+      water_shader->set_vec3(cam_pos_loc, cam.look_at.eye);
+
+      water::Plane plane{{0.0f, 1.0f, 0.0f}, 0.0f};
+      auto intersections = water::find_visible(cam, 0.0f, 0.5f);
+      if(intersections.size())
+      {
+        auto projector = build_projector(cam, plane, 0.5f);
+        //auto projector = glm::inverse(gfx::camera_proj_matrix(cam) * gfx::camera_view_matrix(cam));
+        auto range = build_min_max_mat(intersections, projector, plane);
+        projector = projector * range;
+
+        water_shader->set_matrix(projector_loc, projector);
+        water_shader->set_float(time_loc, glfwGetTime() / 50.0f);
+
+        auto water_grid = water::gen_grid(50);
+
+        auto projected_grid = water::project_grid(water_grid, projector, plane);
+
+        grid_mesh->buffer_data(grid_uv_buf, 0, sizeof(float) * 3 * projected_grid.size(), &projected_grid[0]);
+        grid_mesh->draw_arrays(0, projected_grid.size());
+        driver.use_shader(*shader);
+      }
 
       glfwSwapBuffers(window);
 
