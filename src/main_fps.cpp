@@ -159,12 +159,15 @@ int main(int argc, char** argv)
 
     // Get all our textures
     auto brick = driver.make_texture_repr();
-    load_png("tex/cracked_soil.png", *brick);
+    auto brick_tex_data = load_png_data("tex/cracked_soil.png");
+    blit_image(*brick, brick_tex_data);
     auto grass = driver.make_texture_repr();
-    load_png("tex/grass.png", *grass);
+    auto grass_tex_data = load_png_data("tex/grass.png");
+    blit_image(*grass, grass_tex_data);
 
     auto terrain_tex = driver.make_texture_repr();
-    load_png("tex/topdown_terrain.png", *terrain_tex);
+    auto terrain_tex_data = load_png_data("tex/topdown_terrain.png");
+    blit_image(*terrain_tex, terrain_tex_data);
 
     auto scene_mesh = driver.make_mesh_repr();
     auto scene = fps::load_scene("scene/fps.json", std::move(scene_mesh));

@@ -24,9 +24,9 @@ add_subdirectory(fps)
 #add_subdirectory(assets)
 
 find_package(Freetype REQUIRED)
-add_subdirectory(ui)
+# add_subdirectory(ui)
 
-add_subdirectory(strat)
+# add_subdirectory(strat)
 add_subdirectory(gen)
 add_subdirectory(terrain)
 add_subdirectory(water)
@@ -40,10 +40,10 @@ add_subdirectory(sail)
 
 find_package(Threads REQUIRED)
 
-add_executable(strategy main.cpp)
-target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
-                               genlib terrainlib)
-target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
+#add_executable(strategy main.cpp)
+#target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
+                               #genlib terrainlib)
+#target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
 
 
 add_executable(fps_exe main_fps.cpp)
@@ -64,7 +64,7 @@ add_subdirectory(luaint)
 add_executable(map_gen map_gen.cpp)
 target_link_libraries(map_gen genlib luaintlib)
 
-add_executable(event_spread_test event_spread.cpp)
-target_link_libraries(event_spread_test stratlib commonlib)
+# add_executable(event_spread_test event_spread.cpp)
+# target_link_libraries(event_spread_test stratlib commonlib)
 
-add_subdirectory(tests)
+# add_subdirectory(tests)

@@ -37,6 +37,7 @@
 #include "sail/boat.h"
 
 #include "use/mesh.h"
+#include "use/texture.h"
 
 #include "water/grid.h"
 #include "terrain/chunks.h"
@@ -271,6 +272,14 @@ int main(int argc, char** argv)
     glm::vec3 light_pos(10.0f, 4.0f, 10.0f);
     shader->set_vec3(light_pos_loc, light_pos);
     shader->set_sampler(0);
+
+    // Load environment map
+    auto envtex = gfx::load_cubemap(driver, "tex/envmap/interstellar_ft.png",
+                                    "tex/envmap/interstellar_bk.png",
+                                    "tex/envmap/interstellar_rt.png",
+                                    "tex/envmap/interstellar_lf.png",
+                                    "tex/envmap/interstellar_up.png",
+                                    "tex/envmap/interstellar_dn.png");
 
     // Find the depth of the four corner points.
     // Unproject each point with the inverse proj * view matrix.

@@ -8,13 +8,12 @@ namespace game { namespace gfx { namespace null
 {
   class Null_Texture : public Texture
   {
-    void allocate_(Vec<int> const&, Image_Format) noexcept override {}
+    void allocate_(Vec<int> const&, Image_Format, Image_Type) noexcept override {}
 
-    void blit_data_(Volume<int> const&, Color const*) noexcept override {}
+    void blit_tex2d_data(Volume<int> const&, Data_Type,
+                         void const*) noexcept override {}
 
-    void blit_data_(Volume<int> const&, float const*) noexcept override {}
-
-    void blit_data_(Volume<int> const&, Data_Type,
-                    void const*) noexcept override {}
+    void blit_cube_data(Cube_Map_Texture const& side, Volume<int> const& vol,
+                        Data_Type type, void const* data) noexcept override {}
   };
 } } }

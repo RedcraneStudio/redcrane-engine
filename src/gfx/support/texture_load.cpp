@@ -10,13 +10,15 @@ namespace game
 {
   void error_fn(void*) noexcept {}
 
-  void load_png(std::string filename, Texture& t, bool allocate_once) noexcept
+  Image load_png_data(std::string filename) noexcept
   {
+    Image image;
+
     std::FILE* fp = std::fopen(filename.c_str(), "rb");
     if(!fp)
     {
       log_w("Failed to open file '%'", filename);
-      return;
+      return {};
     }
 
     constexpr int HEADER_READ = 7;
@@ -26,7 +28,7 @@ namespace game
     if(!is_png)
     {
       log_w("File '%' not a png", filename);
-      return;
+      return {};
     }
 
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
@@ -34,7 +36,7 @@ namespace game
     if(!png_ptr)
     {
       log_w("Failed to initialize png struct for '%'", filename);
-      return;
+      return {};
     }
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
@@ -42,7 +44,7 @@ namespace game
     {
       png_destroy_read_struct(&png_ptr, NULL, NULL);
       log_w("Failed to initialize png info for '%'", filename);
-      return;
+      return {};
     }
 
     png_infop end_info_ptr = png_create_info_struct(png_ptr);
@@ -50,7 +52,7 @@ namespace game
     {
       png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
       log_w("Failed to initialize png end info for '%'", filename);
-      return;
+      return {};
     }
 
     if(setjmp(png_jmpbuf(png_ptr)))
@@ -59,7 +61,7 @@ namespace game
       fclose(fp);
 
       log_w("libpng error for '%'", filename);
-      return;
+      return {};
     }
 
     png_init_io(png_ptr, fp);
@@ -67,10 +69,8 @@ namespace game
 
     png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_GRAY_TO_RGB, NULL);
 
-    Vec<int> image_extents;
-    image_extents.x = png_get_image_width(png_ptr, info_ptr);
-    image_extents.y = png_get_image_height(png_ptr, info_ptr);
-    t.allocate(image_extents);
+    image.extents.x = png_get_image_width(png_ptr, info_ptr);
+    image.extents.y = png_get_image_height(png_ptr, info_ptr);
 
     auto png_data = png_get_rows(png_ptr, info_ptr);
     auto format = png_get_color_type(png_ptr, info_ptr);
@@ -85,66 +85,62 @@ namespace game
       png_bytes_per_pixel = 4;
     }
 
-    Color* colors = nullptr;
-    if(allocate_once)
-    {
-      colors = new Color[image_extents.x * image_extents.y];
-    }
-    for(int i = 0; i < image_extents.y * image_extents.x; ++i)
+    image.data.reserve(image.extents.x * image.extents.y);
+    for(int i = 0; i < image.extents.y * image.extents.x; ++i)
     {
       // Find out our position.
-      int x = i % image_extents.x;
-      int y = i / image_extents.y;
+      int x = i % image.extents.x;
+      int y = i / image.extents.y;
 
       // Find where we are in png's data.
       auto dst_ptr = *(png_data + y);
       dst_ptr += x * png_bytes_per_pixel;
 
-      // Every time we are at a new row...
-      if(x == 0 && !allocate_once)
-      {
-        // Allocate the row.
-        colors = new Color[image_extents.x];
-      }
-
-      Color* color_ptr = nullptr;
-      if(allocate_once)
-      {
-        color_ptr = colors + (y * image_extents.y + x);
-      }
-      else
-      {
-        color_ptr = colors + x;
-      }
-      color_ptr->r = dst_ptr[0];
-      color_ptr->g = dst_ptr[1];
-      color_ptr->b = dst_ptr[2];
+      Color c;
+      c.r = dst_ptr[0];
+      c.g = dst_ptr[1];
+      c.b = dst_ptr[2];
       if(format == PNG_COLOR_TYPE_RGB)
       {
         // We don't have an alpha value, so fill in full opacity.
-        color_ptr->a = 0xff;
+        c.a = 0xff;
       }
       else if(format == PNG_COLOR_TYPE_RGBA)
       {
-        color_ptr->a = dst_ptr[3];
+        c.a = dst_ptr[3];
       }
 
-      // At the end of the row, blit the row.
-      if(x == image_extents.x - 1 && !allocate_once)
-      {
-        t.blit_data(Volume<int>{{0,y},image_extents.x,1}, colors);
-        delete[] colors;
-      }
-    }
-    if(allocate_once)
-    {
-      t.blit_data(vol_from_extents(image_extents), colors);
-      delete[] colors;
+      image.data.push_back(c);
     }
 
     // We copied the data, so just forget about png now.
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info_ptr);
     // Close the file of course.
     fclose(fp);
+
+    return image;
+  }
+  void blit_image(Texture& t, Image const& img) noexcept
+  {
+    static_assert(sizeof(Color) == sizeof(unsigned char) * 4,
+                  "Color structs must be stored contigously");
+
+    t.allocate(img.extents, Image_Format::Rgba, Image_Type::Tex_2D);
+
+    t.blit_tex2d_data(vol_from_extents(img.extents),
+                      Data_Type::Unsigned_Byte, &img.data[0]);
+  }
+  void allocate_cube_map(Texture& t, Image const& img) noexcept
+  {
+    t.allocate(img.extents, Image_Format::Rgba, Image_Type::Cube_Map);
+  }
+  void blit_cube_map_face(Texture& t, Cube_Map_Texture const& side,
+                          Image const& img) noexcept
+  {
+    static_assert(sizeof(Color) == sizeof(unsigned char) * 4,
+                  "Color structs must be stored contigously");
+
+    t.blit_cube_data(side, vol_from_extents(img.extents), Data_Type::Unsigned_Byte,
+                     &img.data[0]);
   }
 }

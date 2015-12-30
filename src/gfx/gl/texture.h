@@ -9,30 +9,25 @@ namespace game { namespace gfx { namespace gl
 {
   struct GL_Texture : public Texture
   {
-    void allocate_(Vec<int> const&, Image_Format) noexcept override;
+  private:
+    void uninit() noexcept;
 
-    inline void blit_data_(Volume<int> const& vol,
-                           Color const* data) noexcept override
-    {
-      // Fuck it, it might work.
-      static_assert(sizeof(Color) == sizeof(Color::c_t) * 4,
-                    "Color struct must not have any padding.");
-      blit_data_(vol, Data_Type::Integer, data);
-    }
+    virtual void allocate_(Vec<int> const&, Image_Format,
+                           Image_Type type) noexcept override;
 
-    inline void blit_data_(Volume<int> const& vol,
-                           float const* data) noexcept override
-    {
-      blit_data_(vol, Data_Type::Float, data);
-    }
+  public:
+    ~GL_Texture() noexcept;
+    void blit_tex2d_data(Volume<int> const&, Data_Type,
+                         void const*) noexcept override;
 
-    void blit_data_(Volume<int> const&, Data_Type,
-                    void const*) noexcept override;
+    void blit_cube_data(Cube_Map_Texture const& side, Volume<int> const& v,
+                        Data_Type, void const* data) noexcept override;
 
     GLuint tex_id;
     GLenum texture_type;
 
     Image_Format format_;
+    Image_Type type_;
 
     void bind(unsigned int loc) const noexcept;
   };
