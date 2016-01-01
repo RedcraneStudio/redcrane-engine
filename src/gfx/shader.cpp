@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "shader.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   void Shader::set_color(int loc, Color const& c) noexcept
   {

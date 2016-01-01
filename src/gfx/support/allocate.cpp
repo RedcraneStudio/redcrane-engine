@@ -4,7 +4,7 @@
  */
 #include "allocate.h"
 #include "../mesh_data.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   void allocate_standard_mesh_buffers(int vertices, int elements, Mesh& m,
                                       Usage_Hint us, Upload_Hint up) noexcept

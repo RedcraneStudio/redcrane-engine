@@ -10,8 +10,8 @@
 #include "../common/algorithm.h"
 #include "../common/aabb.h"
 
-#include "../common/ID_Gen.hpp"
-namespace game { namespace collis
+#include "../common/id_gen.hpp"
+namespace redc { namespace collis
 {
   using SAP_AABB_Ref = uint16_t;
 

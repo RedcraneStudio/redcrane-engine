@@ -10,7 +10,7 @@
 
 #include "ifont_renderer.h"
 #include "renderer.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct Bad_Orientation{};
 

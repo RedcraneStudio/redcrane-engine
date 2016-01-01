@@ -65,13 +65,13 @@
 
 void error_callback(int error, const char* description)
 {
-  game::log_d("GLFW Error: % (Code = %)", description, error);
+  redc::log_d("GLFW Error: % (Code = %)", description, error);
 }
 
 struct Glfw_User_Data
 {
-  game::gfx::IDriver& driver;
-  game::gfx::Camera& camera;
+  redc::gfx::IDriver& driver;
+  redc::gfx::Camera& camera;
   bool forward_pressed = false;
   bool left_pressed = false;
   bool back_pressed = false;
@@ -87,7 +87,7 @@ void mouse_motion_callback(GLFWwindow*, double, double)
 }
 void key_callback(GLFWwindow* window, int key, int, int action, int)
 {
-  using namespace game;
+  using namespace redc;
 
   auto user_ptr = (Glfw_User_Data*) glfwGetWindowUserPointer(window);
 
@@ -159,9 +159,9 @@ void resize_callback(GLFWwindow* window, int width, int height)
 }
 int main(int argc, char** argv)
 {
-  using namespace game;
+  using namespace redc;
 
-  set_log_level(Log_Severity::Debug);
+  set_out_log_level(Log_Severity::Debug);
 
   namespace po = boost::program_options;
   po::options_description desc("Allowed Options");
@@ -389,8 +389,8 @@ int main(int argc, char** argv)
     auto grid_mesh = driver.make_mesh_repr();
     auto grid_uv_buf =
       grid_mesh->allocate_buffer(sizeof(float) * 2 * water_grid.size(),
-                                 game::Usage_Hint::Draw,
-                                 game::Upload_Hint::Static);
+                                 redc::Usage_Hint::Draw,
+                                 redc::Upload_Hint::Static);
     grid_mesh->format_buffer(grid_uv_buf, 0, 2, Buffer_Format::Float, 0, 0);
     grid_mesh->enable_vertex_attrib(0);
     grid_mesh->buffer_data(grid_uv_buf, 0, sizeof(float) * 2 * water_grid.size(),

@@ -9,7 +9,7 @@
 #include "../../common/translate.h"
 
 #include "../ifont_renderer.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   namespace detail
   {
@@ -35,7 +35,7 @@ namespace game { namespace ui
     {
       // Call the function with a first argument equal to name followed by the
       // contents of the tuple.
-      return call(&game::translate<const Args&...>, tup, name);
+      return call(&redc::translate<const Args&...>, tup, name);
     }
 
   }

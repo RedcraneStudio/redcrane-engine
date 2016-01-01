@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../mesh.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   void allocate_standard_mesh_buffers(int vertices, int elements, Mesh& m,
                                       Usage_Hint, Upload_Hint) noexcept;

@@ -8,7 +8,7 @@
 
 #include "../common/debugging.h"
 #include "../common/algorithm.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   Event_Map::Event_Map(Vec<int> map_extents) noexcept : accum_time(0.0f)
   {

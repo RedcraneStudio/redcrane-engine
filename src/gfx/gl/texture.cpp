@@ -4,7 +4,7 @@
  */
 #include "texture.h"
 #include <cstring>
-namespace game { namespace gfx { namespace gl
+namespace redc { namespace gfx { namespace gl
 {
   void GL_Texture::uninit() noexcept
   {

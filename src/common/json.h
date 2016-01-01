@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "rapidjson/document.h"
-namespace game
+namespace redc
 {
   struct Bad_File
   {

@@ -8,7 +8,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "../common/vec.h"
-namespace game { namespace water
+namespace redc { namespace water
 {
   glm::vec3 ray_intersection(Plane const& plane, glm::vec3 pt1,
                              glm::vec3 pt2) noexcept

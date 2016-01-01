@@ -14,7 +14,7 @@ extern "C"
 {
   #include "lua.h"
 }
-namespace game { namespace luaint
+namespace redc { namespace luaint
 {
   struct Terrain_Gen_Config
   {

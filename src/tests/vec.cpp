@@ -5,11 +5,11 @@
 #include "../common/vec.h"
 
 #include "catch/catch.hpp"
-namespace game
+namespace redc
 {
   TEST_CASE("Project onto point axis works", "[Vec]")
   {
-    using namespace game;
+    using namespace redc;
 
     auto initial_pt = Vec<float>{0.0f, 0.0f};
 

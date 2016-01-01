@@ -5,7 +5,7 @@
 #pragma once
 #include <uv.h>
 
-namespace game
+namespace redc
 {
   // libuv allocator.
   inline void alloc(uv_handle_t* handle, size_t ssize, uv_buf_t* buf)

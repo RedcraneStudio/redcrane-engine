@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "render_normals.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   void render_normals(Immediate_Renderer& r, Indexed_Mesh_Data const& m,
                       glm::mat4 const& model) noexcept

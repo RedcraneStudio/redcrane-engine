@@ -48,13 +48,13 @@
 
 void error_callback(int error, const char* description)
 {
-  game::log_d("GLFW Error: % (Code = %)", description, error);
+  redc::log_d("GLFW Error: % (Code = %)", description, error);
 }
 
 struct Glfw_User_Data
 {
-  game::gfx::IDriver& driver;
-  game::gfx::Camera& camera;
+  redc::gfx::IDriver& driver;
+  redc::gfx::Camera& camera;
 };
 void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
 {
@@ -79,9 +79,9 @@ void resize_callback(GLFWwindow* window, int width, int height)
 
 int main(int argc, char** argv)
 {
-  using namespace game;
+  using namespace redc;
 
-  set_log_level(Log_Severity::Debug);
+  set_out_log_level(Log_Severity::Debug);
 
   uv_chdir("assets/");
 

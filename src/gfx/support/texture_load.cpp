@@ -6,7 +6,7 @@
 #include "../../common/log.h"
 #include <png.h>
 #include <cstring>
-namespace game
+namespace redc
 {
   void error_fn(void*) noexcept {}
 

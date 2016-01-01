@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 #include "../texture.h"
-namespace game
+namespace redc
 {
   struct Image
   {

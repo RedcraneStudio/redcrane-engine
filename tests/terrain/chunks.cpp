@@ -12,9 +12,9 @@
 
 #include "gfx/null/driver.h"
 
-void compare_volumes(game::terrain::terrain_tree_t& tree, std::size_t level,
-                     std::size_t index, game::Volume<int> uv_vol,
-                     game::Volume<float> world_vol) noexcept
+void compare_volumes(redc::terrain::terrain_tree_t& tree, std::size_t level,
+                     std::size_t index, redc::Volume<int> uv_vol,
+                     redc::Volume<float> world_vol) noexcept
 {
   auto& node = tree.node_at_depth(level,index);
   REQUIRE(node.val.uv_vol == uv_vol);
@@ -27,7 +27,7 @@ void compare_volumes(game::terrain::terrain_tree_t& tree, std::size_t level,
 
 TEST_CASE("set_volumes works as expected", "[terrainlib]")
 {
-  using namespace game;
+  using namespace redc;
 
   Quadtree<terrain::Chunk> tree;
   tree.set_depth(3);
@@ -125,7 +125,7 @@ TEST_CASE("set_volumes works as expected", "[terrainlib]")
 
 TEST_CASE("correct vertex count for terrain grid", "[terrainlib]")
 {
-  using namespace game::terrain;
+  using namespace redc::terrain;
   REQUIRE(detail::mesh_vertices(0, 1, 3) == 54);
   REQUIRE(detail::mesh_vertices(1, 2, 3) == 216);
   REQUIRE(detail::mesh_vertices(0, 2, 3) == 270);
@@ -140,8 +140,8 @@ TEST_CASE("correct vertex count for terrain grid", "[terrainlib]")
 }
 TEST_CASE("initialize_vertices works as expected", "[terrainlib]")
 {
-  using namespace game;
-  using namespace game::terrain;
+  using namespace redc;
+  using namespace redc::terrain;
 
   terrain_tree_t tree;
 

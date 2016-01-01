@@ -12,7 +12,7 @@
 #include "elements/empty.h"
 #include "elements/sprite.h"
 #include "elements/bar.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   template <class T>
   std::string typeof_json(T const& obj) noexcept

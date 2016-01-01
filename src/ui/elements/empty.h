@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../element.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   /*!
    * \brief A view that simply takes up space.

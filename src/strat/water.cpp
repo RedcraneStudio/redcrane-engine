@@ -5,7 +5,7 @@
 #include "water.h"
 #include "../common/noise.h"
 #include "terrain.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   void set_noise_heightmap(Heightmap& h, double time) noexcept
   {

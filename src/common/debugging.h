@@ -6,15 +6,18 @@
 
 #ifndef NDEBUG
 
-  #define GAME_DEBUGGING_ENABLED
+  #define REDC_DEBUGGING_ENABLED
 
-  void game_assert(bool val, char const* const condition,
-                   char const* const filename, long line) noexcept;
+namespace redc
+{
+  void assert_fn(bool val, char const* const condition,
+                 char const* const filename, long line) noexcept;
+}
 
   // Don't do anything stupid like count on side effects of the condition.
-  #define GAME_ASSERT(condition) \
-    game_assert((condition), #condition, __FILE__, __LINE__)
+  #define REDC_ASSERT(condition) \
+    ::redc::assert_fn((condition), #condition, __FILE__, __LINE__)
 
 #else
-  #define GAME_ASSERT(condition) ((void)0)
+  #define REDC_ASSERT(condition) ((void)0)
 #endif

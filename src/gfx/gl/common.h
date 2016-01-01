@@ -6,7 +6,7 @@
 #include "../mesh.h"
 #include "glad/glad.h"
 #include "../idriver.h"
-namespace game { namespace gfx { namespace gl
+namespace redc { namespace gfx { namespace gl
 {
   GLenum get_gl_hint(Upload_Hint up_h, Usage_Hint us_h) noexcept;
   GLenum get_gl_primitive(Primitive_Type type) noexcept;

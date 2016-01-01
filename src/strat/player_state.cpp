@@ -5,7 +5,7 @@
 #include "player_state.h"
 #include "map.h"
 #include "../common/log.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   Player_State::Player_State(Game_State& g_state) noexcept
     : impl_(std::make_shared<Nothing_State>(*this, g_state)),

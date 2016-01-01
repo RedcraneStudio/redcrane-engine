@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "grid_layout.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   Volume<int> Grid_Layout::layout_()
   {

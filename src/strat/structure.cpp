@@ -13,7 +13,7 @@
 #include "../gfx/support/generate_aabb.h"
 #include "../gfx/support/write_data_to_mesh.h"
 #include "../gfx/support/texture_load.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   Structure::Structure(gfx::Mesh_Chunk&& m, AABB aabb,
                        Maybe_Owned<Texture> tex, std::string name,

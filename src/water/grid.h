@@ -14,7 +14,7 @@ extern "C"
   #include "opensimplex/open-simplex-noise.h"
 }
 
-namespace game { namespace water
+namespace redc { namespace water
 {
   struct Plane
   {

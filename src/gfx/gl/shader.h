@@ -5,7 +5,7 @@
 #pragma once
 #include "../shader.h"
 #include "glad/glad.h"
-namespace game { namespace gfx { namespace gl
+namespace redc { namespace gfx { namespace gl
 {
   struct Driver;
   struct GL_Shader : public Shader

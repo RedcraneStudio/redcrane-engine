@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <functional>
-namespace game
+namespace redc
 {
   enum Anim_Repeat_Mode
   {

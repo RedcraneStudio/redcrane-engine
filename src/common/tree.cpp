@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "tree.h"
-namespace game
+namespace redc
 {
   unsigned int tree_amount_nodes(unsigned int N, std::size_t depth) noexcept
   {

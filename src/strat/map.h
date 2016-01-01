@@ -9,7 +9,7 @@
 #include "structure.h"
 
 #include "../gfx/immediate_renderer.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   using pos_t = Vec<float>;
 

@@ -8,7 +8,7 @@
 
 TEST_CASE("Circle-point detection works", "[struct Circle]")
 {
-  using namespace game;
+  using namespace redc;
 
   Circle<float> circle;
   circle.center = {0.0f, 0.0f};
@@ -35,7 +35,7 @@ TEST_CASE("Circle-point detection works", "[struct Circle]")
 
 TEST_CASE("Arc-point detection works", "[struct Arc]")
 {
-  using namespace game;
+  using namespace redc;
 
   Arc<float> arc;
   arc.center = {0.0f, 0.0f};

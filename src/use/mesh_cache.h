@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "mesh.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   /*!
    * \brief Wraps mesh creation without a need to pass the driver.

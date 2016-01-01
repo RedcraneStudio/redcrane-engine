@@ -5,7 +5,7 @@
 #pragma once
 #include "../texture.h"
 #include "../../common/maybe_owned.hpp"
-namespace game
+namespace redc
 {
   struct Texture_Composite : public Texture
   {

@@ -9,10 +9,23 @@
 // We make this a macro so we can just not do it should it become something we
 // don't want to be doing for some reason. Performance or IO bottleneck for
 // example.
-#define GAME_LOG_ATTEMPT_INIT() init_log()
-// #define GAME_LOG_ATTEMPT_INIT() ((void*)0)
+#ifndef REDC_DISABLE_LOGGING
+  #define REDC_LOG_ATTEMPT_INIT() init_log()
 
-namespace game
+  #define REDC_LOG_E(...) redc::log_e(__VA_ARGS__)
+  #define REDC_LOG_W(...) redc::log_w(__VA_ARGS__)
+  #define REDC_LOG_I(...) redc::log_i(__VA_ARGS__)
+  #define REDC_LOG_D(...) redc::log_d(__VA_ARGS__)
+#else
+  #define REDC_LOG_ATTEMPT_INIT() ((void*)0)
+
+  #define REDC_LOG_E ((void*)0)
+  #define REDC_LOG_W ((void*)0)
+  #define REDC_LOG_I ((void*)0)
+  #define REDC_LOG_D ((void*)0)
+#endif
+
+namespace redc
 {
   struct Scoped_Log_Init
   {
@@ -24,12 +37,13 @@ namespace game
   void flush_log() noexcept;
   void flush_log_full() noexcept;
 
-  enum class Log_Severity
+  enum class Log_Severity : unsigned int
   {
-    Debug, Info, Warning, Error
+    Debug = 0, Info, Warning, Error
   };
 
-  void set_log_level(Log_Severity level) noexcept;
+  void set_log_filename(char const* const filename) noexcept;
+  void set_out_log_level(Log_Severity level) noexcept;
 
   template <class... Args>
   void log(Log_Severity severity, std::string msg, Args&&... args) noexcept

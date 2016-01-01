@@ -4,7 +4,7 @@
  */
 #include "noise.h"
 #include <cmath>
-namespace game
+namespace redc
 {
   namespace
   {
@@ -15,7 +15,7 @@ namespace game
       pt_t x, y, z;
     };
 
-    static constexpr vec3 G[] = 
+    static constexpr vec3 G[] =
     {
       {+1.0f, +1.0f,  0.0f},
       {-1.0f, +1.0f,  0.0f},

@@ -4,7 +4,7 @@
  */
 #include "texture.h"
 #include "../gfx/support/texture_load.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   std::unique_ptr<Texture> load_texture(gfx::IDriver& d,
                                         std::string filename) noexcept

@@ -10,7 +10,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   void On_Click_Handler::operator()(Mouse_State const& ms) noexcept
   {

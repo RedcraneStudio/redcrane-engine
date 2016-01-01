@@ -9,7 +9,7 @@
 #include "../common/vec.h"
 #include "../common/volume.h"
 #include "../common/color.h"
-namespace game
+namespace redc
 {
   enum class Image_Type
   {

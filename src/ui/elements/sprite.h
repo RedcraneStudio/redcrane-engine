@@ -7,7 +7,7 @@
 #include <boost/optional.hpp>
 #include "../element.h"
 #include "../../gfx/support/software_texture.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct Sprite : public Element
   {

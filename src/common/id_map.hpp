@@ -5,10 +5,10 @@
 #pragma once
 #include <unordered_map>
 #include <queue>
-#include "ID_Gen.hpp"
-#include "Cache.h"
+#include "id_gen.hpp"
+#include "cache.h"
 
-namespace game
+namespace redc
 {
   template <typename T, typename Id = uint8_t>
   struct ID_Map

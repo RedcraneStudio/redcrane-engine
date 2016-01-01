@@ -7,13 +7,16 @@
 #include <cstdlib>
 #include "log.h"
 
-void game_assert(bool val, char const* const condition,
-               char const* const filename, long line) noexcept
+namespace redc
 {
-  if(!val)
+  void assert_fn(bool val, char const* const condition,
+                   char const* const filename, long line) noexcept
   {
-    game::log_e("Assertion '%' failed in %:%", condition, filename, line);
-    game::flush_log_full();
-    std::abort();
+    if(!val)
+    {
+      redc::log_e("Assertion '%' failed in %:%", condition, filename, line);
+      redc::flush_log_full();
+      std::abort();
+    }
   }
 }

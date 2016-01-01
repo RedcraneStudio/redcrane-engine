@@ -5,7 +5,7 @@
 #pragma once
 #include <array>
 #include <glm/glm.hpp>
-namespace game
+namespace redc
 {
   struct AABB
   {

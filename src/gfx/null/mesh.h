@@ -4,8 +4,8 @@
  */
 #pragma once
 #include "../mesh.h"
-#include "../../common/ID_Gen.hpp"
-namespace game { namespace gfx { namespace null
+#include "../../common/id_gen.hpp"
+namespace redc { namespace gfx { namespace null
 {
   struct Null_Mesh : public Mesh
   {

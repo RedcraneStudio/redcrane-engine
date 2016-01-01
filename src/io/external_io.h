@@ -4,21 +4,19 @@
  */
 #pragma once
 #include <uv.h>
-#include <vector>
 #include <string>
 #include <functional>
 #include <queue>
 #include "../common/maybe_owned.hpp"
 #include "ipc.h"
 #include "net.h"
-namespace game
+namespace redc
 {
-  /*!
-   * \brief Manages and connects client code to some arbitrary io source.
+  /*!  \brief Manages and connects client code to some arbitrary io source.
    */
   struct External_IO
   {
-    using read_cb = std::function<void (std::vector<char> const&)>;
+    using read_cb = std::function<void (buf_t const&)>;
 
     External_IO(read_cb r_cb = nullptr, read_cb e_cb = nullptr) noexcept
                 : read_cb_(r_cb), err_cb_(e_cb) {}
@@ -27,10 +25,10 @@ namespace game
 
     inline void set_read_callback(read_cb cb) noexcept;
     inline void set_error_callback(read_cb cb) noexcept;
-    inline void post(std::vector<char> const& buf) noexcept;
-    inline void post_error(std::vector<char> const& err) noexcept;
+    inline void post(buf_t const& buf) noexcept;
+    inline void post_error(buf_t const& err) noexcept;
 
-    virtual void write(std::vector<char> const& buf) noexcept = 0;
+    virtual void write(buf_t const& buf) noexcept = 0;
     virtual void step() noexcept = 0;
   private:
     read_cb read_cb_;
@@ -45,11 +43,11 @@ namespace game
   {
     err_cb_ = cb;
   }
-  inline void External_IO::post(std::vector<char> const& buf) noexcept
+  inline void External_IO::post(buf_t const& buf) noexcept
   {
     read_cb_(buf);
   }
-  inline void External_IO::post_error(std::vector<char> const& buf) noexcept
+  inline void External_IO::post_error(buf_t const& buf) noexcept
   {
     err_cb_(buf);
   }
@@ -59,7 +57,7 @@ namespace game
     Child_Process(ipc::Spawn_Options&) noexcept;
     ~Child_Process() noexcept;
 
-    void write(std::vector<char> const& buf) noexcept override;
+    void write(buf_t const& buf) noexcept override;
     void step() noexcept override;
   private:
     ipc::Process* process_;
@@ -72,7 +70,7 @@ namespace game
            std::string const& write_ip, uint16_t const write_port) noexcept;
     ~Net_IO() noexcept;
 
-    void write(std::vector<char> const& buf) noexcept override;
+    void write(buf_t const& buf) noexcept override;
     void step() noexcept override;
   private:
     struct sockaddr_in write_addr_;
@@ -92,7 +90,7 @@ namespace game
     Pipe_IO& counterpart() noexcept;
 
     // Queue a write to the counterpart.
-    void write(std::vector<char> const& buf) noexcept override;
+    void write(buf_t const& buf) noexcept override;
 
     // Read from the counterpart and send queued buffers.
     void step() noexcept override;
@@ -100,11 +98,11 @@ namespace game
     void step_(bool recursive) noexcept;
 
     // Counterpart mode. Counter part is pointed to, not owned.
-    Pipe_IO(Pipe_IO& cp) noexcept : External_IO(), cp_(&cp, false) {}
+    Pipe_IO(Pipe_IO& cp) noexcept;
 
     // Represents a Pipe_IO object that is maybe owned.
     Maybe_Owned<Pipe_IO> cp_;
 
-    std::queue<std::vector<char> > input_;
+    std::queue<buf_t> input_;
   };
 }

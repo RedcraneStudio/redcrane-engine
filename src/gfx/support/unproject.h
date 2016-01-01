@@ -7,7 +7,7 @@
 #include "../../common/vec.h"
 
 #include <boost/optional.hpp>
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   struct IDriver; struct Camera;
 

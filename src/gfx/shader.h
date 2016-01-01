@@ -6,7 +6,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include "../common/color.h"
-namespace game
+namespace redc
 {
   namespace gfx
   {

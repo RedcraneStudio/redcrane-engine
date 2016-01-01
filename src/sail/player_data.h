@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 #include <vector>
-namespace game
+namespace redc
 {
   struct Player
   {

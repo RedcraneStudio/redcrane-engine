@@ -8,7 +8,7 @@
 #include "../common/json.h"
 #include "../gfx/mesh_chunk.h"
 #include "../collisionlib/triangle.h"
-namespace game { namespace fps
+namespace redc { namespace fps
 {
   struct Object
   {

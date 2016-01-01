@@ -12,7 +12,7 @@
 
 TEST_CASE("Face index string is properly parsed", "[struct Face]")
 {
-  using namespace game;
+  using namespace redc;
 
   using gfx::parse_wavefront_vert_ref;
 
@@ -39,7 +39,7 @@ TEST_CASE("Face index string is properly parsed", "[struct Face]")
 
 TEST_CASE(".obj mesh is properly parsed", "[struct Mesh]")
 {
-  using namespace game;
+  using namespace redc;
 
   std::string data =
   "v -10.0 10.0 0.0\n"

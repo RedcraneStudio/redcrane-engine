@@ -16,7 +16,7 @@
 
 int main(int argc, char** argv)
 {
-  using namespace game;
+  using namespace redc;
 
   Scoped_Log_Init log_init{};
 

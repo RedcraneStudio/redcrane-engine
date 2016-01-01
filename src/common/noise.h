@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-namespace game
+namespace redc
 {
   double perlin_noise(double x, double y, double z) noexcept;
 }

@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "triangle.h"
-namespace game { namespace collis
+namespace redc { namespace collis
 {
   void inplace_make_espace(std::vector<Triangle>& triangles,
                            glm::vec3 const& scale_factor) noexcept

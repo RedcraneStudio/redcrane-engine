@@ -1,10 +1,16 @@
 /*
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
+ *
+ * \file cache.hpp
+ * \brief Contains the implementations of Cache_Impl member functions.
+ *
+ * This file is included from cache.h since template member functions need
+ * to be put in the header. This is just for the sake of separation.
  */
 #pragma once
-#include "template_utility.hpp"
-namespace game
+#include "utility.h"
+namespace redc
 {
   /*!
    * \brief Move constructor, moves the cache!

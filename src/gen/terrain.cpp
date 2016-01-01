@@ -12,7 +12,7 @@
 
 #include "../common/debugging.h"
 
-namespace game { namespace gen
+namespace redc { namespace gen
 {
   Noise_Raii::Noise_Raii(int64_t seed, osn_context** ptr) noexcept
   {

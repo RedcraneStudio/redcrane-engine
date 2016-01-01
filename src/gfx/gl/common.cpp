@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "common.h"
-namespace game { namespace gfx { namespace gl
+namespace redc { namespace gfx { namespace gl
 {
   GLenum get_gl_hint(Upload_Hint up_h, Usage_Hint us_h) noexcept
   {

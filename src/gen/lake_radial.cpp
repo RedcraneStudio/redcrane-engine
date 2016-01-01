@@ -6,7 +6,7 @@
 #include "radial_algorithm.h"
 #include <random>
 
-namespace game { namespace gen
+namespace redc { namespace gen
 {
   void Lake_Radial_Algorithm::gen(Grid_Map& map) noexcept
   {

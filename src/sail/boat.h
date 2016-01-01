@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include "../gfx/mesh_chunk.h"
 #include "../use/mesh_cache.h"
-namespace game
+namespace redc
 {
   struct Hull_Attachment_Def
   {

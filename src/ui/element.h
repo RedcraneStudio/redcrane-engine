@@ -16,7 +16,7 @@
 
 #include <boost/signals2.hpp>
 
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct Element;
   using Model = Element;

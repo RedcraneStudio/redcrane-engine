@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../texture.h"
-namespace game { namespace gfx { namespace null
+namespace redc { namespace gfx { namespace null
 {
   class Null_Texture : public Texture
   {

@@ -6,9 +6,10 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
-#include "template_utility.hpp"
-namespace game
-{ struct Lang
+#include "utility.h"
+namespace redc
+{
+  struct Lang
   {
     std::unordered_map<std::string, std::string> dict;
   };

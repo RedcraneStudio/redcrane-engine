@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "triangle_conversion.h"
-namespace game { namespace collis
+namespace redc { namespace collis
 {
   void append_triangles(std::vector<Triangle>& triangles,
                         Indexed_Mesh_Data const& data, bool ccw) noexcept

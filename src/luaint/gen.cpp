@@ -14,7 +14,7 @@ extern "C"
 #define RC_TERRAIN_MODS_REGISTRY_NAME "Redcrane.Gen.Terrain_Mods"
 #define RC_GEN_GRID_METATABLE_NAME "Redcrane.Gen.Grid.Metatable"
 
-namespace game { namespace luaint
+namespace redc { namespace luaint
 {
   void Terrain_Gen_Config::add_option(std::string const& name,
                                       double def) noexcept

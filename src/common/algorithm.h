@@ -5,7 +5,7 @@
 #pragma once
 #include <memory>
 #include <functional>
-namespace game
+namespace redc
 {
   template <class T, class Sort = std::less<T> >
   struct shared_content_less

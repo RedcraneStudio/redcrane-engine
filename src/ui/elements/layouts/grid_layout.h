@@ -6,7 +6,7 @@
 #include "../../element_composite.h"
 
 #include <boost/optional.hpp>
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct Grid_Layout_Params
   {

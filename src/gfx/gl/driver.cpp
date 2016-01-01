@@ -20,7 +20,7 @@
 #define CAST_PTR reinterpret_cast
 #endif
 
-namespace game
+namespace redc
 {
   namespace gfx
   {

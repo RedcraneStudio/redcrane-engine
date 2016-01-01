@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "mesh_cache.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   Mesh_Chunk Mesh_Cache::load_owned_chunk(std::string filename) noexcept
   {

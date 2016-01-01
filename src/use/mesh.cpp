@@ -10,7 +10,7 @@
 #include "../gfx/support/format.h"
 #include "../gfx/support/write_data_to_mesh.h"
 
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   Mesh_Result load_mesh(IDriver& d, Mesh_Load_Params const& params) noexcept
   {

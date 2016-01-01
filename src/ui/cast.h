@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <memory>
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   template <class T, class U>
   inline std::shared_ptr<T> as(std::shared_ptr<U> const& v)

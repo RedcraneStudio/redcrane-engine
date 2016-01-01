@@ -7,7 +7,7 @@
 
 #include "idriver.h"
 #include "support/unproject.h"
-namespace game
+namespace redc
 {
   namespace gfx
   {

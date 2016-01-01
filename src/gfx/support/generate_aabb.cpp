@@ -5,7 +5,7 @@
 #include "generate_aabb.h"
 #include <glm/glm.hpp>
 
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   AABB generate_aabb(Indexed_Mesh_Data const& mesh) noexcept
   {

@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "terrain.h"
-namespace game { namespace gen
+namespace redc { namespace gen
 {
   struct Lake_Radial_Algorithm : public Terrain_Algorithm
   {

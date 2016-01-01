@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-namespace game
+namespace redc
 {
   /*!
    * \brief Gets the point which should be the location of an object of

@@ -15,7 +15,7 @@
 #include "../gfx/idriver.h"
 #include "../gfx/mesh.h"
 #include "../gfx/mesh_chunk.h"
-namespace game { namespace terrain
+namespace redc { namespace terrain
 {
   using Heightmap = Value_Map<float>;
   Heightmap make_heightmap(gen::Grid_Map const&) noexcept;

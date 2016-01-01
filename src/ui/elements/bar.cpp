@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "bar.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   Vec<int> Bar::get_minimum_extents_() const noexcept
   {

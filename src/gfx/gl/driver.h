@@ -5,7 +5,7 @@
 #pragma once
 #include <unordered_map>
 #include "../idriver.h"
-namespace game
+namespace redc
 {
   namespace gfx
   {

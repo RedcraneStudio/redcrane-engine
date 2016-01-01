@@ -11,7 +11,7 @@
 
 #include "../gfx/idriver.h"
 
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   struct Wall_Type
   {

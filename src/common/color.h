@@ -5,7 +5,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <cstdint>
-namespace game
+namespace redc
 {
   struct Color
   {

@@ -5,7 +5,7 @@
 #pragma once
 #include "../shader.h"
 #include "../idriver.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   struct Shader_Push_Lock
   {

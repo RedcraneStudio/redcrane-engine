@@ -5,7 +5,7 @@
 #include "sprite.h"
 
 #include "../../common/center.hpp"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   Vec<int> Sprite::get_minimum_extents_() const noexcept
   {

@@ -6,7 +6,7 @@
 #include "../common/grid_iterator.h"
 
 #include "../common/debugging.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   void Heightmap::allocate(Vec<int> e) noexcept
   {

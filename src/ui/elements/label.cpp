@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "label.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   Vec<int> Label::get_minimum_extents_() const noexcept
   {

@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../gfx/camera.h"
-namespace game
+namespace redc
 {
   namespace fps
   {

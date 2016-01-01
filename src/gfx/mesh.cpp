@@ -6,7 +6,7 @@
 #include <set>
 #include <functional>
 #include <algorithm>
-namespace game
+namespace redc
 {
   struct Buf_Search
   {

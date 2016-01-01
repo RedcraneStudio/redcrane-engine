@@ -9,7 +9,7 @@
 #include "mouse_logic.h"
 #include "renderer.h"
 #include "ifont_renderer.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   enum class Center_Behavior
   {

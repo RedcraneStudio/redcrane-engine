@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "cast.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   template <class T>
   void Element_Composite<T>::push_child(Shared_Element v, T l) noexcept

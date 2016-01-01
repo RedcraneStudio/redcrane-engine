@@ -4,7 +4,7 @@
  */
 #include "side_layout.h"
 #include "../../../common/center.hpp"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
     Vec<int> Side_Layout::get_minimum_extents_() const noexcept
     {

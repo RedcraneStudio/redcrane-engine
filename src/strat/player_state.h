@@ -10,7 +10,7 @@
 #include "wall.h"
 #include "map.h"
 #include "structure.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   // Deals with everything fairly global pertaining to actual gameplay.
   struct Game_State

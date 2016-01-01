@@ -7,7 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include "../../common/log.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   Vert_Ref parse_wavefront_vert_ref(std::string str) noexcept
   {

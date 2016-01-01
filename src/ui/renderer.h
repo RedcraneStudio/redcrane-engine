@@ -10,7 +10,7 @@
 #include "../gfx/texture.h"
 
 #include <memory>
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   // Pronounced: ui renderer interface
   struct Renderer

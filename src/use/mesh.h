@@ -3,12 +3,11 @@
  * All rights reserved.
  */
 #pragma once
-#include "../common/optional.h"
-
+#include <boost/optional.hpp>
 #include "../gfx/idriver.h"
 #include "../gfx/mesh_chunk.h"
 #include "../gfx/mesh_data.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   struct Mesh_Load_Params
   {
@@ -20,7 +19,7 @@ namespace game { namespace gfx
   struct Mesh_Result
   {
     Mesh_Chunk chunk;
-    optional<Indexed_Mesh_Data> data;
+    boost::optional<Indexed_Mesh_Data> data;
   };
 
   Mesh_Result load_mesh(IDriver&, Mesh_Load_Params const&) noexcept;

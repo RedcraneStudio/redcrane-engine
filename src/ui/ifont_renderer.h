@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "renderer.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct IFont_Renderer
   {

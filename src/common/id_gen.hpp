@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <queue>
-namespace game
+namespace redc
 {
   template <typename id_type>
   struct ID_Gen

@@ -6,7 +6,7 @@
 #include "../gfx/mesh_data.h"
 #include "../gfx/support/allocate.h"
 #include "../gfx/support/write_data_to_mesh.h"
-namespace game { namespace terrain
+namespace redc { namespace terrain
 {
   //! Wat
   int distance_from_water(Vec<int> pos, gen::Grid_Map const& map,

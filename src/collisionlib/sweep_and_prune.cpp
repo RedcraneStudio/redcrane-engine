@@ -5,7 +5,7 @@
 #include "sweep_and_prune.h"
 #include <algorithm>
 #include "../common/algorithm.h"
-namespace game { namespace collis
+namespace redc { namespace collis
 {
   namespace detail
   {

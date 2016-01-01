@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "pie_menu.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   void Pie_Menu::center_button_behavior(Center_Behavior cb) noexcept
   {

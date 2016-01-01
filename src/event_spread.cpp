@@ -19,7 +19,7 @@ constexpr char const* const CLEAR_C = "\x1b[2J";
 
 int main(int argc, char** argv) noexcept
 {
-  using namespace game;
+  using namespace redc;
   namespace chrono = std::chrono;
 
   auto map_size = Vec<int>{35,35};

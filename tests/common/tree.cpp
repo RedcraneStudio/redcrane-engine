@@ -9,7 +9,7 @@
 
 TEST_CASE("tree returns valid iterators for allocated depth levels", "[tree]")
 {
-  using namespace game;
+  using namespace redc;
   Quadtree<int> tree;
 
   tree.set_depth(3);
@@ -87,7 +87,7 @@ TEST_CASE("tree returns valid iterators for allocated depth levels", "[tree]")
 }
 TEST_CASE("depth level is properly maintained in nodes", "[tree]")
 {
-  using namespace game;
+  using namespace redc;
   struct null_t {};
 
   // The tree has 5 children per node per depth level.
@@ -150,7 +150,7 @@ TEST_CASE("depth level is properly maintained in nodes", "[tree]")
 }
 TEST_CASE("amount of nodes in an entire tree", "[tree]")
 {
-  using namespace game;
+  using namespace redc;
 
   REQUIRE(tree_amount_nodes(4, 0) == 0);
   REQUIRE(tree_amount_nodes(4, 1) == 1);
@@ -171,7 +171,7 @@ TEST_CASE("amount of nodes in an entire tree", "[tree]")
 }
 TEST_CASE("offset into level", "[tree]")
 {
-  using namespace game;
+  using namespace redc;
 
   REQUIRE(tree_level_offset(4, 0) == 0);
   REQUIRE(tree_level_offset(4, 1) == 1);
@@ -192,7 +192,7 @@ TEST_CASE("offset into level", "[tree]")
 }
 TEST_CASE("amount of tree nodes in a level", "[tree]")
 {
-  using namespace game;
+  using namespace redc;
 
   REQUIRE(tree_nodes_in_level(4, 0) == 1);
   REQUIRE(tree_nodes_in_level(4, 1) == 4);

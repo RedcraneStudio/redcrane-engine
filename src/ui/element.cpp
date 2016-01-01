@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "element.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   void Element::render(Renderer& r) const noexcept
   {

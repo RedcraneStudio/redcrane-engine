@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "translate.h"
-namespace game
+namespace redc
 {
   Lang language_;
 

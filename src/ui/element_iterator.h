@@ -5,7 +5,7 @@
 #pragma once
 #include <iterator>
 #include "element.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   namespace detail
   {

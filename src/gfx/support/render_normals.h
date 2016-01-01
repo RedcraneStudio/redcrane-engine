@@ -5,7 +5,7 @@
 #pragma once
 #include "../immediate_renderer.h"
 #include "../mesh_data.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   void render_normals(Immediate_Renderer&, Indexed_Mesh_Data const&,
                       glm::mat4 const&) noexcept;

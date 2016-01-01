@@ -6,7 +6,7 @@
 #include "idriver.h"
 #include "../ui/renderer.h"
 #include "support/scoped_shader_lock.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   struct IDriver_UI_Adapter : public ui::Renderer
   {

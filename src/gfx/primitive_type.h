@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-namespace game
+namespace redc
 {
   enum class Primitive_Type
   {

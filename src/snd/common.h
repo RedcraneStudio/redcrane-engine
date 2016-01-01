@@ -5,7 +5,7 @@
 #pragma once
 #include <memory>
 #include "pcm_data.h"
-namespace game { namespace snd
+namespace redc { namespace snd
 {
   void initialize_pa() noexcept;
   void terminate_pa() noexcept;

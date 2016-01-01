@@ -13,7 +13,7 @@ extern "C"
 }
 
 #include "../common/value_map.h"
-namespace game { namespace gen
+namespace redc { namespace gen
 {
   struct Noise_Raii
   {

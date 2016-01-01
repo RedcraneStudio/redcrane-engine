@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 #include <string>
-namespace game { namespace assets
+namespace redc { namespace assets
 {
   /*!
    * \brief Scans a directory for any files.

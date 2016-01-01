@@ -5,7 +5,7 @@
 #include "mesh_conversion.h"
 #include <tuple>
 #include <set>
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   // Pronounded Ordered-vertex-reference.
   struct Ord_Vert_Ref

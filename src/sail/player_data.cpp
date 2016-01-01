@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "player_data.h"
-namespace game
+namespace redc
 {
   Game_State& get_state() noexcept
   {

@@ -9,7 +9,7 @@
 #include "../gfx/mesh_chunk.h"
 #include "../gfx/mesh_data.h"
 #include "../gfx/texture.h"
-namespace game
+namespace redc
 {
   namespace gfx { struct IDriver; }
 

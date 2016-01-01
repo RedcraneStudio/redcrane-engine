@@ -6,7 +6,7 @@
 #include <array>
 #include <vector>
 #include <glm/glm.hpp>
-namespace game { namespace collis
+namespace redc { namespace collis
 {
   struct Triangle
   {

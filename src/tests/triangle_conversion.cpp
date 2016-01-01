@@ -10,7 +10,7 @@
 TEST_CASE("Correct triangle normals are generated",
           "[triangles_from_mesh_data]")
 {
-  using namespace game;
+  using namespace redc;
   Indexed_Mesh_Data md;
 
   Vertex v;

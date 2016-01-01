@@ -14,7 +14,7 @@ extern "C"
 
 #include <uv.h>
 
-namespace game { namespace luaint
+namespace redc { namespace luaint
 {
   struct Push_Value_Visitor : public boost::static_visitor<>
   {

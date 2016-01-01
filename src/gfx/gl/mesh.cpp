@@ -5,7 +5,7 @@
 #include "mesh.h"
 #include <algorithm>
 #include "common.h"
-namespace game { namespace gfx { namespace gl
+namespace redc { namespace gfx { namespace gl
 {
   GL_Mesh::GL_Mesh(Driver& driver) noexcept : driver_(&driver)
   {

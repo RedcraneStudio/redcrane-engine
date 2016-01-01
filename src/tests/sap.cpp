@@ -8,7 +8,7 @@
 
 TEST_CASE("SAP algorithm detects AABB collision", "[SAP]")
 {
-  using namespace game;
+  using namespace redc;
 
   collis::SAP sap{};
 
@@ -76,7 +76,7 @@ TEST_CASE("SAP algorithm detects AABB collision", "[SAP]")
 }
 TEST_CASE("MO TESTS", "[SAP]")
 {
-  using namespace game;
+  using namespace redc;
 
   auto pairs_equal = [](auto const& fp, auto const& sp)
   {

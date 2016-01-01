@@ -4,7 +4,7 @@
  */
 #include "linear_layout.h"
 #include <numeric>
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   Volume<int> Linear_Layout::layout_()
   {

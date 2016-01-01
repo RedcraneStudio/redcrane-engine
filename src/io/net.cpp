@@ -1,7 +1,11 @@
+/*
+ * Copyright (C) 2015 Luke San Antonio
+ * All rights reserved.
+ */
 #include "net.h"
 #include "common.h"
 
-namespace game { namespace net
+namespace redc { namespace net
 {
   UDP_Handle* create_udp_handle(uv_loop_t* loop) noexcept
   {
@@ -16,7 +20,7 @@ namespace game { namespace net
   }
   void init_udp_handle(UDP_Handle& self, uv_loop_t* loop) noexcept
   {
-    self.buf = new std::vector<char>();
+    self.buf = new buf_t();
     uv_udp_init(loop, &self.handle);
   }
   void uninit_udp_handle(UDP_Handle& self) noexcept
@@ -105,7 +109,8 @@ namespace game { namespace net
     Send_Req* req = new Send_Req;
     req->pipe = &p;
 
-    req->buf.base = p.out.buf->data();
+    // Why is this such an issue?
+    req->buf.base = reinterpret_cast<char*>(p.out.buf->data());
     req->buf.len = p.out.buf->size();
 
     uv_udp_send(&req->req, &p.out.handle, &req->buf, 1, dest, after_write);

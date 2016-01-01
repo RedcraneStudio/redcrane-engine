@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "motion.h"
-namespace game { namespace collis
+namespace redc { namespace collis
 {
   void solve_displacement_motion(float dt, float mass,
                                  Displacement_Desc& motion) noexcept

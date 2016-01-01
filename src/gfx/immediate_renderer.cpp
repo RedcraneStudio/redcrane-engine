@@ -4,7 +4,7 @@
  */
 #include "immediate_renderer.h"
 #include "support/scoped_shader_lock.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   Immediate_Renderer::Immediate_Renderer(IDriver& d) noexcept : d_(&d)
   {

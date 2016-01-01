@@ -8,7 +8,7 @@
 #include "../mesh_data.h"
 #include "../mesh.h"
 #include "../../common/log.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   // All offsets here are in elements, relative to the size of whatever element
   // is being used. These are not byte offsets!!

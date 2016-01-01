@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "scoped_shader_lock.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   Shader_Push_Lock::Shader_Push_Lock(Shader& shader, IDriver& driver) noexcept
     : driver_(&driver)

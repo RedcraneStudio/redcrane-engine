@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 #include <tuple>
-namespace game
+namespace redc
 {
   /*!
    * \brief Implements a caching system for arbitrary pointers.
@@ -93,4 +93,4 @@ namespace game
   using Cache_With_Deleter = Cache_Impl<T, D, Depends...>;
 };
 
-#include "Cache_Impl.hpp"
+#include "cache_impl.hpp"

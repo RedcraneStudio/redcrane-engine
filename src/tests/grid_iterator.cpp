@@ -5,7 +5,7 @@
 #include "../common/grid_iterator.h"
 #include "catch/catch.hpp"
 
-using namespace game;
+using namespace redc;
 
 TEST_CASE("Grid iterator works", "[Grid_Iterator]")
 {

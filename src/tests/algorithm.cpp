@@ -8,7 +8,7 @@
 
 TEST_CASE("Sorted insertion works", "Algorithm Lib")
 {
-  using namespace game;
+  using namespace redc;
 
   std::vector<int> vec;
 

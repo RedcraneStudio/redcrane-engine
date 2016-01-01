@@ -18,7 +18,7 @@
 
 // TODO: Log bad uniform locations.
 
-namespace game { namespace gfx { namespace gl
+namespace redc { namespace gfx { namespace gl
 {
   std::string load_stream(std::istream& stream) noexcept
   {

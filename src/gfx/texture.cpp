@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "texture.h"
-namespace game
+namespace redc
 {
   void Texture::allocate(Vec<int> const& extents, Image_Format form,
                          Image_Type type) noexcept

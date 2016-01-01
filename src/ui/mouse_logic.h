@@ -8,7 +8,7 @@
 #pragma once
 #include "../common/vec.h"
 #include <functional>
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   enum Mouse_Button
   {

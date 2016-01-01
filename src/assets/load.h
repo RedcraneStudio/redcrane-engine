@@ -10,7 +10,7 @@
 #include "../gfx/idriver.h"
 #include "asset.h"
 
-namespace game { namespace assets
+namespace redc { namespace assets
 {
   /*!
    * \brief Filters the list of pathnames and loads them into an asset
@@ -20,7 +20,7 @@ namespace game { namespace assets
    *
    * \note Currently supported asset types: json, png, and ttf.
 
-   * \sa game::get_asset for searching the result of this function.
+   * \sa redc::get_asset for searching the result of this function.
    */
   assets::Vector load(std::vector<std::string> const& assets,
                       gfx::IDriver& fact) noexcept;

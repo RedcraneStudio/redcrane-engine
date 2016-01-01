@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "texture_composite.h"
-namespace game
+namespace redc
 {
   Texture_Composite::Texture_Composite(Texture_Composite&& rhs) noexcept
     : ts_(std::move(rhs.ts_)) {}

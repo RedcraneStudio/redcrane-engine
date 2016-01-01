@@ -5,7 +5,7 @@
 #pragma once
 #include "../common/vec.h"
 #include <glm/glm.hpp>
-namespace game
+namespace redc
 {
   namespace gfx
   {

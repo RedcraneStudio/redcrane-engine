@@ -10,8 +10,8 @@
 
 TEST_CASE("Object moving and sharing works as expected", "[struct Object]")
 {
-  using namespace game;
-  using namespace game::gfx;
+  using namespace redc;
+  using namespace redc::gfx;
 
   null::Driver driver{{1000,1000}};
 

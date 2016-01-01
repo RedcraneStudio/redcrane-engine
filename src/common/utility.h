@@ -3,9 +3,11 @@
  * All rights reserved.
  */
 #pragma once
-#include <tuple>
 #include <type_traits>
-namespace game
+#include <functional>
+#include <vector>
+#include <string>
+namespace redc
 {
   namespace detail
   {
@@ -27,13 +29,10 @@ namespace game
   struct has_equality : public
                std::integral_constant<bool, detail::has_equality<T>::value> {};
 
-  template <std::size_t I, class T>
-    using tuple_element_t = typename std::tuple_element<I, T>::type;
-
   template <int N, typename... Params>
   struct pack_element
   {
-    using type = tuple_element_t<N, std::tuple<Params...> >;
+    using type = std::tuple_element_t<N, std::tuple<Params...> >;
   };
 
   template <int N, typename... Params>
@@ -106,4 +105,59 @@ namespace game
   template <bool... vals>
   struct all_of
     : std::integral_constant<bool, detail::all_of(vals...) > {};
+  namespace detail
+  {
+    template <bool is_const, typename Dest, typename Source,
+              typename F>
+    std::vector<Dest> vector_cast(std::conditional_t<is_const,
+                                                   const std::vector<Source>&,
+                                                   std::vector<Source>&> v,
+                                  F f)
+    {
+      std::vector<Dest> d;
+
+      using Source_Reference =
+                          std::conditional_t<is_const, const Source&, Source&>;
+
+      for(Source_Reference s : v)
+      {
+        d.push_back(f(s));
+      }
+
+      return d;
+    }
+  }
+
+  template <typename Dest, typename Source, typename F>
+  inline std::vector<Dest> vector_cast(const std::vector<Source>& v, F f)
+  {
+    return detail::vector_cast<true, Dest, Source>(v, f);
+  }
+  template <typename Dest, typename Source>
+  inline std::vector<Dest> vector_cast(const std::vector<Source>& v)
+  {
+    return detail::vector_cast<true, Dest, Source>(v,
+    [](const auto& c) { return c; });
+  }
+  template <typename Dest, typename Source, typename F>
+  inline std::vector<Dest> vector_cast(std::vector<Source>& v, F f)
+  {
+    return detail::vector_cast<false, Dest, Source>(v, f);
+  }
+  template <typename Dest, typename Source>
+  inline std::vector<Dest> vector_cast(std::vector<Source>& v)
+  {
+    return detail::vector_cast<false, Dest, Source>(v,
+    [](auto& c) { return c; });
+  }
+
+  /*!
+   * \brief Converts a vector of some smart pointer to a vector of just those
+   * pointers.
+   */
+  template <typename Dest, class SP>
+  std::vector<Dest> get_data_vector(const std::vector<SP>& v) noexcept
+  {
+    return vector_cast<Dest>(v, [](const SP& p) { return p.get(); });
+  }
 }

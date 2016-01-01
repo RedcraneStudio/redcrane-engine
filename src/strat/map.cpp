@@ -7,7 +7,7 @@
 #include "../common/log.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   Structure_Instance::Structure_Instance(Structure const& s, pos_t p) noexcept
     : pos_(p), s_type_(&s){}

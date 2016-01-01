@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "mesh_data.h"
-namespace game
+namespace redc
 {
   bool operator==(Vert_Ref const& lhs, Vert_Ref const& rhs) noexcept
   {

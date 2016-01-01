@@ -5,7 +5,7 @@
 #pragma once
 #include "rapidjson/document.h"
 #include "glm/glm.hpp"
-namespace game
+namespace redc
 {
   inline glm::vec3 vec3_from_js(rapidjson::Value const& v) noexcept
   {

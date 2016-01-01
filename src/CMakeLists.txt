@@ -33,6 +33,7 @@ add_subdirectory(water)
 
 add_subdirectory(collisionlib)
 
+add_subdirectory(rpc)
 add_subdirectory(use)
 
 # find_package(ENet REQUIRED)

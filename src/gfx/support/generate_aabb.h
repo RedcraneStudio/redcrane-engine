@@ -5,7 +5,7 @@
 #pragma once
 #include "../mesh_data.h"
 #include "../../common/aabb.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   AABB generate_aabb(Indexed_Mesh_Data const&) noexcept;
   AABB generate_aabb(Indexed_Split_Mesh_Data const&) noexcept;

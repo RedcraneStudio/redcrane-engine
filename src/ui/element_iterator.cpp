@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "element_iterator.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   D_F_Elem_Iter::D_F_Elem_Iter(Shared_Element e) noexcept
   {

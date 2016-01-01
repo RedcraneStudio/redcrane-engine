@@ -10,7 +10,7 @@
 #include <vector>
 #include <tuple>
 #include "primitive_type.h"
-namespace game
+namespace redc
 {
   enum class Usage_Hint
   {

@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "location_cache.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   int Location_Cache::operator()(std::string const& str) const noexcept
   {

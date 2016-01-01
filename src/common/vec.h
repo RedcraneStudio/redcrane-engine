@@ -4,8 +4,9 @@
  */
 #pragma once
 
+#include <ostream>
 #include <cmath>
-namespace game
+namespace redc
 {
   template <typename T = int>
   struct Vec
@@ -189,5 +190,12 @@ namespace game
     // We don't want to normalize this one
     auto to_endpt_full = endpt - initial;
     return ret * dot(ret, to_endpt_full) + initial;
+  }
+
+  template <class T>
+  std::ostream& operator<<(std::ostream& out, Vec<T> const& v) noexcept
+  {
+    out << "{" << std::to_string(v.x) << ", " << std::to_string(v.y) << "}";
+    return out;
   }
 }

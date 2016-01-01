@@ -12,7 +12,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_CACHE_H
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct detail::Freetype_Impl
   {

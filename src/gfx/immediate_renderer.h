@@ -6,7 +6,7 @@
 #include "../common/aabb.h"
 #include "camera.h"
 #include "idriver.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   // It's stupid to have two immediate-like renderers that just have different
   // functionally but implement it largely the same way.

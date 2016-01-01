@@ -5,7 +5,7 @@
 #pragma once
 #include "../shader.h"
 #include <unordered_map>
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   struct Location_Cache
   {

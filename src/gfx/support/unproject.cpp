@@ -8,7 +8,7 @@
 #include "../camera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   glm::vec3 unproject_screen(gfx::IDriver& d, gfx::Camera const& cam,
                              glm::mat4 const& mod, Vec<int> v,

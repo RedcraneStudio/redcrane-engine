@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "aabb.h"
-namespace game
+namespace redc
 {
   AABB aabb_from_min_max(glm::vec3 min, glm::vec3 max) noexcept
   {

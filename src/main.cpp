@@ -68,22 +68,22 @@ glm::vec4 project_point(glm::vec4 pt,
 
 struct Glfw_User_Data
 {
-  game::gfx::IDriver& driver;
-  game::gfx::Camera& camera;
-  game::ui::Element& root_hud;
-  game::ui::Mouse_State& mouse_state;
+  redc::gfx::IDriver& driver;
+  redc::gfx::Camera& camera;
+  redc::ui::Element& root_hud;
+  redc::ui::Mouse_State& mouse_state;
 };
 
 void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
 {
-  using game::Vec; using game::ui::Mouse_State;
+  using redc::Vec; using redc::ui::Mouse_State;
 
   auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
   auto& mouse_state = user_ptr.mouse_state;
 
   bool down = (action == GLFW_PRESS);
 
-  using namespace game::ui;
+  using namespace redc::ui;
   Mouse_Button button;
   switch(glfw_button)
   {
@@ -110,7 +110,7 @@ void mouse_button_callback(GLFWwindow* window, int glfw_button, int action,int)
 
 void mouse_motion_callback(GLFWwindow* window, double x, double y)
 {
-  using game::ui::Mouse_State;
+  using redc::ui::Mouse_State;
 
   auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
   auto& mouse_state = user_ptr.mouse_state;
@@ -121,7 +121,7 @@ void mouse_motion_callback(GLFWwindow* window, double x, double y)
 
 void scroll_callback(GLFWwindow* window, double, double deltay)
 {
-  using game::ui::Mouse_State;
+  using redc::ui::Mouse_State;
 
   auto user_ptr = *(Glfw_User_Data*) glfwGetWindowUserPointer(window);
   auto& mouse_state = user_ptr.mouse_state;
@@ -129,7 +129,7 @@ void scroll_callback(GLFWwindow* window, double, double deltay)
   mouse_state.scroll_delta = deltay;
 }
 
-void log_gl_limits(game::Log_Severity s) noexcept
+void log_gl_limits(redc::Log_Severity s) noexcept
 {
   GLint i = 0;
   glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &i);
@@ -138,7 +138,7 @@ void log_gl_limits(game::Log_Severity s) noexcept
 
 void error_callback(int error, const char* description)
 {
-  game::log_d("GLFW Error: % (Code = %)", description, error);
+  redc::log_d("GLFW Error: % (Code = %)", description, error);
 }
 
 void resize_callback(GLFWwindow* window, int width, int height)
@@ -156,14 +156,14 @@ void resize_callback(GLFWwindow* window, int width, int height)
   user_ptr.camera.perspective.aspect = width / (float) height;
 
   // Perhaps relayout the hud here?
-  user_ptr.root_hud.layout(game::Vec<int>{width, height});
+  user_ptr.root_hud.layout(redc::Vec<int>{width, height});
 
 }
 
 
 int main(int argc, char** argv)
 {
-  using namespace game;
+  using namespace redc;
 
   set_log_level(Log_Severity::Debug);
 

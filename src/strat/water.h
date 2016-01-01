@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   struct Heightmap;
   void set_noise_heightmap(Heightmap&, double time) noexcept;

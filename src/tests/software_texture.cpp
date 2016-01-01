@@ -9,7 +9,7 @@
 
 TEST_CASE("Software texture works as expected", "[struct Software_Texture]")
 {
-  using namespace game;
+  using namespace redc;
 
   Software_Texture texture;
   texture.allocate(Vec<int>{5, 5});

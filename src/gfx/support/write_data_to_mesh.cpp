@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "write_data_to_mesh.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   // TODO: Remove these implementations!
   void allocate_mesh_buffers(Indexed_Mesh_Data const& data,

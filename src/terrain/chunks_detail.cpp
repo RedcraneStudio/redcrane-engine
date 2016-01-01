@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "chunks.h"
-namespace game { namespace terrain { namespace detail
+namespace redc { namespace terrain { namespace detail
 {
   std::size_t mesh_vertices(std::size_t start_level, std::size_t depth,
                             std::size_t vertices) noexcept

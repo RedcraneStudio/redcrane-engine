@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <iterator>
-namespace game
+namespace redc
 {
   namespace detail
   {

@@ -8,7 +8,7 @@
 #include "texture.h"
 #include "mesh.h"
 #include "shader.h"
-namespace game
+namespace redc
 {
   // Forward declare the color structure.
   struct Color;

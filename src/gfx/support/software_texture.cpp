@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "software_texture.h"
-namespace game
+namespace redc
 {
   Software_Texture::Software_Texture() noexcept
   {

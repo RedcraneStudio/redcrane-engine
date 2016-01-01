@@ -7,7 +7,7 @@
 #include <string>
 #include "../gfx/idriver.h"
 #include "../gfx/texture.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   std::unique_ptr<Texture> load_texture(gfx::IDriver& d,
                                         std::string filename) noexcept;

@@ -3,7 +3,7 @@
  * All rights reserved
  */
 #include "mesh_chunk.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   Mesh_Chunk copy_mesh_chunk_share_mesh(Mesh_Chunk const& orig) noexcept
   {

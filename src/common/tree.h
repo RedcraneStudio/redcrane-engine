@@ -9,7 +9,7 @@
 
 #include "null_t.h"
 
-namespace game
+namespace redc
 {
   template <class T>
   struct Node;

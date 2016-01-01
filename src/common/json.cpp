@@ -10,7 +10,7 @@
 
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/error/en.h"
-namespace game
+namespace redc
 {
   struct File_Wrapper
   {

@@ -4,9 +4,9 @@
  */
 #pragma once
 #include <cstring>
-#include "../common/vec.h"
-#include "../common/volume.h"
-namespace game
+#include "vec.h"
+#include "volume.h"
+namespace redc
 {
   template <class T>
   struct Value_Map

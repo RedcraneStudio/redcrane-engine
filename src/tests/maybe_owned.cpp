@@ -7,7 +7,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch/catch.hpp"
 
-using namespace game;
+using namespace redc;
 
 TEST_CASE("Constructed to null", "[Maybe_Owned]")
 {

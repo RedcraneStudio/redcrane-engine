@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "mesh.h"
-namespace game { namespace gfx { namespace null
+namespace redc { namespace gfx { namespace null
 {
   Null_Mesh::buf_t
   Null_Mesh::allocate_buffer(std::size_t size, Usage_Hint, Upload_Hint)

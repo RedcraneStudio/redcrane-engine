@@ -5,7 +5,7 @@
 #include "driver.h"
 #include "mesh.h"
 #include "texture.h"
-namespace game { namespace gfx { namespace null
+namespace redc { namespace gfx { namespace null
 {
   std::unique_ptr<Shader> Driver::make_shader_repr() noexcept
   {

@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "camera_controller.h"
-namespace game
+namespace redc
 {
   namespace fps
   {

@@ -7,7 +7,7 @@
 #include "../common/log.h"
 
 #include <boost/filesystem.hpp>
-namespace game { namespace assets
+namespace redc { namespace assets
 {
   namespace fs = boost::filesystem;
 

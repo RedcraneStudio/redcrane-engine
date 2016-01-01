@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "animation.h"
-namespace game
+namespace redc
 {
   // TODO: ***TEST THIS CLASS***
   Animation::Animation(int segment_size, int segments,

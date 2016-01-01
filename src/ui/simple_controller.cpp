@@ -4,7 +4,7 @@
  */
 #include "simple_controller.h"
 #include "element_iterator.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   bool Simple_Controller::step(Shared_Element root,
                                Mouse_State mouse_state) noexcept

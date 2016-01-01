@@ -5,7 +5,7 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-namespace game { namespace snd
+namespace redc { namespace snd
 {
   struct Sample
   {

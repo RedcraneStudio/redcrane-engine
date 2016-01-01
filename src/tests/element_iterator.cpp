@@ -7,7 +7,7 @@
 #include "../ui/element_iterator.h"
 #include "catch/catch.hpp"
 
-using namespace game;
+using namespace redc;
 
 TEST_CASE("Element iterator works.", "[Element_Iterator]")
 {

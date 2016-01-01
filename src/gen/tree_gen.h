@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "terrain.h"
-namespace game { namespace gen
+namespace redc { namespace gen
 {
   // Use open-simplex noise to generate a sort of forest biome on top of the
   // land. This forest area will later on be populated with trees, either

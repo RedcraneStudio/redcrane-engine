@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <memory>
-namespace game
+namespace redc
 {
   template <class T>
   struct Service

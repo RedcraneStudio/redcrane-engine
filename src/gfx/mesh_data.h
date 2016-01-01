@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 #include <boost/optional.hpp>
 #include "primitive_type.h"
-namespace game
+namespace redc
 {
   struct Vertex
   {

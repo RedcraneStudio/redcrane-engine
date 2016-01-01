@@ -17,11 +17,11 @@
 #include "../gfx/support/load_wavefront.h"
 
 #include "../collisionlib/triangle_conversion.h"
-namespace game { namespace fps
+namespace redc { namespace fps
 {
-  Scene load_scene(std::string fn, std::unique_ptr<game::Mesh> msh) noexcept
+  Scene load_scene(std::string fn, std::unique_ptr<redc::Mesh> msh) noexcept
   {
-    using namespace game;
+    using namespace redc;
 
     auto json = load_json(fn);
 

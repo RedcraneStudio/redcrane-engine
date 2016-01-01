@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "ifont_renderer.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   namespace detail { struct Freetype_Impl; }
 

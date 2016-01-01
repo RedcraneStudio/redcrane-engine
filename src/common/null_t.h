@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-namespace game
+namespace redc
 {
   struct null_t {};
 }

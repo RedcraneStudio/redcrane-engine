@@ -8,7 +8,7 @@
 #include <cstring>
 #include <uv.h>
 #include "thread_local.h"
-namespace game
+namespace redc
 {
   Scoped_Log_Init::Scoped_Log_Init() noexcept
   {
@@ -19,8 +19,8 @@ namespace game
     uninit_log();
   }
 
-  GAME_THREAD_LOCAL uv_loop_t* loop_ = nullptr;
-  Log_Severity level_ = Log_Severity::Info;
+  REDC_THREAD_LOCAL uv_loop_t* loop_ = nullptr;
+  Log_Severity out_level_ = Log_Severity::Info;
 
   void init_log() noexcept
   {
@@ -43,6 +43,14 @@ namespace game
   void flush_log_full() noexcept
   {
     uv_run(loop_, UV_RUN_DEFAULT);
+  }
+
+  void set_out_log_level(Log_Severity level) noexcept
+  {
+    // TODO: Add a mutex or something so we don't get that 1-in-1000000 data
+    // race. TODO On second thought if this ever comes up in practice buy a
+    // lotto ticket!
+    out_level_ = level;
   }
 
   std::string format_time(const std::string& format)
@@ -83,15 +91,18 @@ namespace game
     delete req;
   }
 
-  void set_log_level(Log_Severity level) noexcept
-  {
-    level_ = level;
-  }
-
   void log(std::string severity, std::string msg,
-           char const* const before, char const* const after) noexcept
+           char const* const before, char const* const after,
+           int severity_level) noexcept
   {
     if(!loop_) return;
+
+    // Bail out if the severity level isn't enough
+    if(severity_level > (int) out_level_)
+    {
+      // Get outta here!
+      return;
+    }
 
     // Create the final message.
     std::string time = format_time("%F|%T");
@@ -136,22 +147,18 @@ namespace game
 
   void log_e(std::string msg) noexcept
   {
-    if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Error))
-      log("error", msg, ERROR_C, RESET_C);
+    log("error", msg, ERROR_C, RESET_C, static_cast<int>(Log_Severity::Error));
   }
   void log_w(std::string msg) noexcept
   {
-    if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Warning))
-      log("warning", msg, WARNING_C, RESET_C);
+    log("warning", msg, WARNING_C, RESET_C, static_cast<int>(Log_Severity::Warning));
   }
   void log_i(std::string msg) noexcept
   {
-    if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Info))
-      log("info", msg, INFO_C, RESET_C);
+    log("info", msg, INFO_C, RESET_C, static_cast<int>(Log_Severity::Info));
   }
   void log_d(std::string msg) noexcept
   {
-    if(static_cast<int>(level_) <= static_cast<int>(Log_Severity::Debug))
-      log("debug", msg, DEBUG_C, RESET_C);
+    log("debug", msg, DEBUG_C, RESET_C, static_cast<int>(Log_Severity::Debug));
   }
 }

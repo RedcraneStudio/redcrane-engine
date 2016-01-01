@@ -9,7 +9,7 @@
 #include <list>
 #include <vector>
 #include "../common/value_map.h"
-namespace game { namespace strat
+namespace redc { namespace strat
 {
   // An ________ is used to decide when an event is ready to spread out.
   // Event_Timer seems to fit here I guess.

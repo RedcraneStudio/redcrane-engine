@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../../element_composite.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct Padding
   {

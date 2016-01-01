@@ -4,7 +4,7 @@
  */
 #include "idriver_ui_adapter.h"
 #include <glm/gtc/matrix_transform.hpp>
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   IDriver_UI_Adapter::IDriver_UI_Adapter(IDriver& d) noexcept
     : d_(&d), hud_shader_(std::move(d.make_shader_repr())),

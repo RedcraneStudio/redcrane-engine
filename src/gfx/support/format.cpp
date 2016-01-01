@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "format.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   void format_standard_mesh_buffers(Mesh& m) noexcept
   {

@@ -9,7 +9,7 @@
 
 TEST_CASE("volume quad returns the proper quadrant", "[volume]")
 {
-  using namespace game;
+  using namespace redc;
 
   SECTION("simple square integer volume at the origin")
   {

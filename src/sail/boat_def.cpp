@@ -4,7 +4,7 @@
  */
 #include "boat.h"
 #include "../common/log.h"
-namespace game
+namespace redc
 {
   Boat_Descs build_default_descs(gfx::Mesh_Cache& mc) noexcept
   {

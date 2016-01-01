@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "boat.h"
-namespace game
+namespace redc
 {
   Hull_Desc build_hull_desc(gfx::Mesh_Cache& m_cache, std::string name,
                             std::string model_name,

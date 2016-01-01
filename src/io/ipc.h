@@ -4,15 +4,15 @@
  */
 #pragma once
 #include <uv.h>
-#include <vector>
+#include "buffer.h"
 
-namespace game { namespace ipc
+namespace redc { namespace ipc
 {
   struct Process;
   struct Pipe
   {
     uv_pipe_t pipe;
-    std::vector<char>* buf;
+    buf_t* buf;
     Process* proc;
     void (*action_cb)(Pipe* p);
     void* user_data;

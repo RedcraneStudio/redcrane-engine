@@ -9,7 +9,7 @@
 
 TEST_CASE("value map sampling works", "[value_map]")
 {
-  using namespace game;
+  using namespace redc;
 
   SECTION("integer sampling works as expected")
   {

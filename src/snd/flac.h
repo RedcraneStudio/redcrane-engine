@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 #include "pcm_data.h"
-namespace game { namespace snd
+namespace redc { namespace snd
 {
   PCM_Data load_flac(std::string file) noexcept;
 } }

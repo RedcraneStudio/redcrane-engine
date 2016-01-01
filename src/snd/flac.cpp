@@ -9,7 +9,7 @@
 #include "FLAC/stream_decoder.h"
 
 #include "../common/log.h"
-namespace game { namespace snd
+namespace redc { namespace snd
 {
   FLAC__StreamDecoderWriteStatus
   flac_write_fn(FLAC__StreamDecoder const*,

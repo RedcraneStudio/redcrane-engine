@@ -5,7 +5,7 @@
 #include "element.h"
 #include "mouse_logic.h"
 #include "../common/vec.h"
-namespace game { namespace ui
+namespace redc { namespace ui
 {
   struct Simple_Controller
   {

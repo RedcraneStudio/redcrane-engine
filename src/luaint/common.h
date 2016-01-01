@@ -15,7 +15,7 @@ extern "C"
 #include <boost/variant/variant.hpp>
 #include <boost/variant/recursive_wrapper.hpp>
 
-namespace game { namespace luaint
+namespace redc { namespace luaint
 {
   inline std::string get_string(lua_State* L, int index)
   {

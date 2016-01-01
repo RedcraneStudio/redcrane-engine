@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <glm/glm.hpp>
-namespace game { namespace collis
+namespace redc { namespace collis
 {
   struct Displacement_Desc
   {

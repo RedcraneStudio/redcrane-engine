@@ -4,7 +4,7 @@
  */
 #include "vec.h"
 #include <cmath>
-namespace game
+namespace redc
 {
   template <class T>
   struct Circle

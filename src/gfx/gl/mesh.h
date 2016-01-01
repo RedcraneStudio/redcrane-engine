@@ -7,7 +7,7 @@
 #include <array>
 #include "../mesh.h"
 #include "driver.h"
-namespace game { namespace gfx { namespace gl
+namespace redc { namespace gfx { namespace gl
 {
   struct GL_Mesh : public Mesh
   {

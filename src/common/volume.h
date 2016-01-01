@@ -9,7 +9,7 @@
 #include "vec.h"
 #include <algorithm>
 
-namespace game
+namespace redc
 {
   template <typename T = int>
   struct Volume
@@ -177,8 +177,7 @@ namespace game
   template <class T>
   std::ostream& operator<<(std::ostream& out, Volume<T> const& vol) noexcept
   {
-    out << "{{" + std::to_string(vol.pos.x) + ", " << std::to_string(vol.pos.y)
-        << "}, " + std::to_string(vol.width) + ", "
+    out << "{" << vol.pos << ", " << std::to_string(vol.width) << ", "
         << std::to_string(vol.height) << "}";
     return out;
   }

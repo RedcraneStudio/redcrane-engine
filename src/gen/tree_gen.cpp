@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "tree_gen.h"
-namespace game { namespace gen
+namespace redc { namespace gen
 {
   void Tree_Gen_Algorithm::gen(Grid_Map& map) noexcept
   {

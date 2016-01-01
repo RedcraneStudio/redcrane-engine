@@ -15,7 +15,7 @@
 #define DECLARE_EXTENSION(ext_str) \
 constexpr static char const* const ext = #ext_str;
 
-namespace game { namespace assets
+namespace redc { namespace assets
 {
   struct Asset
   {

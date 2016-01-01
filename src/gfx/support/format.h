@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "../mesh.h"
-namespace game { namespace gfx
+namespace redc { namespace gfx
 {
   void format_standard_mesh_buffers(Mesh& mesh) noexcept;
 } }
