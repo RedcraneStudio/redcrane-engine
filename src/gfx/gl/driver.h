@@ -38,6 +38,7 @@ namespace game
     void clear_depth() noexcept override;
 
     void depth_test(bool enable) noexcept override;
+    void write_depth(bool enable) noexcept override;
     void blending(bool enable) noexcept override;
     void face_culling(bool enable) noexcept override;
 

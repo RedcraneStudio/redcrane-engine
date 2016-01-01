@@ -30,6 +30,7 @@ namespace game { namespace gfx
       void clear_depth() noexcept override {}
 
       void depth_test(bool) noexcept override {}
+      void write_depth(bool) noexcept override {}
       void blending(bool) noexcept override {}
       void face_culling(bool) noexcept override {}
 

@@ -112,6 +112,10 @@ namespace game
         if(enable) glEnable(GL_DEPTH_TEST);
         else glDisable(GL_DEPTH_TEST);
       }
+      void Driver::write_depth(bool enable) noexcept
+      {
+        glDepthMask(enable);
+      }
       void Driver::blending(bool enable) noexcept
       {
         if(enable) glEnable(GL_BLEND);
