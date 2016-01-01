@@ -69,17 +69,29 @@ namespace game { namespace gfx { namespace gl
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
     }
 
-    glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER,
-                    GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    if(type == Image_Type::Tex_2D)
+    {
+      glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER,
+                      GL_NEAREST_MIPMAP_NEAREST);
+      glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    // These are actually set to their respective values by default anyway, but
-    // this is more clear.
-    glTexParameteri(texture_type, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(texture_type, GL_TEXTURE_MAX_LEVEL, 5);
+      // These are actually set to their respective values by default anyway, but
+      // this is more clear.
+      glTexParameteri(texture_type, GL_TEXTURE_BASE_LEVEL, 0);
+      glTexParameteri(texture_type, GL_TEXTURE_MAX_LEVEL, 5);
 
-    glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+      glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    }
+    else if(type == Image_Type::Cube_Map)
+    {
+      glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      glTexParameteri(texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
 
     // Save the format for later.
     format_ = form;
