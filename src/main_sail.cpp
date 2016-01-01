@@ -77,6 +77,7 @@ struct Glfw_User_Data
   bool back_pressed = false;
   bool right_pressed = false;
   bool should_spawn_projectile = false;
+  bool update_cam = false;
 };
 void mouse_button_callback(GLFWwindow*, int, int, int)
 {
@@ -112,6 +113,9 @@ void key_callback(GLFWwindow* window, int key, int, int action, int)
       case GLFW_KEY_SPACE:
         user_ptr->should_spawn_projectile = true;
         break;
+      case GLFW_KEY_C:
+        user_ptr->update_cam = true;
+        break;
     }
   }
   else if(action == GLFW_RELEASE)
@@ -132,6 +136,9 @@ void key_callback(GLFWwindow* window, int key, int, int action, int)
         break;
       case GLFW_KEY_D:
         user_ptr->right_pressed = false;
+        break;
+      case GLFW_KEY_C:
+        user_ptr->update_cam = false;
         break;
     }
   }
@@ -269,7 +276,7 @@ int main(int argc, char** argv)
 
     driver.use_shader(*shader);
 
-    glm::vec3 light_pos(10.0f, 4.0f, 10.0f);
+    glm::vec3 light_pos(0.0f, 5.0f, 0.0f);
     shader->set_vec3(light_pos_loc, light_pos);
     shader->set_sampler(0);
 
@@ -356,15 +363,14 @@ int main(int argc, char** argv)
     boat_motion.mass = 64; // kilograms
     boat_motion.angular.radius = 0.5f; // Radius of about half a meter
     // Start the boat off in the middle of our water
-    boat_motion.displacement.displacement = glm::vec3(25.0f, 0.0f, 25.0f);
-    boat_motion.displacement.displacement.y += .5f;
+    boat_motion.displacement.displacement = glm::vec3(0.0f, 0.5f, 0.0f);
     glm::mat4 boat_model{1.0f};
 
     // Make an fps camera.
     gfx::Camera cam;
     cam.projection_mode = gfx::Camera_Type::Perspective;
     cam.perspective =
-      gfx::Perspective_Cam_Params{glm::radians(50.0f),
+      gfx::Perspective_Cam_Params{glm::radians(90.0f),
                                   driver.window_extents().x /
                                     (float) driver.window_extents().y,
                                   .001f, 1000.0f};
@@ -373,21 +379,22 @@ int main(int argc, char** argv)
 
     // The eye will be rotated around the boat.
     glm::quat eye_dir;
-    cam.look_at.eye = glm::vec3(12.0f, 5.0f, 0.0f);
-    cam.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
+    cam.look_at.eye = boat_motion.displacement.displacement - glm::vec3(0.0f, 5.0f, -6.0f);
+    cam.look_at.look = boat_motion.displacement.displacement;
 
     // Make a grid and upload it
-    auto water_grid = water::gen_grid(50);
-    water::Plane plane{{0.0f, 1.0f, 0.0f}, 0.0f};
+    auto water_grid = water::gen_grid(200);
+    water::Plane water_base{{0.0f, 1.0f, 0.0f}, 0.0f};
 
     auto grid_mesh = driver.make_mesh_repr();
     auto grid_uv_buf =
-      grid_mesh->allocate_buffer(sizeof(float) * 3 * water_grid.size(),
+      grid_mesh->allocate_buffer(sizeof(float) * 2 * water_grid.size(),
                                  game::Usage_Hint::Draw,
                                  game::Upload_Hint::Static);
-    grid_mesh->format_buffer(grid_uv_buf, 0, 3, Buffer_Format::Float, 0, 0);
+    grid_mesh->format_buffer(grid_uv_buf, 0, 2, Buffer_Format::Float, 0, 0);
     grid_mesh->enable_vertex_attrib(0);
-
+    grid_mesh->buffer_data(grid_uv_buf, 0, sizeof(float) * 2 * water_grid.size(),
+                           &water_grid[0]);
     grid_mesh->set_primitive_type(Primitive_Type::Triangle);
 
     // Initialize the shader
@@ -395,20 +402,21 @@ int main(int argc, char** argv)
     water_shader->load_vertex_part("shader/water/vs.glsl");
     water_shader->load_fragment_part("shader/water/fs.glsl");
 
-    auto water_height_loc = water_shader->get_location("height");
-    water_shader->set_float(water_height_loc, 0.0f);
-
-    auto displ_loc = water_shader->get_location("disp");
-    water_shader->set_float(displ_loc, 0.5f);
+    auto plane_loc = water_shader->get_location("plane");
+    water_shader->set_vec4(plane_loc, plane_as_vec4(water_base));
 
     auto time_loc = water_shader->get_location("time");
     water_shader->set_float(time_loc, 0.0f);
 
-    water_shader->set_integer(water_shader->get_location("octaves"), 5);
-    water_shader->set_float(water_shader->get_location("amplitude"), 1.0f);
-    water_shader->set_float(water_shader->get_location("frequency"), 0.05f);
-    water_shader->set_float(water_shader->get_location("persistence"), 0.5f);
-    water_shader->set_float(water_shader->get_location("lacunarity"), 2.0f);
+    water_shader->set_integer(water_shader->get_location("octaves_in"), 5);
+    water_shader->set_float(water_shader->get_location("amplitude_in"), 0.2f);
+    water_shader->set_float(water_shader->get_location("frequency_in"), 0.5f);
+    water_shader->set_float(water_shader->get_location("persistence_in"), 0.5f);
+    water_shader->set_float(water_shader->get_location("lacunarity_in"), 0.6f);
+
+    float max_displacement = 0.1f * std::pow(2.0f, 8);
+    //auto displ_loc = water_shader->get_location("disp");
+    //water_shader->set_float(displ_loc, max_displacement);
 
     auto projector_loc = water_shader->get_location("projector");
     water_shader->set_view_name("view");
@@ -419,8 +427,12 @@ int main(int argc, char** argv)
     water_shader->set_projection(glm::mat4(1.0f));
 
     auto cam_pos_loc = water_shader->get_location("camera_pos");
-    water_shader->set_float(water_shader->get_location("ambient_intensity"), 0.2f);
-    water_shader->set_vec3(water_shader->get_location("light_pos"), light_pos);
+    auto light_dir_loc = water_shader->get_location("light_dir");
+
+    auto water_envmap_loc = water_shader->get_location("envmap");
+    water_shader->set_integer(water_envmap_loc, 0);
+
+    driver.bind_texture(*envtex, 0);
 
     auto glfw_user_data = Glfw_User_Data{driver, cam};
     glfwSetWindowUserPointer(window, &glfw_user_data);
@@ -449,6 +461,8 @@ int main(int argc, char** argv)
     //driver.bind_texture(*diffusemap_tex, 2);
 
     std::vector<collis::Motion> projectiles;
+
+    gfx::Camera water_cam = cam;
 
     float prev_time = glfwGetTime();
     while(!glfwWindowShouldClose(window))
@@ -484,6 +498,10 @@ int main(int argc, char** argv)
         boat_motion.angular.net_torque +=
           glm::cross(glm::vec3(0.0f, 0.0f, 1.0f),
                      glm::vec3(-18.0f * 3.14f, 0.0f, 0.0f));
+      }
+      if(glfw_user_data.update_cam == true)
+      {
+        water_cam = cam;
       }
 
       // Take the velocity of the boat and use it to calculate a drag force.
@@ -638,26 +656,22 @@ int main(int argc, char** argv)
       use_camera(driver, cam);
       water_shader->set_vec3(cam_pos_loc, cam.look_at.eye);
 
-      water::Plane plane{{0.0f, 1.0f, 0.0f}, 0.0f};
-      auto intersections = water::find_visible(cam, 0.0f, 0.5f);
+      water_shader->set_vec3(light_dir_loc,
+        glm::normalize(glm::vec3(5.0f, 5.0f, -6.0f)));
+
+      auto intersections = water::find_visible(water_cam, water_base.dist, max_displacement);
       if(intersections.size())
       {
-        auto projector = build_projector(cam, plane, 0.5f);
-        //auto projector = glm::inverse(gfx::camera_proj_matrix(cam) * gfx::camera_view_matrix(cam));
-        auto range = build_min_max_mat(intersections, projector, plane);
+        auto projector = build_projector(water_cam, water_base, max_displacement);
+        auto range = build_min_max_mat(intersections, projector, water_base);
         projector = projector * range;
 
         water_shader->set_matrix(projector_loc, projector);
-        water_shader->set_float(time_loc, glfwGetTime() / 50.0f);
+        water_shader->set_float(time_loc, glfwGetTime());
 
-        auto water_grid = water::gen_grid(50);
-
-        auto projected_grid = water::project_grid(water_grid, projector, plane);
-
-        grid_mesh->buffer_data(grid_uv_buf, 0, sizeof(float) * 3 * projected_grid.size(), &projected_grid[0]);
-        grid_mesh->draw_arrays(0, projected_grid.size());
-        driver.use_shader(*shader);
+        grid_mesh->draw_arrays(0, water_grid.size());
       }
+      driver.use_shader(*shader);
 
       glfwSwapBuffers(window);
 
