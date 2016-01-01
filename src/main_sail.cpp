@@ -77,7 +77,7 @@ struct Glfw_User_Data
   bool back_pressed = false;
   bool right_pressed = false;
   bool should_spawn_projectile = false;
-  bool update_cam = false;
+  bool update_cam = true;
 };
 void mouse_button_callback(GLFWwindow*, int, int, int)
 {
@@ -114,7 +114,7 @@ void key_callback(GLFWwindow* window, int key, int, int action, int)
         user_ptr->should_spawn_projectile = true;
         break;
       case GLFW_KEY_C:
-        user_ptr->update_cam = true;
+        user_ptr->update_cam = false;
         break;
     }
   }
@@ -138,7 +138,7 @@ void key_callback(GLFWwindow* window, int key, int, int action, int)
         user_ptr->right_pressed = false;
         break;
       case GLFW_KEY_C:
-        user_ptr->update_cam = false;
+        user_ptr->update_cam = true;
         break;
     }
   }
