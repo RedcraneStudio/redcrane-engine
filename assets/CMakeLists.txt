@@ -18,9 +18,17 @@ add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     shader/hud/fs.glsl shader/hud/vs.glsl
                     shader/debug/vs.glsl shader/debug/fs.glsl
                     shader/terrain/vs.glsl shader/terrain/fs.glsl
+                    shader/envmap/vs.glsl shader/envmap/fs.glsl
 
                     shader/water/vs.glsl
                     shader/water/fs.glsl
+
+                    tex/envmap/down.png
+                    tex/envmap/up.png
+                    tex/envmap/back.png
+                    tex/envmap/front.png
+                    tex/envmap/left.png
+                    tex/envmap/right.png
 
                     tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
                     tex/bark.png

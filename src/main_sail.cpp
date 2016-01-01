@@ -274,12 +274,77 @@ int main(int argc, char** argv)
     shader->set_sampler(0);
 
     // Load environment map
-    auto envtex = gfx::load_cubemap(driver, "tex/envmap/interstellar_ft.png",
-                                    "tex/envmap/interstellar_bk.png",
-                                    "tex/envmap/interstellar_rt.png",
-                                    "tex/envmap/interstellar_lf.png",
-                                    "tex/envmap/interstellar_up.png",
-                                    "tex/envmap/interstellar_dn.png");
+    auto envtex = gfx::load_cubemap(driver, "tex/envmap/front.png",
+                                    "tex/envmap/back.png",
+                                    "tex/envmap/right.png",
+                                    "tex/envmap/left.png",
+                                    "tex/envmap/up.png",
+                                    "tex/envmap/down.png");
+
+    std::vector<float> env_cube_data =
+    {
+      -1.0f, +1.0f, -1.0f,
+      -1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
+       1.0f, +1.0f, -1.0f,
+      -1.0f, +1.0f, -1.0f,
+
+      -1.0f, -1.0f,  1.0f,
+      -1.0f, -1.0f, -1.0f,
+      -1.0f, +1.0f, -1.0f,
+      -1.0f, +1.0f, -1.0f,
+      -1.0f, +1.0f,  1.0f,
+      -1.0f, -1.0f,  1.0f,
+
+       1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f,  1.0f,
+       1.0f, +1.0f,  1.0f,
+       1.0f, +1.0f,  1.0f,
+       1.0f, +1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
+
+      -1.0f, -1.0f,  1.0f,
+      -1.0f, +1.0f,  1.0f,
+       1.0f, +1.0f,  1.0f,
+       1.0f, +1.0f,  1.0f,
+       1.0f, -1.0f,  1.0f,
+      -1.0f, -1.0f,  1.0f,
+
+      -1.0f,  1.0f, -1.0f,
+       1.0f,  1.0f, -1.0f,
+       1.0f,  1.0f,  1.0f,
+       1.0f,  1.0f,  1.0f,
+      -1.0f,  1.0f,  1.0f,
+      -1.0f,  1.0f, -1.0f,
+
+      -1.0f, -1.0f, -1.0f,
+      -1.0f, -1.0f,  1.0f,
+       1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
+      -1.0f, -1.0f,  1.0f,
+       1.0f, -1.0f,  1.0f
+    };
+
+    auto envmap_mesh = driver.make_mesh_repr();
+    auto envmap_data_buf =
+      envmap_mesh->allocate_buffer(env_cube_data.size() * sizeof(float),
+                                   Usage_Hint::Draw, Upload_Hint::Static);
+    envmap_mesh->format_buffer(envmap_data_buf, 0, 3, Buffer_Format::Float, 0, 0);
+    envmap_mesh->enable_vertex_attrib(0);
+    envmap_mesh->set_primitive_type(Primitive_Type::Triangle);
+    envmap_mesh->buffer_data(envmap_data_buf, 0,
+                             sizeof(float) * env_cube_data.size(),
+                             &env_cube_data[0]);
+
+    auto envmap_shader = driver.make_shader_repr();
+    envmap_shader->load_vertex_part("shader/envmap/vs.glsl");
+    envmap_shader->load_fragment_part("shader/envmap/fs.glsl");
+
+    auto envmap_view_loc = envmap_shader->get_location("view");
+    auto envmap_proj_loc = envmap_shader->get_location("proj");
+    auto envmap_cube_loc = envmap_shader->get_location("envmap");
+    envmap_shader->set_integer(envmap_cube_loc, 0);
 
     // Find the depth of the four corner points.
     // Unproject each point with the inverse proj * view matrix.
@@ -533,6 +598,21 @@ int main(int argc, char** argv)
 
       // Clear the screen
       driver.clear();
+
+      // Render the environment map
+      driver.use_shader(*envmap_shader);
+
+      glm::mat4 env_camera_mat = camera_view_matrix(cam);
+      // Zero out the translation
+      env_camera_mat[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+      envmap_shader->set_matrix(envmap_view_loc, env_camera_mat);
+      envmap_shader->set_matrix(envmap_proj_loc, camera_proj_matrix(cam));
+
+      driver.write_depth(false);
+      envmap_mesh->draw_arrays(0, env_cube_data.size() / 3);
+      driver.write_depth(true);
+
+      driver.use_shader(*shader);
 
       // Render the hull
       shader->set_model(boat_render.model);
