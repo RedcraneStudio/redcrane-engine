@@ -38,8 +38,8 @@ namespace game { namespace gfx
     blit_cube_map_face(*tex, Cube_Map_Texture::Positive_Y, top_data);
     blit_cube_map_face(*tex, Cube_Map_Texture::Negative_Y, bottom_data);
 
-    blit_cube_map_face(*tex, Cube_Map_Texture::Positive_Z, front_data);
-    blit_cube_map_face(*tex, Cube_Map_Texture::Negative_Z, back_data);
+    blit_cube_map_face(*tex, Cube_Map_Texture::Positive_Z, back_data);
+    blit_cube_map_face(*tex, Cube_Map_Texture::Negative_Z, front_data);
 
     return tex;
   }
