@@ -247,4 +247,34 @@ namespace game { namespace water
 
     return data;
   }
+
+  // Sobel filter impl. code not used but I want to keep this here.
+
+  template <class T>
+  float apply_sobel_kernel_x(Vec<int> pt, Value_Map<T> const& map,
+                             float scale = 1.0f) noexcept
+  {
+    // Code derived from: http://stackoverflow.com/questions/5281261
+    // "Generating a normal map from a height map?"
+
+    auto s_2 = map.at({pt.x + 1, pt.y + 1});
+    auto s_0 = map.at({pt.x - 1, pt.y + 1});
+    auto s_5 = map.at({pt.x + 1, pt.y});
+    auto s_3 = map.at({pt.x - 1, pt.y});
+    auto s_8 = map.at({pt.x + 1, pt.y - 1});
+    auto s_6 = map.at({pt.x - 1, pt.y - 1});
+    return scale * -(s_2 - s_0 + 2 * (s_5 - s_3) + s_8 - s_6);
+  }
+  template <class T>
+  float apply_sobel_kernel_y(Vec<int> pt, Value_Map<T> const& map,
+                             float scale = 1.0f) noexcept
+  {
+    auto s_6 = map.at({pt.x - 1, pt.y - 1});
+    auto s_0 = map.at({pt.x - 1, pt.y + 1});
+    auto s_7 = map.at({pt.x, pt.y - 1});
+    auto s_1 = map.at({pt.x, pt.y + 1});
+    auto s_8 = map.at({pt.x + 1, pt.y - 1});
+    auto s_2 = map.at({pt.x + 1, pt.y + 1});
+    return scale * -(s_6 - s_0 + 2 * (s_7 - s_1) + s_8 - s_2);
+  }
 } }
