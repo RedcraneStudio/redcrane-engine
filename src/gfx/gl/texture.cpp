@@ -160,54 +160,29 @@ namespace game { namespace gfx { namespace gl
     if(type_ != Image_Type::Cube_Map) return;
     if(vol.width == 0 || vol.height == 0) return;
 
-    std::size_t type_size;
     GLenum data_type;
-
     switch(type)
     {
       case Data_Type::Float:
-        type_size = sizeof(float);
         data_type = GL_FLOAT;
         break;
       case Data_Type::Unsigned_Byte:
-        type_size = sizeof(uint8_t);
         data_type = GL_UNSIGNED_BYTE;
         break;
     }
 
-    // Row size in bytes
-    std::size_t row_size;
     GLenum data_format;
-
     switch(format_)
     {
       case Image_Format::Rgba:
-        row_size = type_size * 4 * vol.width;
         data_format = GL_RGBA;
         break;
       case Image_Format::Depth:
-        row_size = type_size * vol.width;
         data_format = GL_DEPTH_COMPONENT;
         break;
     }
 
-    // Allocate our data
-    uint8_t* out_data = new uint8_t[row_size * vol.height];
-
-    // Go backwards by row.
-    for(int i = 0; i < vol.height; ++i)
-    {
-      // dest: output data starting from first row
-      // src: input data starting from the bottom row
-      // size: row_size
-      std::memcpy(out_data + i * row_size,
-                  (uint8_t*) in_data + row_size*vol.height - (i+1)*row_size,
-                  row_size);
-    }
-
-    // We have a good array of data, where each successive row is going from
-    // bottom to top, but we need to figure out our sub-region on the opengl
-    // texture.
+    // No need to flip data for cube maps.
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, tex_id);
@@ -237,10 +212,8 @@ namespace game { namespace gfx { namespace gl
 
     glTexSubImage2D(cubemap_side, 0, vol.pos.x,
                     allocated_extents().y - vol.pos.y - vol.height,
-                    vol.width, vol.height, data_format, data_type, &out_data[0]);
+                    vol.width, vol.height, data_format, data_type, in_data);
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-
-    delete[] out_data;
   }
 
   void GL_Texture::bind(unsigned int loc) const noexcept
