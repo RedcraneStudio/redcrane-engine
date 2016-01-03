@@ -157,6 +157,30 @@ void resize_callback(GLFWwindow* window, int width, int height)
   // Change the camera aspect ratio
   user_ptr.camera.perspective.aspect = width / (float) height;
 }
+
+enum class Server_Mode
+{
+  Dedicated, Local, Connect, Bad
+};
+
+Server_Mode get_server_mode(boost::program_options::variables_map const& vm) noexcept
+{
+  bool dedicated = vm.count("dedicated-server");
+  bool local = vm.count("local-server");
+  bool connect = vm.count("connect");
+
+  int total = dedicated + local + connect;
+  if(total > 1)
+  {
+    return Server_Mode::Bad;
+  }
+
+  if(dedicated) return Server_Mode::Dedicated;
+  if(connect) return Server_Mode::Connect;
+  // By default, start a local server.
+  else return Server_Mode::Local;
+}
+
 int main(int argc, char** argv)
 {
   using namespace redc;
@@ -219,6 +243,28 @@ int main(int argc, char** argv)
   }
 
   uv_chdir("assets/");
+
+  // Figure out the server situation
+  auto server_mode = get_server_mode(vm);
+  if(server_mode == Server_Mode::Bad)
+  {
+    log_e("Pick either dedicated-server, local-server, or connect");
+    return EXIT_FAILURE;
+  }
+  else if(server_mode == Server_Mode::Dedicated)
+  {
+    log_e("Dedicated server not implemented");
+    return EXIT_FAILURE;
+  }
+  else if(server_mode == Server_Mode::Connect)
+  {
+    auto hostname = vm["connect"].as<std::string>();
+    auto port = vm["port"].as<uint16_t>();
+    log_i("Joining server '%:%'", hostname, port);
+    log_e("Connection not implemented");
+    return EXIT_FAILURE;
+  }
+  // else continue
 
   // Error callback
   glfwSetErrorCallback(error_callback);
