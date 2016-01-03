@@ -20,7 +20,10 @@ namespace redc
   }
 
   REDC_THREAD_LOCAL uv_loop_t* loop_ = nullptr;
-  Log_Severity out_level_ = Log_Severity::Info;
+  Log_Severity out_level_ = Log_Severity::Error;
+  Log_Severity file_level_ = Log_Severity::Info;
+  bool good_file_ = false;
+  uv_file file_;
 
   void init_log() noexcept
   {
@@ -52,6 +55,34 @@ namespace redc
     // lotto ticket!
     out_level_ = level;
   }
+  void set_file_log_level(Log_Severity level) noexcept
+  {
+    file_level_ = level;
+  }
+  void set_log_file(std::string fn) noexcept
+  {
+    // This only attempts to initialize loop_, but won't do anything if we call
+    // it multiple times.
+    init_log();
+
+    uv_fs_t fs_req;
+    auto err = uv_fs_open(loop_, &fs_req, fn.c_str(),
+                          O_WRONLY | O_APPEND | O_CREAT,
+                          S_IRUSR | S_IWUSR, NULL);
+    // I still don't really get the usage of uv_fs_open in synchroneous mode.
+    // It seems like the return value is the result in fs_res but also an error
+    // code if it's negative.
+    if(err < 0)
+    {
+      log_e("Error opening log file: %", uv_strerror(err));
+      good_file_ = false;
+    }
+    else
+    {
+      file_ = fs_req.result;
+      good_file_ = true;
+    }
+  }
 
   std::string format_time(const std::string& format)
   {
@@ -69,6 +100,47 @@ namespace redc
 
     time.resize(count);
     return time;
+  }
+
+  std::string severity_string(Log_Severity severity) noexcept
+  {
+    switch(severity)
+    {
+      case Log_Severity::Debug:
+        return "debug: ";
+      case Log_Severity::Info:
+        return "info: ";
+      case Log_Severity::Warning:
+        return "warning: ";
+      case Log_Severity::Error:
+        return "error: ";
+      default:
+        return "";
+    }
+  }
+
+  constexpr char const* const RESET_C = "\x1b[0m";
+  constexpr char const* const ERROR_C = "\x1b[95m";
+  constexpr char const* const WARNING_C = "\x1b[91m";
+  constexpr char const* const INFO_C = "\x1b[92m";
+  constexpr char const* const DEBUG_C = "\x1b[96m";
+
+  std::string severity_color(Log_Severity severity) noexcept
+  {
+    switch(severity)
+    {
+      case Log_Severity::Debug:
+        return DEBUG_C;
+      case Log_Severity::Info:
+        return INFO_C;
+      case Log_Severity::Warning:
+        return WARNING_C;
+      case Log_Severity::Error:
+        return ERROR_C;
+      default:
+        //return RESET_C;
+        return "";
+    }
   }
 
   struct write_req_t
@@ -91,74 +163,52 @@ namespace redc
     delete req;
   }
 
-  void log(std::string severity, std::string msg,
-           char const* const before, char const* const after,
-           int severity_level) noexcept
+  void log_out(char* msg, std::size_t size) noexcept
   {
-    if(!loop_) return;
-
-    // Bail out if the severity level isn't enough
-    if(severity_level > (int) out_level_)
+    if(!loop_)
     {
-      // Get outta here!
+      delete[] msg;
       return;
     }
 
-    // Create the final message.
-    std::string time = format_time("%F|%T");
-    std::string final_msg = std::string{before} + "(" + time + "): " +
-                            severity + ": " + msg + std::string{after} + "\n";
-
-    // Copy to a buffer libuv can use.
-    char* msg_data = new char[final_msg.size()];
-    std::memcpy(msg_data, final_msg.data(), final_msg.size());
-
     // Make the request.
     write_req_t* req = new write_req_t;
-    req->buf = uv_buf_init(msg_data, final_msg.size());
+    req->buf = uv_buf_init(msg, size);
     uv_fs_write(loop_, &req->req, 1, &req->buf, 1, -1, after_log);
+  }
+  void log_file(char* msg, std::size_t size) noexcept
+  {
+    // Bad file descriptor or bad loop
+    if(!loop_ || !good_file_)
+    {
+      delete[] msg;
+      return;
+    }
+
+    write_req_t* req = new write_req_t;
+    req->buf = uv_buf_init(msg, size);
+    uv_fs_write(loop_, &req->req, file_, &req->buf, 1, -1, after_log);
   }
   void log(Log_Severity severity, std::string msg) noexcept
   {
-    // This could be implemented differently, for instance with a
-    // enum-to-string function + calling the log(string,string) function
-    // directly.
-    switch(severity)
+    // Create the final message.
+    std::string time = format_time("%F|%T");
+
+    std::string msg_file = "("+time+"): "+severity_string(severity)+msg+"\n";
+    // If the severity of this message is greater than the output minimum.
+    if((unsigned int) severity >= (unsigned int) file_level_)
     {
-      case Log_Severity::Error:
-        log_e(msg);
-        break;
-      case Log_Severity::Warning:
-        log_w(msg);
-        break;
-      case Log_Severity::Info:
-        log_i(msg);
-        break;
-      case Log_Severity::Debug:
-        log_d(msg);
+      char* msg_buf = new char[msg_file.size()];
+      std::memcpy(msg_buf, msg_file.data(), msg_file.size());
+      log_file(msg_buf, msg_file.size());
     }
-  }
 
-  constexpr char const* const RESET_C = "\x1b[0m";
-  constexpr char const* const ERROR_C = "\x1b[95m";
-  constexpr char const* const WARNING_C = "\x1b[91m";
-  constexpr char const* const INFO_C = "\x1b[92m";
-  constexpr char const* const DEBUG_C = "\x1b[96m";
-
-  void log_e(std::string msg) noexcept
-  {
-    log("error", msg, ERROR_C, RESET_C, static_cast<int>(Log_Severity::Error));
-  }
-  void log_w(std::string msg) noexcept
-  {
-    log("warning", msg, WARNING_C, RESET_C, static_cast<int>(Log_Severity::Warning));
-  }
-  void log_i(std::string msg) noexcept
-  {
-    log("info", msg, INFO_C, RESET_C, static_cast<int>(Log_Severity::Info));
-  }
-  void log_d(std::string msg) noexcept
-  {
-    log("debug", msg, DEBUG_C, RESET_C, static_cast<int>(Log_Severity::Debug));
+    if((unsigned int) severity >= (unsigned int) out_level_)
+    {
+      std::string msg_term = severity_color(severity) + msg_file + RESET_C;
+      char* msg_buf = new char[msg_term.size()];
+      std::memcpy(msg_buf, msg_term.data(), msg_term.size());
+      log_out(msg_buf, msg_term.size());
+    }
   }
 }

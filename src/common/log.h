@@ -32,54 +32,70 @@ namespace redc
     Scoped_Log_Init() noexcept;
     ~Scoped_Log_Init() noexcept;
   };
+
   void init_log() noexcept;
   void uninit_log() noexcept;
+
   void flush_log() noexcept;
   void flush_log_full() noexcept;
 
+  // Higher is more severe!
   enum class Log_Severity : unsigned int
   {
-    Debug = 0, Info, Warning, Error
+    Debug = 0, Info = 1, Warning = 2, Error = 3
   };
 
-  void set_log_filename(char const* const filename) noexcept;
+  void set_log_file(std::string filename) noexcept;
   void set_out_log_level(Log_Severity level) noexcept;
+  void set_file_log_level(Log_Severity level) noexcept;
 
   template <class... Args>
-  void log(Log_Severity severity, std::string msg, Args&&... args) noexcept
+  inline void log(Log_Severity severity, std::string msg, Args&&... args) noexcept
   {
     log(severity, format(msg, 0, "", std::forward<Args>(args)...));
   }
   void log(Log_Severity severity, std::string msg) noexcept;
 
-  void log_e(std::string msg) noexcept;
+  inline void log_e(std::string msg) noexcept
+  {
+    log(Log_Severity::Error, msg);
+  }
 
   template <class... Args>
-  void log_e(std::string msg, Args&&... args) noexcept
+  inline void log_e(std::string msg, Args&&... args) noexcept
   {
     log_e(format(msg, 0, "", std::forward<Args>(args)...));
   }
 
-  void log_w(std::string msg) noexcept;
+  inline void log_w(std::string msg) noexcept
+  {
+    log(Log_Severity::Warning, msg);
+  }
 
   template <class... Args>
-  void log_w(std::string msg, Args&&... args) noexcept
+  inline void log_w(std::string msg, Args&&... args) noexcept
   {
     log_w(format(msg, 0, "", std::forward<Args>(args)...));
   }
 
-  void log_i(std::string msg) noexcept;
+  inline void log_i(std::string msg) noexcept
+  {
+    log(Log_Severity::Info, msg);
+  }
 
   template <class... Args>
-  void log_i(std::string msg, Args&&... args) noexcept
+  inline void log_i(std::string msg, Args&&... args) noexcept
   {
     log_i(format(msg, 0, "", std::forward<Args>(args)...));
   }
 
-  void log_d(std::string msg) noexcept;
+  inline void log_d(std::string msg) noexcept
+  {
+    log(Log_Severity::Debug, msg);
+  }
 
   template <class... Args>
-  void log_d(std::string msg, Args&&... args) noexcept
+  inline void log_d(std::string msg, Args&&... args) noexcept
   {
     log_d(format(msg, 0, "", std::forward<Args>(args)...));
   }
