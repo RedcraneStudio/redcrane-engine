@@ -50,7 +50,13 @@ namespace redc
     Result(Ok_Wrap<T> const& t) noexcept : res(t) {}
 
     template <class T>
+    Result(Ok_Wrap<T>&& t) noexcept : res(std::move(t)) {}
+
+    template <class T>
     Result(Err_Wrap<T> const& t) noexcept : res(t) {}
+
+    template <class T>
+    Result(Err_Wrap<T>&& t) noexcept : res(std::move(t)) {}
 
     template <class T>
     Result& operator=(Ok_Wrap<T> const& t) noexcept
