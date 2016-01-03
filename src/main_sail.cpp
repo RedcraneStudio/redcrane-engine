@@ -161,19 +161,41 @@ int main(int argc, char** argv)
 {
   using namespace redc;
 
-  set_out_log_level(Log_Severity::Debug);
-
   namespace po = boost::program_options;
-  po::options_description desc("Allowed Options");
-  desc.add_options()
+
+  po::options_description general_opt("General");
+  general_opt.add_options()
     ("help", "display help")
-    ("log-level", po::value<unsigned int>()->implicit_value(0),
-     "set minimum log level (if logging is enabled)")
+    ("out-log-level", po::value<unsigned int>()->default_value(2),
+     "set minimum log level to stdout")
+    ("log-file", po::value<std::string>(), "set log file")
+    ("file-log-level", po::value<unsigned int>()->default_value(0),
+     "set minimum log level to file")
+  ;
+
+  po::options_description boat_opt("Boat");
+  boat_opt.add_options()
     ("hull", po::value<unsigned int>()->default_value(0), "set boat hull")
     ("sail", po::value<unsigned int>()->default_value(0), "set boat sail")
     ("rudder", po::value<unsigned int>()->default_value(0), "set boat rudder")
-    ("gun", po::value<unsigned int>()->default_value(1), "set boat gun")
+    ("gun", po::value<unsigned int>()->default_value(0), "set boat gun")
   ;
+
+  po::options_description server_opt("Server");
+  server_opt.add_options()
+    ("port", po::value<uint16_t>()->default_value(28222), "set port number")
+    ("max-peers", po::value<uint16_t>()->default_value(12),
+     "set max number of connections")
+    ("local-server", "start local server with a client gui")
+    ("dedicated-server", "start a dedicated server without a client gui")
+    ("advertise-server", "advertise the server to other clients")
+    ("connect", po::value<std::string>(), "connect to a server")
+  ;
+
+  po::options_description desc("Allowed Options");
+
+  desc.add(general_opt).add(boat_opt).add(server_opt);
+
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);
