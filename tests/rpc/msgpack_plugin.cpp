@@ -9,7 +9,7 @@
 #include "rpc/dispatch.h"
 #include "common/utility.h"
 
-TEST_CASE("Msgpack plredcin poll_request", "[rpclib]")
+TEST_CASE("Msgpack plugin poll_request", "[rpclib]")
 {
   auto out_pipe = std::make_unique<redc::Pipe_IO>();
   auto& write_pipe = out_pipe->counterpart();
