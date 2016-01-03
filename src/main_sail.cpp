@@ -206,10 +206,19 @@ int main(int argc, char** argv)
     return EXIT_SUCCESS;
   }
 
-  uv_chdir("assets/");
-
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
+
+  // Figure out proper log level
+  set_out_log_level((Log_Severity) vm["out-log-level"].as<unsigned int>());
+  set_file_log_level((Log_Severity) vm["file-log-level"].as<unsigned int>());
+
+  if(vm.count("log-file"))
+  {
+    set_log_file(vm["log-file"].as<std::string>());
+  }
+
+  uv_chdir("assets/");
 
   // Error callback
   glfwSetErrorCallback(error_callback);
@@ -705,6 +714,9 @@ int main(int argc, char** argv)
       }
     }
   }
+
+  flush_log_full();
+
   glfwTerminate();
   return 0;
 }
