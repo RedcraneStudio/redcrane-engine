@@ -35,6 +35,7 @@
 
 #include "sail/player_data.h"
 #include "sail/boat.h"
+#include "sail/game.h"
 
 #include "use/mesh.h"
 #include "use/texture.h"
@@ -158,82 +159,23 @@ void resize_callback(GLFWwindow* window, int width, int height)
   user_ptr.camera.perspective.aspect = width / (float) height;
 }
 
-enum class Server_Mode
-{
-  Dedicated, Local, Connect, Bad
-};
-
-Server_Mode get_server_mode(boost::program_options::variables_map const& vm) noexcept
-{
-  bool dedicated = vm.count("dedicated-server");
-  bool local = vm.count("local-server");
-  bool connect = vm.count("connect");
-
-  int total = dedicated + local + connect;
-  if(total > 1)
-  {
-    return Server_Mode::Bad;
-  }
-
-  if(dedicated) return Server_Mode::Dedicated;
-  if(connect) return Server_Mode::Connect;
-  // By default, start a local server.
-  else return Server_Mode::Local;
-}
-
 int main(int argc, char** argv)
 {
   using namespace redc;
 
-  namespace po = boost::program_options;
+  // Parse command line options
+  auto vm = sail::parse_command_options(argc, argv);
 
-  po::options_description general_opt("General");
-  general_opt.add_options()
-    ("help", "display help")
-    ("out-log-level", po::value<unsigned int>()->default_value(2),
-     "set minimum log level to stdout")
-    ("log-file", po::value<std::string>(), "set log file")
-    ("file-log-level", po::value<unsigned int>()->default_value(0),
-     "set minimum log level to file")
-  ;
-
-  po::options_description boat_opt("Boat");
-  boat_opt.add_options()
-    ("hull", po::value<unsigned int>()->default_value(0), "set boat hull")
-    ("sail", po::value<unsigned int>()->default_value(0), "set boat sail")
-    ("rudder", po::value<unsigned int>()->default_value(0), "set boat rudder")
-    ("gun", po::value<unsigned int>()->default_value(0), "set boat gun")
-  ;
-
-  po::options_description server_opt("Server");
-  server_opt.add_options()
-    ("port", po::value<uint16_t>()->default_value(28222), "set port number")
-    ("max-peers", po::value<uint16_t>()->default_value(12),
-     "set max number of connections")
-    ("local-server", "start local server with a client gui")
-    ("dedicated-server", "start a dedicated server without a client gui")
-    ("advertise-server", "advertise the server to other clients")
-    ("connect", po::value<std::string>(), "connect to a server")
-  ;
-
-  po::options_description desc("Allowed Options");
-
-  desc.add(general_opt).add(boat_opt).add(server_opt);
-
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);
-
+  // House-keeping, etc
   if(vm.count("help"))
   {
-    std::cerr << desc << std::endl;
+    std::cerr << sail::command_options_desc() << std::endl;
     return EXIT_SUCCESS;
   }
 
   // Initialize logger.
   Scoped_Log_Init log_init_raii_lock{};
 
-  // Figure out proper log level
   set_out_log_level((Log_Severity) vm["out-log-level"].as<unsigned int>());
   set_file_log_level((Log_Severity) vm["file-log-level"].as<unsigned int>());
 
@@ -242,29 +184,28 @@ int main(int argc, char** argv)
     set_log_file(vm["log-file"].as<std::string>());
   }
 
-  uv_chdir("assets/");
-
-  // Figure out the server situation
-  auto server_mode = get_server_mode(vm);
-  if(server_mode == Server_Mode::Bad)
+  // Figure out the server situation, then pass control to the corresponding
+  // function of that mode.
+  auto server_mode = sail::pick_server_mode(vm);
+  if(server_mode == sail::Server_Mode::Bad)
   {
     log_e("Pick either dedicated-server, local-server, or connect");
     return EXIT_FAILURE;
   }
-  else if(server_mode == Server_Mode::Dedicated)
+  else if(server_mode == sail::Server_Mode::Dedicated)
   {
-    log_e("Dedicated server not implemented");
-    return EXIT_FAILURE;
+    return sail::start_dedicated(vm);
   }
-  else if(server_mode == Server_Mode::Connect)
+  else if(server_mode == sail::Server_Mode::Connect)
   {
-    auto hostname = vm["connect"].as<std::string>();
-    auto port = vm["port"].as<uint16_t>();
-    log_i("Joining server '%:%'", hostname, port);
-    log_e("Connection not implemented");
-    return EXIT_FAILURE;
+    return sail::start_connect(vm);
   }
-  // else continue
+  else
+  {
+    return sail::start_game(vm);
+  }
+
+  uv_chdir("assets/");
 
   // Error callback
   glfwSetErrorCallback(error_callback);
