@@ -34,6 +34,8 @@ namespace redc { namespace net
                                        std::size_t max_peers) noexcept;
   Result<Host, Error> make_client_host() noexcept;
 
+  void connect_with_client(Host& host, std::string h, uint16_t port) noexcept;
+
   struct Net_IO : public External_IO
   {
     Net_IO(Host&& host, ENetPeer* peer, read_cb r_cb = nullptr,
@@ -45,6 +47,9 @@ namespace redc { namespace net
     ~Net_IO() noexcept {}
 
     void set_reliable(bool rely) noexcept;
+
+    void disconnect() noexcept;
+
     void write(buf_t const& buf) noexcept override;
     void step() noexcept override;
   private:

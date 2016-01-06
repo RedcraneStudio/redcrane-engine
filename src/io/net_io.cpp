@@ -110,6 +110,15 @@ namespace redc { namespace net
     return ok(Host(host));
   }
 
+  void connect_with_client(Host& host, std::string h, uint16_t port) noexcept
+  {
+    ENetAddress addr;
+    enet_address_set_host(&addr, h.data());
+    addr.port = port;
+
+    enet_host_connect(host.host, &addr, 1, 0);
+  }
+
   Net_IO::Net_IO(Host&& host, ENetPeer* peer,
                  read_cb r_cb, read_cb e_cb) noexcept
     : External_IO(r_cb, e_cb), host_(std::move(host)), peer_(peer) {}
@@ -133,6 +142,12 @@ namespace redc { namespace net
   {
     send_reliable_ = rely;
   }
+
+  void Net_IO::disconnect() noexcept
+  {
+    enet_peer_disconnect(peer_, 0);
+  }
+
   void Net_IO::write(buf_t const& buf) noexcept
   {
     ENetPacketFlag flags = (ENetPacketFlag) 0;
