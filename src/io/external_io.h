@@ -64,20 +64,6 @@ namespace redc
     uv_loop_t loop_;
   };
 
-  struct Net_IO : public External_IO
-  {
-    Net_IO(std::string const& bind_ip, uint16_t const bind_port,
-           std::string const& write_ip, uint16_t const write_port) noexcept;
-    ~Net_IO() noexcept;
-
-    void write(buf_t const& buf) noexcept override;
-    void step() noexcept override;
-  private:
-    struct sockaddr_in write_addr_;
-    net::Pipe pipe_;
-    uv_loop_t loop_;
-  };
-
   struct Pipe_IO : public External_IO
   {
     // Client mode. The counterpart is owned.

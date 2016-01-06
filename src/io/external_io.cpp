@@ -55,44 +55,6 @@ namespace redc
     uv_run(&loop_, UV_RUN_NOWAIT);
   }
 
-  void post_net_buffer(net::Pipe* pipe)
-  {
-    Net_IO* io = (Net_IO*) pipe->user_data;
-    io->post(*pipe->out.buf);
-  }
-
-  Net_IO::Net_IO(std::string const& bind_ip,
-                 uint16_t const bind_port,
-                 std::string const& write_ip,
-                 uint16_t const write_port) noexcept
-  {
-    // Initialize the loop
-    uv_loop_init(&loop_);
-    // Initialize the network pipe.
-    net::init_pipe(pipe_, &loop_, bind_ip, bind_port);
-    pipe_.read_cb = post_net_buffer;
-
-    // Initialize the address that will be written to.
-    uv_ip4_addr(write_ip.c_str(), write_port, &write_addr_);
-  }
-  Net_IO::~Net_IO() noexcept
-  {
-    // Uninitialize the net pipe
-    net::uninit_pipe(pipe_);
-    // Uninit the loop
-    uv_loop_close(&loop_);
-  }
-
-  void Net_IO::write(buf_t const& buf) noexcept
-  {
-    *pipe_.out.buf = buf;
-    net::write_buffer(pipe_, (struct sockaddr*) &write_addr_);
-  }
-  void Net_IO::step() noexcept
-  {
-    uv_run(&loop_, UV_RUN_NOWAIT);
-  }
-
   Pipe_IO::Pipe_IO() noexcept
     : External_IO(), cp_(make_owned_maybe(new Pipe_IO(*this))) {}
 

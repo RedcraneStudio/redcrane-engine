@@ -33,10 +33,11 @@ add_subdirectory(water)
 
 add_subdirectory(collisionlib)
 
-add_subdirectory(rpc)
 add_subdirectory(use)
 
-# find_package(ENet REQUIRED)
+find_package(ENet REQUIRED)
+add_subdirectory(rpc)
+
 add_subdirectory(sail)
 
 find_package(Threads REQUIRED)
