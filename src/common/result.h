@@ -74,6 +74,9 @@ namespace redc
 
     Ok_T const* ok() const noexcept;
     Err_T const* err() const noexcept;
+
+    Ok_T* ok() noexcept;
+    Err_T* err() noexcept;
   };
 
   template <class Ok_T, class Err_T>
@@ -93,5 +96,16 @@ namespace redc
       return &boost::get<Err_Wrap<Err_T> >(res).obj;
     }
     return nullptr;
+  }
+
+  template <class Ok_T, class Err_T>
+  Ok_T* Result<Ok_T, Err_T>::ok() noexcept
+  {
+    return const_cast<Ok_T*>(static_cast<Result const*>(this)->ok());
+  }
+  template <class Ok_T, class Err_T>
+  Err_T* Result<Ok_T, Err_T>::err() noexcept
+  {
+    return const_cast<Err_T*>(static_cast<Result const*>(this)->err());
   }
 }
