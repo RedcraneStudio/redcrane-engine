@@ -15,6 +15,12 @@ namespace redc
 
   std::vector<uchar> buf_from_string(const std::string& s) noexcept;
 
+  // For logging
+  std::string to_string_helper(buf_t const& buf) noexcept;
+
+  std::string string_from_buf(const buf_t& buf) noexcept;
+  std::ostream& operator<<(std::ostream& out, buf_t const& buf) noexcept;
+
   namespace literals
   {
     std::vector<uchar>

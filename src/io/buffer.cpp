@@ -17,6 +17,21 @@ namespace redc
     return std::vector<uchar>(s.begin(), s.end());
   }
 
+  std::string to_string_helper(buf_t const& buf) noexcept
+  {
+    return string_from_buf(buf);
+  }
+  std::string string_from_buf(const buf_t& buf) noexcept
+  {
+    return std::string(buf.begin(), buf.end());
+  }
+
+  std::ostream& operator<<(std::ostream& out, buf_t const& buf) noexcept
+  {
+    out << string_from_buf(buf);
+    return out;
+  }
+
   namespace literals
   {
     std::vector<uchar>
