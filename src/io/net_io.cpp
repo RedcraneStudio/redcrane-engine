@@ -68,4 +68,128 @@ namespace redc { namespace net
       enet_uninitialize_refct();
     }
   }
+
+  Result<Host, Error> make_server_host(uint16_t port,
+                                       std::size_t max_peers) noexcept
+  {
+    // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    // @@ Host::~Host will do the corresponding de-refcount. @@
+    // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    auto init_err = enet_initialize_refct();
+    if(init_err) return err(Error::ENet_Init_Failed);
+
+    ENetAddress addr;
+    addr.host = ENET_HOST_ANY;
+    addr.port = port;
+
+    ENetHost* host = enet_host_create(&addr, max_peers, 1, 0, 0);
+    if(!host)
+    {
+      log_e("Failed to init server host on port % for % max peers", port,
+            max_peers);
+      return err(Error::Host_Init_Failed);
+    }
+
+    return ok(Host(host));
+  }
+  Result<Host, Error> make_client_host() noexcept
+  {
+    // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    // @@ Host::~Host will do the corresponding de-refcount. @@
+    // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    auto init_err = enet_initialize_refct();
+    if(init_err) return err(Error::ENet_Init_Failed);
+
+    ENetHost* host = enet_host_create(NULL, 1, 1, 0, 0);
+    if(!host)
+    {
+      log_e("Failed to init client host");
+      return err(Error::Host_Init_Failed);
+    }
+
+    return ok(Host(host));
+  }
+
+  Net_IO::Net_IO(Host&& host, ENetPeer* peer,
+                 read_cb r_cb, read_cb e_cb) noexcept
+    : External_IO(r_cb, e_cb), host_(std::move(host)), peer_(peer) {}
+
+  Net_IO::Net_IO(Net_IO&& io) noexcept
+    : External_IO(std::move(io)), host_(std::move(io.host_)), peer_(io.peer_),
+      send_reliable_(io.send_reliable_) {}
+
+  Net_IO& Net_IO::operator=(Net_IO&& io) noexcept
+  {
+    this->External_IO::operator=(std::move(io));
+
+    this->host_ = std::move(io.host_);
+    this->peer_ = io.peer_;
+    this->send_reliable_ = io.send_reliable_;
+
+    return *this;
+  }
+
+  void Net_IO::set_reliable(bool rely) noexcept
+  {
+    send_reliable_ = rely;
+  }
+  void Net_IO::write(buf_t const& buf) noexcept
+  {
+    ENetPacketFlag flags = (ENetPacketFlag) 0;
+    if(send_reliable_)
+    {
+      flags = ENET_PACKET_FLAG_RELIABLE;
+    }
+
+    // Should we buffer this and wait for a call to Net_IO::step?
+    ENetPacket* packet = enet_packet_create(buf.data(), buf.size(), flags);
+    enet_peer_send(peer_, 0, packet);
+  }
+  void Net_IO::step() noexcept
+  {
+    ENetEvent event;
+    while(enet_host_service(host_.host, &event, 0) > 0)
+    {
+      switch(event.type)
+      {
+        case ENET_EVENT_TYPE_CONNECT:
+          log_w("Ignoring additional connections");
+          break;
+        case ENET_EVENT_TYPE_DISCONNECT:
+          log_w("Peer disconnected");
+          break;
+        case ENET_EVENT_TYPE_RECEIVE:
+        {
+          // SO MANY COPIES!!
+          buf_t buf(event.packet->data,
+                    event.packet->data + event.packet->dataLength);
+          post(buf);
+          enet_packet_destroy(event.packet);
+          break;
+        }
+        case ENET_EVENT_TYPE_NONE:
+        default:
+          break;
+      }
+    }
+  }
+
+  ENetPeer* wait_for_connection(Host& host, uint32_t time) noexcept
+  {
+    ENetEvent event;
+    if(enet_host_service(host.host, &event, time))
+    {
+      if(event.type == ENET_EVENT_TYPE_CONNECT)
+      {
+        // Eeh, this is kind of confusing. If there is no connection no move
+        // is done.
+        return event.peer;
+      }
+      else
+      {
+        return nullptr;
+      }
+    }
+    return nullptr;
+  }
 } }
