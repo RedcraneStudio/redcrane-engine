@@ -8,37 +8,42 @@
 #include "external_io.h"
 #include "../common/result.h"
 #include "../common/null_t.h"
-namespace redc { namespace net
+namespace redc
 {
-  enum class Error
+  namespace net
   {
-    ENet_Init_Failed,
-    Host_Init_Failed,
-    Connect_Failed
-  };
+    enum class Error
+    {
+      ENet_Init_Failed,
+      Host_Init_Failed,
+      Connect_Failed
+    };
 
-  // RAII wrapper for ENetHost.
-  struct Host
-  {
-    explicit Host(ENetHost* host) noexcept;
-    Host(Host&& oh) noexcept;
-    Host& operator=(Host&& oh) noexcept;
-    ~Host() noexcept;
+    // RAII wrapper for ENetHost.
+    struct Host
+    {
+      explicit Host(ENetHost* host) noexcept;
+      Host(Host&& oh) noexcept;
+      Host& operator=(Host&& oh) noexcept;
+      ~Host() noexcept;
 
-    void close() noexcept;
+      void close() noexcept;
 
-    ENetHost* host;
-  };
+      ENetHost* host;
+    };
 
-  Result<Host, Error> make_server_host(uint16_t port,
-                                       std::size_t max_peers) noexcept;
-  Result<Host, Error> make_client_host() noexcept;
+    Result<Host, Error> make_server_host(uint16_t port,
+                                         std::size_t max_peers) noexcept;
+    Result<Host, Error> make_client_host() noexcept;
 
-  void connect_with_client(Host& host, std::string h, uint16_t port) noexcept;
+    void connect_with_client(Host& host, std::string h, uint16_t port) noexcept;
+
+    ENetPeer* wait_for_connection(Host& host, uint32_t time) noexcept;
+  }
 
   struct Net_IO : public External_IO
   {
-    Net_IO(Host&& host, ENetPeer* peer, read_cb r_cb = nullptr,
+    Net_IO(net::Host&& host, ENetPeer* peer, read_cb r_cb = nullptr,
            read_cb e_cb = nullptr) noexcept;
 
     Net_IO(Net_IO&& io) noexcept;
@@ -53,10 +58,8 @@ namespace redc { namespace net
     void write(buf_t const& buf) noexcept override;
     void step() noexcept override;
   private:
-    Host host_;
+    net::Host host_;
     ENetPeer* peer_;
     bool send_reliable_ = true;
   };
-
-  ENetPeer* wait_for_connection(Host& host, uint32_t time) noexcept;
-} };
+}
