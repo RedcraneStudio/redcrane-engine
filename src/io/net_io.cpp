@@ -141,24 +141,9 @@ namespace redc
     }
   } // namespace net
 
-  Net_IO::Net_IO(net::Host&& host, ENetPeer* peer,
+  Net_IO::Net_IO(net::Host& host, ENetPeer* peer,
                  read_cb r_cb, read_cb e_cb) noexcept
-    : External_IO(r_cb, e_cb), host_(std::move(host)), peer_(peer) {}
-
-  Net_IO::Net_IO(Net_IO&& io) noexcept
-    : External_IO(std::move(io)), host_(std::move(io.host_)), peer_(io.peer_),
-      send_reliable_(io.send_reliable_) {}
-
-  Net_IO& Net_IO::operator=(Net_IO&& io) noexcept
-  {
-    this->External_IO::operator=(std::move(io));
-
-    this->host_ = std::move(io.host_);
-    this->peer_ = io.peer_;
-    this->send_reliable_ = io.send_reliable_;
-
-    return *this;
-  }
+    : External_IO(r_cb, e_cb), host_(&host), peer_(peer) {}
 
   void Net_IO::set_reliable(bool rely) noexcept
   {
@@ -167,7 +152,8 @@ namespace redc
 
   void Net_IO::disconnect() noexcept
   {
-    enet_peer_disconnect(peer_, 0);
+    // TODO: Flag to decide how to disconnect?
+    enet_peer_disconnect_later(peer_, 0);
   }
 
   void Net_IO::write(buf_t const& buf) noexcept
@@ -184,30 +170,20 @@ namespace redc
   }
   void Net_IO::step() noexcept
   {
-    ENetEvent event;
-    while(enet_host_service(host_.host, &event, 0) > 0)
+    enet_host_flush(host_->host);
+  }
+  bool Net_IO::post_recieve(ENetEvent& event) noexcept
+  {
+    // If we recieved data from our client / peer.
+    if(event.type == ENET_EVENT_TYPE_RECEIVE && event.peer == peer_)
     {
-      switch(event.type)
-      {
-        case ENET_EVENT_TYPE_CONNECT:
-          log_w("Ignoring additional connections");
-          break;
-        case ENET_EVENT_TYPE_DISCONNECT:
-          log_w("Peer disconnected");
-          break;
-        case ENET_EVENT_TYPE_RECEIVE:
-        {
-          // SO MANY COPIES!!
-          buf_t buf(event.packet->data,
-                    event.packet->data + event.packet->dataLength);
-          post(buf);
-          enet_packet_destroy(event.packet);
-          break;
-        }
-        case ENET_EVENT_TYPE_NONE:
-        default:
-          break;
-      }
+      // Post it
+      buf_t buf(event.packet->data,
+                event.packet->data + event.packet->dataLength);
+      post(buf);
+      enet_packet_destroy(event.packet);
+      return true;
     }
+    return false;
   }
 } // namespace redc

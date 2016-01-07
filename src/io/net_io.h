@@ -43,22 +43,30 @@ namespace redc
 
   struct Net_IO : public External_IO
   {
-    Net_IO(net::Host&& host, ENetPeer* peer, read_cb r_cb = nullptr,
+    Net_IO(net::Host& host, ENetPeer* peer, read_cb r_cb = nullptr,
            read_cb e_cb = nullptr) noexcept;
-
-    Net_IO(Net_IO&& io) noexcept;
-    Net_IO& operator=(Net_IO&& io) noexcept;
 
     ~Net_IO() noexcept {}
 
+    // Set reliable packets
     void set_reliable(bool rely) noexcept;
 
+    // Send a disconnect message to the peer
     void disconnect() noexcept;
 
+    // Write to the peer
     void write(buf_t const& buf) noexcept override;
+
+    // Send out any messages to the peer
     void step() noexcept override;
+
+    // Potentially handles recieved data returning true if it is our peer.
+    bool post_recieve(ENetEvent& event) noexcept;
+
+    net::Host* host() const noexcept { return host_; }
+    ENetPeer* peer() const noexcept { return peer_; }
   private:
-    net::Host host_;
+    net::Host* host_;
     ENetPeer* peer_;
     bool send_reliable_ = true;
   };
