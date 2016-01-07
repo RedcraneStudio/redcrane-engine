@@ -37,6 +37,9 @@ namespace redc
     }
     inline id_type insert(T const& obj) noexcept;
 
+    template <class... Args>
+    inline id_type emplace(Args&&... args) noexcept;
+
     inline T const& find(id_type) const;
     inline T& find(id_type);
     inline void set(id_type, T const&);
@@ -70,6 +73,18 @@ namespace redc
     if(!id) return 0;
 
     this->objs_.emplace(id, obj);
+    this->ids_cache_.invalidate();
+    return id;
+  }
+
+  template <class T, class Id>
+  template <class... Args>
+  inline auto ID_Map<T, Id>::emplace(Args&&... args) noexcept -> id_type
+  {
+    id_type id = this->id_counter_.get();
+    if(!id) return 0;
+
+    this->objs_.emplace(id, T{std::forward<Args>(args)...});
     this->ids_cache_.invalidate();
     return id;
   }
