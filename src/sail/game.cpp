@@ -81,10 +81,10 @@ namespace redc { namespace sail
     auto port = vm["port"].as<uint16_t>();
     auto max_peers = vm["max-peers"].as<uint16_t>();
 
-    auto host = net::make_server_host(port, max_peers);
-    Server server{std::move(*host.ok()), {}};
+    auto host = std::move(*net::make_server_host(port, max_peers).ok());
+    Server server;
 
-    Client_Dispatcher client_dispatcher(server);
+    Client_Dispatcher client_dispatcher(host, server);
 
     bool running = true;
     while(running)
@@ -95,7 +95,7 @@ namespace redc { namespace sail
       }
 
       ENetEvent event;
-      while(enet_host_service(server.host.host, &event, 0) != 0)
+      while(enet_host_service(host.host, &event, 0) != 0)
       {
         auto id = client_dispatcher.try_client_dispatch(event);
         if(id)

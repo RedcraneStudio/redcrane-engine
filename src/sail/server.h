@@ -17,19 +17,25 @@ namespace redc { namespace sail
 
   struct Server
   {
-    net::Host host;
     ID_Map<Client> clients;
   };
 
+  /*
+   * \brief Dispatches connections to a host in the form of clients + net_io.
+   */
   struct Client_Dispatcher
   {
-    Client_Dispatcher(Server& server) : server_(&server) {}
+    Client_Dispatcher(net::Host& host, Server& server)
+      : host_(&host), server_(&server) {}
 
     // Returns amount of clients added to the server.
-    ID_Map<Client>::id_type try_client_dispatch(ENetEvent const& event) noexcept;
-    ID_Map<Client>::id_type check_client_disconnect(ENetEvent const& event) noexcept;
+    ID_Map<Client>::id_type
+      try_client_dispatch(ENetEvent const& event) noexcept;
+    ID_Map<Client>::id_type
+      check_client_disconnect(ENetEvent const& event) noexcept;
 
   private:
+    net::Host* host_;
     Server* server_;
   };
 } }

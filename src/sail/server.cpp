@@ -27,7 +27,9 @@ namespace redc { namespace sail
   {
     if(event.type == ENET_EVENT_TYPE_CONNECT)
     {
-      auto io = make_maybe_owned<Net_IO>(server_->host, event.peer);
+      // It's stupid to take the whole host in as a constructor parameter but
+      // only use it here, is there a better solution?
+      auto io = make_maybe_owned<Net_IO>(*host_, event.peer);
       auto id = server_->clients.emplace("", std::move(io));
       // Give it a random name
 
@@ -36,7 +38,7 @@ namespace redc { namespace sail
       server_->clients.find(id).name = names[(id - 1) % name_count];
       return id;
     }
-    // Zero is never a valid id.
+    // Not our event, signal it with a zero, which is never a valid id.
     return 0;
   }
 
@@ -48,6 +50,7 @@ namespace redc { namespace sail
       auto id = 0;
       for(auto& client : server_->clients)
       {
+        // Is it any of these peers?
         if(client.second.io->peer() == event.peer)
         {
           // Our client disconnected.
@@ -57,6 +60,7 @@ namespace redc { namespace sail
       }
       if(id)
       {
+        // Don't forget to reserve its id.
         server_->clients.erase(id);
         return id;
       }
