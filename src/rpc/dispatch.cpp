@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "dispatch.h"
-namespace redc
+namespace redc { namespace rpc
 {
   void dispatch(std::vector<method_t>& methods, Request req,
                 Run_Context* ctx) noexcept
@@ -25,4 +25,4 @@ namespace redc
     }
     (methods[req.fn])(ctx, *req.params);
   }
-}
+} }

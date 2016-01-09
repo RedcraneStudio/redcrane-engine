@@ -2,18 +2,19 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "plugins.h"
-#include "../common/utility.h"
+#include "msgpack_interface.h"
 #include "../common/result.h"
 #include "../common/log.h"
 
+#include <vector>
+
 #include <msgpack.hpp>
-namespace redc
+namespace redc { namespace rpc
 {
-  Msgpack_Plugin::Msgpack_Plugin(std::unique_ptr<External_IO> io) noexcept
-                                 : io_(std::move(io))
+  Msgpack_Interface::Msgpack_Interface(Maybe_Owned<External_IO> io) noexcept
+                                       : io_(std::move(io))
   {
-    io_->set_read_callback([this](const std::vector<uchar>& buf)
+    io_->set_read_callback([this](buf_t const& buf)
     {
       unpacker_.reserve_buffer(buf.size());
       std::memcpy(unpacker_.buffer(), &buf[0], buf.size());
@@ -119,7 +120,7 @@ namespace redc
     }
   }
 
-  bool Msgpack_Plugin::poll_request(Request& req)
+  bool Msgpack_Interface::poll_request(Request& req)
   {
     io_->step();
 
@@ -148,7 +149,7 @@ namespace redc
     return false;
   }
 
-  void Msgpack_Plugin::post_request(Request const& res,
+  void Msgpack_Interface::post_request(Request const& res,
                                     bool reliable) noexcept
   {
     std::ostringstream buf;
@@ -189,4 +190,4 @@ namespace redc
     io_->write(buf_from_string(buf.str()));
     io_->step();
   }
-}
+} }

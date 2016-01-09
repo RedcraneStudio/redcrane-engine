@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "req.h"
-namespace redc
+namespace redc { namespace rpc
 {
   // I believe msgpack::object_handle has implicit move constructors which
   // scare me but okay.
@@ -30,4 +30,4 @@ namespace redc
     this->object = std::move(p.object);
     return *this;
   }
-}
+} }

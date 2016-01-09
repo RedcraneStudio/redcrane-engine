@@ -3,18 +3,21 @@
  * All rights reserved.
  */
 //#include <boost/optional/optional_io.hpp>
+#include "rpc/msgpack_interface.h"
 #include "catch/catch.hpp"
+
 #include "io/external_io.h"
-#include "rpc/plugins.h"
 #include "rpc/dispatch.h"
 #include "common/utility.h"
 
 TEST_CASE("Msgpack plugin poll_request", "[rpclib]")
 {
+  namespace rpc = redc::rpc;
+
   auto out_pipe = std::make_unique<redc::Pipe_IO>();
   auto& write_pipe = out_pipe->counterpart();
 
-  redc::Msgpack_Plugin plugin{std::move(out_pipe)};
+  rpc::Msgpack_Interface plugin{std::move(out_pipe)};
 
   using namespace redc::literals;
 
@@ -38,7 +41,7 @@ TEST_CASE("Msgpack plugin poll_request", "[rpclib]")
 
   write_pipe.step();
 
-  redc::Request req;
+  rpc::Request req;
   REQUIRE(plugin.poll_request(req));
   CHECK(req.fn == 0);
   CHECK_FALSE(req.id);
@@ -81,6 +84,8 @@ TEST_CASE("Msgpack plugin poll_request", "[rpclib]")
 }
 TEST_CASE("Msgpack plugin post_request", "[rpclib]")
 {
+  namespace rpc = redc::rpc;
+
   auto plugin_pipe = std::make_unique<redc::Pipe_IO>();
   auto& read_pipe = plugin_pipe->counterpart();
 
@@ -110,10 +115,10 @@ TEST_CASE("Msgpack plugin post_request", "[rpclib]")
 
   using namespace redc::literals;
 
-  redc::Msgpack_Plugin plugin{std::move(plugin_pipe)};
+  rpc::Msgpack_Interface plugin{std::move(plugin_pipe)};
 
   // [0]
-  redc::Request req;
+  rpc::Request req;
   req.fn = 0;
   plugin.post_request(req);
   REQUIRE("\x91\x00"_buf == read_bytes(2));
@@ -135,12 +140,12 @@ TEST_CASE("Msgpack plugin post_request", "[rpclib]")
 
   // [1, [3]]
   req.id = boost::none;
-  req.params = redc::make_params(3);
+  req.params = rpc::make_params(3);
   plugin.post_request(req);
   REQUIRE("\x92\x01\x91\x03"_buf == read_bytes(4));
 
   // [1, [5, 2, 5]]
-  req.params = redc::make_params(5, 2, 5);
+  req.params = rpc::make_params(5, 2, 5);
   plugin.post_request(req);
   REQUIRE("\x92\x01\x93\x05\x02\x05"_buf == read_bytes(6));
 
@@ -156,31 +161,33 @@ TEST_CASE("Msgpack plugin post_request", "[rpclib]")
 }
 TEST_CASE("Request dispatcher", "[rpclib]")
 {
+  namespace rpc = redc::rpc;
+
   int var0 = 0;
   int var1 = 0;
 
-  auto func0 = [&var0](auto* run_context, auto& params)
+  auto func0 = [&var0](auto*, auto&)
   {
     var0 = 5;
   };
-  auto func1 = [&var1](auto* run_context, auto& params)
+  auto func1 = [&var1](auto*, auto&)
   {
     ++var1;
   };
 
-  std::vector<redc::method_t> methods{func0, func1};
+  std::vector<rpc::method_t> methods{func0, func1};
 
   auto in = 5;
-  redc::Request req;
+  rpc::Request req;
   req.fn = 0;
-  req.params = redc::make_params(5);
-  redc::dispatch(methods, req);
+  req.params = rpc::make_params(5);
+  rpc::dispatch(methods, req);
   REQUIRE(var0 == in);
 
   req.fn = 1;
   req.params = boost::none;
 
-  redc::dispatch(methods, req);
-  redc::dispatch(methods, req);
+  rpc::dispatch(methods, req);
+  rpc::dispatch(methods, req);
   REQUIRE(var1 == 2);
 }

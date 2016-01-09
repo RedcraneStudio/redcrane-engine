@@ -8,7 +8,7 @@
 #include <boost/optional.hpp>
 #include <msgpack.hpp>
 
-namespace redc
+namespace redc { namespace rpc
 {
   using boost::optional;
 
@@ -81,4 +81,4 @@ namespace redc
     // and parameters.
     optional<Params> params;
   };
-}
+} }

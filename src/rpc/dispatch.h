@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "req.h"
-namespace redc
+namespace redc { namespace rpc
 {
   struct Run_Context
   {
@@ -13,10 +13,13 @@ namespace redc
 
     bool is_error;
     Params response;
+
+    void* userdata;
   };
 
   using method_t = std::function<void(Run_Context*, Params& params)>;
 
+  // Request => Function call
   void dispatch(std::vector<method_t>& methods, Request req,
                 Run_Context* ctx = nullptr) noexcept;
-}
+} }
