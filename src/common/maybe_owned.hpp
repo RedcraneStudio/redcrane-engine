@@ -99,6 +99,8 @@ namespace redc
   private:
     bool owned_ = false;
     T* ptr_ = nullptr;
+
+    template <class U> friend struct Maybe_Owned;
   };
 
   template <class T>
