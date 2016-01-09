@@ -16,7 +16,8 @@ namespace redc
   struct Plugin
   {
     virtual bool poll_request(Request& req) = 0;
-    virtual void post_request(Request const& res) noexcept = 0;
+    virtual void post_request(Request const& res,
+                              bool reliable = true) noexcept = 0;
   };
 
   struct Msgpack_Plugin : public Plugin
@@ -31,7 +32,8 @@ namespace redc
     Msgpack_Plugin& operator=(Msgpack_Plugin const&) noexcept = delete;
 
     bool poll_request(Request& req) override;
-    void post_request(Request const& res) noexcept override;
+    void post_request(Request const& res,
+                      bool reliable = true) noexcept override;
 
     inline External_IO& io() noexcept { return *this->io_; }
     inline External_IO const& io() const noexcept { return *this->io_; }

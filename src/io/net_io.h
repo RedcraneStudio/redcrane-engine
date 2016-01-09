@@ -49,7 +49,7 @@ namespace redc
     ~Net_IO() noexcept {}
 
     // Set reliable packets
-    void set_reliable(bool rely) noexcept;
+    void set_reliable(bool rely) noexcept override;
 
     // Send a disconnect message to the peer
     void disconnect() noexcept;

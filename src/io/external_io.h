@@ -28,6 +28,8 @@ namespace redc
     inline void post(buf_t const& buf) noexcept;
     inline void post_error(buf_t const& err) noexcept;
 
+    inline virtual void set_reliable(bool) noexcept {}
+
     virtual void write(buf_t const& buf) noexcept = 0;
     virtual void step() noexcept = 0;
   private:

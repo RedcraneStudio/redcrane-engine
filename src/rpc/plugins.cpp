@@ -148,7 +148,8 @@ namespace redc
     return false;
   }
 
-  void Msgpack_Plugin::post_request(Request const& res) noexcept
+  void Msgpack_Plugin::post_request(Request const& res,
+                                    bool reliable) noexcept
   {
     std::ostringstream buf;
     msgpack::packer<std::ostringstream> packer(buf);
@@ -184,6 +185,7 @@ namespace redc
       packer.pack_array(1);
       packer.pack(res.fn);
     }
+    io_->set_reliable(reliable);
     io_->write(buf_from_string(buf.str()));
     io_->step();
   }
