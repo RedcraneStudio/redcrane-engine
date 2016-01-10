@@ -6,6 +6,10 @@
 
 #include <ostream>
 #include <cmath>
+
+#ifdef REDC_USE_MSGPACK
+#include <msgpack.hpp>
+#endif
 namespace redc
 {
   template <typename T = int>
@@ -18,6 +22,10 @@ namespace redc
 
     T x;
     T y;
+
+#ifdef REDC_USE_MSGPACK
+    MSGPACK_DEFINE(x, y);
+#endif
   };
 
   template <class T1, class T2>
