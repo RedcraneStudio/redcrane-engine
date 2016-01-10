@@ -101,7 +101,7 @@ namespace redc { namespace sail
         if(id)
         {
           // That was a connection!
-          auto& client = server.clients.find(id);
+          auto& client = server.clients.at(id);
           log_i("Client % (id = %) connected", client.name, id);
 
 

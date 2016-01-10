@@ -40,8 +40,11 @@ namespace redc
     template <class... Args>
     inline id_type emplace(Args&&... args) noexcept;
 
-    inline T const& find(id_type) const;
-    inline T& find(id_type);
+    inline T const& at(id_type) const;
+    inline T& at(id_type);
+
+    inline const_iterator find(id_type) const;
+    inline iterator find(id_type);
     inline void set(id_type, T const&);
 
     inline iterator erase(const_iterator pos);
@@ -119,20 +122,27 @@ namespace redc
     return this->objs_.erase(id);
   }
 
-  /*!
-   * \brief Returns a const reference to the object with the passed in id.
-   * \throws std::out_of_range if the id doesn't correlate with any Object.
-   */
   template <class T, class Id>
-  inline T const& ID_Map<T, Id>::find(id_type id) const
+  inline T const& ID_Map<T, Id>::at(id_type id) const
+  {
+    return objs_.at(id);
+  }
+  template <class T, class Id>
+  inline T& ID_Map<T, Id>::at(id_type id)
   {
     return objs_.at(id);
   }
 
   template <class T, class Id>
-  inline T& ID_Map<T, Id>::find(id_type id)
+  inline auto ID_Map<T, Id>::find(id_type id) const -> const_iterator
   {
-    return this->objs_.at(id);
+    return objs_.find(id);
+  }
+
+  template <class T, class Id>
+  inline auto ID_Map<T, Id>::find(id_type id) -> iterator
+  {
+    return objs_.find(id);
   }
 
   template <class T, class Id>

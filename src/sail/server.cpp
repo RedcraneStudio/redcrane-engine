@@ -35,7 +35,7 @@ namespace redc { namespace sail
 
       // What are we doing? We are assigning it a random name from all the many
       // species of cranes!
-      server_->clients.find(id).name = names[(id - 1) % name_count];
+      server_->clients.at(id).name = names[(id - 1) % name_count];
       return id;
     }
     // Not our event, signal it with a zero, which is never a valid id.
