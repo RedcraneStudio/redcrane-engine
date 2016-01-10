@@ -4,17 +4,17 @@
  */
 #pragma once
 #include "req.h"
+#include <boost/optional.hpp>
 namespace redc { namespace rpc
 {
   struct Run_Context
   {
-    Run_Context() noexcept : is_error(false), response() {}
-    Run_Context(bool err, Params res) noexcept : is_error(err), response(res){}
+    bool should_make_params = true;
 
-    bool is_error;
-    Params response;
+    bool is_error = false;
+    boost::optional<Params> response = boost::none;
 
-    void* userdata;
+    void* userdata = nullptr;
   };
 
   using method_t = std::function<void(Run_Context*, Params& params)>;
