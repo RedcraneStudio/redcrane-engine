@@ -20,6 +20,6 @@ namespace redc { namespace rpc
   using method_t = std::function<void(Run_Context*, Params& params)>;
 
   // Request => Function call
-  void dispatch(std::vector<method_t>& methods, Request req,
+  void dispatch(std::vector<method_t> const& methods, Request req,
                 Run_Context* ctx = nullptr) noexcept;
 } }

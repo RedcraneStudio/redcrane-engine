@@ -5,7 +5,7 @@
 #include "dispatch.h"
 namespace redc { namespace rpc
 {
-  void dispatch(std::vector<method_t>& methods, Request req,
+  void dispatch(std::vector<method_t> const& methods, Request req,
                 Run_Context* ctx) noexcept
   {
     if(req.fn >= methods.size())
