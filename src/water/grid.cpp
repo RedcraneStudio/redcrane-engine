@@ -45,7 +45,7 @@ namespace redc { namespace water
     return ret;
   }
 
-  std::vector<glm::vec3> find_visible(gfx::Camera& cam, float y,
+  std::vector<glm::vec3> find_visible(gfx::Camera const& cam, float y,
                                       float max_disp) noexcept
   {
     glm::mat4 inv_cam = glm::inverse(gfx::camera_proj_matrix(cam) *

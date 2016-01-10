@@ -26,7 +26,7 @@ namespace redc { namespace water
     return glm::vec4(pl.normal, -pl.dist);
   }
 
-  std::vector<glm::vec3> find_visible(gfx::Camera& cam, float y,
+  std::vector<glm::vec3> find_visible(gfx::Camera const& cam, float y,
                                       float max_disp) noexcept;
   glm::mat4 build_projector(gfx::Camera cam, Plane const& p, float disp) noexcept;
   glm::mat4 build_min_max_mat(std::vector<glm::vec3>& intersections,
