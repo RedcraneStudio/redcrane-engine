@@ -88,4 +88,11 @@ namespace redc
   {
     return translate(str, std::forward<Args>(args)...);
   }
+
+  template <class... Args>
+  inline std::string fmt(std::string str, Args&&... args) noexcept
+  {
+    // TODO remove format_str I probably don't use it.
+    return format_str(str, std::forward<Args>(args)...);
+  }
 }
