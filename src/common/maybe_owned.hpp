@@ -60,14 +60,18 @@ namespace redc
 
     template <class R>
     Maybe_Owned(Maybe_Owned<R>&&) noexcept;
-    Maybe_Owned(Maybe_Owned const&) noexcept = delete;
+
+    template <class R>
+    Maybe_Owned(Maybe_Owned<R> const&) noexcept = delete;
 
     template <class R>
     Maybe_Owned& operator=(std::unique_ptr<R>) noexcept;
 
     template <class R>
     Maybe_Owned& operator=(Maybe_Owned<R>&&) noexcept;
-    Maybe_Owned& operator=(Maybe_Owned const&&) noexcept = delete;
+
+    template <class R>
+    Maybe_Owned& operator=(Maybe_Owned<R> const&) noexcept = delete;
 
     ~Maybe_Owned() noexcept;
 
