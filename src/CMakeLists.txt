@@ -39,6 +39,7 @@ add_subdirectory(collisionlib)
 add_subdirectory(use)
 
 add_subdirectory(effects)
+add_subdirectory(tasks)
 
 find_package(ENet REQUIRED)
 add_subdirectory(rpc)
