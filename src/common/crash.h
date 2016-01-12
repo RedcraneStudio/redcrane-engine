@@ -18,4 +18,9 @@ namespace redc
     std::cerr << "Crashing..." << " " << why << std::endl;
     std::abort();
   }
+
+  [[noreturn]] inline void crash()
+  {
+    std::abort();
+  }
 }
