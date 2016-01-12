@@ -14,6 +14,7 @@ add_subdirectory(io)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 
+find_package(SDL2 REQUIRED)
 find_package(GLFW REQUIRED)
 add_subdirectory(gfx)
 
