@@ -8,8 +8,9 @@
 #include "../common/crash.h"
 namespace redc
 {
-  Render_Task::Render_Task(std::string title, Vec<int> res,
-                           bool fullscreen, bool vsync) noexcept
+  Render_Task::Render_Task(sail::Game const& game, std::string title,
+                           Vec<int> res, bool fullscreen, bool vsync) noexcept
+                           : game_(&game)
   {
     if(!init_sdl(title, res, fullscreen, vsync))
     {
