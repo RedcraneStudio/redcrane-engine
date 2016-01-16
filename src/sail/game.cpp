@@ -9,6 +9,11 @@
 #include "../io/net_io.h"
 
 #include "../common/log.h"
+
+#include "../rpc/dispatch.h"
+#include "methods.h"
+
+#include <enet/enet.h>
 namespace redc { namespace sail
 {
   po::options_description command_options_desc() noexcept
@@ -82,55 +87,14 @@ namespace redc { namespace sail
     auto max_peers = vm["max-peers"].as<uint16_t>();
 
     auto host = std::move(*net::make_server_host(port, max_peers).ok());
-    Server server;
+    Server server{std::move(host), {}, {}};
 
-    Client_Dispatcher client_dispatcher(host, server);
 
     bool running = true;
     while(running)
     {
-      for(auto& client : server.clients)
-      {
-        client.second.io->step();
-      }
-
-      ENetEvent event;
-      while(enet_host_service(host.host, &event, 0) != 0)
-      {
-        auto id = client_dispatcher.try_client_dispatch(event);
-        if(id)
-        {
-          // That was a connection!
-          auto& client = server.clients.at(id);
-          log_i("Client % (id = %) connected", client.name, id);
-
-
-          // Add a read-callback so we know what that client gets data.
-          client.io->set_read_callback([&client](buf_t const& buf)
-          {
-            log_i("%: '%'", client.name, buf);
-          });
-        }
-        else if((id = client_dispatcher.check_client_disconnect(event)))
-        {
-          log_i("Client % disconnected", id);
-        }
-        else
-        {
-          // Something else?
-          for(auto& client_pair : server.clients)
-          {
-            auto& client = client_pair.second;
-            if(client.io->post_recieve(event))
-            {
-              // We just handled the event, because it matched the peer of some
-              // client.
-              // Break from this loop
-              break;
-            }
-          }
-        }
-      }
+      dispatch_net_events_server(server);
+      dispatch_all_requests_server(methods, server);
     }
 
     return EXIT_SUCCESS;
@@ -150,22 +114,48 @@ namespace redc { namespace sail
       peer = wait_for_connection(host, 500);
     }
 
-    log_i("Got a connection from %!", peer->address.host);
+    log_i("Connected", peer->address.host);
 
     auto read_cb = [](buf_t const& buf)
     {
       log_i("Server said: %", buf);
     };
 
-    Net_IO net_io{host, peer, read_cb};
+    auto io = make_maybe_owned<Net_IO>(host, peer, read_cb);
+    auto server_link = make_network_client(std::move(io));
 
-    net_io.write("Hello my friend!"_buf);
-    net_io.step();
+    auto methods = make_client_methods();
 
-    net_io.disconnect();
+    Local_Player_Map players;
 
-    ENetEvent event;
-    while(enet_host_service(host.host, &event, 100));
+    bool running = true;
+    while(running)
+    {
+      ENetEvent event;
+      while(enet_host_service(host.host, &event, 0))
+      {
+        if(event.type == ENET_EVENT_TYPE_DISCONNECT)
+        {
+          // Welp, it was fun while it lasted boys.
+          running = false;
+        }
+        else if(event.type == ENET_EVENT_TYPE_RECEIVE)
+        {
+          server_link.io->post_recieve(event);
+        }
+      }
+
+      rpc::Request req;
+      while(server_link.plugin.poll_request(req))
+      {
+        // Dispatch those requests
+        auto response = dispatch_request(req, methods, &players);
+        if(response)
+        {
+          server_link.plugin.post_request(*response, true);
+        }
+      }
+    }
 
     return EXIT_SUCCESS;
   }
