@@ -22,6 +22,7 @@ namespace redc
     // RAII wrapper for ENetHost.
     struct Host
     {
+      Host() noexcept : host(nullptr) {}
       explicit Host(ENetHost* host) noexcept;
       Host(Host&& oh) noexcept;
       Host& operator=(Host&& oh) noexcept;
