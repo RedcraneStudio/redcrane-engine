@@ -298,79 +298,6 @@ int main(int argc, char** argv)
     shader->set_vec3(light_pos_loc, light_pos);
     shader->set_sampler(0);
 
-    // Load environment map
-    auto envtex = gfx::load_cubemap(driver, "tex/envmap/front.png",
-                                    "tex/envmap/back.png",
-                                    "tex/envmap/right.png",
-                                    "tex/envmap/left.png",
-                                    "tex/envmap/up.png",
-                                    "tex/envmap/down.png");
-
-    std::vector<float> env_cube_data =
-    {
-      -1.0f, +1.0f, -1.0f,
-      -1.0f, -1.0f, -1.0f,
-       1.0f, -1.0f, -1.0f,
-       1.0f, -1.0f, -1.0f,
-       1.0f, +1.0f, -1.0f,
-      -1.0f, +1.0f, -1.0f,
-
-      -1.0f, -1.0f,  1.0f,
-      -1.0f, -1.0f, -1.0f,
-      -1.0f, +1.0f, -1.0f,
-      -1.0f, +1.0f, -1.0f,
-      -1.0f, +1.0f,  1.0f,
-      -1.0f, -1.0f,  1.0f,
-
-       1.0f, -1.0f, -1.0f,
-       1.0f, -1.0f,  1.0f,
-       1.0f, +1.0f,  1.0f,
-       1.0f, +1.0f,  1.0f,
-       1.0f, +1.0f, -1.0f,
-       1.0f, -1.0f, -1.0f,
-
-      -1.0f, -1.0f,  1.0f,
-      -1.0f, +1.0f,  1.0f,
-       1.0f, +1.0f,  1.0f,
-       1.0f, +1.0f,  1.0f,
-       1.0f, -1.0f,  1.0f,
-      -1.0f, -1.0f,  1.0f,
-
-      -1.0f,  1.0f, -1.0f,
-       1.0f,  1.0f, -1.0f,
-       1.0f,  1.0f,  1.0f,
-       1.0f,  1.0f,  1.0f,
-      -1.0f,  1.0f,  1.0f,
-      -1.0f,  1.0f, -1.0f,
-
-      -1.0f, -1.0f, -1.0f,
-      -1.0f, -1.0f,  1.0f,
-       1.0f, -1.0f, -1.0f,
-       1.0f, -1.0f, -1.0f,
-      -1.0f, -1.0f,  1.0f,
-       1.0f, -1.0f,  1.0f
-    };
-
-    auto envmap_mesh = driver.make_mesh_repr();
-    auto envmap_data_buf =
-      envmap_mesh->allocate_buffer(env_cube_data.size() * sizeof(float),
-                                   Usage_Hint::Draw, Upload_Hint::Static);
-    envmap_mesh->format_buffer(envmap_data_buf, 0, 3, Buffer_Format::Float, 0, 0);
-    envmap_mesh->enable_vertex_attrib(0);
-    envmap_mesh->set_primitive_type(Primitive_Type::Triangle);
-    envmap_mesh->buffer_data(envmap_data_buf, 0,
-                             sizeof(float) * env_cube_data.size(),
-                             &env_cube_data[0]);
-
-    auto envmap_shader = driver.make_shader_repr();
-    envmap_shader->load_vertex_part("shader/envmap/vs.glsl");
-    envmap_shader->load_fragment_part("shader/envmap/fs.glsl");
-
-    auto envmap_view_loc = envmap_shader->get_location("view");
-    auto envmap_proj_loc = envmap_shader->get_location("proj");
-    auto envmap_cube_loc = envmap_shader->get_location("envmap");
-    envmap_shader->set_integer(envmap_cube_loc, 0);
-
     // Find the depth of the four corner points.
     // Unproject each point with the inverse proj * view matrix.
 
@@ -399,58 +326,6 @@ int main(int argc, char** argv)
     glm::quat eye_dir;
     cam.look_at.eye = boat_motion.displacement.displacement - glm::vec3(0.0f, 5.0f, -6.0f);
     cam.look_at.look = boat_motion.displacement.displacement;
-
-    // Make a grid and upload it
-    auto water_grid = water::gen_grid(200);
-    water::Plane water_base{{0.0f, 1.0f, 0.0f}, 0.0f};
-
-    auto grid_mesh = driver.make_mesh_repr();
-    auto grid_uv_buf =
-      grid_mesh->allocate_buffer(sizeof(float) * 2 * water_grid.size(),
-                                 redc::Usage_Hint::Draw,
-                                 redc::Upload_Hint::Static);
-    grid_mesh->format_buffer(grid_uv_buf, 0, 2, Buffer_Format::Float, 0, 0);
-    grid_mesh->enable_vertex_attrib(0);
-    grid_mesh->buffer_data(grid_uv_buf, 0, sizeof(float) * 2 * water_grid.size(),
-                           &water_grid[0]);
-    grid_mesh->set_primitive_type(Primitive_Type::Triangle);
-
-    // Initialize the shader
-    auto water_shader = driver.make_shader_repr();
-    water_shader->load_vertex_part("shader/water/vs.glsl");
-    water_shader->load_fragment_part("shader/water/fs.glsl");
-
-    auto plane_loc = water_shader->get_location("plane");
-    water_shader->set_vec4(plane_loc, plane_as_vec4(water_base));
-
-    auto time_loc = water_shader->get_location("time");
-    water_shader->set_float(time_loc, 0.0f);
-
-    water_shader->set_integer(water_shader->get_location("octaves_in"), 5);
-    water_shader->set_float(water_shader->get_location("amplitude_in"), 0.2f);
-    water_shader->set_float(water_shader->get_location("frequency_in"), 0.5f);
-    water_shader->set_float(water_shader->get_location("persistence_in"), 0.5f);
-    water_shader->set_float(water_shader->get_location("lacunarity_in"), 0.6f);
-
-    float max_displacement = 0.1f * std::pow(2.0f, 8);
-    //auto displ_loc = water_shader->get_location("disp");
-    //water_shader->set_float(displ_loc, max_displacement);
-
-    auto projector_loc = water_shader->get_location("projector");
-    water_shader->set_view_name("view");
-    water_shader->set_projection_name("proj");
-
-    water_shader->set_matrix(projector_loc, glm::mat4(1.0f));
-    water_shader->set_view(glm::mat4(1.0f));
-    water_shader->set_projection(glm::mat4(1.0f));
-
-    auto cam_pos_loc = water_shader->get_location("camera_pos");
-    auto light_dir_loc = water_shader->get_location("light_dir");
-
-    auto water_envmap_loc = water_shader->get_location("envmap");
-    water_shader->set_integer(water_envmap_loc, 0);
-
-    driver.bind_texture(*envtex, 0);
 
     auto glfw_user_data = Glfw_User_Data{driver, cam};
     glfwSetWindowUserPointer(window, &glfw_user_data);
@@ -635,19 +510,6 @@ int main(int argc, char** argv)
       // Clear the screen
       driver.clear();
 
-      // Render the environment map
-      driver.use_shader(*envmap_shader);
-
-      glm::mat4 env_camera_mat = camera_view_matrix(cam);
-      // Zero out the translation
-      env_camera_mat[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-      envmap_shader->set_matrix(envmap_view_loc, env_camera_mat);
-      envmap_shader->set_matrix(envmap_proj_loc, camera_proj_matrix(cam));
-
-      driver.write_depth(false);
-      envmap_mesh->draw_arrays(0, env_cube_data.size() / 3);
-      driver.write_depth(true);
-
       driver.use_shader(*shader);
 
       // Render the hull
@@ -668,27 +530,6 @@ int main(int argc, char** argv)
         gfx::render_chunk(projectile_mesh.chunk);
       }
 
-      // Render water
-
-      driver.use_shader(*water_shader);
-      use_camera(driver, cam);
-      water_shader->set_vec3(cam_pos_loc, cam.look_at.eye);
-
-      water_shader->set_vec3(light_dir_loc,
-        glm::normalize(glm::vec3(5.0f, 5.0f, -6.0f)));
-
-      auto intersections = water::find_visible(water_cam, water_base.dist, max_displacement);
-      if(intersections.size())
-      {
-        auto projector = build_projector(water_cam, water_base, max_displacement);
-        auto range = build_min_max_mat(intersections, projector, water_base);
-        projector = projector * range;
-
-        water_shader->set_matrix(projector_loc, projector);
-        water_shader->set_float(time_loc, glfwGetTime());
-
-        grid_mesh->draw_arrays(0, water_grid.size());
-      }
       driver.use_shader(*shader);
 
       glfwSwapBuffers(window);
