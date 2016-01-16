@@ -23,4 +23,6 @@ namespace redc { namespace sail
   {
     ID_Map<Player> players;
   };
+
+  using player_id = ID_Map<Player>::id_type;
 } }
