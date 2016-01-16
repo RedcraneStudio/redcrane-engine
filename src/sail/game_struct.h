@@ -15,6 +15,8 @@ namespace redc { namespace sail
 
     Hull_Desc boat_config;
     collis::Motion boat_motion;
+
+    void* userdata;
   };
 
   struct Game
