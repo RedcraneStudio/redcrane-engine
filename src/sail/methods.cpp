@@ -62,9 +62,8 @@ namespace redc { namespace sail
   {
     auto info = (Method_Info*) ctx->userdata;
 
-    auto id = info->game->players.insert(Player{
-      name, true, {}, {}, info->client
-    });
+    auto id = info->server->player_id_gen().get();
+    info->game->players.insert({id, Player{name, true, {}, {}, info->client}});
 
     auto& player = info->game->players.at(id);
     if(player.name.empty())
@@ -87,9 +86,8 @@ namespace redc { namespace sail
       ctx->is_error = false;
     }
 
-    for(auto& client : info->clients)
+    for(auto& client : info->server->clients())
     {
-      rpc::Request req;
       // Check to see if this particular client is the one that made the
       // request in the first place.
       bool owned = false;
@@ -98,7 +96,8 @@ namespace redc { namespace sail
         owned = true;
       }
       // Make the request
-      req = req_method(REDC_FN_ID(move_player), id, player.name, pos, owned);
+      auto req = req_method(REDC_FN_ID(make_player), id, player.name, pos,
+                            owned);
       // Send it out - one to each client.
       client.second.plugin.post_request(req, true);
     }
@@ -108,8 +107,8 @@ namespace redc { namespace sail
   {
     auto& info = *(Method_Info*) ctx->userdata;
 
-    auto player_iter = info.server->players.find(player_id);
-    if(player_iter == info.server->players.end())
+    auto player_iter = info.game->players.find(player_id);
+    if(player_iter == info.game->players.end())
     {
       // Return an error, that player id doesn't exist!
       if(ctx->should_make_params)
@@ -124,7 +123,7 @@ namespace redc { namespace sail
       auto& player = player_iter->second;
 
       // Does this client even own that player?
-      if(player.owner == info.client)
+      if(player.userdata == info.client)
       {
         // Yes!
 
@@ -144,17 +143,12 @@ namespace redc { namespace sail
         }
         collis::apply_force(player.boat_motion, glm::vec3(force.x, 0.0f, force.y));
 
-        for(auto& client : info.server->clients)
-        {
-          rpc::Request req;
-          // Make the request
-          auto pos = Vec<float>{player.boat_motion.displacement.displacement.x,
-                                player.boat_motion.displacement.displacement.y};
-          req = req_method(REDC_FN_ID(move_player), player_id, pos, 0.0f);
-          // Send it out - one to each client.
-          // It's not really important that we send it reliably.
-          client.second.plugin.post_request(req, false);
-        }
+        auto pos = Vec<float>{player.boat_motion.displacement.displacement.x,
+                              player.boat_motion.displacement.displacement.y};
+
+        auto* server = (Server_Task*) info.server_client;
+        server->dispatch_to_all(req_method(REDC_FN_ID(move_player), player_id,
+                                           pos, 0.0f), false);
       }
       else
       {
@@ -167,22 +161,29 @@ namespace redc { namespace sail
       }
     }
   }
-  void make_player_client(rpc::Run_Context* ctx, player_id id, std::string name,
-                          Vec<float> pos, bool owned) noexcept
+  void make_player_client(rpc::Run_Context*, player_id, std::string,
+                          Vec<float>, bool) noexcept
   {
-    auto& players = *(Local_Player_Map*) ctx->userdata;
-    players.insert({id, {owned, name, true, glm::vec3(pos.x, 0.0f, pos.y),
-                    glm::vec3(0.0f, 0.0f, 0.0f)}});
+    log_i("make_player_client called");
+#if 0
+    auto& players = *(Method_Info*) ctx->userdata;
+    players.game->players.insert({id, {owned, name, true,
+                                  glm::vec3(pos.x, 0.0f, pos.y),
+                                  glm::vec3(0.0f, 0.0f, 0.0f)}});
+#endif
   }
-  void move_player_client(rpc::Run_Context* ctx, player_id id,
-                          Vec<float> pos, float angle) noexcept
+  void move_player_client(rpc::Run_Context*, player_id,
+                          Vec<float>, float) noexcept
   {
-    auto& players = *(Local_Player_Map*) ctx->userdata;
+    log_i("move_player_client called");
+#if 0
+    auto& players = ((Method_Info*) ctx->userdata)->game->players;
     auto player = players.find(id);
     if(player != players.end())
     {
-      player->second.displacement.x = pos.x;
-      player->second.displacement.z = pos.y;
+      player->second.boat_motion.displacement.displacement.x = pos.x;
+      player->second.boat_motion.displacement.displacement.z = pos.y;
     }
+#endif
   }
 } }

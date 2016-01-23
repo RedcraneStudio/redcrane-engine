@@ -42,7 +42,7 @@ add_subdirectory(effects)
 add_subdirectory(tasks)
 
 find_package(ENet REQUIRED)
-add_subdirectory(rpc)
+# add_subdirectory(rpc)
 
 add_subdirectory(sail)
 

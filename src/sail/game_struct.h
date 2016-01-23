@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../common/id_map.hpp"
+#include <unordered_map>
 #include "boat.h"
 #include "../collisionlib/motion.h"
 namespace redc { namespace sail
@@ -16,13 +16,13 @@ namespace redc { namespace sail
     Hull_Desc boat_config;
     collis::Motion boat_motion;
 
+    // For server methods: this is the Network_Client* that owns the player.
     void* userdata;
   };
 
+  using player_id = uint16_t;
   struct Game
   {
-    ID_Map<Player> players;
+    std::unordered_map<player_id, Player> players;
   };
-
-  using player_id = ID_Map<Player>::id_type;
 } }

@@ -22,4 +22,8 @@ namespace redc { namespace rpc
   // Request => Function call
   void dispatch(std::vector<method_t> const& methods, Request req,
                 Run_Context* ctx = nullptr) noexcept;
+
+  boost::optional<rpc::Request>
+    dispatch_request(rpc::Request req,std::vector<rpc::method_t> const& methods,
+                     void* userdata) noexcept;
 } }

@@ -7,8 +7,7 @@
 #include "../common/utility.h"
 #include "../common/glm_vec_serialize.h"
 #include "../rpc/dispatch.h"
-
-#include "server.h"
+#include "game_struct.h"
 
 #define REDC_FN_ID(fn) REDC_METHOD_ ## fn
 
