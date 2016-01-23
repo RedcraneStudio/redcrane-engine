@@ -42,7 +42,7 @@ add_subdirectory(effects)
 add_subdirectory(tasks)
 
 find_package(ENet REQUIRED)
-# add_subdirectory(rpc)
+add_subdirectory(net)
 
 add_subdirectory(sail)
 
@@ -60,7 +60,7 @@ target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
 
 add_executable(sl main_sail.cpp)
 target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
-                         waterlib terrainlib uselib saillib effectslib
+                         waterlib terrainlib uselib saillib effectslib netlib
                          ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 # add_executable(play_snd play_snd.cpp)

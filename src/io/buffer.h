@@ -15,6 +15,9 @@ namespace redc
 
   std::vector<uchar> buf_from_string(const std::string& s) noexcept;
 
+  inline buf_t str_to_buf(const std::string& s) noexcept
+  { return buf_from_string(s); }
+
   // For logging
   std::string to_string_helper(buf_t const& buf) noexcept;
 

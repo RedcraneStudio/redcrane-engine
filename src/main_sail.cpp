@@ -33,7 +33,6 @@
 #include "collisionlib/triangle.h"
 #include "collisionlib/motion.h"
 
-#include "sail/player_data.h"
 #include "sail/boat.h"
 #include "sail/game.h"
 

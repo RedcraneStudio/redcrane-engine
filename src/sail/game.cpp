@@ -5,6 +5,8 @@
 #include "game.h"
 #include <thread>
 #include "../common/log.h"
+#include "../net/protocol.h"
+#include "../tasks/render.h"
 namespace redc { namespace sail
 {
   po::options_description command_options_desc() noexcept
@@ -27,8 +29,9 @@ namespace redc { namespace sail
       ("gun", po::value<unsigned int>()->default_value(0), "set boat gun")
     ;
 
-    po::options_description server_opt("Server");
+    po::options_description server_opt("Networking");
     server_opt.add_options()
+      ("name", po::value<std::string>(), "client name")
       ("port", po::value<uint16_t>()->default_value(28222), "set port number")
       ("max-peers", po::value<uint16_t>()->default_value(12),
        "set max number of connections")
@@ -70,14 +73,41 @@ namespace redc { namespace sail
     else return Server_Mode::Local;
   }
 
-  using namespace redc::literals;
+  //using namespace redc::literals;
 
   int start_game(po::variables_map const&) noexcept
   {
     return EXIT_SUCCESS;
   }
-  int start_connect(po::variables_map const&) noexcept
+  int start_connect(po::variables_map const& vm) noexcept
   {
+    // Get details
+    auto port = vm["port"].as<uint16_t>();
+    auto addr = vm["connect"].as<std::string>();
+
+    // Negotiate connection
+    // Just wait for now
+    auto connection = net::wait_for_connection(addr, port);
+
+    // Wait for information
+    Game game;
+    net::wait_for_game_info(connection, game);
+
+    // Set name
+    net::set_name(connection, vm["name"].as<std::string>());
+
+    //Input_Task input_task;
+    Render_Task render_task(game, "Sail", {1000, 1000}, false, false);
+
+    while(!render_task.should_close())
+    {
+      //input_task.step();
+      //client->step();
+      render_task.step();
+    }
+
+    net::close_connection(connection);
+
     return EXIT_SUCCESS;
   }
   int start_dedicated(po::variables_map const&) noexcept

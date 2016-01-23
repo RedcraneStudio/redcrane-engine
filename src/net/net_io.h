@@ -5,7 +5,7 @@
 #pragma once
 #include <cstdint>
 #include <enet/enet.h>
-#include "external_io.h"
+#include "../io/external_io.h"
 #include "../common/result.h"
 #include "../common/null_t.h"
 namespace redc

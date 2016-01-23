@@ -16,6 +16,8 @@ namespace redc
                 bool fullscreen, bool vsync) noexcept;
     ~Render_Task() noexcept;
     void step() noexcept override;
+
+    bool should_close() noexcept;
   private:
     sail::Game const* game_;
   };

@@ -22,4 +22,7 @@ namespace redc
   {
     uninit_sdl();
   }
+  void Render_Task::step() noexcept { }
+
+  bool Render_Task::should_close() noexcept { return false; }
 }

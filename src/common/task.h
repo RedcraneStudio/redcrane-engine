@@ -11,7 +11,7 @@ namespace redc
   struct Task
   {
     virtual ~Task() noexcept {}
-    virtual void step() noexcept;
+    virtual void step() noexcept {};
   };
 
   struct Task_Composite : public Task
