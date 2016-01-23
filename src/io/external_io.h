@@ -9,7 +9,6 @@
 #include <queue>
 #include "../common/maybe_owned.hpp"
 #include "ipc.h"
-#include "net.h"
 namespace redc
 {
   /*!  \brief Manages and connects client code to some arbitrary io source.
