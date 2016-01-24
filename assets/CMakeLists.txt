@@ -28,6 +28,8 @@ add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     tex/envmap/left.png
                     tex/envmap/right.png
 
+                    cfg.ini
+
                     tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
                     tex/bark.png
                     ui/hud.json obj/terrain.obj mat/terrain.json
