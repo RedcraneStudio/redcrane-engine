@@ -113,6 +113,7 @@ namespace redc
       driver.active_shader()->set_projection(camera_proj_matrix(cam));
     }
 
+#if 0
     void apply_pan(Camera& cam, Vec<int> np, Vec<int> op, IDriver& dv) noexcept
     {
       auto oworld = gfx::unproject_screen(dv, cam, glm::mat4(1.0f), op);
@@ -137,5 +138,6 @@ namespace redc
       auto ray_to_cam = glm::normalize(world - cam.fp.pos);
       cam.fp.pos += ray_to_cam * (float) delta;
     }
+#endif
   }
 }

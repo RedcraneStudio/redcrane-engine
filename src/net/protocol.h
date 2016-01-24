@@ -36,6 +36,8 @@ namespace redc { namespace net
   {
     net::Host host;
     ENetPeer* peer;
+
+    //void step() noexcept;
   };
 
   Client make_client(std::string addr, uint16_t port) noexcept;

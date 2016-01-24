@@ -75,8 +75,14 @@ namespace redc { namespace sail
 
   //using namespace redc::literals;
 
-  int start_game(po::variables_map const&) noexcept
+  int start_game(po::variables_map const& vm) noexcept
   {
+    Game game;
+    Render_Task render(game, vm, "Sail", Vec<int>{1000,1000}, false, false);
+    while(!render.should_close())
+    {
+      render.step();
+    }
     return EXIT_SUCCESS;
   }
   int start_connect(po::variables_map const& vm) noexcept
@@ -87,32 +93,39 @@ namespace redc { namespace sail
 
     // Negotiate connection
     // Just wait for now
-    auto connection = net::wait_for_connection(addr, port);
+    auto client = net::wait_for_connection(addr, port);
 
     // Wait for information
     Game game;
-    net::wait_for_game_info(connection, game);
+    net::wait_for_game_info(client, game);
 
     // Set name
-    net::set_name(connection, vm["name"].as<std::string>());
+    net::set_name(client, vm["name"].as<std::string>());
 
     //Input_Task input_task;
-    Render_Task render_task(game, "Sail", {1000, 1000}, false, false);
+    Render_Task render_task(game, vm, "Sail", {1000, 1000}, false, false);
 
     while(!render_task.should_close())
     {
       //input_task.step();
-      //client->step();
+      //client.step();
       render_task.step();
     }
 
-    net::close_connection(connection);
+    net::close_connection(client);
 
     return EXIT_SUCCESS;
   }
-  int start_dedicated(po::variables_map const&) noexcept
+  int start_dedicated(po::variables_map const& vm) noexcept
   {
+    // Get details
+    //auto port = vm["port"].as<uint16_t>();
+    //auto max_peers = vm["max-peers"].as<uint16_t>();
+
+    //auto server = net::make_server(port, max_peers);
+
+    //Game game;
+
     return EXIT_SUCCESS;
   }
 } }
-

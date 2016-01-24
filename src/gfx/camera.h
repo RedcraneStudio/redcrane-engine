@@ -94,9 +94,9 @@ namespace redc
      * Costs two glReadPixels for depth. Requires the camera to be in first-
      * person specification mode.
      */
-    void apply_pan(Camera& cam, Vec<int> np, Vec<int> op, IDriver& d) noexcept;
+    //void apply_pan(Camera& cam, Vec<int> np, Vec<int> op, IDriver& d) noexcept;
 
-    void apply_zoom(Camera& c, double delta, Vec<int> mp, IDriver& d) noexcept;
-    void apply_zoom(Camera& c, double delta, glm::vec3 world) noexcept;
+    //void apply_zoom(Camera& c, double delta, Vec<int> mp, IDriver& d) noexcept;
+    //void apply_zoom(Camera& c, double delta, glm::vec3 world) noexcept;
   }
 }

@@ -6,15 +6,15 @@
 #include "../../common/log.h"
 namespace redc
 {
-  bool init_sdl(std::string title, Vec<int> res, bool fullscreen,
-                bool vsync) noexcept
+  SDL_Window* init_sdl(std::string title, Vec<int> res, bool fullscreen,
+                       bool vsync) noexcept
   {
     // Initialize SDL
 
     if(SDL_Init(SDL_INIT_VIDEO))
     {
       log_e("Failed to init SDL");
-      return false;
+      return nullptr;
     }
 
     SDL_version version;
@@ -33,7 +33,7 @@ namespace redc
     if(!window)
     {
       log_e("Failed to initialize SDL for resolution %x%", res.x, res.y);
-      return false;
+      return nullptr;
     }
 
     // Initialize OpenGL context
@@ -59,12 +59,13 @@ namespace redc
     glGetIntegerv(GL_MINOR_VERSION, &opengl_min);
     log_i("OpenGL core profile %.%", opengl_maj, opengl_min);
 
-    return true;
+    return window;
   }
 
-  void uninit_sdl() noexcept
+  void uninit_sdl(SDL_Window* window) noexcept
   {
     SDL_GL_DeleteContext(SDL_GL_GetCurrentContext());
+    SDL_DestroyWindow(window);
     SDL_Quit();
   }
 }

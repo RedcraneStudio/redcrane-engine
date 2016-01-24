@@ -9,6 +9,7 @@
 #include "glad/glad.h"
 namespace redc
 {
-  bool init_sdl(std::string title, Vec<int> res, bool fs, bool vsync) noexcept;
-  void uninit_sdl() noexcept;
+  SDL_Window* init_sdl(std::string title, Vec<int> res, bool fs,
+                       bool vsync) noexcept;
+  void uninit_sdl(SDL_Window* window) noexcept;
 }
