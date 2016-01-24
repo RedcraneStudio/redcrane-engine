@@ -7,6 +7,8 @@
 #include "../common/log.h"
 #include "../net/protocol.h"
 #include "../tasks/render.h"
+#include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
 namespace redc { namespace sail
 {
   po::options_description command_options_desc() noexcept
@@ -41,9 +43,12 @@ namespace redc { namespace sail
       ("connect", po::value<std::string>(), "connect to a server")
     ;
 
+    po::options_description config_opt("Config");
+    config_opt.add_options()("render.fov", po::value<float>(), "FOV");
+
     po::options_description desc("Allowed Options");
 
-    desc.add(general_opt).add(boat_opt).add(server_opt);
+    desc.add(general_opt).add(boat_opt).add(server_opt).add(config_opt);
 
     return desc;
   }
@@ -51,6 +56,7 @@ namespace redc { namespace sail
   {
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, command_options_desc()), vm);
+    po::store(po::parse_config_file<char>("assets/cfg.ini", command_options_desc()), vm);
     po::notify(vm);
 
     return vm;
