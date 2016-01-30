@@ -6,15 +6,19 @@
 #include <msgpack.hpp>
 #include <string>
 #include "net_io.h"
+// Move this file somewhere else, we need it and we don't need anything else
+// from saillib.
 #include "../sail/game_struct.h"
 namespace redc { namespace net
 {
-  // 1. Client initiates a connection to the server. (Possibly write something
-  // so we don't accidentally connect to a completely unrelated enet server?)
+  // 1. Client initiates a connection to the server, writes version of the
+  // highest protocol version the client supports.
   // 2. Server response with:
   //    - Player information
   //    - Team information
   //    - Possible place for extensions, etc.
+  // or:
+  //    - Bad version something, disconnects
   // 3. Client asks the user which team they would like to join. The server
   // may send updates to the client while the client is picking a team.
   // 4. Client -> Server: This team!
@@ -31,6 +35,7 @@ namespace redc { namespace net
   // This way, each boat looks proper given each clients (sorta) individual
   // water but they stay sorta in sink
 
+  // These roughly corrospond to the above steps, obviously.
   enum class Client_State
   {
     Connecting,
@@ -42,18 +47,77 @@ namespace redc { namespace net
     Playing
   };
 
+  // First the version information
+  using version_t = uint16_t;
+
+  // Player information
+  struct Player_Information
+  {
+    sail::player_id id;
+    std::string name;
+
+    MSGPACK_DEFINE(id, name);
+  };
+
+  // Teams should be able to have names themselves. Even if the user can't name
+  // them themselves, maybe the name could change if every member of the team
+  // has a tag on, etc.
+  struct Team
+  {
+    // Yah I'm going to have to say a maximum of 256 teams, sorry.
+    // I know... I know.
+    uint8_t id;
+    std::string name;
+
+    // This gives the client a name of the player and an id for future
+    // reference.
+    std::vector<Player_Information> members;
+
+    MSGPACK_DEFINE(name, members);
+  };
+
+  // I'm thinking the above stuff (player, team) could be idempotent at the
+  // cost of the little extra bandwidth. Instead of worrying about specifically
+  // constructed packets that say "This team now has this name" we can just
+  // resend the definition, we can let the client figure out the differences.
+
+  // Sent from client to server.
+  struct Input
+  {
+    // Standard movement
+    bool forward;
+    bool left;
+    bool right;
+    bool backward;
+
+    // Hmm, I guess the server can make the call as to whether the user shot
+    // too earlier with respect to when this changed, then again we can write
+    // our own packer that optionally packs this or nothing otherwise, etc.
+    uint8_t cur_weapon;
+
+    // This is the time of the water simulation for the client. Double
+    // precision? What the hell are we going to do if we need to quantize this?
+    float time;
+
+    MSGPACK_DEFINE(forward, left, right, backward, cur_weapon, time);
+  };
+
+  // Sent from server to client about all clients (even the owner).
+  // We should optimize this packer since a client that knows its own inputs
+  // has no need for this information, which currently is like 5.5 bytes, I
+  // think?
+  struct State
+  {
+    // The time of this state update is input.time.
+    Input input;
+
+    // Insert some quantized vector type here.
+  };
+
   struct Peer
   {
     //Maybe_Owned<net::Host> host;
     ENetPeer* peer;
-  };
-
-  // Send from server to client first.
-  using version_t = uint16_t;
-
-  struct Player
-  {
-    std::string name;
   };
 
   // Then the server sends one of these.
