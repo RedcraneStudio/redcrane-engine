@@ -9,6 +9,39 @@
 #include "../sail/game_struct.h"
 namespace redc { namespace net
 {
+  // 1. Client initiates a connection to the server. (Possibly write something
+  // so we don't accidentally connect to a completely unrelated enet server?)
+  // 2. Server response with:
+  //    - Player information
+  //    - Team information
+  //    - Possible place for extensions, etc.
+  // 3. Client asks the user which team they would like to join. The server
+  // may send updates to the client while the client is picking a team.
+  // 4. Client -> Server: This team!
+  // 5. Server -> Client: Fine, or no!
+  // 6. Client has the user pick their boat.
+  // 7. Client -> Server: This boat!
+  // 8. Server -> Client: Spawn here, which this orientation, approximately
+  // this time, with this *seed*, or no!
+  // 9. Client -> Server: Sampled input information with time so that the
+  // water can be properly simulated, etc. The simulation will run on both
+  // systems. The server should also be sending data to the client of updates
+  // from other clients, this state should include inputs from the clients so
+  // that our client can rewind and apply inputs given its own state of water.
+  // This way, each boat looks proper given each clients (sorta) individual
+  // water but they stay sorta in sink
+
+  enum class Client_State
+  {
+    Connecting,
+    Waiting_For_Players,
+    Selecting_Team,
+    Waiting_For_Team,
+    Selecting_Boat,
+    Waiting_For_Boat,
+    Playing
+  };
+
   struct Peer
   {
     //Maybe_Owned<net::Host> host;
