@@ -21,13 +21,13 @@ namespace redc { namespace net
   //    - Possible place for extensions, etc.
   // or:
   //    - Bad version something, disconnects
-  // 3. Client sends inventory to the server
+  // 3. Client sends its loadouts to the server
   // 4. The server says the inventory will work or no.
   // 3. Client asks the user which team they would like to join. The server
   // may send updates to the client while the client is picking a team.
   // 4. Client -> Server: This team!
-  // 5. Server -> Client: Spawn here, which this orientation, approximately
-  // this time, with this *seed*, or no!
+  // 5. Server -> Client: Spawn here, with this orientation, approximately this
+  // time, with this *seed*, or no!
   // 6. Client -> Server: Sampled input information with time so that the
   // water can be properly simulated, etc. The simulation will run on both
   // systems. The server should also be sending data to the client of updates
@@ -39,13 +39,17 @@ namespace redc { namespace net
   // These roughly corrospond to the above steps, obviously.
   enum class Client_State
   {
-    Connecting,
-    Waiting_For_Players,
-    Selecting_Team,
-    Waiting_For_Team,
-    Selecting_Boat,
-    Waiting_For_Boat,
-    Playing
+    Starting, // For before any of this
+    // Populate the server address member
+    Connecting, // Waiting for connection acknowledgement
+    Waiting_For_Info, // Waiting for players, teams, etc.
+    Sending_Loadouts, // About to send the users inventory / loadouts.
+    // Populate the inventory member of Client_Context then call step_client
+    Waiting_For_Inventory_Confirmation, // Waiting for server okay.
+    Sending_Team, // About to send the team the client wanted to be on
+    // Populate the team id member of Client_Context then call step_client
+    Waiting_For_Spawn, // Waiting for server okay on team and spawn info
+    Playing // Your on your own, client
   };
 
   // First the version information
