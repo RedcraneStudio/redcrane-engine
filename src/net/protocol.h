@@ -15,20 +15,20 @@ namespace redc { namespace net
   // 1. Client initiates a connection to the server, writes version of the
   // highest protocol version the client supports.
   // 2. Server response with:
+  //    - Server rules
   //    - Player information
   //    - Team information
   //    - Possible place for extensions, etc.
   // or:
   //    - Bad version something, disconnects
+  // 3. Client sends inventory to the server
+  // 4. The server says the inventory will work or no.
   // 3. Client asks the user which team they would like to join. The server
   // may send updates to the client while the client is picking a team.
   // 4. Client -> Server: This team!
-  // 5. Server -> Client: Fine, or no!
-  // 6. Client has the user pick their boat.
-  // 7. Client -> Server: This boat!
-  // 8. Server -> Client: Spawn here, which this orientation, approximately
+  // 5. Server -> Client: Spawn here, which this orientation, approximately
   // this time, with this *seed*, or no!
-  // 9. Client -> Server: Sampled input information with time so that the
+  // 6. Client -> Server: Sampled input information with time so that the
   // water can be properly simulated, etc. The simulation will run on both
   // systems. The server should also be sending data to the client of updates
   // from other clients, this state should include inputs from the clients so
@@ -51,6 +51,14 @@ namespace redc { namespace net
   // First the version information
   using version_t = uint16_t;
 
+  // Server rules
+  struct Server_Rules
+  {
+    uint8_t max_allowed_loadouts;
+
+    MSGPACK_DEFINE(max_allowed_loadouts);
+  };
+
   // Player information
   struct Player_Information
   {
@@ -72,9 +80,51 @@ namespace redc { namespace net
 
     // This gives the client a name of the player and an id for future
     // reference.
-    std::vector<Player_Information> members;
+    std::vector<sail::player_id> members;
 
     MSGPACK_DEFINE(name, members);
+  };
+
+  struct Client_Init_Packet
+  {
+    Server_Rules rules;
+    std::vector<Player_Information> players;
+    std::vector<Team> teams;
+  };
+
+  // Client to server
+  struct Loadout
+  {
+    // Globally agreed upon list of hulls, sails, etc.
+    // I guess it is concievable to have more than 256 hulls and sails
+    uint16_t hull;
+    uint16_t sail;
+
+    uint8_t rudder;
+    // For now we are only going to let the user pick two guns
+    std::array<uint8_t, 2> guns;
+
+    MSGPACK_DEFINE(hull, sail, rudder, guns);
+  };
+  struct Inventory
+  {
+    // This must be the same amount as server max-loadouts.
+    std::vector<Loadout> loadouts;
+
+    MSGPACK_DEFINE(loadouts);
+  };
+
+  // Hahahaha fuck it
+  using okay_t = bool;
+
+  struct Spawn_Information
+  {
+    glm::vec3 position;
+    glm::quat orientation;
+    float time;
+    uint16_t seed;
+
+    MSGPACK_DEFINE(position, orientation, time, seed);
   };
 
   // I'm thinking the above stuff (player, team) could be idempotent at the
