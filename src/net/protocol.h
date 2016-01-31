@@ -96,6 +96,8 @@ namespace redc { namespace net
     Server_Rules rules;
     std::vector<Player_Information> players;
     std::vector<Team> teams;
+
+    MSGPACK_DEFINE(rules, players, teams);
   };
 
   // Client to server
