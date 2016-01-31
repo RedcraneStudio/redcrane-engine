@@ -133,6 +133,43 @@ namespace redc { namespace net
     MSGPACK_DEFINE(position, orientation, time, seed);
   };
 
+  // This is for clients to keep track of the server
+  struct Client_Context
+  {
+    Client_State state = Client_State::Starting;
+    // Starting
+    ENetAddress server_addr;
+    // Connecting
+    net::Host host;
+    // Maybe wrap this for RAII; After connecting
+    ENetPeer* server_peer;
+    // Waiting for server info
+    Client_Init_Packet client_init_packet;
+    // Sending inventory
+    Inventory inventory;
+    // Inventory check
+    okay_t inventory_okay;
+    // Sending team
+    team_id team;
+    // Spawn
+    Spawn_Information information;
+  };
+
+  /*!
+   * \brief Steps a client forward in terms of server communication up to
+   * Client_State::Playing.
+   *
+   * \returns Whether or not the event parameter was utilized. If it's false,
+   * the event should be handled elsewhere, if it's true ctx probably changed
+   * based on the new state in ctx.
+   */
+  struct Step_Client_Result
+  {
+    bool context_changed = false;
+    bool event_handled = false;
+  };
+  Step_Client_Result step_client(Client_Context& ctx, ENetEvent const& event) noexcept;
+
   // I'm thinking the above stuff (player, team) could be idempotent at the
   // cost of the little extra bandwidth. Instead of worrying about specifically
   // constructed packets that say "This team now has this name" we can just
