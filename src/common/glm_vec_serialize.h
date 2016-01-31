@@ -7,6 +7,7 @@
 #pragma once
 #ifdef REDC_USE_MSGPACK
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <msgpack.hpp>
 
 namespace msgpack {
@@ -129,6 +130,47 @@ OBJECT_WITH_ZONE_END()
 #undef OBJECT_WITH_ZONE_BEGIN
 #undef SET_INDEX
 #undef OBJECT_WITH_ZONE_END
+
+template<>
+struct convert<glm::quat> {
+    msgpack::object const& operator()(msgpack::object const& o, glm::quat& q) const {
+        if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+        if (o.via.array.size != 4) throw msgpack::type_error();
+        q = glm::quat(o.via.array.ptr[0].as<float>(),
+                      o.via.array.ptr[1].as<float>(),
+                      o.via.array.ptr[2].as<float>(),
+                      o.via.array.ptr[3].as<float>());
+        return o;
+    }
+};
+
+template<>
+struct pack<glm::quat> {
+    template <typename Stream>
+    packer<Stream>& operator()(msgpack::packer<Stream>& o, glm::quat const& q) const {
+        // packing member variables as an array.
+        o.pack_array(4);
+        o.pack(q.x);
+        o.pack(q.y);
+        o.pack(q.z);
+        o.pack(q.w);
+        return o;
+    }
+};
+
+template <>
+struct object_with_zone<glm::quat> {
+    void operator()(msgpack::object::with_zone& o, glm::quat const& q) const {
+        o.type = type::ARRAY;
+        o.via.array.size = 4;
+        o.via.array.ptr = static_cast<msgpack::object*>(
+            o.zone.allocate_align(sizeof(msgpack::object) * o.via.array.size));
+        o.via.array.ptr[0] = msgpack::object(q.x, o.zone);
+        o.via.array.ptr[1] = msgpack::object(q.y, o.zone);
+        o.via.array.ptr[2] = msgpack::object(q.z, o.zone);
+        o.via.array.ptr[3] = msgpack::object(q.w, o.zone);
+    }
+};
 
 } // namespace adaptor
 } // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
