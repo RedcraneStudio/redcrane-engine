@@ -5,6 +5,7 @@
 #pragma once
 #include <msgpack.hpp>
 #include <string>
+#include "../common/glm_vec_serialize.h"
 #include "net_io.h"
 // Move this file somewhere else, we need it and we don't need anything else
 // from saillib.
@@ -85,21 +86,29 @@ namespace redc { namespace net
   struct Input
   {
     // Standard movement
-    bool forward;
-    bool left;
-    bool right;
-    bool backward;
+    // bool forward;
+    // bool left;
+    // bool right;
+    // bool backward;
+    // *** SEE BELOW ***
+
+    // Put this in a single byte? From most significant bit to least:
+    // Forward, left, right, backward; remaining bytes are the client's current
+    // weapon.
+    uint8_t input;
 
     // Hmm, I guess the server can make the call as to whether the user shot
     // too earlier with respect to when this changed, then again we can write
     // our own packer that optionally packs this or nothing otherwise, etc.
-    uint8_t cur_weapon;
+    // *** SEE ABOVE ***
+    // uint8_t cur_weapon;
+    // *** SEE ABOVE ***
 
     // This is the time of the water simulation for the client. Double
-    // precision? What the hell are we going to do if we need to quantize this?
+    // precision?
     float time;
 
-    MSGPACK_DEFINE(forward, left, right, backward, cur_weapon, time);
+    MSGPACK_DEFINE(input, time);
   };
 
   // Sent from server to client about all clients (even the owner).
@@ -111,7 +120,18 @@ namespace redc { namespace net
     // The time of this state update is input.time.
     Input input;
 
-    // Insert some quantized vector type here.
+    // We can't quantize the position, but we can do it for the velocity.
+    // For now I'm not going to worry about it because it means some hacks with
+    // message pack.
+
+    // This is all about the boat.
+    glm::vec3 position;
+    glm::vec3 velocity;
+    glm::quat angular_displacement;
+    glm::quat angular_velocity;
+
+    MSGPACK_DEFINE(input, position, velocity, angular_displacement,
+                   angular_velocity);
   };
 
   struct Peer
