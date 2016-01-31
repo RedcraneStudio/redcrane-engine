@@ -56,6 +56,46 @@ namespace redc { namespace net
         break;
       }
       case Client_State::Waiting_For_Info:
+      {
+        if(event.type == ENET_EVENT_TYPE_RECEIVE)
+        {
+          if(event.peer == ctx.server_peer)
+          {
+            // We got some data from the server!
+            if(event.packet->dataLength == 1)
+            {
+              // If it is just false:
+              if(event.packet->data[0] == 0xc2)
+              {
+                // Our version was probably bad
+                // Throw an error?
+              }
+            }
+
+            // Try to decode Client_Init_Packet struct
+            msgpack::unpacked unpacked;
+            msgpack::unpack(unpacked, (const char*) event.packet->data,
+                            event.packet->dataLength);
+            try
+            {
+              ctx.client_init_packet = unpacked.get().as<Client_Init_Packet>();
+            }
+            catch(...)
+            {
+              // Figure out what exception I need to catch
+              // For now rethrow it
+              throw;
+            }
+
+            // Now we have the client init packet available, that's all we need
+            // then the user should populate the inventory field.
+            res.context_changed = true;
+            res.event_handled = true;
+            ctx.state = Client_State::Sending_Loadouts;
+          }
+        }
+        break;
+      }
       case Client_State::Sending_Loadouts:
       case Client_State::Waiting_For_Inventory_Confirmation:
       case Client_State::Sending_Team:
