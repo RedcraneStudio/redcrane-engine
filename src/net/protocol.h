@@ -72,14 +72,16 @@ namespace redc { namespace net
     MSGPACK_DEFINE(id, name);
   };
 
+  // Yah I'm going to have to say a maximum of 256 teams, sorry.
+  // I know... I know.
+  using team_id = uint8_t;
+
   // Teams should be able to have names themselves. Even if the user can't name
   // them themselves, maybe the name could change if every member of the team
   // has a tag on, etc.
   struct Team
   {
-    // Yah I'm going to have to say a maximum of 256 teams, sorry.
-    // I know... I know.
-    uint8_t id;
+    team_id id;
     std::string name;
 
     // This gives the client a name of the player and an id for future
