@@ -13,14 +13,14 @@
 namespace redc { namespace net
 {
   // 1. Client initiates a connection to the server, writes version of the
-  // highest protocol version the client supports.
+  // client and protocol that it supports, etc.
   // 2. Server response with:
   //    - Server rules
   //    - Player information
   //    - Team information
   //    - Possible place for extensions, etc.
   // or:
-  //    - Bad version something, disconnects
+  //    - Bad version, etc: Disconnects
   // 3. Client sends its loadouts to the server
   // 4. The server says the inventory will work or no.
   // 3. Client asks the user which team they would like to join. The server
@@ -140,6 +140,7 @@ namespace redc { namespace net
   {
     Client_State state = Client_State::Starting;
     // Starting
+    version_t client_version; // This is not protocol version
     ENetAddress server_addr;
     // Connecting
     net::Host host;
@@ -154,7 +155,7 @@ namespace redc { namespace net
     // Sending team
     team_id team;
     // Spawn
-    Spawn_Information information;
+    Spawn_Information spawn_information;
   };
 
   /*!
@@ -170,7 +171,7 @@ namespace redc { namespace net
     bool context_changed = false;
     bool event_handled = false;
   };
-  Step_Client_Result step_client(Client_Context& ctx, ENetEvent const& event) noexcept;
+  Step_Client_Result step_client(Client_Context& ctx, ENetEvent const* event) noexcept;
 
   // I'm thinking the above stuff (player, team) could be idempotent at the
   // cost of the little extra bandwidth. Instead of worrying about specifically
@@ -188,7 +189,7 @@ namespace redc { namespace net
     // *** SEE BELOW ***
 
     // Put this in a single byte? From most significant bit to least:
-    // Forward, left, right, backward; remaining bytes are the client's current
+    // Forward, left, right, backward; remaining bits are the client's current
     // weapon.
     uint8_t input;
 
@@ -205,6 +206,19 @@ namespace redc { namespace net
 
     MSGPACK_DEFINE(input, time);
   };
+
+  // weapon should be in the range [0,0xff]
+  inline Input pack_input(bool forward, bool left, bool right, bool backward,
+                          uint8_t weapon, float time) noexcept
+  {
+    Input ret;
+
+    ret.input = (forward << 7) | (left << 6) | (right << 5) | (backward << 4) |
+                (weapon & 0xff);
+    ret.time = time;
+
+    return ret;
+  }
 
   // Sent from server to client about all clients (even the owner).
   // We should optimize this packer since a client that knows its own inputs
@@ -229,46 +243,17 @@ namespace redc { namespace net
                    angular_velocity);
   };
 
-  struct Peer
+  struct Network_Player
   {
-    //Maybe_Owned<net::Host> host;
-    ENetPeer* peer;
-  };
-
-  // Then the server sends one of these.
-  struct Client_Info
-  {
-    uint8_t map_id;
-    std::vector<std::pair<uint16_t, std::string> > players;
-
-    MSGPACK_DEFINE(map_id, players);
+    // What actual player this corrosponds to. Currently we have to do a linear
+    // into the vector of players in client_init_packet.
+    sail::player_id id;
+    std::vector<State> state_queue;
   };
 
   struct Client
   {
-    net::Host host;
-    ENetPeer* peer;
-
-    //void step() noexcept;
+    Client_Context ctx;
+    std::vector<Network_Player> players;
   };
-
-  Client make_client(std::string addr, uint16_t port) noexcept;
-  Client wait_for_connection(std::string addr, uint16_t port) noexcept;
-
-  void close_connection(Client& client) noexcept;
-
-  void wait_for_game_info(Client& client, sail::Game& game) noexcept;
-  void set_name(Client& client, std::string name) noexcept;
-
-  // General
-  void send_data(Peer peer, buf_t const& buf) noexcept;
-
-  // Client
-  void send_name(Peer peer, std::string name) noexcept;
-  void request_spawn(Peer peer) noexcept;
-
-  void send_protocol_version(Peer peer) noexcept;
-  void send_map_id(Peer peer, uint16_t) noexcept;
-  void send_player(Peer peer, uint16_t, std::string) noexcept;
-  void send_player_id(Peer peer, uint16_t) noexcept;
 } }
