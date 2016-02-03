@@ -27,6 +27,30 @@ namespace redc
   template <class T>
   std::string to_string_helper(T&& v) noexcept { return std::to_string(v); }
 
+  // This is to print integers as binary strings.
+  template <class T>
+  std::string to_bin_string(T val) noexcept
+  {
+    std::string ret;
+
+    std::size_t bytes = sizeof(T);
+    // Size_t can't necessarily hold the value returned by sizeof * 8 but
+    // whateva.
+    std::size_t bits = bytes * 8;
+
+    for(std::size_t i = 0; i < bits; ++i)
+    {
+      // Right to left
+      auto bit_where = i % 8;
+      auto byte_where = i / 8;
+
+      auto shift = (7 - bit_where) + (bytes - 1 - byte_where);
+
+      ret.append(std::to_string(val & (0xf << shift)));
+    }
+    return ret;
+  }
+
   inline std::string format(std::string s, int pos, std::string i) noexcept
   {
     // If we have no more to replace just append the original string to
