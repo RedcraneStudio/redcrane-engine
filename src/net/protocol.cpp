@@ -6,18 +6,6 @@
 #include "../common/crash.h"
 namespace redc { namespace net
 {
-  template <class T>
-  void send_data(T const& t, ENetPeer* peer) noexcept
-  {
-    msgpack::sbuffer buf;
-    msgpack::pack(buf, t);
-
-    // Make the version packet
-    auto packet = enet_packet_create(buf.data(), buf.size(),
-                                     ENET_PACKET_FLAG_RELIABLE);
-    enet_peer_send(peer, 0, packet);
-  }
-
   struct Version_Info
   {
     version_t protocol_version;
