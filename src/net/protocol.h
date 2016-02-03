@@ -58,9 +58,10 @@ namespace redc { namespace net
   // Server rules
   struct Server_Rules
   {
+    uint8_t tickrate;
     uint8_t max_allowed_loadouts;
 
-    MSGPACK_DEFINE(max_allowed_loadouts);
+    MSGPACK_DEFINE(tickrate, max_allowed_loadouts);
   };
 
   // Player information

@@ -93,7 +93,7 @@ namespace redc { namespace sail
   }
 
   template <class T>
-  double time_since_start(T before) noexcept
+  double time_since(T before) noexcept
   {
     T now = std::chrono::high_resolution_clock::now();
     using sec_t = std::chrono::duration<double, std::chrono::seconds::period>;
@@ -124,10 +124,16 @@ namespace redc { namespace sail
 
     int ret_code = EXIT_SUCCESS;
     bool running = true;
-    while(running)
+
+    // For the actual sendrate
+    double sendrate = 0.0;
+
+    // While we still want to run but also the client isn't playing.
+    // When we reach playing we need another loop
+    while(running && client.ctx.state != net::Client_State::Playing)
     {
       if(client.ctx.state == net::Client_State::Connecting &&
-         time_since_start(start_time) > 5.0)
+         time_since(start_time) > 5.0)
       {
         // We've waited five seconds. Fuck it
         log_e("Failed to connect to %:%", addr, port);
@@ -172,16 +178,121 @@ namespace redc { namespace sail
             case net::Client_State::Playing:
               // Do playing things
               log_i("All done connecting, starting game.");
+
+              // Find our sendrate.
+              // Sample input every 1 / tickrate seconds.
+              sendrate = 1.0f / client.ctx.client_init_packet.rules.tickrate;
               break;
             default:
               break;
           }
         }
+      }
+    }
 
-        if(!res.event_handled)
+    // Actual game loop
+
+    // Where are we at now?
+    double last_frame_time = 0.0;
+
+    net::Input cur_input;
+
+    // This could be done more gracefully, make sure to think about this when
+    // abstracting things like input, etc.
+    double time_since_last_weapon_switch = 0.0;
+
+    // For now we are enforcing a completely arbitrary limit. TODO: Make
+    // this a server rule?
+    double switch_min = 1.0;
+
+    while(running)
+    {
+      SDL_Event event;
+      while(SDL_PollEvent(&event))
+      {
+        if(event.type == SDL_KEYDOWN)
         {
-          // Handle it otherwise
+          if(event.key.keysym.scancode == SDL_SCANCODE_W)
+          {
+            cur_input.input |= 0x01 << 7;
+          }
+          else if(event.key.keysym.scancode == SDL_SCANCODE_A)
+          {
+            cur_input.input |= 0x01 << 6;
+          }
+          else if(event.key.keysym.scancode == SDL_SCANCODE_D)
+          {
+            cur_input.input |= 0x01 << 5;
+          }
+          else if(event.key.keysym.scancode == SDL_SCANCODE_S)
+          {
+            cur_input.input |= 0x01 << 4;
+          }
+          else if(event.key.keysym.scancode == SDL_SCANCODE_Q &&
+                  time_since(start_time) - time_since_last_weapon_switch >
+                  switch_min)
+          {
+            // Increase our weapon
+
+            // What is it currently?
+            uint8_t cur_weapon = cur_input.input & 0xf;
+
+            // Add to it
+            ++cur_weapon;
+
+            // If it is exactly 0xf it will become 0x10 and then and'd with 0xf
+            // to become zero. This will acceptably handle overflow +
+            // wrap-around.
+
+            cur_input.input |= (cur_weapon & 0xf);
+
+            // I'm prepared for this I programmed for FTC!
+            // import com.qualcomm.closed.source.shit.ftcommon.opmodes.CriOp /s
+            time_since_last_weapon_switch = time_since(start_time);
+          }
+          else if(event.key.keysym.scancode == SDL_SCANCODE_E &&
+                  time_since(start_time) - time_since_last_weapon_switch >
+                  switch_min)
+          {
+            // Decrease our weapon
+
+            // What is it currently?
+            uint8_t cur_weapon = cur_input.input & 0xf;
+
+            // Subtract one from it
+            --cur_weapon;
+
+            // If it is exactly 0x0 it will become 0xff and then and'd with 0xf
+            // to become the max of our 4-bit integer. See above also.
+
+            cur_input.input |= (cur_weapon & 0xf);
+
+            time_since_last_weapon_switch = time_since(start_time);
+          }
         }
+      }
+
+      // If our delta time since last send is larger than our send rate get
+      // going!
+      auto frame_dur = time_since(start_time) - last_frame_time;
+      if(frame_dur < sendrate)
+      {
+        // Add whatever time we just measured.
+        last_frame_time += frame_dur;
+
+        // Send current input!
+        // This is too low level abstract this in net/use.h!
+        net::send_data(cur_input, client.ctx.server_peer);
+
+        // Log it for now
+        log_i("% %", to_bin_string(cur_input.input), cur_input.time);
+      }
+
+      // Handle input
+      ENetEvent net_event;
+      while(enet_host_service(client.ctx.host.host, &net_event, 0))
+      {
+        // Deserialize some shit, etc.
       }
     }
 
