@@ -193,4 +193,28 @@ namespace redc { namespace net
 
     return res;
   }
+
+  void step_server(Server_Context& ctx, ENetEvent const& event) noexcept
+  {
+    switch(event.type)
+    {
+      case ENET_EVENT_TYPE_CONNECT:
+      {
+        // Oh boy!
+        ctx.clients.push_back({event.peer, Client_State::Starting, {}});
+        break;
+      }
+      case ENET_EVENT_TYPE_RECEIVE:
+      {
+        // Progress the state of the client. Jesus Christ that scares me.
+        // Abstract that, obviously!
+        break;
+      }
+      case ENET_EVENT_TYPE_DISCONNECT:
+      default:
+      {
+        break;
+      }
+    }
+  }
 } }

@@ -270,4 +270,25 @@ namespace redc { namespace net
     enet_peer_send(peer, 0, packet);
   }
 
+  // ===
+  // Server stuff!
+  // ===
+
+  struct Client_State_And_Buffer
+  {
+    ENetPeer* peer;
+
+    Client_State state;
+
+    // Somehow limit this to a certain amount? Circular buffer?
+    std::vector<Input> inputs;
+  };
+
+  struct Server_Context
+  {
+    std::vector<Client_State_And_Buffer> clients;
+  };
+
+  void step_server(Server_Context& context, ENetEvent const& event) noexcept;
+
 } }
