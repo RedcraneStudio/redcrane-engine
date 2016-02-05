@@ -4,6 +4,7 @@
  */
 #include "protocol.h"
 #include "../common/crash.h"
+#include "../common/log.h"
 namespace redc { namespace net
 {
   struct Version_Info
@@ -78,6 +79,10 @@ namespace redc { namespace net
               {
                 // Our version was probably bad
                 // Throw an error?
+                log_e("Server does not support our client version");
+                // Disconnect
+                enet_peer_disconnect(event->peer, 0);
+                break;
               }
             }
 
