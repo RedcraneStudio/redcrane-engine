@@ -187,6 +187,17 @@ namespace redc { namespace sail
               break;
           }
         }
+
+        if(!res.event_handled)
+        {
+          if(event.type == ENET_EVENT_TYPE_DISCONNECT)
+          {
+            // Get the hell out!
+            log_i("Disconnected from server");
+            running = false;
+            break;
+          }
+        }
       }
     }
 
