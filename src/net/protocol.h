@@ -298,7 +298,14 @@ namespace redc { namespace net
     // better to use templates + macros or something so that each structure
     // could be fairly flat.
     Server_Info info;
+
+    uint16_t port;
+    // This is a little wasteful but whatever.
+    uint16_t max_peers;
+    Host host;
   };
+
+  void init_server(Server_Context& ctx) noexcept;
 
   void step_server(Server_Context& context, ENetEvent const& event) noexcept;
 

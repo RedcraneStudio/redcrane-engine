@@ -199,6 +199,11 @@ namespace redc { namespace net
     return res;
   }
 
+  void init_server(Server_Context& ctx) noexcept
+  {
+    ctx.host = std::move(*make_server_host(ctx.port, ctx.max_peers).ok());
+  }
+
   void step_server(Server_Context& ctx, ENetEvent const& event) noexcept
   {
     switch(event.type)
@@ -206,18 +211,51 @@ namespace redc { namespace net
       case ENET_EVENT_TYPE_CONNECT:
       {
         // Oh boy!
-        ctx.clients.push_back({event.peer, Client_State::Starting, {}});
+        ctx.clients.push_back({event.peer, Client_State::Connecting, {}});
+        // At this point we will recieve it's version info.
         break;
       }
       case ENET_EVENT_TYPE_RECEIVE:
       {
         // Progress the state of the client. Jesus Christ that scares me.
         // Abstract that, obviously!
+
+        // Find the corect client state and buffer object that will tell us
+        // what we are actually recieving
+        auto peer = event.peer;
+        auto client_find =
+          std::find_if(std::begin(ctx.clients), std::end(ctx.clients),
+          [&peer](auto& client_state)
+          {
+            return client_state.peer == peer;
+          });
+
+        if(client_find == ctx.clients.end())
+        {
+          // I don't know when this would happen. Something went quite wrong
+          log_e("Recieving data from unknown client - ignoring!");
+          break;
+        }
+
+        // Okay, figure out what the client wants or what we are getting.
+        // Actually for now ignore their version and return something to
+        // signify we don't support the protocol yet!
+
+        send_data(false, peer);
+
+        // Disconnect and remove that client.
+        enet_peer_disconnect_later(peer, 0);
+        ctx.clients.erase(client_find);
+
+        // Don't forget to destory the packet!
+        enet_packet_destroy(event.packet);
+
         break;
       }
       case ENET_EVENT_TYPE_DISCONNECT:
       default:
       {
+        log_i("Disconnect event");
         break;
       }
     }

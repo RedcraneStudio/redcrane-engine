@@ -312,12 +312,23 @@ namespace redc { namespace sail
   int start_dedicated(po::variables_map const& vm) noexcept
   {
     // Get details
-    //auto port = vm["port"].as<uint16_t>();
-    //auto max_peers = vm["max-peers"].as<uint16_t>();
+    auto port = vm["port"].as<uint16_t>();
+    auto max_peers = vm["max-peers"].as<uint16_t>();
 
-    //auto server = net::make_server(port, max_peers);
+    net::Server_Context server;
+    server.port = port;
+    server.max_peers = max_peers;
+    net::init_server(server);
 
-    //Game game;
+    bool running = true;
+    while(running)
+    {
+      ENetEvent event;
+      while(enet_host_service(server.host.host, &event, 0))
+      {
+        net::step_server(server, event);
+      }
+    }
 
     return EXIT_SUCCESS;
   }
