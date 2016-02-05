@@ -7,13 +7,34 @@
 #include "../common/log.h"
 namespace redc { namespace net
 {
-  struct Version_Info
+  // These are helper functions so I don't forget to destroy the packet or
+  // adjust the right bool flag
+  void set_state(Step_Client_Result& res, Client_Context& ctx,
+                 Client_State new_state) noexcept
   {
-    version_t protocol_version;
-    version_t client_version;
+    if(ctx.state == new_state) return;
 
-    MSGPACK_DEFINE(protocol_version, client_version);
-  };
+    ctx.state = new_state;
+    res.context_changed = true;
+  }
+
+  void set_event_handled(Step_Client_Result& res, ENetPacket* pack = nullptr)
+  {
+    if(pack)
+    {
+      enet_packet_destroy(pack);
+    }
+    res.event_handled = true;
+  }
+
+#define CLIENT_PROTOCOL_VERSION 1
+
+#define REQUIRE_EVENT(ctx, event, type_name) \
+  if(!event) break; \
+  if(event->type != ENET_EVENT_TYPE_##type_name) break
+
+#define REQUIRE_EVENT_FROM_SERVER(ctx, event) \
+  if(ctx.server_peer != event->peer) break
 
   Step_Client_Result step_client(Client_Context& ctx, ENetEvent const* event) noexcept
   {
@@ -27,167 +48,125 @@ namespace redc { namespace net
         ctx.host = std::move(*make_client_host().ok());
         // How many channels? Just one?
         enet_host_connect(ctx.host.host, &ctx.server_addr, 1, 0);
-        ctx.state = Client_State::Connecting;
-        res.context_changed = true;
+        // We are now in the process of connecting! Exciting times!
+        set_state(res, ctx, Client_State::Connecting);
         break;
       }
       case Client_State::Connecting:
       {
-        if(!event) break;
-        // If it's the correct type of event
-        if(event->type == ENET_EVENT_TYPE_CONNECT)
+        REQUIRE_EVENT(ctx, event, CONNECT);
+
+        // From the correct peer? We can probably assume nobody will use our
+        // host that we made but better safe than sorry.
+        if(event->peer->address.host == ctx.server_addr.host &&
+           event->peer->address.port == ctx.server_addr.port)
         {
-          // From the correct peer? We can probably assume nobody will use our
-          // host that we made but better safe than sorry.
-          if(event->peer->address.host == ctx.server_addr.host &&
-             event->peer->address.port == ctx.server_addr.port)
-          {
-            res.event_handled = true;
-            res.context_changed = true;
+          // Now send our version
+          ctx.server_peer = event->peer;
 
-            // Now send our version
-            ctx.server_peer = event->peer;
+          // Serialize versions
 
-            // Serialize versions
+          // Protocol version is internal
+          version_t cur_prot_version = CLIENT_PROTOCOL_VERSION;
 
-            // Protocol version is internal
-            version_t cur_prot_version = 1;
+          // Send both
+          Version_Info version{cur_prot_version, ctx.client_version};
+          send_data(version, ctx.server_peer);
 
-            // Send both
-            Version_Info version{cur_prot_version, ctx.client_version};
-            send_data(version, ctx.server_peer);
+          // Now we are waiting for a response (or failure due to versioning)
+          set_state(res, ctx, Client_State::Waiting_For_Info);
 
-            // Now we are waiting for a response (or failure due to versioning)
-            ctx.state = Client_State::Waiting_For_Info;
-          }
+          // We don't have any packet to destroy
+          set_event_handled(res);
         }
+
         break;
       }
       case Client_State::Waiting_For_Info:
       {
-        if(!event) break;
-        // Abstract over actual thing we are reading, etc. Maybe
-        if(event->type == ENET_EVENT_TYPE_RECEIVE)
+        REQUIRE_EVENT(ctx, event, RECEIVE);
+        REQUIRE_EVENT_FROM_SERVER(ctx, event);
+
+        std::pair<bool, bool> version_failure;
+
+        // Try to decode Server_Info struct
+        if(recieve_data(ctx.server_info, event->packet))
         {
-          if(event->peer == ctx.server_peer)
+          // The client code should now populate the inventory field.
+          set_state(res, ctx, Client_State::Sending_Loadouts);
+          set_event_handled(res, event->packet);
+        }
+        else if(recieve_data(version_failure, event->packet))
+        {
+          // Was our protocol version rejected, client version rejected?
+          // Or both?
+
+          // First is protocol
+          if(version_failure.first)
           {
-            // We got some data from the server!
-            if(event->packet->dataLength == 1)
-            {
-              // If it is just false:
-              if(event->packet->data[0] == 0xc2)
-              {
-                // Our version was probably bad
-                // Throw an error?
-                log_e("Server does not support our client version");
-                // Disconnect
-                enet_peer_disconnect(event->peer, 0);
-                break;
-              }
-            }
-
-            // Try to decode Server_Info struct
-            msgpack::unpacked unpacked;
-            msgpack::unpack(unpacked, (const char*) event->packet->data,
-                            event->packet->dataLength);
-            try
-            {
-              ctx.server_info = unpacked.get().as<Server_Info>();
-            }
-            catch(...)
-            {
-              // Figure out what exception I need to catch
-              // For now rethrow it
-              throw;
-            }
-
-            // Now we have the client init packet available, that's all we need
-            // then the user should populate the inventory field.
-            res.context_changed = true;
-            res.event_handled = true;
-            ctx.state = Client_State::Sending_Loadouts;
+            log_e("Server rejected client protocol version: %",
+                  CLIENT_PROTOCOL_VERSION);
           }
+          // Second is the game version
+          if(version_failure.second)
+          {
+            log_e("Server rejected client (game) version: %",
+                  ctx.client_version);
+          }
+
+          if(!version_failure.first && !version_failure.second)
+          {
+            log_e("Versions seem fine, but something failed!");
+          }
+
+          // Either case disconnect
+          log_e("Disconnecting...");
+          enet_peer_disconnect(event->peer, 0);
+
+          // We did handle this event
+          set_event_handled(res, event->packet);
         }
         break;
       }
       case Client_State::Sending_Loadouts:
       {
-        // Serialize inventory
+        // Serialize and send inventory
         send_data(ctx.inventory, ctx.server_peer);
-
         // We are waiting to see if the server accepts our inventory.
-        res.context_changed = true;
-        ctx.state = Client_State::Waiting_For_Inventory_Confirmation;
+        set_state(res, ctx, Client_State::Waiting_For_Inventory_Confirmation);
         break;
       }
       case Client_State::Waiting_For_Inventory_Confirmation:
       {
-        if(!event) break;
-        // This is copied from Waiting_For_Server_Info.
-        if(event->type == ENET_EVENT_TYPE_RECEIVE)
-        {
-          if(event->peer == ctx.server_peer)
-          {
-            // Try to decode a bool
-            msgpack::unpacked unpacked;
-            msgpack::unpack(unpacked, (const char*) event->packet->data,
-                            event->packet->dataLength);
-            try
-            {
-              ctx.inventory_okay = unpacked.get().as<bool>();
-            }
-            catch(...)
-            {
-              // Figure out what exception I need to catch
-              // For now rethrow it
-              throw;
-            }
+        REQUIRE_EVENT(ctx, event, RECEIVE);
+        REQUIRE_EVENT_FROM_SERVER(ctx, event);
 
-            // Now we have the client init packet available, that's all we need
-            // then the user should populate the inventory field.
-            res.context_changed = true;
-            res.event_handled = true;
-            ctx.state = Client_State::Sending_Team;
-          }
+        // Try to decode a bool
+        if(recieve_data(ctx.inventory_okay, event->packet))
+        {
+          // The client code should now populate the team id field.
+          // We know our inventory was accepted.
+          set_state(res, ctx, Client_State::Sending_Team);
+          set_event_handled(res, event->packet);
         }
-        break;
       }
       case Client_State::Sending_Team:
       {
-        res.context_changed = true;
+        // Send team id
         send_data(ctx.team, ctx.server_peer);
-        ctx.state = Client_State::Waiting_For_Spawn;
+        set_state(res, ctx, Client_State::Waiting_For_Spawn);
         break;
       }
       case Client_State::Waiting_For_Spawn:
       {
-        if(!event) break;
-        // This is copied from Waiting_For_Server_Info.
-        if(event->type == ENET_EVENT_TYPE_RECEIVE)
-        {
-          if(event->peer == ctx.server_peer)
-          {
-            // Try to decode a bool
-            msgpack::unpacked unpacked;
-            msgpack::unpack(unpacked, (const char*) event->packet->data,
-                            event->packet->dataLength);
-            try
-            {
-              ctx.spawn_information = unpacked.get().as<Spawn_Information>();
-            }
-            catch(...)
-            {
-              // Figure out what exception I need to catch
-              // For now rethrow it
-              throw;
-            }
+        REQUIRE_EVENT(ctx, event, RECEIVE);
+        REQUIRE_EVENT_FROM_SERVER(ctx, event);
 
-            // Now we have the client init packet available, that's all we need
-            // then the user should populate the inventory field.
-            res.context_changed = true;
-            res.event_handled = true;
-            ctx.state = Client_State::Playing;
-          }
+        // Try to decode spawn information
+        if(recieve_data(ctx.spawn_information, event->packet))
+        {
+          set_state(res, ctx, Client_State::Playing);
+          set_event_handled(res, event->packet);
         }
         break;
       }
@@ -211,7 +190,15 @@ namespace redc { namespace net
       case ENET_EVENT_TYPE_CONNECT:
       {
         // Oh boy!
-        ctx.clients.push_back({event.peer, Client_State::Connecting, {}});
+        Client_State_And_Buffer client;
+
+        // We only know this information, we'll fill out the rest later.
+        client.peer = event.peer;
+        client.state = Client_State::Connecting;
+
+        // Keep track of it, of course
+        ctx.clients.push_back(std::move(client));
+
         // At this point we will recieve it's version info.
         break;
       }
@@ -237,11 +224,23 @@ namespace redc { namespace net
           break;
         }
 
+        if(!recieve_data(client_find->version, event.packet))
+        {
+          // Err, ignore:
+          break;
+        }
+
         // Okay, figure out what the client wants or what we are getting.
         // Actually for now ignore their version and return something to
         // signify we don't support the protocol yet!
 
-        send_data(false, peer);
+        // Protocol comes first, then client. Therefore: We support the client
+        // but not the protocol.
+        send_data(std::make_pair(true, false), peer);
+        log_i("Rejecting client (game version = %) because we don't know "
+              "protocol version %",
+              client_find->version.client_version,
+              client_find->version.protocol_version);
 
         // Disconnect and remove that client.
         enet_peer_disconnect_later(peer, 0);

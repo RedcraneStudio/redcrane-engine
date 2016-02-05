@@ -165,6 +165,10 @@ namespace redc { namespace net
   /*!
    * \brief Steps a client forward in terms of server communication up to
    * Client_State::Playing.
+
+   * This function will properly destroy a packet it has consumed / used.
+   * If event_handled is returned false, the packet should still be usable and
+   * must be destroyed by other code.
    *
    * \returns Whether or not the event parameter was utilized. If it's false,
    * the event should be handled elsewhere, if it's true ctx probably changed
@@ -273,6 +277,33 @@ namespace redc { namespace net
     enet_peer_send(peer, 0, packet);
   }
 
+  template <class T>
+  bool recieve_data(T& t, ENetPacket* packet) noexcept
+  {
+    msgpack::unpacked unpacked;
+    msgpack::unpack(unpacked, (const char*) packet->data, packet->dataLength);
+    try
+    {
+      // Try to do the conversion
+      t = unpacked.get().as<T>();
+      // If we get here it worked!
+      return true;
+    }
+    catch(...)
+    {
+      // We failed to do that conversion
+      return false;
+    }
+  }
+
+  struct Version_Info
+  {
+    version_t protocol_version;
+    version_t client_version;
+
+    MSGPACK_DEFINE(protocol_version, client_version);
+  };
+
   // ===
   // Server stuff!
   // ===
@@ -282,6 +313,10 @@ namespace redc { namespace net
     ENetPeer* peer;
 
     Client_State state;
+
+    Version_Info version;
+    Inventory inventory;
+    team_id team;
 
     // Somehow limit this to a certain amount? Circular buffer?
     std::vector<Input> inputs;
