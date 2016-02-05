@@ -308,11 +308,19 @@ namespace redc { namespace net
   // Server stuff!
   // ===
 
+  enum class Remote_Client_State
+  {
+    Version,
+    Inventory,
+    Team_Id,
+    Playing
+  };
+
   struct Client_State_And_Buffer
   {
     ENetPeer* peer;
 
-    Client_State state;
+    Remote_Client_State state;
 
     Version_Info version;
     Inventory inventory;

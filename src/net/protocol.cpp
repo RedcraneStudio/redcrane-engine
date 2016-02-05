@@ -183,6 +183,54 @@ namespace redc { namespace net
     ctx.host = std::move(*make_server_host(ctx.port, ctx.max_peers).ok());
   }
 
+  void step_remote_client(Client_State_And_Buffer& client,
+                          ENetEvent const& event) noexcept
+  {
+    // We can assume we got a recieve event I guess.
+    switch(client.state)
+    {
+      case Remote_Client_State::Version:
+      {
+        // Recieve version
+        if(!recieve_data(client.version, event.packet))
+        {
+          // Err, ignore:
+          break;
+        }
+
+        // Okay, figure out what the client wants or what we are getting.
+        // Actually for now ignore their version and return something to
+        // signify we don't support the protocol yet!
+
+        // Protocol comes first, then client. Therefore: We support the client
+        // but not the protocol.
+        send_data(std::make_pair(true, false), event.peer);
+        log_i("Rejecting client (game version = %) because we don't know "
+              "protocol version %",
+              client.version.client_version,
+              client.version.protocol_version);
+
+        // Disconnect that client.
+        enet_peer_disconnect_later(event.peer, 0);
+
+        break;
+      }
+      case Remote_Client_State::Inventory:
+      {
+        break;
+      }
+      case Remote_Client_State::Team_Id:
+      {
+        break;
+      }
+      case Remote_Client_State::Playing:
+      default:
+      {
+        break;
+      }
+    }
+  }
+
   void step_server(Server_Context& ctx, ENetEvent const& event) noexcept
   {
     switch(event.type)
@@ -194,7 +242,7 @@ namespace redc { namespace net
 
         // We only know this information, we'll fill out the rest later.
         client.peer = event.peer;
-        client.state = Client_State::Connecting;
+        client.state = Remote_Client_State::Version;
 
         // Keep track of it, of course
         ctx.clients.push_back(std::move(client));
@@ -224,27 +272,8 @@ namespace redc { namespace net
           break;
         }
 
-        if(!recieve_data(client_find->version, event.packet))
-        {
-          // Err, ignore:
-          break;
-        }
-
-        // Okay, figure out what the client wants or what we are getting.
-        // Actually for now ignore their version and return something to
-        // signify we don't support the protocol yet!
-
-        // Protocol comes first, then client. Therefore: We support the client
-        // but not the protocol.
-        send_data(std::make_pair(true, false), peer);
-        log_i("Rejecting client (game version = %) because we don't know "
-              "protocol version %",
-              client_find->version.client_version,
-              client_find->version.protocol_version);
-
-        // Disconnect and remove that client.
-        enet_peer_disconnect_later(peer, 0);
-        ctx.clients.erase(client_find);
+        // Recieve whatever we need to recieve, etc.
+        step_remote_client(*client_find, event);
 
         // Don't forget to destory the packet!
         enet_packet_destroy(event.packet);
@@ -255,6 +284,10 @@ namespace redc { namespace net
       default:
       {
         log_i("Disconnect event");
+
+        // TODO:
+        // Find an iterator to the right client and remove it from the list of
+        // clients.
         break;
       }
     }
