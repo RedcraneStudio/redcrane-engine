@@ -172,7 +172,7 @@ namespace redc { namespace sail
               break;
             case net::Client_State::Sending_Team:
               // Always join the first team.
-              client.ctx.team = client.ctx.client_init_packet.teams[0].id;
+              client.ctx.team = client.ctx.server_info.teams[0].id;
               log_i("Picking first time");
               break;
             case net::Client_State::Playing:
@@ -181,7 +181,7 @@ namespace redc { namespace sail
 
               // Find our sendrate.
               // Sample input every 1 / tickrate seconds.
-              sendrate = 1.0f / client.ctx.client_init_packet.rules.tickrate;
+              sendrate = 1.0f / client.ctx.server_info.rules.tickrate;
               break;
             default:
               break;

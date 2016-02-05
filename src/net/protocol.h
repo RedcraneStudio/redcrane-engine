@@ -92,7 +92,10 @@ namespace redc { namespace net
     MSGPACK_DEFINE(name, members);
   };
 
-  struct Client_Init_Packet
+  // Includes meta-information about the game. Each client recieves this as
+  // often as things change. It is also sent as part of the connection
+  // protocol.
+  struct Server_Info
   {
     Server_Rules rules;
     std::vector<Player_Information> players;
@@ -148,7 +151,7 @@ namespace redc { namespace net
     // Maybe wrap this for RAII; After connecting
     ENetPeer* server_peer;
     // Waiting for server info
-    Client_Init_Packet client_init_packet;
+    Server_Info server_info;
     // Sending inventory
     Inventory inventory;
     // Inventory check
@@ -247,7 +250,7 @@ namespace redc { namespace net
   struct Network_Player
   {
     // What actual player this corrosponds to. Currently we have to do a linear
-    // into the vector of players in client_init_packet.
+    // search into the vector of players in server_info.
     sail::player_id id;
     std::vector<State> state_queue;
   };
@@ -287,6 +290,14 @@ namespace redc { namespace net
   struct Server_Context
   {
     std::vector<Client_State_And_Buffer> clients;
+
+    // Most up to date server info
+    // This structure includes rules, teams and players.
+    // Hmm, those indices may not be correct for us, may need to be adjusted
+    // for each client? Also I like this arbitrary structure, maybe it would be
+    // better to use templates + macros or something so that each structure
+    // could be fairly flat.
+    Server_Info info;
   };
 
   void step_server(Server_Context& context, ENetEvent const& event) noexcept;

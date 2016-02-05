@@ -81,13 +81,13 @@ namespace redc { namespace net
               }
             }
 
-            // Try to decode Client_Init_Packet struct
+            // Try to decode Server_Info struct
             msgpack::unpacked unpacked;
             msgpack::unpack(unpacked, (const char*) event->packet->data,
                             event->packet->dataLength);
             try
             {
-              ctx.client_init_packet = unpacked.get().as<Client_Init_Packet>();
+              ctx.server_info = unpacked.get().as<Server_Info>();
             }
             catch(...)
             {
