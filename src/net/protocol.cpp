@@ -87,7 +87,7 @@ namespace redc { namespace net
         REQUIRE_EVENT(ctx, event, RECEIVE);
         REQUIRE_EVENT_FROM_SERVER(ctx, event);
 
-        std::pair<bool, bool> version_failure;
+        Version_Okay version_okay;
 
         // Try to decode Server_Info struct
         if(recieve_data(ctx.server_info, event->packet))
@@ -96,25 +96,23 @@ namespace redc { namespace net
           set_state(res, ctx, Client_State::Sending_Loadouts);
           set_event_handled(res, event->packet);
         }
-        else if(recieve_data(version_failure, event->packet))
+        else if(recieve_data(version_okay, event->packet))
         {
           // Was our protocol version rejected, client version rejected?
           // Or both?
 
-          // First is protocol
-          if(version_failure.first)
+          if(!version_okay.protocol)
           {
             log_e("Server rejected client protocol version: %",
                   CLIENT_PROTOCOL_VERSION);
           }
-          // Second is the game version
-          if(version_failure.second)
+          if(!version_okay.client)
           {
             log_e("Server rejected client (game) version: %",
                   ctx.client_version);
           }
 
-          if(!version_failure.first && !version_failure.second)
+          if(version_okay.protocol && version_okay.client)
           {
             log_e("Versions seem fine, but something failed!");
           }
@@ -183,7 +181,8 @@ namespace redc { namespace net
     ctx.host = std::move(*make_server_host(ctx.port, ctx.max_peers).ok());
   }
 
-  void step_remote_client(Client_State_And_Buffer& client,
+  void step_remote_client(Server_Context& ctx,
+                          Client_State_And_Buffer& client,
                           ENetEvent const& event) noexcept
   {
     // We can assume we got a recieve event I guess.
@@ -198,37 +197,102 @@ namespace redc { namespace net
           break;
         }
 
-        // Okay, figure out what the client wants or what we are getting.
-        // Actually for now ignore their version and return something to
-        // signify we don't support the protocol yet!
+        // Make sure the version is correct
+        Version_Okay versions_okay;
+        versions_okay.protocol =
+          client.version.protocol_version == CLIENT_PROTOCOL_VERSION;
+        versions_okay.client = client.version.client_version == 1;
 
-        // Protocol comes first, then client. Therefore: We support the client
-        // but not the protocol.
-        send_data(std::make_pair(true, false), event.peer);
-        log_i("Rejecting client (game version = %) because we don't know "
-              "protocol version %",
-              client.version.client_version,
-              client.version.protocol_version);
+        if(!versions_okay.protocol || !versions_okay.client)
+        {
+          // Send which version was actually the issue.
+          send_data(versions_okay, event.peer);
+          if(!versions_okay.protocol && versions_okay.client)
+          {
+            log_i("Rejecting client (game version = %) because we don't know "
+                  "protocol version %",
+                  client.version.client_version,
+                  client.version.protocol_version);
+          }
+          else if(versions_okay.protocol && !versions_okay.client)
+          {
+            log_i("Rejecting client (protocol version = %) because we don't "
+                  "know game client version %",
+                  client.version.protocol_version,
+                  client.version.client_version);
+          }
+          else if(!versions_okay.protocol && !versions_okay.client)
+          {
+            log_i("Rejecting client because we don't know protocol version % "
+                  "or game client version %",
+                  client.version.protocol_version,
+                  client.version.client_version);
+          }
 
-        // Disconnect that client.
-        enet_peer_disconnect_later(event.peer, 0);
+          // Disconnect the peer and jump ship.
+          enet_peer_disconnect_later(event.peer, 0);
+
+          break;
+        }
+
+        // Versions are okay, send our rules / info, etc.
+
+        // TODO: Figure out how to send the info at any point even while playing.
+        send_data(ctx.info, event.peer);
+        client.state = Remote_Client_State::Inventory;
 
         break;
       }
       case Remote_Client_State::Inventory:
       {
+        if(!recieve_data(client.inventory, event.packet))
+        {
+          // Failed to read inventory.
+          break;
+        }
+        send_data(true, event.peer);
         break;
       }
       case Remote_Client_State::Team_Id:
       {
+        if(!recieve_data(client.team, event.packet))
+        {
+          // Failed to read team id.
+          break;
+        }
+
+        Spawn_Information spawn_info;
+
+        // TODO: Fill in spawn information
+
+        send_data(spawn_info, event.peer);
         break;
       }
       case Remote_Client_State::Playing:
       default:
       {
+        Input cur_input;
+        if(!recieve_data(cur_input, event.packet))
+        {
+          // Possibly handle other types of packets.
+          break;
+        }
+
+        client.inputs.push_back(cur_input);
+
         break;
       }
     }
+  }
+
+  Client_Vector_Iter find_client_by_peer(Client_Vector& cts,
+                                         ENetPeer* peer) noexcept
+  {
+    return std::find_if(std::begin(cts), std::end(cts),
+      [&peer](auto& client_state)
+      {
+        return client_state.peer == peer;
+      });
   }
 
   void step_server(Server_Context& ctx, ENetEvent const& event) noexcept
@@ -255,16 +319,10 @@ namespace redc { namespace net
         // Progress the state of the client. Jesus Christ that scares me.
         // Abstract that, obviously!
 
+        auto client_find = find_client_by_peer(ctx.clients, event.peer);
+
         // Find the corect client state and buffer object that will tell us
         // what we are actually recieving
-        auto peer = event.peer;
-        auto client_find =
-          std::find_if(std::begin(ctx.clients), std::end(ctx.clients),
-          [&peer](auto& client_state)
-          {
-            return client_state.peer == peer;
-          });
-
         if(client_find == ctx.clients.end())
         {
           // I don't know when this would happen. Something went quite wrong
@@ -273,7 +331,7 @@ namespace redc { namespace net
         }
 
         // Recieve whatever we need to recieve, etc.
-        step_remote_client(*client_find, event);
+        step_remote_client(ctx, *client_find, event);
 
         // Don't forget to destory the packet!
         enet_packet_destroy(event.packet);
@@ -288,6 +346,19 @@ namespace redc { namespace net
         // TODO:
         // Find an iterator to the right client and remove it from the list of
         // clients.
+        auto client_find = find_client_by_peer(ctx.clients, event.peer);
+
+        if(client_find == ctx.clients.end())
+        {
+          // wat
+        }
+        else
+        {
+          // Remove it from our clients list.
+          ctx.clients.erase(client_find);
+          // TODO: Worry about removing it from teams, etc.
+        }
+
         break;
       }
     }

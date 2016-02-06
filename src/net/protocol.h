@@ -304,6 +304,14 @@ namespace redc { namespace net
     MSGPACK_DEFINE(protocol_version, client_version);
   };
 
+  struct Version_Okay
+  {
+    okay_t protocol;
+    okay_t client;
+
+    MSGPACK_DEFINE(protocol, client);
+  };
+
   // ===
   // Server stuff!
   // ===
@@ -330,9 +338,12 @@ namespace redc { namespace net
     std::vector<Input> inputs;
   };
 
+  using Client_Vector = std::vector<Client_State_And_Buffer>;
+  using Client_Vector_Iter = Client_Vector::iterator;
+
   struct Server_Context
   {
-    std::vector<Client_State_And_Buffer> clients;
+    Client_Vector clients;
 
     // Most up to date server info
     // This structure includes rules, teams and players.
