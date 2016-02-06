@@ -5,7 +5,8 @@
 #include "game.h"
 #include <thread>
 #include "../common/log.h"
-#include "../net/protocol.h"
+#include "../net/client_protocol.h"
+#include "../net/server_protocol.h"
 #include "../tasks/render.h"
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -172,7 +173,7 @@ namespace redc { namespace sail
               break;
             case net::Client_State::Sending_Team:
               // Always join the first team.
-              client.ctx.team = client.ctx.server_info.teams[0].id;
+              client.ctx.team = 0;
               log_i("Picking first time");
               break;
             case net::Client_State::Playing:

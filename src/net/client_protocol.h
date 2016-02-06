@@ -3,32 +3,38 @@
  * All rights reserved.
  */
 #pragma once
-#include <msgpack.hpp>
+#include <cstdint>
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <msgpack.hpp>
+
 #include "../common/glm_vec_serialize.h"
+
 #include "net_io.h"
-// Move this file somewhere else, we need it and we don't need anything else
-// from saillib.
-#include "../sail/game_struct.h"
 namespace redc { namespace net
 {
-  // 1. Client initiates a connection to the server, writes version of the
-  // client and protocol that it supports, etc.
-  // 2. Server response with:
+
+#define CLIENT_PROTOCOL_VERSION 1
+  // 1. Client initiates a connection to the server, sends a packet with:
+  //    - Highest client and protocol version that it supports
+  // 2. Server responds with two booleans. Both true means continue. They
+  // corrospond to which version were compatible and which weren't.
+  // 3. Client sends to the server the player's name.
+  // 4. Server response with:
   //    - Server rules
-  //    - Player information
-  //    - Team information
+  //    - All players
+  //    - All Teams
+  //    - ID of the current client
   //    - Possible place for extensions, etc.
-  // or:
-  //    - Bad version, etc: Disconnects
-  // 3. Client sends its loadouts to the server
-  // 4. The server says the inventory will work or no.
-  // 3. Client asks the user which team they would like to join. The server
+  // 5. Client sends its loadouts to the server
+  // 6. The server says the inventory will work or no.
+  // 7. Client asks the user which team they would like to join. The server
   // may send updates to the client while the client is picking a team.
-  // 4. Client -> Server: This team!
-  // 5. Server -> Client: Spawn here, with this orientation, approximately this
+  // 8. Client -> Server: This team!
+  // 9. Server -> Client: Spawn here, with this orientation, approximately this
   // time, with this *seed*, or no!
-  // 6. Client -> Server: Sampled input information with time so that the
+  // 10. Client -> Server: Sampled input information with time so that the
   // water can be properly simulated, etc. The simulation will run on both
   // systems. The server should also be sending data to the client of updates
   // from other clients, this state should include inputs from the clients so
@@ -41,7 +47,11 @@ namespace redc { namespace net
   {
     Starting, // For before any of this
     // Populate the server address member
+    // Populate version information
     Connecting, // Waiting for connection acknowledgement
+    Waiting_For_Version_Confirmation, // Waiting for the server to confirm ver.
+    Sending_Name, // About to send the player name
+    // Populate player name
     Waiting_For_Info, // Waiting for players, teams, etc.
     Sending_Loadouts, // About to send the users inventory / loadouts.
     // Populate the inventory member of Client_Context then call step_client
@@ -52,8 +62,27 @@ namespace redc { namespace net
     Playing // Your on your own, client
   };
 
+  // Hahahaha fuck it
+  using okay_t = bool;
+
   // First the version information
   using version_t = uint16_t;
+
+  struct Version_Info
+  {
+    version_t protocol_version;
+    version_t client_version;
+
+    MSGPACK_DEFINE(protocol_version, client_version);
+  };
+
+  struct Version_Okay
+  {
+    okay_t protocol;
+    okay_t client;
+
+    MSGPACK_DEFINE(protocol, client);
+  };
 
   // Server rules
   struct Server_Rules
@@ -64,32 +93,42 @@ namespace redc { namespace net
     MSGPACK_DEFINE(tickrate, max_allowed_loadouts);
   };
 
-  // Player information
-  struct Player_Information
-  {
-    sail::player_id id;
-    std::string name;
-
-    MSGPACK_DEFINE(id, name);
-  };
-
   // Yah I'm going to have to say a maximum of 256 teams, sorry.
   // I know... I know.
   using team_id = uint8_t;
 
+  using player_id = uint16_t;
+
+  // Player information
+  struct Player_Info
+  {
+    player_id id;
+    std::string name;
+
+    team_id team;
+
+    MSGPACK_DEFINE(id, name);
+  };
+
+  template <class T>
+  struct ID_Hash
+  {
+    std::size_t operator()(T const& t) const noexcept
+    {
+      return static_cast<std::size_t>(t.id);
+    }
+  };
+
+  using Player_Set = std::set<Player_Info, ID_Hash<Player_Info> >;
+
   // Teams should be able to have names themselves. Even if the user can't name
   // them themselves, maybe the name could change if every member of the team
   // has a tag on, etc.
+  // The id of a team is just it's index into a contigious array of them.
   struct Team
   {
-    team_id id;
     std::string name;
-
-    // This gives the client a name of the player and an id for future
-    // reference.
-    std::vector<sail::player_id> members;
-
-    MSGPACK_DEFINE(name, members);
+    MSGPACK_DEFINE(name);
   };
 
   // Includes meta-information about the game. Each client recieves this as
@@ -98,8 +137,10 @@ namespace redc { namespace net
   struct Server_Info
   {
     Server_Rules rules;
-    std::vector<Player_Information> players;
+    std::vector<Player_Info> players;
     std::vector<Team> teams;
+
+    player_id our_id;
 
     MSGPACK_DEFINE(rules, players, teams);
   };
@@ -126,9 +167,6 @@ namespace redc { namespace net
     MSGPACK_DEFINE(loadouts);
   };
 
-  // Hahahaha fuck it
-  using okay_t = bool;
-
   struct Spawn_Information
   {
     glm::vec3 position;
@@ -144,12 +182,16 @@ namespace redc { namespace net
   {
     Client_State state = Client_State::Starting;
     // Starting
-    version_t client_version; // This is not protocol version
     ENetAddress server_addr;
-    // Connecting
+    // Connecting. Maybe wrap the peer in a RAII class, after connecting
     net::Host host;
-    // Maybe wrap this for RAII; After connecting
     ENetPeer* server_peer;
+    // Sending version
+    version_t client_version; // This is not protocol version
+    // Version confirmation / result
+    Version_Okay version_okay;
+    // Sending name
+    std::string player_name;
     // Waiting for server info
     Server_Info server_info;
     // Sending inventory
@@ -179,7 +221,8 @@ namespace redc { namespace net
     bool context_changed = false;
     bool event_handled = false;
   };
-  Step_Client_Result step_client(Client_Context& ctx, ENetEvent const* event) noexcept;
+  Step_Client_Result step_client(Client_Context& ctx,
+                                 ENetEvent const* event) noexcept;
 
   // I'm thinking the above stuff (player, team) could be idempotent at the
   // cost of the little extra bandwidth. Instead of worrying about specifically
@@ -228,43 +271,7 @@ namespace redc { namespace net
     return ret;
   }
 
-  // Sent from server to client about all clients (even the owner).
-  // We should optimize this packer since a client that knows its own inputs
-  // has no need for this information, which currently is like 5.5 bytes, I
-  // think?
-  struct State
-  {
-    // The time of this state update is input.time.
-    Input input;
-
-    // We can't quantize the position, but we can do it for the velocity.
-    // For now I'm not going to worry about it because it means some hacks with
-    // message pack.
-
-    // This is all about the boat.
-    glm::vec3 position;
-    glm::vec3 velocity;
-    glm::quat angular_displacement;
-    glm::quat angular_velocity;
-
-    MSGPACK_DEFINE(input, position, velocity, angular_displacement,
-                   angular_velocity);
-  };
-
-  struct Network_Player
-  {
-    // What actual player this corrosponds to. Currently we have to do a linear
-    // search into the vector of players in server_info.
-    sail::player_id id;
-    std::vector<State> state_queue;
-  };
-
-  struct Client
-  {
-    Client_Context ctx;
-    std::vector<Network_Player> players;
-  };
-
+  // Helper functions to send and recieve.
   template <class T>
   void send_data(T const& t, ENetPeer* peer) noexcept
   {
@@ -295,72 +302,4 @@ namespace redc { namespace net
       return false;
     }
   }
-
-  struct Version_Info
-  {
-    version_t protocol_version;
-    version_t client_version;
-
-    MSGPACK_DEFINE(protocol_version, client_version);
-  };
-
-  struct Version_Okay
-  {
-    okay_t protocol;
-    okay_t client;
-
-    MSGPACK_DEFINE(protocol, client);
-  };
-
-  // ===
-  // Server stuff!
-  // ===
-
-  enum class Remote_Client_State
-  {
-    Version,
-    Inventory,
-    Team_Id,
-    Playing
-  };
-
-  struct Client_State_And_Buffer
-  {
-    ENetPeer* peer;
-
-    Remote_Client_State state;
-
-    Version_Info version;
-    Inventory inventory;
-    team_id team;
-
-    // Somehow limit this to a certain amount? Circular buffer?
-    std::vector<Input> inputs;
-  };
-
-  using Client_Vector = std::vector<Client_State_And_Buffer>;
-  using Client_Vector_Iter = Client_Vector::iterator;
-
-  struct Server_Context
-  {
-    Client_Vector clients;
-
-    // Most up to date server info
-    // This structure includes rules, teams and players.
-    // Hmm, those indices may not be correct for us, may need to be adjusted
-    // for each client? Also I like this arbitrary structure, maybe it would be
-    // better to use templates + macros or something so that each structure
-    // could be fairly flat.
-    Server_Info info;
-
-    uint16_t port;
-    // This is a little wasteful but whatever.
-    uint16_t max_peers;
-    Host host;
-  };
-
-  void init_server(Server_Context& ctx) noexcept;
-
-  void step_server(Server_Context& context, ENetEvent const& event) noexcept;
-
 } }
