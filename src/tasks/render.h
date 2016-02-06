@@ -27,6 +27,8 @@ namespace redc
     sail::Game const* game_;
     SDL_Window* window_;
 
+    bool should_close_ = false;
+
     std::unique_ptr<gfx::gl::Driver> driver_;
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache_;
 

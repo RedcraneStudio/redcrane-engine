@@ -54,6 +54,13 @@ namespace redc
   }
   void Render_Task::step() noexcept
   {
+    // Handle events
+    SDL_Event event;
+    while(SDL_PollEvent(&event))
+    {
+      if(event.type == SDL_QUIT) should_close_ = true;
+    }
+
     // Passing in the driver is redundant.
     ocean_.render(*driver_, cam_);
     envmap_.render(*driver_, cam_);
@@ -61,5 +68,5 @@ namespace redc
     SDL_GL_SwapWindow(window_);
   }
 
-  bool Render_Task::should_close() noexcept { return false; }
+  bool Render_Task::should_close() noexcept { return should_close_; }
 }
