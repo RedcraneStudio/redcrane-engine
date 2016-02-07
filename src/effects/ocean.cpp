@@ -40,15 +40,13 @@ namespace redc { namespace effects
     time_loc_ = shader_->get_location("time");
     shader_->set_float(time_loc_, 0.0f);
 
-    shader_->set_integer(shader_->get_location("octaves_in"), 5);
-    shader_->set_float(shader_->get_location("amplitude_in"), 0.2f);
-    shader_->set_float(shader_->get_location("frequency_in"), 0.5f);
-    shader_->set_float(shader_->get_location("persistence_in"), 0.5f);
-    shader_->set_float(shader_->get_location("lacunarity_in"), 0.6f);
-
-    max_disp_ = 0.2f * std::pow(0.6f, 5);
-    //auto displ_loc = water_shader->get_location("disp");
-    //water_shader->set_float(displ_loc, max_displacement);
+    Ocean_Gen params;
+    params.octaves = 5;
+    params.amplitude = 0.2f;
+    params.frequency = 0.5f;
+    params.persistence = .5f;
+    params.lacunarity = .6f;
+    set_ocean_gen_parameters(params);
 
     projector_loc_ = shader_->get_location("projector");
     shader_->set_view_name("view");
@@ -75,6 +73,9 @@ namespace redc { namespace effects
     use_camera(driver, cam);
     shader_->set_vec3(cam_pos_loc_, cam.look_at.eye);
 
+    // In case they have changed in the meantime
+    update_ocean_gen_params();
+
     shader_->set_vec3(light_dir_loc_,
       glm::normalize(glm::vec3(5.0f, 5.0f, -6.0f)));
 
@@ -99,6 +100,35 @@ namespace redc { namespace effects
       shader_->set_float(time_loc_, time_s);
 
       grid_mesh_->draw_arrays(0, elements_);
+    }
+  }
+
+  void Ocean_Effect::set_ocean_gen_parameters(Ocean_Gen const& gen) noexcept
+  {
+    gen_params_ = gen;
+    needs_gen_params_update_ = true;
+  }
+
+  void Ocean_Effect::update_ocean_gen_params() noexcept
+  {
+    // Update the uniforms in the shader.
+    if(needs_gen_params_update_)
+    {
+      needs_gen_params_update_ = false;
+
+      shader_->set_integer(shader_->get_location("octaves_in"),
+                           gen_params_.octaves);
+      shader_->set_float(shader_->get_location("amplitude_in"),
+                         gen_params_.amplitude);
+      shader_->set_float(shader_->get_location("frequency_in"),
+                         gen_params_.frequency);
+      shader_->set_float(shader_->get_location("persistence_in"),
+                         gen_params_.persistence);
+      shader_->set_float(shader_->get_location("lacunarity_in"),
+                         gen_params_.lacunarity);
+
+      // TODO: Base this off the above parameters.
+      max_disp_ = 1.0f;
     }
   }
 } }
