@@ -10,8 +10,10 @@
 #include "SDL.h"
 #include "../sail/game_struct.h"
 #include "../gfx/gl/driver.h"
+
 #include "../effects/envmap.h"
 #include "../effects/ocean.h"
+#include "../effects/boat.h"
 
 #include "render/sdl_helper.h"
 namespace redc
@@ -33,8 +35,9 @@ namespace redc
     std::unique_ptr<gfx::gl::Driver> driver_;
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache_;
 
-    effects::Ocean_Effect ocean_;
     effects::Envmap_Effect envmap_;
+    effects::Ocean_Effect ocean_;
+    effects::Boat_Effect boat_;
 
     gfx::Camera cam_;
   };

@@ -32,8 +32,9 @@ namespace redc
     mesh_cache_ = std::make_unique<gfx::Mesh_Cache>(*driver_);
     driver_->set_active_mesh_cache(mesh_cache_.get());
 
-    ocean_.init(*driver_, vm);
     envmap_.init(*driver_, vm);
+    ocean_.init(*driver_, vm);
+    boat_.init(*driver_, vm);
 
     // This is getting long. Make a bunch of functions that just establish
     // policy. Make_sail_camera, make_sail_effects, etc.
@@ -74,6 +75,7 @@ namespace redc
     ocean_.render(*driver_, cam_);
 
     // Render boat.
+    boat_.render(*driver_, cam_);
 
     SDL_GL_SwapWindow(sdl.window);
   }
