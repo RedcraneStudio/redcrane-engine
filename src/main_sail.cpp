@@ -33,7 +33,7 @@
 #include "collisionlib/triangle.h"
 #include "collisionlib/motion.h"
 
-#include "sail/boat.h"
+#include "boatlib/boat.h"
 #include "sail/game.h"
 
 #include "use/mesh.h"

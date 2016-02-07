@@ -38,6 +38,7 @@ add_subdirectory(collisionlib)
 
 add_subdirectory(use)
 
+add_subdirectory(boatlib)
 add_subdirectory(effects)
 add_subdirectory(tasks)
 
@@ -61,6 +62,7 @@ target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
 add_executable(sl main_sail.cpp)
 target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
                          waterlib terrainlib uselib saillib effectslib netlib
+                         boatlib
                          ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 # add_executable(play_snd play_snd.cpp)

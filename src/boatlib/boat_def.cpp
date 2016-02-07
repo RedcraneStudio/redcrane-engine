@@ -12,9 +12,9 @@ namespace redc
 
     ret.hull_descs.push_back(
       build_hull_desc(mc, "Sailboat Hull", "obj/hulls/sailhull.obj",
-                      {{0.0f, +0.07065f, -0.30366f}, // Sail
-                       {0.0f, +0.26013f, +0.83811f}, // Rudder
-                       {0.0f, +0.23586f, -0.94225f}}) // Gun
+                      {{0.0f, +0.0000f, 0.01013f}, // Sail
+                       {0.0f, +0.0f, +0.0f}, // Rudder
+                       {0.0f, +0.0f, 0.0f}}) // Gun
     );
 
     ret.sail_descs.push_back(

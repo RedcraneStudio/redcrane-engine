@@ -4,4 +4,5 @@
 
 add_library(effectslib STATIC envmap.cpp ocean.cpp)
 
-target_link_libraries(effectslib PUBLIC uselib waterlib gfxlib gfxsupportlib)
+target_link_libraries(effectslib PUBLIC uselib waterlib gfxlib gfxsupportlib
+                                        boatlib)

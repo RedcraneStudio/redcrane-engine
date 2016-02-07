@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <unordered_map>
-#include "boat.h"
+#include "../boatlib/boat.h"
 #include "../collisionlib/motion.h"
 namespace redc { namespace sail
 {
