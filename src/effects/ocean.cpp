@@ -95,7 +95,7 @@ namespace redc { namespace effects
       // microseconds since start
       auto us = chrono::duration_cast<chrono::microseconds>(now - start_);
       // time in seconds since start
-      float time_s = us.count() / 1000000.0f;
+      float time_s = us.count() / 10000.0f;
 
       shader_->set_float(time_loc_, time_s);
 
