@@ -12,6 +12,8 @@
 #include "../gfx/gl/driver.h"
 #include "../effects/envmap.h"
 #include "../effects/ocean.h"
+
+#include "render/sdl_helper.h"
 namespace redc
 {
   struct Render_Task : public Task
@@ -19,13 +21,12 @@ namespace redc
     Render_Task(sail::Game const& game, po::variables_map const& vm,
                 std::string title, Vec<int> res, bool fullscreen,
                 bool vsync) noexcept;
-    ~Render_Task() noexcept;
     void step() noexcept override;
 
     bool should_close() noexcept;
   private:
     sail::Game const* game_;
-    SDL_Window* window_;
+    SDL_Init_Lock sdl;
 
     bool should_close_ = false;
 

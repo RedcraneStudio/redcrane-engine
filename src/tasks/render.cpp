@@ -4,16 +4,18 @@
  */
 #include "render.h"
 #include "../common/log.h"
-#include "render/sdl_helper.h"
 #include "../common/crash.h"
+#include "render/camera.h"
 #include <uv.h>
 namespace redc
 {
   Render_Task::Render_Task(sail::Game const& game, po::variables_map const& vm,
                            std::string title, Vec<int> res, bool fullscreen,
-                           bool vsync) noexcept : game_(&game)
+                           bool vsync) noexcept
+                           : game_(&game),
+                             sdl(title, res, fullscreen, vsync)
   {
-    if(!(window_ = init_sdl(title, res, fullscreen, vsync)))
+    if(!sdl.window)
     {
       crash();
     }
@@ -24,7 +26,7 @@ namespace redc
 
     // Initialize a driver
     int w, h;
-    SDL_GetWindowSize(window_, &w, &h);
+    SDL_GetWindowSize(sdl.window, &w, &h);
     driver_ = std::make_unique<gfx::gl::Driver>(Vec<int>{w, h});
 
     mesh_cache_ = std::make_unique<gfx::Mesh_Cache>(*driver_);
@@ -48,10 +50,6 @@ namespace redc
     cam_.look_at.eye = glm::vec3(0.0f, 5.0f, -6.0f);
     cam_.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
   }
-  Render_Task::~Render_Task() noexcept
-  {
-    uninit_sdl(window_);
-  }
   void Render_Task::step() noexcept
   {
     // Handle events
@@ -65,7 +63,7 @@ namespace redc
     ocean_.render(*driver_, cam_);
     envmap_.render(*driver_, cam_);
 
-    SDL_GL_SwapWindow(window_);
+    SDL_GL_SwapWindow(sdl.window);
   }
 
   bool Render_Task::should_close() noexcept { return should_close_; }

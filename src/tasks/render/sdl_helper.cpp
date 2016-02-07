@@ -6,6 +6,17 @@
 #include "../../common/log.h"
 namespace redc
 {
+
+  SDL_Init_Lock::SDL_Init_Lock(std::string title, Vec<int> res, bool fs,
+                               bool vsync) noexcept
+  {
+    window = init_sdl(title, res, fs, vsync);
+  }
+  SDL_Init_Lock::~SDL_Init_Lock() noexcept
+  {
+    uninit_sdl(window);
+  }
+
   SDL_Window* init_sdl(std::string title, Vec<int> res, bool fullscreen,
                        bool vsync) noexcept
   {
