@@ -30,6 +30,7 @@ namespace redc
     driver_ = std::make_unique<gfx::gl::Driver>(Vec<int>{w, h});
 
     mesh_cache_ = std::make_unique<gfx::Mesh_Cache>(*driver_);
+    driver_->set_active_mesh_cache(mesh_cache_.get());
 
     ocean_.init(*driver_, vm);
     envmap_.init(*driver_, vm);
