@@ -11,9 +11,27 @@ namespace redc { namespace net
     ctx.host = std::move(*make_server_host(ctx.port, ctx.max_peers).ok());
   }
 
-  void step_remote_client(Server_Context& ctx,
-                          Client_State_And_Buffer& client,
-                          ENetEvent const& event) noexcept
+  Server_Info make_server_info(Server_Context& ctx, player_id id = 0) noexcept
+  {
+    // We already have teams and rules.
+    // Make a vector of players.
+    // A player consists of a name and id.
+
+    auto players = std::vector<Player_Info>{};
+    for(auto& client_id_pair : ctx.clients)
+    {
+      // They will need to select a team.
+      players.push_back({client_id_pair.first,
+                         client_id_pair.second.player_name,
+                         (team_id) -1});
+    }
+
+    // The last 'our_id' member must be set for each client.
+    return Server_Info{ctx.rules, players, ctx.teams, id};
+  }
+
+  void step_remote_client(Server_Context& ctx, Remote_Client& client,
+                          player_id client_id, ENetEvent const& event) noexcept
   {
     // We can assume we got a receive event I guess.
     switch(client.state)
@@ -74,7 +92,7 @@ namespace redc { namespace net
       {
         if(!recieve_data(client.player_name, event.packet)) break;
 
-        send_data(ctx.info, event.peer);
+        send_data(make_server_info(ctx, client_id), event.peer);
         client.state = Remote_Client_State::Inventory;
 
         break;
@@ -101,6 +119,9 @@ namespace redc { namespace net
         send_data(spawn_info, event.peer);
         client.state = Remote_Client_State::Playing;
 
+        // We have a new player. Resend information
+        ctx.must_resend_server_info = true;
+
         break;
       }
       case Remote_Client_State::Playing:
@@ -120,33 +141,48 @@ namespace redc { namespace net
     }
   }
 
-  Client_Vector_Iter find_client_by_peer(Client_Vector& cts,
-                                         ENetPeer* peer) noexcept
+  ID_Map<Remote_Client>::iterator
+    find_client_by_peer(ID_Map<Remote_Client>& cts, ENetPeer* peer) noexcept
   {
     return std::find_if(std::begin(cts), std::end(cts),
       [&peer](auto& client_state)
       {
-        return client_state.peer == peer;
+        return client_state.second.peer == peer;
       });
   }
 
   void step_server(Server_Context& ctx, ENetEvent const& event) noexcept
   {
+    if(ctx.must_resend_server_info)
+    {
+      auto server_info = make_server_info(ctx);
+      for(auto& client : ctx.clients)
+      {
+        // First send this identifier which says we are sending this not state.
+        send_data(0x01, client.second.peer);
+
+        // Our id is the first value in the map.
+        server_info.our_id = client.first;
+        // Send that info to everyone, so now they know their id, team, etc.
+        send_data(server_info, client.second.peer);
+      }
+    }
+
     switch(event.type)
     {
       case ENET_EVENT_TYPE_CONNECT:
       {
         // Oh boy!
-        Client_State_And_Buffer client;
+        Remote_Client client;
 
         // We only know this information, we'll fill out the rest later.
         client.peer = event.peer;
         client.state = Remote_Client_State::Version;
 
         // Keep track of it, of course
-        ctx.clients.push_back(std::move(client));
+        ctx.clients.insert(std::move(client));
 
-        // At this point we will receive it's version info.
+        // At this point we will receive its version info.
         break;
       }
       case ENET_EVENT_TYPE_RECEIVE:
@@ -166,7 +202,7 @@ namespace redc { namespace net
         }
 
         // Receive whatever we need to receive, etc.
-        step_remote_client(ctx, *client_find, event);
+        step_remote_client(ctx, client_find->second, client_find->first, event);
 
         // Don't forget to destroy the packet!
         enet_packet_destroy(event.packet);

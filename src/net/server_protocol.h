@@ -4,6 +4,8 @@
  */
 #pragma once
 #include "client_protocol.h"
+
+#include "../common/id_map.hpp"
 namespace redc { namespace net
 {
   // Sent from server to client about all clients (even the owner).
@@ -29,24 +31,6 @@ namespace redc { namespace net
                    angular_velocity);
   };
 
-  struct Network_Player
-  {
-    // What actual player this corresponds to. Currently we have to do a linear
-    // search into the vector of players in server_info.
-    player_id id;
-    std::vector<State> state_queue;
-  };
-
-  struct Client
-  {
-    Client_Context ctx;
-    std::vector<Network_Player> players;
-  };
-
-  // ===
-  // Server stuff!
-  // ===
-
   enum class Remote_Client_State
   {
     Version,
@@ -56,13 +40,14 @@ namespace redc { namespace net
     Playing
   };
 
-  struct Client_State_And_Buffer
+  struct Remote_Client
   {
     ENetPeer* peer;
 
     Remote_Client_State state;
 
     Version_Info version;
+    std::string player_name;
     Inventory inventory;
     team_id team;
 
@@ -70,25 +55,27 @@ namespace redc { namespace net
     std::vector<Input> inputs;
   };
 
-  using Client_Vector = std::vector<Client_State_And_Buffer>;
-  using Client_Vector_Iter = Client_Vector::iterator;
-
   struct Server_Context
   {
-    Client_Vector clients;
-
     // Most up to date server info
     // This structure includes rules, teams and players.
     // Hmm, those indices may not be correct for us, may need to be adjusted
     // for each client? Also I like this arbitrary structure, maybe it would be
     // better to use templates + macros or something so that each structure
     // could be fairly flat.
-    Server_Info info;
+
+    Server_Rules rules;
+    std::vector<Team> teams;
+
+    // Player id from the Player_Info struct are for this map
+    ID_Map<Remote_Client> clients;
 
     uint16_t port;
     // This is a little wasteful but whatever.
     uint16_t max_peers;
     Host host;
+
+    bool must_resend_server_info = false;
   };
 
   void init_server(Server_Context& ctx) noexcept;

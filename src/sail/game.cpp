@@ -109,11 +109,11 @@ namespace redc { namespace sail
     auto port = vm["port"].as<uint16_t>();
     auto addr = vm["connect"].as<std::string>();
 
-    auto client = net::Client{};
+    auto client = net::Client_Context{};
     // Initialize necessary fields
-    client.ctx.client_version = 0x01;
-    enet_address_set_host(&client.ctx.server_addr, addr.c_str());
-    client.ctx.server_addr.port = port;
+    client.client_version = 0x01;
+    enet_address_set_host(&client.server_addr, addr.c_str());
+    client.server_addr.port = port;
 
     //Input_Task input_task;
     //Render_Task render_task(game, vm, "Sail", {1000, 1000}, false, false);
@@ -121,7 +121,7 @@ namespace redc { namespace sail
     //while(!render_task.should_close())
 
     // Start connecting we need to do this first so ctx.host is initialized.
-    step_client(client.ctx, nullptr);
+    step_client(client, nullptr);
 
     int ret_code = EXIT_SUCCESS;
     bool running = true;
@@ -131,9 +131,9 @@ namespace redc { namespace sail
 
     // While we still want to run but also the client isn't playing.
     // When we reach playing we need another loop
-    while(running && client.ctx.state != net::Client_State::Playing)
+    while(running && client.state != net::Client_State::Playing)
     {
-      if(client.ctx.state == net::Client_State::Connecting &&
+      if(client.state == net::Client_State::Connecting &&
          time_since(start_time) > 5.0)
       {
         // We've waited five seconds. Fuck it
@@ -144,13 +144,13 @@ namespace redc { namespace sail
       }
 
       ENetEvent event;
-      while(enet_host_service(client.ctx.host.host, &event, 0))
+      while(enet_host_service(client.host.host, &event, 0))
       {
-        auto res = step_client(client.ctx, &event);
+        auto res = step_client(client, &event);
 
         if(res.context_changed)
         {
-          switch(client.ctx.state)
+          switch(client.state)
           {
             case net::Client_State::Connecting:
               log_e("Failed to connect to %:%!", addr, port);
@@ -159,11 +159,11 @@ namespace redc { namespace sail
               break;
             case net::Client_State::Sending_Loadouts:
               // Send loadouts
-              client.ctx.inventory.loadouts.push_back({0,0,0,{0,1}});
+              client.inventory.loadouts.push_back({0,0,0,{0,1}});
               log_i("Sending default loadout");
               break;
             case net::Client_State::Waiting_For_Inventory_Confirmation:
-              if(!client.ctx.inventory_okay)
+              if(!client.inventory_okay)
               {
                 // Shit
                 log_e("Bad inventory");
@@ -173,7 +173,7 @@ namespace redc { namespace sail
               break;
             case net::Client_State::Sending_Team:
               // Always join the first team.
-              client.ctx.team = 0;
+              client.team = 0;
               log_i("Picking first time");
               break;
             case net::Client_State::Playing:
@@ -182,7 +182,7 @@ namespace redc { namespace sail
 
               // Find our sendrate.
               // Sample input every 1 / tickrate seconds.
-              sendrate = 1.0f / client.ctx.server_info.rules.tickrate;
+              sendrate = 1.0f / client.server_info.rules.tickrate;
               break;
             default:
               break;
@@ -294,7 +294,7 @@ namespace redc { namespace sail
 
         // Send current input!
         // This is too low level abstract this in net/use.h!
-        net::send_data(cur_input, client.ctx.server_peer);
+        net::send_data(cur_input, client.server_peer);
 
         // Log it for now
         log_i("% %", to_bin_string(cur_input.input), cur_input.time);
@@ -302,7 +302,7 @@ namespace redc { namespace sail
 
       // Handle input
       ENetEvent net_event;
-      while(enet_host_service(client.ctx.host.host, &net_event, 0))
+      while(enet_host_service(client.host.host, &net_event, 0))
       {
         // Deserialize some shit, etc.
       }
