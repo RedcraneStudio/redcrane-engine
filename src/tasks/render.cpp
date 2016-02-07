@@ -52,11 +52,20 @@ namespace redc
   }
   void Render_Task::step() noexcept
   {
+    Vec<float> m_dif = {0.0f, 0.0f};
     // Handle events
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
       if(event.type == SDL_QUIT) should_close_ = true;
+
+      if(event.type == SDL_MOUSEMOTION)
+      {
+        m_dif.x = event.motion.xrel / -500.0f;
+        m_dif.y = event.motion.yrel / -500.0f;
+
+        reposition_camera(cam_, m_dif);
+      }
     }
 
     // Passing in the driver is redundant.
