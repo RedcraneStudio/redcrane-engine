@@ -15,12 +15,12 @@ namespace redc { namespace net
                           Client_State_And_Buffer& client,
                           ENetEvent const& event) noexcept
   {
-    // We can assume we got a recieve event I guess.
+    // We can assume we got a receive event I guess.
     switch(client.state)
     {
       case Remote_Client_State::Version:
       {
-        // Recieve version
+        // Receive version
         if(!recieve_data(client.version, event.packet))
         {
           // Err, ignore:
@@ -146,7 +146,7 @@ namespace redc { namespace net
         // Keep track of it, of course
         ctx.clients.push_back(std::move(client));
 
-        // At this point we will recieve it's version info.
+        // At this point we will receive it's version info.
         break;
       }
       case ENET_EVENT_TYPE_RECEIVE:
@@ -156,19 +156,19 @@ namespace redc { namespace net
 
         auto client_find = find_client_by_peer(ctx.clients, event.peer);
 
-        // Find the corect client state and buffer object that will tell us
-        // what we are actually recieving
+        // Find the correct client state and buffer object that will tell us
+        // what we are actually receiving
         if(client_find == ctx.clients.end())
         {
           // I don't know when this would happen. Something went quite wrong
-          log_e("Recieving data from unknown client - ignoring!");
+          log_e("Receiving data from unknown client - ignoring!");
           break;
         }
 
-        // Recieve whatever we need to recieve, etc.
+        // Receive whatever we need to receive, etc.
         step_remote_client(ctx, *client_find, event);
 
-        // Don't forget to destory the packet!
+        // Don't forget to destroy the packet!
         enet_packet_destroy(event.packet);
 
         break;
@@ -186,6 +186,8 @@ namespace redc { namespace net
         if(client_find == ctx.clients.end())
         {
           // wat
+          // RIP
+          // A client we don't know just disconnected from us.
         }
         else
         {
