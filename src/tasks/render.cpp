@@ -69,8 +69,10 @@ namespace redc
     }
 
     // Passing in the driver is redundant.
-    ocean_.render(*driver_, cam_);
     envmap_.render(*driver_, cam_);
+    ocean_.render(*driver_, cam_);
+
+    // Render boat.
 
     SDL_GL_SwapWindow(sdl.window);
   }
