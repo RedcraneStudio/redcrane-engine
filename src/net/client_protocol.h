@@ -271,7 +271,7 @@ namespace redc { namespace net
     return ret;
   }
 
-  // Helper functions to send and recieve.
+  // Helper functions to send and receive.
   template <class T>
   void send_data(T const& t, ENetPeer* peer) noexcept
   {
