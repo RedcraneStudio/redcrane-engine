@@ -4,6 +4,7 @@
  */
 #include "radial_algorithm.h"
 #include "../common/volume.h"
+#include "../common/gen_noise.h"
 namespace redc { namespace gen
 {
   // This function could be run alone.
@@ -38,7 +39,7 @@ namespace redc { namespace gen
 
         // Get a small delta from the angle. We will use this to modify the
 
-        auto delta = gen_noise(osn, to_here_dir, *this);
+        auto delta = gen_simplex_noise(osn, to_here_dir, *this);
 
         auto modified_radius = radius + delta;
 

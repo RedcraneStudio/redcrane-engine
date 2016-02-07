@@ -68,30 +68,4 @@ namespace redc { namespace gen
   void terrain_v1_map(Grid_Map& map, Terrain_Params const&) noexcept;
 
   void write_png_heightmap(Grid_Map const& map, std::string const&) noexcept;
-
-  // T must have the following members:
-  // - float amplitude;
-  // - float frequency;
-  // - float persistence;
-  // - float lacunarity;
-  // - int octaves;
-
-  // Let this commemorate the moment Hazza rekt Navy at precisely (9-3-15,
-  // 17:49:23)!   <----------------.------------------------^
-  template <class P, class T>   // ^--------------------------------------.
-  float gen_noise(osn_context* osn, Vec<P> pt, T const& rekt) noexcept // |
-  {                                                   // ^----------------^
-    auto value = 0.0f;
-    auto cur_amplitude = rekt.amplitude;
-    auto cur_frequency = rekt.frequency;
-    for(int octave_i = 0; octave_i < rekt.octaves; ++octave_i)
-    {
-      value += open_simplex_noise2(osn, pt.y * cur_frequency,
-                                   pt.x * cur_frequency) * cur_amplitude;
-      cur_amplitude *= rekt.persistence;
-      cur_frequency *= rekt.lacunarity;
-    }
-
-    return value;
-  }
 } }

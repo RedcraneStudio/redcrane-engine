@@ -2,6 +2,7 @@
  * Copyright (C) 2015 Luke San Antonio and Hazza Alkaabi
  * All rights reserved.
  */
+#include "../common/gen_noise.h"
 #include "tree_gen.h"
 namespace redc { namespace gen
 {
@@ -17,7 +18,7 @@ namespace redc { namespace gen
         Vec<int> pt{j,i};
         if(map.at(pt).type == Cell_Type::Land)
         {
-          auto value = gen_noise(osn, pt, *this);
+          auto value = gen_simplex_noise(osn, pt, *this);
           if(value >= tree_altitude)
           {
             map.at(pt).contents = this->contents;

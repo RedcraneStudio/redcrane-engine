@@ -4,6 +4,7 @@
  */
 #include "noise_algorithm.h"
 #include "../common/log.h"
+#include "../common/gen_noise.h"
 namespace redc { namespace gen
 {
   void Noise_Algorithm::gen(Grid_Map& map) noexcept
@@ -16,7 +17,7 @@ namespace redc { namespace gen
     {
       for(int j = use_area.pos.x; j < use_area.pos.x + use_area.width; ++j)
       {
-        float value = gen_noise(osn, Vec<int>{j, i}, *this);
+        float value = gen_simplex_noise(osn, Vec<int>{j, i}, *this);
 
         // Find our distance from the origin point.
 
