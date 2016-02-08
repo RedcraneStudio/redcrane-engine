@@ -71,6 +71,17 @@ namespace redc
 
         reposition_camera(cam_, m_dif);
       }
+      if(event.type == SDL_KEYDOWN)
+      {
+        if(event.key.keysym.scancode == SDL_SCANCODE_W)
+        {
+          // Add a certain amount to eye in the direction of look - eye.
+          auto eye_dir = glm::normalize(cam_.look_at.look - cam_.look_at.eye);
+          eye_dir *= .1f;
+          cam_.look_at.eye += eye_dir;
+          cam_.look_at.look += eye_dir;
+        }
+      }
     }
 
     driver_->clear();
