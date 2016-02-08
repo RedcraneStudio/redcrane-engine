@@ -70,6 +70,8 @@ namespace redc
       }
     }
 
+    driver_->clear();
+
     // Passing in the driver is redundant.
     envmap_.render(*driver_, cam_);
     ocean_.render(*driver_, cam_);
