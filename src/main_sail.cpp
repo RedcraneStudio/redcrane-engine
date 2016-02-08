@@ -204,7 +204,7 @@ int main(int argc, char** argv)
     return sail::start_game(vm);
   }
 
-  uv_chdir("assets/");
+  uv_chdir("../assets/");
 
   // Error callback
   glfwSetErrorCallback(error_callback);

@@ -57,7 +57,7 @@ namespace redc { namespace sail
   {
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, command_options_desc()), vm);
-    po::store(po::parse_config_file<char>("assets/cfg.ini", command_options_desc()), vm);
+    po::store(po::parse_config_file<char>("../assets/cfg.ini", command_options_desc()), vm);
     po::notify(vm);
 
     return vm;

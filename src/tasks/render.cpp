@@ -23,7 +23,7 @@ namespace redc
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
     // Can we do this?
-    uv_chdir("./assets");
+    uv_chdir("../assets");
 
     // Initialize a driver
     int w, h;
