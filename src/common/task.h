@@ -11,7 +11,7 @@ namespace redc
   struct Task
   {
     virtual ~Task() noexcept {}
-    virtual void step() noexcept {};
+    virtual void step(float dt) noexcept {};
   };
 
   struct Task_Composite : public Task
@@ -20,7 +20,7 @@ namespace redc
 
     Task_Composite(std::initializer_list<task_t> init) noexcept;
 
-    void step() noexcept override;
+    void step(float dt) noexcept override;
   private:
     std::vector<task_t> tasks_;
   };

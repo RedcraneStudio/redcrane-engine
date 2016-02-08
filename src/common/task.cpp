@@ -11,11 +11,11 @@ namespace redc
     tasks_.resize(init.size());
     std::move(init.begin(), init.end(), tasks_.begin());
   }
-  void Task_Composite::step() noexcept
+  void Task_Composite::step(float dt) noexcept
   {
     for(auto& task : tasks_)
     {
-      task->step();
+      task->step(dt);
     }
   }
 }

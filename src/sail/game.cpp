@@ -82,23 +82,33 @@ namespace redc { namespace sail
 
   //using namespace redc::literals;
 
-  int start_game(po::variables_map const& vm) noexcept
-  {
-    Game game;
-    Render_Task render(game, vm, "Sail", Vec<int>{1000,1000}, false, false);
-    while(!render.should_close())
-    {
-      render.step();
-    }
-    return EXIT_SUCCESS;
-  }
-
   template <class T>
   double time_since(T before) noexcept
   {
     T now = std::chrono::high_resolution_clock::now();
     using sec_t = std::chrono::duration<double, std::chrono::seconds::period>;
     return sec_t(now - before).count();
+  }
+
+
+  int start_game(po::variables_map const& vm) noexcept
+  {
+    Game game;
+    Render_Task render(game, vm, "Sail", Vec<int>{1000,1000}, false, false);
+
+    auto before = std::chrono::high_resolution_clock::now();
+
+    while(!render.should_close())
+    {
+      // Hmm
+      float dt = time_since(before);
+
+      // Update the time
+      before = std::chrono::high_resolution_clock::now();
+
+      render.step(dt);
+    }
+    return EXIT_SUCCESS;
   }
 
   int start_connect(po::variables_map const& vm) noexcept

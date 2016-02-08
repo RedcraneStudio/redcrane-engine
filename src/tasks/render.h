@@ -23,7 +23,7 @@ namespace redc
     Render_Task(sail::Game const& game, po::variables_map const& vm,
                 std::string title, Vec<int> res, bool fullscreen,
                 bool vsync) noexcept;
-    void step() noexcept override;
+    void step(float dt) noexcept override;
 
     bool should_close() noexcept;
   private:

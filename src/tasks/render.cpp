@@ -52,7 +52,7 @@ namespace redc
     cam_.look_at.eye = glm::vec3(0.0f, 5.0f, -6.0f);
     cam_.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
   }
-  void Render_Task::step() noexcept
+  void Render_Task::step(float dt) noexcept
   {
     Vec<float> m_dif = {0.0f, 0.0f};
     // Handle events

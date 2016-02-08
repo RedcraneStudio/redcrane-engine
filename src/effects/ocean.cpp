@@ -90,6 +90,8 @@ namespace redc { namespace effects
 
       namespace chrono = std::chrono;
 
+      // TODO: Utilize the dt given to the render task instead of rolling our
+      // TODO: own!
       // current time
       auto now = chrono::high_resolution_clock::now();
       // microseconds since start
