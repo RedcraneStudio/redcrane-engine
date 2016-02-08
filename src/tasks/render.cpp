@@ -5,6 +5,7 @@
 #include "render.h"
 #include "../common/log.h"
 #include "../common/crash.h"
+#include "../common/gen_noise.h"
 #include "render/camera.h"
 #include <uv.h>
 namespace redc
@@ -51,6 +52,8 @@ namespace redc
     // The eye will be rotated around the boat.
     cam_.look_at.eye = glm::vec3(0.0f, 5.0f, -6.0f);
     cam_.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    boat_.motion.mass = 100;
   }
   void Render_Task::step(float dt) noexcept
   {
@@ -75,6 +78,35 @@ namespace redc
     // Passing in the driver is redundant.
     envmap_.render(*driver_, cam_);
     ocean_.render(*driver_, cam_);
+
+    // Adjust the boat based on the current state of the ocean. Apply spring
+    // forces based on the height of the water below the boat.
+
+    // First try just the center.
+    // Find the surface of the water.
+    auto disp = boat_.motion.displacement.displacement;
+    auto water_height =
+      gen_noise(Vec<float>{disp.x, disp.z}, ocean_.get_ocean_gen_parameters());
+
+    // Now use the boats height and apply a spring force with the distance
+    // being equal to height the boat should be in the water, this is normally
+    // determined by force of buoyancy but we are going to fake it for now.
+    // F = kx
+
+    // If we say up is positive (not sure) we expect the displacement to be the
+    // bigger value so it must come first
+    auto spring_k = 100.0f;
+    auto force = glm::vec3(0.0f, (disp.y - water_height) * -spring_k, 0.0f);
+
+    auto damp_factor = 5.0f;
+    auto dampening = boat_.motion.displacement.velocity.y * -damp_factor;
+
+    collis::reset_force(boat_.motion);
+
+    collis::apply_force(boat_.motion, force);
+    collis::apply_force(boat_.motion, glm::vec3(0.0f, dampening, 0.0f));
+
+    collis::solve_motion(dt, boat_.motion);
 
     // Render boat.
     boat_.render(*driver_, cam_);

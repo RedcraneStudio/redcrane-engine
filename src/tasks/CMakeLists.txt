@@ -5,4 +5,4 @@
 add_library(taskslib render.cpp render/sdl_helper.cpp render/camera.cpp)
 target_include_directories(taskslib PUBLIC ${SDL2_INCLUDE_DIRS})
 target_link_libraries(taskslib PUBLIC engine_gl ${SDL2_LIBRARIES} commonlib
-                                      effectslib)
+                                      effectslib collisionlib)
