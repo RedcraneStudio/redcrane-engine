@@ -49,6 +49,8 @@ add_subdirectory(sail)
 
 find_package(Threads REQUIRED)
 
+find_package(Steamworks REQUIRED)
+
 #add_executable(strategy main.cpp)
 #target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
                                #genlib terrainlib)
