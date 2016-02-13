@@ -50,6 +50,7 @@ add_subdirectory(sail)
 find_package(Threads REQUIRED)
 
 find_package(Steamworks REQUIRED)
+add_subdirectory(steamlib)
 
 #add_executable(strategy main.cpp)
 #target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
@@ -64,7 +65,7 @@ target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
 add_executable(sl main_sail.cpp)
 target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
                          waterlib terrainlib uselib saillib effectslib netlib
-                         boatlib
+                         boatlib steamlib
                          ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 # add_executable(play_snd play_snd.cpp)
