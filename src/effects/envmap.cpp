@@ -99,7 +99,9 @@ namespace redc { namespace effects
     shader_->set_matrix(proj_loc_, camera_proj_matrix(cam));
 
     driver.write_depth(false);
+    driver.depth_test(false);
     mesh_->draw_arrays(0, elements_);
     driver.write_depth(true);
+    driver.depth_test(true);
   }
 } }
