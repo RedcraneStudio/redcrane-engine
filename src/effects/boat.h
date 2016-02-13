@@ -14,6 +14,8 @@ namespace redc { namespace effects
     void init(gfx::IDriver& driver, po::variables_map const&) noexcept;
     void render(gfx::IDriver& driver, gfx::Camera const& cam) noexcept;
 
+    glm::mat4 gen_model_mat() const;
+
     collis::Motion motion;
   private:
     std::unique_ptr<gfx::Shader> shader_;

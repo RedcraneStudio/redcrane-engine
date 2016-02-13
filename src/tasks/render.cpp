@@ -50,10 +50,16 @@ namespace redc
     cam_.look_at.up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     // The eye will be rotated around the boat.
-    cam_.look_at.eye = glm::vec3(0.0f, 5.0f, -6.0f);
+    cam_.look_at.eye = glm::vec3(0.0f, 1.0f, -6.0f);
     cam_.look_at.look = glm::vec3(0.0f, 0.0f, 0.0f);
 
     boat_.motion.mass = 100;
+    // We are using a radius of one for a solid sphere
+    boat_.motion.angular.moment_of_inertia = 100 * 2 / 5;
+    // Approximate AABB of the boat, this will be used to calculate volume of
+    // the boat.
+    boat_aabb_ = aabb_from_min_max(glm::vec3(-0.4f, -0.12f, -1.8f),
+                                   glm::vec3(+0.4f, +0.38f, +1.8f));
   }
   void Render_Task::step(float dt) noexcept
   {
@@ -99,24 +105,94 @@ namespace redc
     auto water_height =
       gen_noise(Vec<float>{disp.x, disp.z}, ocean_.get_ocean_gen_parameters());
 
-    // Now use the boats height and apply a spring force with the distance
-    // being equal to height the boat should be in the water, this is normally
-    // determined by force of buoyancy but we are going to fake it for now.
-    // F = kx
-
-    // If we say up is positive (not sure) we expect the displacement to be the
-    // bigger value so it must come first
-    auto spring_k = 100.0f;
-    auto force = glm::vec3(0.0f, (disp.y - water_height) * -spring_k, 0.0f);
-
-    auto damp_factor = 5.0f;
-    auto dampening = boat_.motion.displacement.velocity.y * -damp_factor;
-
+    // Reset force
     collis::reset_force(boat_.motion);
 
-    collis::apply_force(boat_.motion, force);
-    collis::apply_force(boat_.motion, glm::vec3(0.0f, dampening, 0.0f));
+    // mg
+    collis::apply_force(boat_.motion,
+                        glm::vec3(0.0f, boat_.motion.mass * -9.81f, 0.0f));
 
+
+    auto p_water = 1000.0f;
+
+    // Use the aabb and do a bunch of segments
+    // _________
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+    // |_|_|_|_|
+
+    // ^^ That's our boat, in reality it is a ton smoother. For now we consider
+    // rows to be left to right and colums top to bottom
+    auto cell_width = boat_aabb_.width / 4.0f;
+    auto cell_height = boat_aabb_.depth / 10.0f;
+
+    // From top to bottom
+    for(int segment_y_i = 0; segment_y_i < 10; ++segment_y_i)
+    {
+      // Left to right
+      for(int segment_x_i = 0; segment_x_i < 4; ++segment_x_i)
+      {
+        // Where are we on the x axis, in boat model space?
+
+        Vec<float> boat_grid_pos {
+          0.0f + cell_width / 2 + cell_width * segment_x_i,
+          0.0f + cell_height / 2 + cell_height * segment_y_i
+        };
+
+        // Okay now we have that position, put it in world space
+        glm::vec3 world_pt = glm::vec3(boat_grid_pos.x, 0.0f, boat_grid_pos.y);
+
+        // We do care about translation so use 1.0f as w.
+        world_pt = glm::vec3(boat_.gen_model_mat() * glm::vec4(world_pt, 1.0f));
+
+        // Now find that position and sample the height of the water at that
+        // point.
+        auto water_height = gen_noise(Vec<float>{world_pt.x, world_pt.z},
+                                      ocean_.get_ocean_gen_parameters());
+        water_height = 0.0f;
+
+        // Now calculate the volume below this grid cell that is currently
+        // displacing water.
+
+        // The volume is the small grid where the height is adjusted by the
+        // water surface.
+
+        // Start at the boat center
+        // Go down to the bottom of the boat
+        // The distance between here and the water surface, where the water
+        // surface is above us is the volume height
+        auto volume_height = water_height -
+                             (boat_.motion.displacement.displacement.y +
+                              boat_aabb_.min.y);
+
+        auto volume = cell_width * volume_height *
+                      cell_height; // Cell height is more like length
+
+        // B = pVg
+        auto B_force = glm::vec3(0.0f, p_water * volume * 9.81f, 0.0f);
+        // Use the original coordinates to apply the torque
+        auto torque_r = glm::vec3(boat_grid_pos.x, 0.0f, boat_grid_pos.y);
+        // Half the center of the boat, ez pz with the aabb
+        torque_r -= glm::vec3(boat_aabb_.width / 2.0f, 0.0f,
+                              boat_aabb_.depth / 2.0f);
+
+        // Only apply the force if we are the only one
+        if(segment_x_i == 0 && segment_y_i == 0)
+        {
+          collis::apply_force(boat_.motion, B_force, torque_r);
+        }
+      }
+    }
+
+    // Solve motion
     collis::solve_motion(dt, boat_.motion);
 
     // Render boat.

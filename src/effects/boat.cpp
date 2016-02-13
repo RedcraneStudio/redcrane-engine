@@ -66,9 +66,13 @@ namespace redc { namespace effects
     use_camera(driver, cam);
 
     // Use boat_motion to give the boat a model matrix
-    boat_render_config_.model =
-      glm::translate(glm::mat4(1.0f), motion.displacement.displacement);
+    boat_render_config_.model = gen_model_mat();
 
     render_boat(*shader_, boat_render_config_);
+  }
+
+  glm::mat4 Boat_Effect::gen_model_mat() const
+  {
+    return glm::translate(glm::mat4(1.0f), motion.displacement.displacement);
   }
 } }

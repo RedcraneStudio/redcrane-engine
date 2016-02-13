@@ -11,6 +11,8 @@
 #include "../sail/game_struct.h"
 #include "../gfx/gl/driver.h"
 
+#include "../common/aabb.h"
+
 #include "../effects/envmap.h"
 #include "../effects/ocean.h"
 #include "../effects/boat.h"
@@ -38,6 +40,8 @@ namespace redc
     effects::Envmap_Effect envmap_;
     effects::Ocean_Effect ocean_;
     effects::Boat_Effect boat_;
+
+    AABB boat_aabb_;
 
     gfx::Camera cam_;
   };
