@@ -19,7 +19,7 @@ namespace redc { namespace collis
 
   struct Angular_Desc
   {
-    float radius;
+    float moment_of_inertia;
 
     glm::vec3 net_torque{0.0f, 0.0f, 0.0f};
     glm::vec3 acceleration{0.0f, 0.0f, 0.0f};

@@ -16,9 +16,7 @@ namespace redc { namespace collis
   void solve_angular_motion(float dt, float mass,
                             Angular_Desc& motion) noexcept
   {
-    // I = mr^2
-    float inert_moment = motion.radius * motion.radius * mass;
-    motion.acceleration = motion.net_torque / inert_moment;
+    motion.acceleration = motion.net_torque / motion.moment_of_inertia;
     motion.velocity += motion.acceleration * dt;
     motion.displacement += motion.velocity * dt;
   }

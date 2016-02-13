@@ -305,7 +305,9 @@ int main(int argc, char** argv)
 
     auto boat_motion = collis::Motion{};
     boat_motion.mass = 64; // kilograms
-    boat_motion.angular.radius = 0.5f; // Radius of about half a meter
+
+    // Radius of about half a meter
+    boat_motion.angular.moment_of_inertia = 0.5f * 0.5f * 64 * 2 / 5;
     // Start the boat off in the middle of our water
     boat_motion.displacement.displacement = glm::vec3(0.0f, 0.5f, 0.0f);
     glm::mat4 boat_model{1.0f};
@@ -430,7 +432,7 @@ int main(int argc, char** argv)
         projectiles.emplace_back();
         projectiles.back().mass = 270;
         // We should instead retrieve this from the model.
-        projectiles.back().angular.radius = 0.14f;
+        projectiles.back().angular.moment_of_inertia = 0.14f * 0.14f * 270 * 2 / 5;
 
         projectiles.back().displacement = boat_motion.displacement;
         projectiles.back().angular = boat_motion.angular;
