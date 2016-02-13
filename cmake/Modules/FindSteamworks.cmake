@@ -26,8 +26,8 @@ elseif(WIN32)
 endif()
 
 
-find_path(Steamworks_INCLUDE_DIR steam_api.h HINTS ${Steamworks_ROOT}/public
-          PATH_SUFFIXES steam)
+find_path(Steamworks_INCLUDE_DIR steam/steam_api.h HINTS
+          ${Steamworks_ROOT}/public)
 find_library(Steamworks_LIB steam_api HINTS ${Steamworks_ROOT}
              PATH_SUFFIXES redistributable_bin/${SUBDIR})
 
