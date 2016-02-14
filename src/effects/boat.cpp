@@ -73,6 +73,18 @@ namespace redc { namespace effects
 
   glm::mat4 Boat_Effect::gen_model_mat() const
   {
-    return glm::translate(glm::mat4(1.0f), motion.displacement.displacement);
+    auto trans = glm::translate(glm::mat4(1.0f),
+                                motion.displacement.displacement);
+
+    auto rot = glm::rotate(glm::mat4(1.0f),
+                           glm::length(motion.angular.displacement),
+                           glm::normalize(motion.angular.displacement));
+    if(std::isnan(rot[0][0]))
+    {
+      // Reset the mat
+      rot = glm::mat4(1.0f);
+    }
+
+    return trans * rot;
   }
 } }
