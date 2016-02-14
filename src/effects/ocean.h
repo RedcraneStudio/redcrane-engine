@@ -25,6 +25,9 @@ namespace redc { namespace effects
     void set_ocean_gen_parameters(Ocean_Gen const& gen) noexcept;
     Ocean_Gen get_ocean_gen_parameters() const noexcept
     { return gen_params_; }
+
+    float last_time_used_ = 0.0f;
+    Plane water_base_;
   private:
     std::size_t elements_;
 
@@ -42,8 +45,6 @@ namespace redc { namespace effects
 
     int cam_pos_loc_ = 0;
     int light_dir_loc_ = 0;
-
-    water::Plane water_base_;
 
     std::chrono::high_resolution_clock::time_point start_;
   };
