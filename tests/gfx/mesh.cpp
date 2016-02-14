@@ -3,8 +3,8 @@
  * All rights reserved.
  */
 
-#include "../gfx/mesh.h"
-#include "../gfx/support/load_wavefront.h"
+#include "gfx/mesh.h"
+#include "gfx/support/load_wavefront.h"
 
 #include <sstream>
 

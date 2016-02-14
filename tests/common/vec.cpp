@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Luke San Antonio and Hazza Alkaabi
  * All rights reserved.
  */
-#include "../common/vec.h"
+#include "common/vec.h"
 
 #include "catch/catch.hpp"
 namespace redc

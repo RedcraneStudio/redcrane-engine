@@ -79,5 +79,3 @@ target_link_libraries(map_gen genlib luaintlib)
 
 # add_executable(event_spread_test event_spread.cpp)
 # target_link_libraries(event_spread_test stratlib commonlib)
-
-# add_subdirectory(tests)

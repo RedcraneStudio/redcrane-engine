@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 
-#include "../collisionlib/triangle_conversion.h"
+#include "collisionlib/triangle_conversion.h"
 
 #include "catch/catch.hpp"
 

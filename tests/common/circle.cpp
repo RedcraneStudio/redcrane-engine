@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "../common/circle.h"
+#include "common/circle.h"
 
 #include "catch/catch.hpp"
 

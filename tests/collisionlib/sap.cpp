@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "../collisionlib/sweep_and_prune.h"
+#include "collisionlib/sweep_and_prune.h"
 
 #include "catch/catch.hpp"
 

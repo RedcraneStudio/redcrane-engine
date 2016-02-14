@@ -8,7 +8,7 @@
 
 TEST_CASE("make_triangle works", "[collisionlib]")
 {
-  using namespace game;
+  using namespace redc;
 
   std::array<glm::vec3, 3> pts;
 

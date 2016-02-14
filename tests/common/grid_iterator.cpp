@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "../common/grid_iterator.h"
+#include "common/grid_iterator.h"
 #include "catch/catch.hpp"
 
 using namespace redc;
