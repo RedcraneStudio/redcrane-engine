@@ -149,7 +149,7 @@ void main()
   world_pos = intercept_plane(vec3(start / start.w), vec3(end / end.w));
 
   // That 18 could be some sort of `velocity` parameter.
-  vec2 coord = world_pos.xz + vec2(time, time) / 18.0;
+  vec2 coord = world_pos.xz + vec2(time, time) / 5.0;
 
   float cur = fbm(coord);
   world_pos.y += cur;

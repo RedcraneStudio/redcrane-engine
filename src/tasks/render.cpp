@@ -4,6 +4,7 @@
  */
 #include "render.h"
 #include "../common/log.h"
+#include "../common/plane.h"
 #include "../common/crash.h"
 #include "../common/gen_noise.h"
 #include "render/camera.h"
@@ -109,91 +110,126 @@ namespace redc
     collis::reset_force(boat_.motion);
 
     // mg
-    collis::apply_force(boat_.motion,
-                        glm::vec3(0.0f, boat_.motion.mass * -9.81f, 0.0f));
-
+    auto mg = glm::vec3(0.0f, boat_.motion.mass * -9.81f, 0.0f);
 
     auto p_water = 1000.0f;
 
-    // Use the aabb and do a bunch of segments
-    // _________
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
-    // |_|_|_|_|
+    Plane plane;
 
-    // ^^ That's our boat, in reality it is a ton smoother. For now we consider
-    // rows to be left to right and colums top to bottom
-    auto cell_width = boat_aabb_.width / 4.0f;
-    auto cell_height = boat_aabb_.depth / 10.0f;
+    // Rotate the normal with the boat's rotation
+    plane.normal =
+            glm::vec3(boat_.gen_model_mat() * glm::vec4(0.0f,1.0f,0.0f,0.0f));
 
-    // From top to bottom
-    for(int segment_y_i = 0; segment_y_i < 10; ++segment_y_i)
+    auto plane_pt = glm::vec3(boat_.gen_model_mat() *
+                              glm::vec4(0.0f, boat_aabb_.min.y, 0.0f, 1.0f));
+
+    std::array<glm::vec3, 4> boat_edges;
+
+    // Front right
+    boat_edges[0] = glm::vec3(boat_.gen_model_mat() *
+                              glm::vec4(+boat_aabb_.min.x,
+                                        +boat_aabb_.min.y,
+                                        +boat_aabb_.min.z,
+                                        1.0f));
+    // Front left
+    boat_edges[1] = glm::vec3(boat_.gen_model_mat() *
+                              glm::vec4(-boat_aabb_.min.x,
+                                        +boat_aabb_.min.y,
+                                        +boat_aabb_.min.z,
+                                        1.0f));
+    // Back right
+    boat_edges[2] = glm::vec3(boat_.gen_model_mat() *
+                              glm::vec4(+boat_aabb_.min.x,
+                                        +boat_aabb_.min.y,
+                                        -boat_aabb_.min.z,
+                                        1.0f));
+
+    // Back left
+    boat_edges[3] = glm::vec3(boat_.gen_model_mat() *
+                              glm::vec4(-boat_aabb_.min.x,
+                                        +boat_aabb_.min.y,
+                                        -boat_aabb_.min.z,
+                                        1.0f));
+
+    plane.dist = -plane.normal.x * plane_pt.x +
+                 -plane.normal.y * plane_pt.y +
+                 -plane.normal.z * plane_pt.z;
+
+
+    Vec<int> sample_dist{10, 20};
+
+    // Intentionally not normalized
+    auto to_front = boat_edges[1] - boat_edges[3];
+    auto to_right = boat_edges[2] - boat_edges[3];
+
+    auto num_values = 0;
+    auto mean_distance = 0.0f;
+    auto max_distance = 0.0f;
+    auto min_distance = 0.0f;
+
+    // Sample a set of points between the four edges, after projecting them
+    // onto the water plane.
+    for(int i = 0; i < area(sample_dist); ++i)
     {
-      // Left to right
-      for(int segment_x_i = 0; segment_x_i < 4; ++segment_x_i)
-      {
-        // Where are we on the x axis, in boat model space?
+      auto x = i % sample_dist.x; // 10 in the x
+      auto y = i / sample_dist.x; // 20 in the y
 
-        Vec<float> boat_grid_pos {
-          0.0f + cell_width / 2 + cell_width * segment_x_i,
-          0.0f + cell_height / 2 + cell_height * segment_y_i
-        };
+      // We have our starting point.
+      auto back_left = boat_edges[3];
 
-        // Okay now we have that position, put it in world space
-        glm::vec3 world_pt = glm::vec3(boat_grid_pos.x, 0.0f, boat_grid_pos.y);
+      // Now, depending our position move forward and right
+      // These are unit length, so scale them appropriately.
+      // That means each increment of x and y is exactly that amount out of the
+      // the total distance.
+      // This will never make a vector exceeding its original length.
+      back_left += to_right * (x / (float) sample_dist.x);
+      back_left += to_front * (y / (float) sample_dist.y);
 
-        // We do care about translation so use 1.0f as w.
-        world_pt = glm::vec3(boat_.gen_model_mat() * glm::vec4(world_pt, 1.0f));
+      // Now we are at some place.
+      // TODO: Project onto the water plane and sample the height
 
-        // Now find that position and sample the height of the water at that
-        // point.
-        auto water_height = gen_noise(Vec<float>{world_pt.x, world_pt.z},
-                                      ocean_.get_ocean_gen_parameters());
-        water_height = 0.0f;
+      float sampled_height = fbm({back_left.x + ocean_.last_time_used_ / 5.0f,
+                                  back_left.z + ocean_.last_time_used_ / 5.0f},
+                                 ocean_.get_ocean_gen_parameters());
 
-        // Now calculate the volume below this grid cell that is currently
-        // displacing water.
+      //float sampled_height = glm::sin(ocean_.last_time_used_ +
+                                      //back_left.z) * .4f;
+      //float sampled_height = 0.0f;
 
-        // The volume is the small grid where the height is adjusted by the
-        // water surface.
+      // We currently have a point on the boat
+      // Find the signed distance from the boat hull to the water surface.
 
-        // Start at the boat center
-        // Go down to the bottom of the boat
-        // The distance between here and the water surface, where the water
-        // surface is above us is the volume height
-        auto volume_height = water_height -
-                             (boat_.motion.displacement.displacement.y +
-                              boat_aabb_.min.y);
+      // This gives us the signed distance such that a negative value means
+      // the boat surface is above the water, if it is negative we don't care
+      // about it.
+      auto distance = std::max(0.0f, sampled_height - back_left.y);
 
-        auto volume = cell_width * volume_height *
-                      cell_height; // Cell height is more like length
+      // Calculate force finally!
+      auto F = distance * 10000;
 
-        // B = pVg
-        auto B_force = glm::vec3(0.0f, p_water * volume * 9.81f, 0.0f);
-        // Use the original coordinates to apply the torque
-        auto torque_r = glm::vec3(boat_grid_pos.x, 0.0f, boat_grid_pos.y);
-        // Half the center of the boat, ez pz with the aabb
-        torque_r -= glm::vec3(boat_aabb_.width / 2.0f, 0.0f,
-                              boat_aabb_.depth / 2.0f);
+      mean_distance += F;
+      max_distance = std::max(max_distance, F);
+      min_distance = std::min(min_distance, F);
+      ++num_values;
 
-        // Only apply the force if we are the only one
-        if(segment_x_i == 0 && segment_y_i == 0)
-        {
-          collis::apply_force(boat_.motion, B_force, torque_r);
-        }
-      }
+      // World distance - world origin of the boat.
+      collis::apply_force(boat_.motion,
+                          glm::vec3(0.0f, F / (float) area(sample_dist), 0.0f),
+                          back_left - boat_.motion.displacement.displacement);
+
+      // Apply gravity
+      collis::apply_force(boat_.motion, mg / (float)area(sample_dist),
+                          back_left - boat_.motion.displacement.displacement);
     }
 
     // Solve motion
     collis::solve_motion(dt, boat_.motion);
+
+    mean_distance /= num_values;
+
+    log_i("distance: %", mean_distance);
+    log_i("max dist: %", max_distance);
+    log_i("min dist: %", min_distance);
 
     // Render boat.
     boat_.render(*driver_, cam_);
