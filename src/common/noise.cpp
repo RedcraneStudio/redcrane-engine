@@ -120,4 +120,66 @@ namespace redc
                            lerp(u, dot_gradient(P[AB+1], x,   y-1, z-1),
                                    dot_gradient(P[BB+1], x-1, y-1, z-1))));
   }
+
+  glm::vec4 mod289(glm::vec4 x)
+  {
+    return x - glm::floor(x * (1.0f / 289.0f)) * 289.0f;
+  }
+
+  glm::vec4 permute(glm::vec4 x)
+  {
+    return mod289(((x*34.0f)+1.0f)*x);
+  }
+
+  glm::vec4 taylorInvSqrt(glm::vec4 r)
+  {
+    return 1.79284291400159f - 0.85373472095314f * r;
+  }
+
+  glm::vec2 fade(glm::vec2 t)
+  {
+    return t*t*t*(t*(t*6.0f-15.0f)+10.0f);
+  }
+
+  // Classic Perlin noise
+  float cnoise(glm::vec2 P)
+  {
+    auto Pi = glm::floor(glm::vec4(P.x, P.y, P.x, P.y)) +
+              glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    auto Pf = glm::fract(glm::vec4(P.x, P.y, P.x, P.y)) -
+              glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    Pi = mod289(Pi); // To avoid truncation effects in permutation
+    auto ix = glm::vec4(Pi.x, Pi.z, Pi.x, Pi.z);
+    auto iy = glm::vec4(Pi.y, Pi.y, Pi.w, Pi.w);
+    auto fx = glm::vec4(Pf.x, Pf.z, Pf.x, Pf.z);
+    auto fy = glm::vec4(Pf.y, Pf.y, Pf.w, Pf.w);
+
+    glm::vec4 i = permute(permute(ix) + iy);
+
+    glm::vec4 gx = glm::fract(i * (1.0f / 41.0f)) * 2.0f - 1.0f ;
+    glm::vec4 gy = glm::abs(gx) - 0.5f ;
+    glm::vec4 tx = glm::floor(gx + 0.5f);
+    gx = gx - tx;
+
+    glm::vec2 g00 = glm::vec2(gx.x,gy.x);
+    glm::vec2 g10 = glm::vec2(gx.y,gy.y);
+    glm::vec2 g01 = glm::vec2(gx.z,gy.z);
+    glm::vec2 g11 = glm::vec2(gx.w,gy.w);
+
+    glm::vec4 norm = taylorInvSqrt(glm::vec4(glm::dot(g00, g00), glm::dot(g01, g01), glm::dot(g10, g10), glm::dot(g11, g11)));
+    g00 *= norm.x;
+    g01 *= norm.y;
+    g10 *= norm.z;
+    g11 *= norm.w;
+
+    float n00 = glm::dot(g00, glm::vec2(fx.x, fy.x));
+    float n10 = glm::dot(g10, glm::vec2(fx.y, fy.y));
+    float n01 = glm::dot(g01, glm::vec2(fx.z, fy.z));
+    float n11 = glm::dot(g11, glm::vec2(fx.w, fy.w));
+
+    glm::vec2 fade_xy = fade(glm::vec2(Pf.x, Pf.y));
+    glm::vec2 n_x = glm::mix(glm::vec2(n00, n01), glm::vec2(n10, n11), fade_xy.x);
+    float n_xy = glm::mix(n_x.x, n_x.y, fade_xy.y);
+    return 2.3 * n_xy;
+  }
 }
