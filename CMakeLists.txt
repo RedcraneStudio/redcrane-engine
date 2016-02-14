@@ -3,10 +3,14 @@
 # All rights reserved.
 
 cmake_minimum_required(VERSION 3.1)
+
+# Not even one version out yet :(
 project(Red_Crane_Engine VERSION 0.0 LANGUAGES C CXX)
 
+# Include our own modules
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
 
+# We want those shiny new features!
 set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_FIND_FRAMEWORK LAST)
