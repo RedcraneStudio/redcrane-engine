@@ -5,7 +5,7 @@
 #pragma once
 #include <chrono>
 #include "../use/effect.h"
-#include "../water/grid.h"
+#include "../common/plane.h"
 namespace redc { namespace effects
 {
   struct Ocean_Gen

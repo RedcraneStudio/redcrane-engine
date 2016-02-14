@@ -8,6 +8,7 @@
 #include "../gfx/mesh_data.h"
 #include "../gfx/texture.h"
 #include "../gfx/camera.h"
+#include "../common/plane.h"
 
 extern "C"
 {
@@ -16,16 +17,6 @@ extern "C"
 
 namespace redc { namespace water
 {
-  struct Plane
-  {
-    glm::vec3 normal;
-    float dist;
-  };
-  inline glm::vec4 plane_as_vec4(Plane const& pl) noexcept
-  {
-    return glm::vec4(pl.normal, -pl.dist);
-  }
-
   std::vector<glm::vec3> find_visible(gfx::Camera const& cam, float y,
                                       float max_disp) noexcept;
   glm::mat4 build_projector(gfx::Camera cam, Plane const& p, float disp) noexcept;

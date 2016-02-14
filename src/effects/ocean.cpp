@@ -82,8 +82,8 @@ namespace redc { namespace effects
     auto intersections = water::find_visible(cam, water_base_.dist, max_disp_);
     if(intersections.size())
     {
-      auto projector = build_projector(cam, water_base_, max_disp_);
-      auto range = build_min_max_mat(intersections, projector, water_base_);
+      auto projector = water::build_projector(cam, water_base_, max_disp_);
+      auto range = water::build_min_max_mat(intersections, projector, water_base_);
       projector = projector * range;
 
       shader_->set_matrix(projector_loc_, projector);
