@@ -56,7 +56,7 @@ namespace redc
 
     boat_.motion.mass = 100;
     // We are using a radius of one for a solid sphere
-    boat_.motion.angular.moment_of_inertia = 100 * 2 / 5;
+    boat_.motion.angular.moment_of_inertia = 2.0f / 5.0f * 100.0f;
     // Approximate AABB of the boat, this will be used to calculate volume of
     // the boat.
     boat_aabb_ = aabb_from_min_max(glm::vec3(-0.4f, -0.12f, -1.8f),
