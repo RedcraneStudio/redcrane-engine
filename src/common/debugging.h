@@ -5,14 +5,13 @@
 #pragma once
 
 #ifndef NDEBUG
-
   #define REDC_DEBUGGING_ENABLED
 
-namespace redc
-{
-  void assert_fn(bool val, char const* const condition,
-                 char const* const filename, long line) noexcept;
-}
+  namespace redc
+  {
+    void assert_fn(bool val, char const* const condition,
+                   char const* const filename, long line) noexcept;
+  }
 
   // Don't do anything stupid like count on side effects of the condition.
   #define REDC_ASSERT(condition) \
