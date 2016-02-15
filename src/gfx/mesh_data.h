@@ -9,7 +9,10 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <boost/optional.hpp>
+#include "../common/glm_vec_serialize.h"
+#include <msgpack.hpp>
 #include "primitive_type.h"
+
 namespace redc
 {
   struct Vertex
@@ -17,6 +20,8 @@ namespace redc
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 uv;
+
+    MSGPACK_DEFINE(position, normal, uv);
   };
 
   std::tuple<std::vector<glm::vec3>,
@@ -58,6 +63,8 @@ namespace redc
     std::vector<unsigned int> elements;
 
     Primitive_Type primitive = Primitive_Type::Triangle;
+
+    MSGPACK_DEFINE(vertices, elements, primitive);
   };
 
   struct Ordered_Mesh_Data
@@ -65,6 +72,8 @@ namespace redc
     std::vector<Vertex> vertices;
 
     Primitive_Type primitive = Primitive_Type::Triangle;
+
+    MSGPACK_DEFINE(vertices, primitive);
   };
 
   struct Indexed_Split_Mesh_Data
