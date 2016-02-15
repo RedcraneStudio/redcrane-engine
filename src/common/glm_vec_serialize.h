@@ -5,7 +5,6 @@
  * \file glm_vec_serialize.h Contains serialization code for glm::vec{2,3,4}.
  */
 #pragma once
-#ifdef REDC_USE_MSGPACK
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <msgpack.hpp>
@@ -176,4 +175,3 @@ struct object_with_zone<glm::quat> {
 } // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
 } // namespace msgpack
 
-#endif

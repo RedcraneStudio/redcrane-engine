@@ -4,8 +4,6 @@
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_definitions(-DREDC_USE_MSGPACK)
-
 find_package(LibPNG REQUIRED)
 find_package(LibUV REQUIRED)
 find_package(GLM REQUIRED)
