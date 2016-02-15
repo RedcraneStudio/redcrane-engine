@@ -31,7 +31,7 @@ namespace redc
     SDL_GetWindowSize(sdl.window, &w, &h);
     driver_ = std::make_unique<gfx::gl::Driver>(Vec<int>{w, h});
 
-    mesh_cache_ = std::make_unique<gfx::Mesh_Cache>(*driver_);
+    mesh_cache_ = std::make_unique<gfx::Mesh_Cache>("obj", "cache");
     driver_->set_active_mesh_cache(mesh_cache_.get());
 
     envmap_.init(*driver_, vm);

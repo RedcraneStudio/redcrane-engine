@@ -22,5 +22,10 @@ namespace redc { namespace gfx
     boost::optional<Indexed_Mesh_Data> data;
   };
 
-  Mesh_Result load_mesh(IDriver&, Mesh_Load_Params const&) noexcept;
+  struct Mesh_Cache;
+
+  Mesh_Result load_mesh(IDriver&, Mesh_Load_Params const&);
+  Mesh_Result load_mesh(IDriver&, Mesh_Cache& mc, Mesh_Load_Params const&);
+
+  Mesh_Chunk load_chunk(IDriver& driver, Mesh_Cache& mc, std::string const& f);
 } }

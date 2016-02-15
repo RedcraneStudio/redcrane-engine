@@ -46,7 +46,7 @@ namespace redc { namespace effects
     auto& mesh_cache = *driver.get_active_mesh_cache();
 
     // Figure out what hulls, sails, rudders, and guns we have available.
-    boat_descs_ = build_default_descs(mesh_cache);
+    boat_descs_ = build_default_descs(driver, mesh_cache);
     log_boat_descs(boat_descs_);
 
     boat_config_.hull = &boat_descs_.hull_descs[vm["hull"].as < unsigned int > ()];

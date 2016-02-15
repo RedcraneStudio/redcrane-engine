@@ -5,8 +5,9 @@
 #pragma once
 #include <string>
 #include <glm/glm.hpp>
+#include "../gfx/idriver.h"
+#include "../use/mesh.h"
 #include "../gfx/mesh_chunk.h"
-#include "../use/mesh_cache.h"
 namespace redc
 {
   struct Hull_Attachment_Def
@@ -25,8 +26,8 @@ namespace redc
   };
 
   namespace gfx { struct Mesh_Cache; }
-  Hull_Desc build_hull_desc(gfx::Mesh_Cache& mc, std::string name,
-                            std::string model_name,
+  Hull_Desc build_hull_desc(gfx::IDriver& mc, gfx::Mesh_Cache& m_cache,
+                            std::string name, std::string model_name,
                             Hull_Attachment_Def attachments) noexcept;
 
   template <int N>
@@ -41,12 +42,13 @@ namespace redc
   using Rudder_Desc = Object_Desc<1>;
   using Gun_Desc =    Object_Desc<2>;
 
-  Sail_Desc build_sail_desc(gfx::Mesh_Cache& mc, std::string name,
-                            std::string model_name) noexcept;
-  Rudder_Desc build_rudder_desc(gfx::Mesh_Cache& mc, std::string name,
-                                std::string model_name) noexcept;
-  Gun_Desc build_gun_desc(gfx::Mesh_Cache& mc, std::string name,
-                          std::string model_name) noexcept;
+  template <class T>
+  T build_object_desc(gfx::IDriver& d, gfx::Mesh_Cache& mc,
+                      std::string name, std::string model_name) noexcept
+  {
+    return {name, load_chunk(d, mc, model_name)};
+  }
+
 
   struct Boat_Config
   {
@@ -79,6 +81,6 @@ namespace redc
   };
 
   // Defined in boat_def.cpp
-  Boat_Descs build_default_descs(gfx::Mesh_Cache& mc) noexcept;
+  Boat_Descs build_default_descs(gfx::IDriver& driver, gfx::Mesh_Cache& mc);
   void log_boat_descs(Boat_Descs&) noexcept;
 }
