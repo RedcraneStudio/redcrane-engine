@@ -19,7 +19,7 @@ namespace adaptor {
     msgpack::object const& operator()(msgpack::object const& o, \
                                       glm::vec##n & v) const { \
       if (o.type != msgpack::type::ARRAY) throw msgpack::type_error(); \
-      if (o.via.array.size != 2) throw msgpack::type_error();
+      if (o.via.array.size != n) throw msgpack::type_error();
 
 #define CONVERT_END() \
       return o; \
