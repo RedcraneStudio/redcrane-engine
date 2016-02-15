@@ -10,7 +10,7 @@ find_package(GLM REQUIRED)
 add_subdirectory(common)
 add_subdirectory(io)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
 find_package(SDL2 REQUIRED)
 find_package(GLFW REQUIRED)
@@ -49,6 +49,8 @@ find_package(Threads REQUIRED)
 
 find_package(Steamworks REQUIRED)
 add_subdirectory(steamlib)
+
+add_subdirectory(assets)
 
 #add_executable(strategy main.cpp)
 #target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib

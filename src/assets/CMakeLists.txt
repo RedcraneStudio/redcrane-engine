@@ -1,8 +1,7 @@
 
-# Copyright (C) 2015 Luke San Antonio
+# Copyright (C) 2016 Luke San Antonio
 # All rights reserved.
 
-add_library(assetslib discovery.cpp load.cpp)
-
-target_include_directories(assetslib PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(assetslib ${Boost_filesystem_LIBRARY})
+add_library(assetslib load.cpp)
+target_link_libraries(assetslib ${Boost_SYSTEM_LIBRARY}
+                                ${Boost_FILESYSTEM_LIBRARY})

@@ -1,27 +1,99 @@
 /*
- * Copyright (C) 2015 Luke San Antonio
+ * Copyright (C) 2016 Luke San Antonio
  * All rights reserved.
  */
 #pragma once
-#include <vector>
 #include <string>
-#include <memory>
-
-#include "../gfx/idriver.h"
-#include "asset.h"
-
+#include "../common/debugging.h"
+#include "../gfx/mesh_data.h"
+#include <boost/filesystem.hpp>
 namespace redc { namespace assets
 {
-  /*!
-   * \brief Filters the list of pathnames and loads them into an asset
-   * implementation.
-   *
-   * \returns A vector containing smart pointers to each asset.
-   *
-   * \note Currently supported asset types: json, png, and ttf.
+  namespace fs = boost::filesystem;
 
-   * \sa redc::get_asset for searching the result of this function.
+  struct File_Desc
+  {
+    fs::path dir;
+    std::string ext;
+    bool load_bin;
+  };
+
+  /*!
+   * \brief Uses a file cache to speed up loading a given asset type.
    */
-  assets::Vector load(std::vector<std::string> const& assets,
-                      gfx::IDriver& fact) noexcept;
+  template <class T>
+  struct Fs_Cache
+  {
+    /*!
+     * \param source_fd Information about the source file type.
+     * \param cache_fd Information about the cache file type.
+     */
+    Fs_Cache(File_Desc source_fd, File_Desc cache_fd);
+
+    virtual ~Fs_Cache() {}
+
+    // Loading from the cache gives the client code a stream to read from.
+    T load(std::string filename);
+  private:
+    virtual T load_from_source_stream(std::istream& st) = 0;
+    virtual T load_from_cache_stream(std::istream& st) = 0;
+    virtual void write_cache(T const& t, std::ostream& fp) = 0;
+
+    File_Desc source_fd_;
+    File_Desc cache_fd_;
+  };
+
+  template <class T>
+  Fs_Cache<T>::Fs_Cache(File_Desc source_fd, File_Desc cache_fd)
+                  : source_fd_(source_fd), cache_fd_(cache_fd)
+  {
+    create_directory(cache_fd_.dir);
+  }
+
+  template <class T>
+  T Fs_Cache<T>::load(std::string filename)
+  {
+    REDC_ASSERT(!filename.empty());
+
+    // Find the two places this file may be
+    auto cache_path = cache_fd_.dir / fs::path(filename + "." + cache_fd_.ext);
+
+    // The source file too
+    auto source_path = source_fd_.dir / fs::path(filename+"."+source_fd_.ext);
+
+    // If our source file doesn't exist it's a bug!
+    REDC_ASSERT(exists(source_path));
+
+    // If the cache file exists and is newer than the source load it and
+    // delegate to our implementation
+    if(exists(cache_path) &&
+       last_write_time(source_path) < last_write_time(cache_path))
+    {
+      auto flags = std::ios_base::in;
+      if(cache_fd_.load_bin) flags |= std::ios_base::binary;
+
+      auto stream = std::ifstream(cache_path.native(), flags);
+      return load_from_cache_stream(stream);
+    }
+
+    // Otherwise we need to load the source and rewrite to the cache
+    // Load the source
+    auto flags = std::ios_base::in;
+    if(source_fd_.load_bin) flags |= std::ios_base::binary;
+    auto stream = std::ifstream(source_path.native(), flags);
+    auto t = load_from_source_stream(stream);
+
+    // Tell the implementation that they should write to the cache now
+    {
+      // Make sure a directory for cache path exists.
+      fs::create_directories(cache_path.parent_path());
+
+      // Open in binary mode?
+      auto flags = std::ios_base::out;
+      if(cache_fd_.load_bin) flags |= std::ios_base::binary;
+      auto cache_stream = std::ofstream(cache_path.native(), flags);
+      write_cache(t, cache_stream);
+    }
+    return t;
+  }
 } }
