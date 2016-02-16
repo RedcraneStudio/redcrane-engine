@@ -49,12 +49,16 @@ namespace redc
   void set_out_log_level(Log_Severity level) noexcept;
   void set_file_log_level(Log_Severity level) noexcept;
 
+  inline void log() {}
+
   template <class... Args>
   inline void log(Log_Severity severity, std::string msg, Args&&... args) noexcept
   {
     log(severity, format(msg, 0, "", std::forward<Args>(args)...));
   }
   void log(Log_Severity severity, std::string msg) noexcept;
+
+  inline void log_e() {}
 
   inline void log_e(std::string msg) noexcept
   {
@@ -67,6 +71,8 @@ namespace redc
     log_e(format(msg, 0, "", std::forward<Args>(args)...));
   }
 
+  inline void log_w() {}
+
   inline void log_w(std::string msg) noexcept
   {
     log(Log_Severity::Warning, msg);
@@ -78,6 +84,8 @@ namespace redc
     log_w(format(msg, 0, "", std::forward<Args>(args)...));
   }
 
+  inline void log_i() {}
+
   inline void log_i(std::string msg) noexcept
   {
     log(Log_Severity::Info, msg);
@@ -88,6 +96,8 @@ namespace redc
   {
     log_i(format(msg, 0, "", std::forward<Args>(args)...));
   }
+
+  inline void log_d() {}
 
   inline void log_d(std::string msg) noexcept
   {
