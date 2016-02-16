@@ -13,7 +13,6 @@
 #include "../../common/log.h"
 
 #include "../../common/debugging.h"
-
 #ifdef GAME_DEBUGGING_ENABLED
 #define CAST_PTR dynamic_cast
 #else
@@ -46,7 +45,8 @@ namespace redc
         if(&s == cur_shader_) return;
 
         auto shader_ptr = CAST_PTR<GL_Shader*>(&s);
-        if(!shader_ptr) return;
+        REDC_ASSERT_MSG(shader_ptr, "Shader not made with this driver;"
+                        " something is very wrong.");
 
         shader_ptr->use();
         cur_shader_ = shader_ptr;
@@ -67,7 +67,8 @@ namespace redc
         if(&mesh == cur_mesh_) return;
 
         auto gl_mesh = CAST_PTR<GL_Mesh*>(&mesh);
-        if(!gl_mesh) return;
+        REDC_ASSERT_MSG(gl_mesh, "Mesh not made with this driver; something is"
+                        " very wrong.");
 
         gl_mesh->bind();
         cur_mesh_ = gl_mesh;
@@ -81,7 +82,8 @@ namespace redc
       void Driver::bind_texture(Texture& tex, unsigned int loc) noexcept
       {
         auto gl_tex = CAST_PTR<GL_Texture*>(&tex);
-        if(!gl_tex) return;
+        REDC_ASSERT_MSG(gl_tex, "Texture not made with this driver; something"
+                        " is very wrong.");
         gl_tex->bind(loc);
       }
 
@@ -138,10 +140,7 @@ namespace redc
       {
         if(glGetError() == GL_INVALID_OPERATION)
         {
-          log_e("Invalid operation");
-
-          int* ptr = nullptr;
-          *ptr = 5;
+          log_e("OpenGL: Invalid operation");
         }
       }
     }

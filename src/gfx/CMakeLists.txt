@@ -17,15 +17,11 @@ add_library(gfxlib STATIC ${RED_CRANE_GFX_GL_SOURCES} camera.cpp shader.cpp
                           immediate_renderer.cpp)
 
 # Link to our extension loader (glad).
-target_link_libraries(gfxlib engine_gl)
-
-# This is for our simple little asynchronous logging library.
-target_link_libraries(gfxlib commonlib)
+target_link_libraries(gfxlib engine_gl commonlib ${GLFW_LIBRARY}
+                             ${Boost_SYSTEM_LIBRARY}
+                             ${Boost_FILESYSTEM_LIBRARY})
 
 # We need this for boost::optional.
-target_include_directories(gfxlib PUBLIC ${Boost_INCLUDE_DIRS})
-
-target_link_libraries(gfxlib ${GLFW_LIBRARY})
-target_include_directories(gfxlib PUBLIC ${GLFW_INCLUDE_DIR})
-
-target_include_directories(gfxlib PUBLIC ${GLM_INCLUDE_DIR})
+target_include_directories(gfxlib PUBLIC ${GLFW_INCLUDE_DIR}
+                                         ${GLM_INCLUDE_DIR}
+                                         ${Boost_INCLUDE_DIRS})

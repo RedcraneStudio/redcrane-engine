@@ -12,11 +12,20 @@
 #include "../../common/log.h"
 #include "driver.h"
 
-#define LOC_BAIL(location) if(location == -1) return
+#include "../../common/debugging.h"
+
+// If we are debugging this will cause a crash, and just in case we return
+// should the macro be deactivated
+#define LOC_BAIL(location) \
+  REDC_ASSERT_MSG(location != -1, "Bad uniform location in shader"); \
+  if(location == -1) return
+
+#include <boost/filesystem.hpp>
+#define ASSERT_FILE(filepath) \
+  REDC_ASSERT_MSG(boost::filesystem::exists(filepath), "Shader file %" \
+                  " doesn't exist", filepath)
 
 #define USE_THIS_SHADER() driver_->use_shader(*this)
-
-// TODO: Log bad uniform locations.
 
 namespace redc { namespace gfx { namespace gl
 {
@@ -74,6 +83,7 @@ namespace redc { namespace gfx { namespace gl
     v_shade_ = glCreateShader(GL_VERTEX_SHADER);
     glAttachShader(prog_, v_shade_);
 
+    ASSERT_FILE(str);
     std::ifstream file{str};
     compile_shader(v_shade_, load_stream(file), str);
 
@@ -84,6 +94,7 @@ namespace redc { namespace gfx { namespace gl
     f_shade_ = glCreateShader(GL_FRAGMENT_SHADER);
     glAttachShader(prog_, f_shade_);
 
+    ASSERT_FILE(str);
     std::ifstream file{str};
     compile_shader(f_shade_, load_stream(file), str);
 
@@ -177,3 +188,5 @@ namespace redc { namespace gfx { namespace gl
 } } }
 
 #undef LOC_BAIL
+#undef ASSERT_FILE
+#undef USE_THIS_SHADER
