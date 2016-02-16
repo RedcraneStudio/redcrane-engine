@@ -53,7 +53,7 @@ namespace redc { namespace assets
   template <class T>
   T Fs_Cache<T>::load(std::string filename)
   {
-    REDC_ASSERT(!filename.empty());
+    REDC_ASSERT_MSG(!filename.empty(), "Cannot load file with no name");
 
     // Find the two places this file may be
     auto cache_path = cache_fd_.dir / fs::path(filename + "." + cache_fd_.ext);
@@ -62,7 +62,8 @@ namespace redc { namespace assets
     auto source_path = source_fd_.dir / fs::path(filename+"."+source_fd_.ext);
 
     // If our source file doesn't exist it's a bug!
-    REDC_ASSERT(exists(source_path));
+    REDC_ASSERT_MSG(exists(source_path), "Source / asset file % doesn't exist",
+                    source_path.native());
 
     // If the cache file exists and is newer than the source load it and
     // delegate to our implementation
