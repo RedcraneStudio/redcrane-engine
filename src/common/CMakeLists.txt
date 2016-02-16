@@ -2,7 +2,7 @@
 # Copyright (C) 2015 Luke San Antonio
 # All rights reserved.
 
-add_library(commonlib STATIC aabb.cpp animation.cpp debugging.cpp json.cpp
+add_library(commonlib STATIC aabb.cpp animation.cpp json.cpp
                              log.cpp noise.cpp translate.cpp tree.cpp task.cpp)
 target_link_libraries(commonlib PUBLIC ${LIBUV_LIBRARIES} opensimplex)
 target_include_directories(commonlib PUBLIC ${LIBUV_INCLUDE_DIRS}
