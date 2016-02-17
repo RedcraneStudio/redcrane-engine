@@ -2,7 +2,7 @@
 # Copyright (C) 2014 Luke San Antonio
 # All rights reserved.
 
-function(add_data target all_or_nah)
+function(add_data target all_or_nah destination)
   add_custom_target(${target} ${all_or_nah})
 
   foreach(filename ${ARGN})
@@ -12,7 +12,7 @@ function(add_data target all_or_nah)
                        ${CMAKE_CURRENT_BINARY_DIR}/${filename}
                        MAIN_DEPENDENCY ${filename})
     get_filename_component(SUBDIR ${filename} DIRECTORY)
-    install(FILES ${filename} DESTINATION share/${PROJECT_NAME}/assets/${SUBDIR})
+    install(FILES ${filename} DESTINATION ${destination}/${SUBDIR})
   endforeach(filename)
 endfunction()
 

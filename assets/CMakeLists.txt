@@ -2,7 +2,8 @@
 # Copyright (C) 2015 Luke San Antonio
 # All rights reserved.
 
-add_data(assets ALL mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
+add_data(assets ALL "share/${PROJECT_NAME}/assets"
+                    mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
                     obj/govnm_building.obj obj/fps_terrain.obj
                     obj/vertical_log.obj obj/map.obj obj/boat.obj
                     obj/projectile.obj
