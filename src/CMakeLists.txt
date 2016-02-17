@@ -68,6 +68,28 @@ target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
                          boatlib steamlib
                          ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+# We don't need these rpath settings on windows, the only thing we are
+# installing is libsteam_api which will be installed in the binary directory on
+# windows anyway.
+if(UNIX)
+    if(APPLE)
+        set_target_properties(sl PROPERTIES INSTALL_RPATH
+                                 "@executable_path/../lib")
+    else()
+        set_target_properties(sl PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+    endif()
+endif()
+
+install(TARGETS sl RUNTIME DESTINATION bin)
+
+# Install the steamworks redistributable in bin/ if we are on windows and
+# into lib/ otherwise
+if(WIN32)
+    install(FILES ${Steamworks_LIB} DESTINATION bin)
+else()
+    install(FILES ${Steamworks_LIB} DESTINATION lib)
+endif()
+
 # add_executable(play_snd play_snd.cpp)
 # target_link_libraries(play_snd sndlib commonlib)
 
