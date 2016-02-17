@@ -4,6 +4,9 @@
 
 include_directories(${CMAKE_SOURCE_DIR})
 
+find_package(Msgpack REQUIRED)
+include_directories(${Msgpack_INCLUDE_DIR})
+
 find_package(LibPNG REQUIRED)
 find_package(LibUV REQUIRED)
 find_package(GLM REQUIRED)
