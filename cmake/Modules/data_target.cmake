@@ -12,7 +12,7 @@ function(add_data target all_or_nah)
                        ${CMAKE_CURRENT_BINARY_DIR}/${filename}
                        MAIN_DEPENDENCY ${filename})
     get_filename_component(SUBDIR ${filename} DIRECTORY)
-    install(FILES ${filename} DESTINATION share/${PROJECT_NAME}/${SUBDIR})
+    install(FILES ${filename} DESTINATION share/${PROJECT_NAME}/assets/${SUBDIR})
   endforeach(filename)
 endfunction()
 
