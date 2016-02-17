@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../assets/load.h"
+#include "../assets/fs_cache.h"
 namespace redc { namespace gfx
 {
   /*!

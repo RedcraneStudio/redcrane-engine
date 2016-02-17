@@ -7,6 +7,10 @@ cmake_minimum_required(VERSION 3.1)
 # Not even one version out yet :(
 project(Red_Crane_Engine VERSION 0.0 LANGUAGES C CXX)
 
+# Tell C++ about our install path
+add_definitions(-DREDC_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+add_definitions(-DREDC_SHARE_DIR="${PROJECT_NAME}")
+
 # Include our own modules
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
 

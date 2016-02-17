@@ -8,6 +8,8 @@
 #include "../net/client_protocol.h"
 #include "../net/server_protocol.h"
 #include "../tasks/render.h"
+#include "../assets/load_dir.h"
+
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 namespace redc { namespace sail
@@ -57,7 +59,10 @@ namespace redc { namespace sail
   {
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, command_options_desc()), vm);
-    po::store(po::parse_config_file<char>("../assets/cfg.ini", command_options_desc()), vm);
+
+    auto cfg_filename = assets::share_path() / "cfg.ini";
+    po::store(po::parse_config_file<char>(cfg_filename.native().c_str(),
+                                          command_options_desc()), vm);
     po::notify(vm);
 
     return vm;

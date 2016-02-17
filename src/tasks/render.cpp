@@ -7,8 +7,10 @@
 #include "../common/plane.h"
 #include "../common/crash.h"
 #include "../common/gen_noise.h"
+
+#include "../assets/load_dir.h"
+
 #include "render/camera.h"
-#include <uv.h>
 namespace redc
 {
   Render_Task::Render_Task(sail::Game const& game, po::variables_map const& vm,
@@ -23,8 +25,8 @@ namespace redc
     }
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
-    // Can we do this?
-    uv_chdir("../assets");
+    // Move into the assets / share directory.
+    boost::filesystem::current_path(assets::share_path());
 
     // Initialize a driver
     int w, h;
