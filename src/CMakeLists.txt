@@ -71,6 +71,8 @@ target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
                          boatlib steamlib
                          ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+add_executable(redc main.cpp)
+
 # We don't need these rpath settings on windows, the only thing we are
 # installing is libsteam_api which will be installed in the binary directory on
 # windows anyway.
