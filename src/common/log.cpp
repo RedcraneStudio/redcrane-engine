@@ -20,8 +20,8 @@ namespace redc
   }
 
   REDC_THREAD_LOCAL uv_loop_t* loop_ = nullptr;
-  Log_Severity out_level_ = Log_Severity::Error;
-  Log_Severity file_level_ = Log_Severity::Info;
+  Log_Severity out_level_ = Log_Severity::Debug;
+  Log_Severity file_level_ = Log_Severity::Debug;
   bool good_file_ = false;
   uv_file file_;
 
