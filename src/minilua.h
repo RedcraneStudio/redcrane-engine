@@ -18,5 +18,7 @@ namespace redc { namespace lua
 
     lua_State* lua;
   };
+
+  bool handle_err(lua_State* L, int err);
 } }
 #endif
