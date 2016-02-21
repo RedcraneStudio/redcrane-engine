@@ -85,6 +85,8 @@ target_link_libraries(redc PUBLIC ${LuaJit_LIBRARY})
 target_include_directories(redc PUBLIC ${LuaJit_INCLUDE_DIR})
 target_compile_options(redc PUBLIC ${LuaJit_COMPILE_OPTIONS})
 
+add_dependencies(redc survival)
+
 # We don't need these rpath settings on windows, the only thing we are
 # installing is libsteam_api which will be installed in the binary directory on
 # windows anyway.

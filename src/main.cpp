@@ -52,6 +52,12 @@ po::options_description command_options_desc() noexcept
 
   config_opt.add_options()("hud.scale", po::value<float>(), "Hud scale");
 
+  config_opt.add_options()("game.cwd", po::value<std::string>(),
+                           "Current working directory");
+
+  config_opt.add_options()("game.entry_file", po::value<std::string>(),
+                           "Lua main file");
+
   po::options_description desc("Allowed Options");
 
   desc.add(general_opt).add(server_opt).add(config_opt);
@@ -112,6 +118,17 @@ int main(int argc, char* argv[])
 
   // Everything we need is in vm now.
 
+  // First change directory
+  auto game_cwd =
+          cfg_path.parent_path() / fs::path(vm["game.cwd"].as<std::string>());
+  if(!exists(game_cwd))
+  {
+    log_e("Failed to enter game directory '%': it doesn't exist!",
+          game_cwd.native());
+    return EXIT_FAILURE;
+  }
+  current_path(game_cwd);
+
   // Initialize LuaJIT
   lua::Scoped_Lua_Init lua_init_raii_lock{};
   auto lua = lua_init_raii_lock.lua;
@@ -120,6 +137,33 @@ int main(int argc, char* argv[])
   if(!lua)
   {
     log_e("Failed to initialize LuaJIT. This is generally caused by a memory"
-          "allocation error");
+                  "allocation error");
   }
+
+  // Load a file
+  auto entry_file = vm["game.entry_file"].as<std::string>();
+  if(lua::handle_err(lua, luaL_loadfile(lua, entry_file.data())))
+  {
+    // Rip
+    return EXIT_FAILURE;
+  }
+
+  if(lua::handle_err(lua, lua_pcall(lua, 0, 1, 0)))
+  {
+    return EXIT_FAILURE;
+  }
+
+  // The main script is all finished
+  if(!lua_isnumber(lua, -1))
+  {
+    // We are either getting a string that is a valid integer, or something
+    // completely ridiculous. This is not an valid issue to crash, but still is
+    // incorrect.
+    log_w("Main game Lua entry point must return an integer");
+  }
+
+  // Now get the return value as an integer and return that
+  int ret = lua_tointeger(lua, -1);
+
+  return ret;
 }
