@@ -16,6 +16,7 @@ namespace redc
   }
   Scoped_Log_Init::~Scoped_Log_Init() noexcept
   {
+    flush_log_full();
     uninit_log();
   }
 
