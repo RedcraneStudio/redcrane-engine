@@ -76,7 +76,7 @@ target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
                          ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 
-add_executable(redc main.cpp minilua.cpp)
+add_executable(redc main.cpp minilua.cpp redcrane.cpp)
 target_link_libraries(redc PUBLIC commonlib ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
                                   ${Boost_FILESYSTEM_LIBRARY})

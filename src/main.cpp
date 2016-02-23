@@ -11,6 +11,8 @@
 
 #include "minilua.h"
 
+#include "redcrane.hpp"
+
 namespace po = boost::program_options;
 
 po::options_description command_options_desc() noexcept
@@ -148,7 +150,10 @@ int main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  if(lua::handle_err(lua, lua_pcall(lua, 0, 1, 0)))
+  auto eng = Redc_Engine{Engine_State::None, std::move(vm)};
+  lua_pushlightuserdata(lua, &eng);
+
+  if(lua::handle_err(lua, lua_pcall(lua, 1, 1, 0)))
   {
     return EXIT_FAILURE;
   }
