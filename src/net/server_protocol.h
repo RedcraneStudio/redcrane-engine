@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "client_protocol.h"
+#include "client.h"
 
 #include "../common/id_map.hpp"
 namespace redc { namespace net
@@ -14,7 +14,6 @@ namespace redc { namespace net
   // think?
   struct State
   {
-    // The time of this state update is input.time.
     Input input;
 
     // We can't quantize the position, but we can do it for the velocity.
@@ -23,21 +22,17 @@ namespace redc { namespace net
 
     // This is all about the boat.
     glm::vec3 position;
-    glm::vec3 velocity;
-    glm::quat angular_displacement;
-    glm::quat angular_velocity;
 
-    MSGPACK_DEFINE(input, position, velocity, angular_displacement,
-                   angular_velocity);
+    MSGPACK_DEFINE(input, position);
   };
 
   enum class Remote_Client_State
   {
     Version,
-    Name,
-    Inventory,
-    Team_Id,
-    Playing
+    Client_Info,
+    Playing,
+    Bad_Version,
+    Bad_Id,
   };
 
   struct Remote_Client
@@ -47,9 +42,7 @@ namespace redc { namespace net
     Remote_Client_State state;
 
     Version_Info version;
-    std::string player_name;
-    Inventory inventory;
-    team_id team;
+    Player_Info player_info;
 
     // Somehow limit this to a certain amount? Circular buffer?
     std::vector<Input> inputs;

@@ -18,48 +18,39 @@ namespace redc { namespace net
 #define CLIENT_PROTOCOL_VERSION 1
   // 1. Client initiates a connection to the server, sends a packet with:
   //    - Highest client and protocol version that it supports
-  // 2. Server responds with two booleans. Both true means continue. They
-  // corrospond to which version were compatible and which weren't.
-  // 3. Client sends to the server the player's name.
-  // 4. Server response with:
-  //    - Server rules
-  //    - All players
-  //    - All Teams
-  //    - ID of the current client
-  //    - Possible place for extensions, etc.
-  // 5. Client sends its loadouts to the server
-  // 6. The server says the inventory will work or no.
-  // 7. Client asks the user which team they would like to join. The server
-  // may send updates to the client while the client is picking a team.
-  // 8. Client -> Server: This team!
-  // 9. Server -> Client: Spawn here, with this orientation, approximately this
-  // time, with this *seed*, or no!
-  // 10. Client -> Server: Sampled input information with time so that the
-  // water can be properly simulated, etc. The simulation will run on both
-  // systems. The server should also be sending data to the client of updates
-  // from other clients, this state should include inputs from the clients so
-  // that our client can rewind and apply inputs given its own state of water.
-  // This way, each boat looks proper given each clients (sorta) individual
-  // water but they stay sorta in sink
+  // 2. Server may respond in two ways:
+  //    a) With two booleans indicated whether it was the client version,
+  //       protocol version, or both that made the server reject the
+  //       connection.
+  //    b) If versions match sufficiently the server should response with:
+  //       - Server rules
+  //       - All players (Names at this point are sufficient, I guess steam ids
+  //         would work.
+  //       - All Teams (Clans, whatever)
+  //       - List of mods
+  // 3. The client may take this opportunity to disconnect if it doesn't
+  //    support all the given mods for example. Otherwise it may send the
+  //    following information about the player:
+  //    - ID
+  //    - Name (Important if the ID has never been on that server before.)
+  //    - Any other information important for the first visit.
+  // 4. If the server finds the given information valid, etc., it may respond
+  //    with the clients spawn location.
+  // 5. Client -> Server: Sampled input, etc.
 
-  // These roughly corrospond to the above steps, obviously.
+  // These roughly correspond to the above steps, obviously.
   enum class Client_State
   {
     Starting, // For before any of this
     // Populate the server address member
     // Populate version information
     Connecting, // Waiting for connection acknowledgement
-    Waiting_For_Version_Confirmation, // Waiting for the server to confirm ver.
-    Sending_Name, // About to send the player name
+    Waiting_For_Server_Info, // Waiting for the server info or version fail.
+    Sending_Client_Info, // About to send the player name, etc.
     // Populate player name
-    Waiting_For_Info, // Waiting for players, teams, etc.
-    Sending_Loadouts, // About to send the users inventory / loadouts.
-    // Populate the inventory member of Client_Context then call step_client
-    Waiting_For_Inventory_Confirmation, // Waiting for server okay.
-    Sending_Team, // About to send the team the client wanted to be on
-    // Populate the team id member of Client_Context then call step_client
-    Waiting_For_Spawn, // Waiting for server okay on team and spawn info
-    Playing // Your on your own, client
+    Waiting_For_Spawn, // Waiting for spawn location.
+    Playing, // Your on your own, client.
+    Bad_Version, // The server doesn't support us.
   };
 
   // Hahahaha fuck it
@@ -88,14 +79,14 @@ namespace redc { namespace net
   struct Server_Rules
   {
     uint8_t tickrate;
-    uint8_t max_allowed_loadouts;
+    uint8_t max_players;
 
-    MSGPACK_DEFINE(tickrate, max_allowed_loadouts);
+    MSGPACK_DEFINE(tickrate, max_players);
   };
 
-  // Yah I'm going to have to say a maximum of 256 teams, sorry.
+  // Yah I'm going to have to say a maximum of 65,535 teams, sorry.
   // I know... I know.
-  using team_id = uint8_t;
+  using team_id = uint16_t;
 
   using player_id = uint16_t;
 
@@ -105,11 +96,13 @@ namespace redc { namespace net
     player_id id;
     std::string name;
 
+    // Zero for no team association
     team_id team;
 
     MSGPACK_DEFINE(id, name);
   };
 
+  // Hashs the objects id member
   template <class T>
   struct ID_Hash
   {
@@ -121,17 +114,15 @@ namespace redc { namespace net
 
   using Player_Set = std::set<Player_Info, ID_Hash<Player_Info> >;
 
-  // Teams should be able to have names themselves. Even if the user can't name
-  // them themselves, maybe the name could change if every member of the team
-  // has a tag on, etc.
-  // The id of a team is just it's index into a contigious array of them.
+  // Teams should be able to have names themselves.
+  // The id of a team is just it's index into a contiguous array of them.
   struct Team
   {
     std::string name;
     MSGPACK_DEFINE(name);
   };
 
-  // Includes meta-information about the game. Each client recieves this as
+  // Includes meta-information about the game. Each client receives this as
   // often as things change. It is also sent as part of the connection
   // protocol.
   struct Server_Info
@@ -140,41 +131,18 @@ namespace redc { namespace net
     std::vector<Player_Info> players;
     std::vector<Team> teams;
 
-    player_id our_id;
-
     MSGPACK_DEFINE(rules, players, teams);
   };
 
-  // Client to server
-  struct Loadout
+  struct Spawn
   {
-    // Globally agreed upon list of hulls, sails, etc.
-    // I guess it is concievable to have more than 256 hulls and sails
-    uint16_t hull;
-    uint16_t sail;
-
-    uint8_t rudder;
-    // For now we are only going to let the user pick two guns
-    std::array<uint8_t, 2> guns;
-
-    MSGPACK_DEFINE(hull, sail, rudder, guns);
-  };
-  struct Inventory
-  {
-    // This must be the same amount as server max-loadouts.
-    std::vector<Loadout> loadouts;
-
-    MSGPACK_DEFINE(loadouts);
-  };
-
-  struct Spawn_Information
-  {
+    // Position of the player
     glm::vec3 position;
-    glm::quat orientation;
-    float time;
-    uint16_t seed;
 
-    MSGPACK_DEFINE(position, orientation, time, seed);
+    // Angle of the player rotating around the y axis.
+    float angle;
+
+    MSGPACK_DEFINE(position, angle);
   };
 
   // This is for clients to keep track of the server
@@ -190,18 +158,12 @@ namespace redc { namespace net
     version_t client_version; // This is not protocol version
     // Version confirmation / result
     Version_Okay version_okay;
-    // Sending name
-    std::string player_name;
     // Waiting for server info
     Server_Info server_info;
-    // Sending inventory
-    Inventory inventory;
-    // Inventory check
-    okay_t inventory_okay;
-    // Sending team
-    team_id team;
+    // Sending client info
+    Player_Info player_info;
     // Spawn
-    Spawn_Information spawn_information;
+    Spawn spawn;
   };
 
   /*!
@@ -285,7 +247,7 @@ namespace redc { namespace net
   }
 
   template <class T>
-  bool recieve_data(T& t, ENetPacket* packet) noexcept
+  bool receive_data(T& t, ENetPacket* packet) noexcept
   {
     msgpack::unpacked unpacked;
     msgpack::unpack(unpacked, (const char*) packet->data, packet->dataLength);

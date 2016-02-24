@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "client_protocol.h"
+#include "client.h"
 #include "../common/log.h"
 namespace redc { namespace net
 {
@@ -69,7 +69,7 @@ namespace redc { namespace net
           send_data(version, ctx.server_peer);
 
           // Now we are waiting for a response
-          set_state(res, ctx, Client_State::Waiting_For_Version_Confirmation);
+          set_state(res, ctx, Client_State::Waiting_For_Server_Info);
 
           // We don't have any packet to destroy
           set_event_handled(res);
@@ -77,90 +77,59 @@ namespace redc { namespace net
 
         break;
       }
-      case Client_State::Waiting_For_Version_Confirmation:
+      case Client_State::Waiting_For_Server_Info:
       {
         REQUIRE_EVENT(ctx, event, RECEIVE);
         REQUIRE_EVENT_FROM_SERVER(ctx, event);
 
         Version_Okay version_okay;
-        if(recieve_data(version_okay, event->packet))
+        Server_Info server_info;
+
+        if(receive_data(version_okay, event->packet))
         {
-          if(version_okay.protocol && version_okay.client)
-          {
-            set_state(res, ctx, Client_State::Sending_Name);
-          }
-          else
-          {
-            // Was our protocol version rejected, client version rejected?
-            // Or both?
+          // Was our protocol version rejected, client version rejected?
+          // Or both?
 
-            if(!version_okay.protocol)
-            {
-              log_e("Server rejected client protocol version: %",
-                    CLIENT_PROTOCOL_VERSION);
-            }
-            if(!version_okay.client)
-            {
-              log_e("Server rejected client (game) version: %",
-                    ctx.client_version);
-            }
-
-            // Either case disconnect
-            log_e("Disconnecting...");
-            enet_peer_disconnect(event->peer, 0);
+          if(!version_okay.protocol)
+          {
+            log_e("Server rejected client protocol version: %",
+                  CLIENT_PROTOCOL_VERSION);
           }
+          if(!version_okay.client)
+          {
+            log_e("Server rejected client (game) version: %",
+                  ctx.client_version);
+          }
+
+          // On the very, very off chance we get both of them equal to true
+          // it is a logic error on the server side, still disconnect, that
+          // server must be broken
+
+          // Either case disconnect
+          log_e("Disconnecting due to bad version...");
+          enet_peer_disconnect(event->peer, 0);
+
+          // Give the client the actual version response.
+          ctx.version_okay = version_okay;
+          // And let them know it was the version that failed, stop further
+          // processing, etc
+          set_state(res, ctx, Client_State::Bad_Version);
 
           // We did handle this event
           set_event_handled(res, event->packet);
         }
-        break;
-      }
-      case Client_State::Sending_Name:
-      {
-        send_data(ctx.player_name, event->peer);
-        set_state(res, ctx, Client_State::Waiting_For_Info);
-        break;
-      }
-      case Client_State::Waiting_For_Info:
-      {
-        REQUIRE_EVENT(ctx, event, RECEIVE);
-        REQUIRE_EVENT_FROM_SERVER(ctx, event);
-
-        // Try to decode Server_Info struct
-        if(recieve_data(ctx.server_info, event->packet))
+        else if(receive_data(server_info, event->packet))
         {
-          // The client code should now populate the inventory field.
-          set_state(res, ctx, Client_State::Sending_Loadouts);
+          // Looks like we got server info on our hands.
+          ctx.server_info = server_info;
+          set_state(res, ctx, Client_State::Sending_Client_Info);
           set_event_handled(res, event->packet);
         }
         break;
       }
-      case Client_State::Sending_Loadouts:
+      case Client_State::Sending_Client_Info:
       {
-        // Serialize and send inventory
-        send_data(ctx.inventory, ctx.server_peer);
-        // We are waiting to see if the server accepts our inventory.
-        set_state(res, ctx, Client_State::Waiting_For_Inventory_Confirmation);
-        break;
-      }
-      case Client_State::Waiting_For_Inventory_Confirmation:
-      {
-        REQUIRE_EVENT(ctx, event, RECEIVE);
-        REQUIRE_EVENT_FROM_SERVER(ctx, event);
-
-        // Try to decode a bool
-        if(recieve_data(ctx.inventory_okay, event->packet))
-        {
-          // The client code should now populate the team id field.
-          // We know our inventory was accepted.
-          set_state(res, ctx, Client_State::Sending_Team);
-          set_event_handled(res, event->packet);
-        }
-      }
-      case Client_State::Sending_Team:
-      {
-        // Send team id
-        send_data(ctx.team, ctx.server_peer);
+        send_data(ctx.player_info, event->peer);
         set_state(res, ctx, Client_State::Waiting_For_Spawn);
         break;
       }
@@ -169,16 +138,17 @@ namespace redc { namespace net
         REQUIRE_EVENT(ctx, event, RECEIVE);
         REQUIRE_EVENT_FROM_SERVER(ctx, event);
 
-        // Try to decode spawn information
-        if(recieve_data(ctx.spawn_information, event->packet))
+        // Try to decode Spawn information struct
+        if(receive_data(ctx.spawn, event->packet))
         {
+          // The client code should now populate the inventory field.
           set_state(res, ctx, Client_State::Playing);
           set_event_handled(res, event->packet);
         }
         break;
       }
       case Client_State::Playing:
-      default:
+      case Client_State::Bad_Version:
         break;
     }
 

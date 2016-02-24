@@ -79,7 +79,8 @@ target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
 add_executable(redc main.cpp minilua.cpp redcrane.cpp)
 target_link_libraries(redc PUBLIC commonlib ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                                  ${Boost_FILESYSTEM_LIBRARY})
+                                  ${Boost_FILESYSTEM_LIBRARY}
+                                  netlib)
 
 target_link_libraries(redc PUBLIC ${LuaJit_LIBRARY})
 target_include_directories(redc PUBLIC ${LuaJit_INCLUDE_DIR})

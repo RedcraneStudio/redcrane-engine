@@ -5,7 +5,7 @@
 #include "game.h"
 #include <thread>
 #include "../common/log.h"
-#include "../net/client_protocol.h"
+#include "src/net/client.h"
 #include "../net/server_protocol.h"
 #include "../tasks/render.h"
 #include "../assets/load_dir.h"

@@ -11,7 +11,7 @@ namespace redc { namespace net
     ctx.host = std::move(*make_server_host(ctx.port, ctx.max_peers).ok());
   }
 
-  Server_Info make_server_info(Server_Context& ctx, player_id id = 0) noexcept
+  Server_Info make_server_info(Server_Context& ctx) noexcept
   {
     // We already have teams and rules.
     // Make a vector of players.
@@ -20,14 +20,22 @@ namespace redc { namespace net
     auto players = std::vector<Player_Info>{};
     for(auto& client_id_pair : ctx.clients)
     {
-      // They will need to select a team.
-      players.push_back({client_id_pair.first,
-                         client_id_pair.second.player_name,
-                         (team_id) -1});
+      // They will need to select a team at some point.
+      players.push_back(client_id_pair.second.player_info);
     }
 
-    // The last 'our_id' member must be set for each client.
-    return Server_Info{ctx.rules, players, ctx.teams, id};
+    return Server_Info{ctx.rules, players, ctx.teams};
+  }
+
+  bool is_valid_player_id(Server_Context& ctx, player_id id)
+  {
+    for(auto client_id_pair : ctx.clients)
+    {
+      // Duplicate!
+      if(client_id_pair.second.player_info.id == id) return false;
+    }
+    // No duplicate
+    return true;
   }
 
   void step_remote_client(Server_Context& ctx, Remote_Client& client,
@@ -39,7 +47,7 @@ namespace redc { namespace net
       case Remote_Client_State::Version:
       {
         // Receive version
-        if(!recieve_data(client.version, event.packet))
+        if(!receive_data(client.version, event.packet))
         {
           // Err, ignore:
           break;
@@ -51,9 +59,7 @@ namespace redc { namespace net
           client.version.protocol_version == CLIENT_PROTOCOL_VERSION;
         versions_okay.client = client.version.client_version == 1;
 
-        // Inform the client
-        send_data(versions_okay, event.peer);
-
+        // How do we stand in terms of compatibility?
         if(!versions_okay.protocol || !versions_okay.client)
         {
           if(!versions_okay.protocol && versions_okay.client)
@@ -78,63 +84,60 @@ namespace redc { namespace net
                   client.version.client_version);
           }
 
+          // Inform the client
+          send_data(versions_okay, event.peer);
+
           // Disconnect the peer and jump ship.
           enet_peer_disconnect_later(event.peer, 0);
-
-          break;
+          client.state = Remote_Client_State::Bad_Version;
+        }
+        else
+        {
+          // Everything is good, send them the current state of our server!
+          send_data(make_server_info(ctx), event.peer);
+          client.state = Remote_Client_State::Client_Info;
         }
 
-        client.state = Remote_Client_State::Name;
-
         break;
       }
-      case Remote_Client_State::Name:
+      case Remote_Client_State::Client_Info:
       {
-        if(!recieve_data(client.player_name, event.packet)) break;
+        // Failed to read client info
+        if(!receive_data(client.player_info, event.packet)) break;
 
-        send_data(make_server_info(ctx, client_id), event.peer);
-        client.state = Remote_Client_State::Inventory;
+        // Verify user id in some way!
+        // For now we are expected random numbers that won't collide, but when
+        // it inevitably happens we will disconnect the client for this reason
+        if(!is_valid_player_id(ctx, client.player_info.id))
+        {
+          // Disconnect the client
+          enet_peer_disconnect_later(client.peer, 0);
+          log_e("Disconnecting client due to duplicate id");
 
-        break;
-      }
-      case Remote_Client_State::Inventory:
-      {
-        // Failed to read inventory
-        if(!recieve_data(client.inventory, event.packet)) break;
+          client.state = Remote_Client_State::Bad_Id;
+        }
+        else
+        {
+          // Otherwise send spawn info
+          send_data(Spawn{}, event.peer);
+          client.state = Remote_Client_State::Playing;
 
-        send_data(true, event.peer);
-        client.state = Remote_Client_State::Team_Id;
-
-        break;
-      }
-      case Remote_Client_State::Team_Id:
-      {
-        // Failed to read team id.
-        if(!recieve_data(client.team, event.packet)) break;
-
-        Spawn_Information spawn_info;
-
-        // TODO: Fill in spawn information
-
-        send_data(spawn_info, event.peer);
-        client.state = Remote_Client_State::Playing;
-
-        // We have a new player. Resend information
-        ctx.must_resend_server_info = true;
-
+          // We just added a new player...
+          ctx.must_resend_server_info = true;
+        }
         break;
       }
       case Remote_Client_State::Playing:
-      default:
       {
         Input cur_input;
-        if(!recieve_data(cur_input, event.packet))
+        if(!receive_data(cur_input, event.packet))
         {
           // Possibly handle other types of packets.
-          break;
         }
-
-        client.inputs.push_back(cur_input);
+        else
+        {
+          client.inputs.push_back(cur_input);
+        }
 
         break;
       }
@@ -161,9 +164,7 @@ namespace redc { namespace net
         // First send this identifier which says we are sending this not state.
         send_data(0x01, client.second.peer);
 
-        // Our id is the first value in the map.
-        server_info.our_id = client.first;
-        // Send that info to everyone, so now they know their id, team, etc.
+        // Send that info to everyone
         send_data(server_info, client.second.peer);
       }
     }
