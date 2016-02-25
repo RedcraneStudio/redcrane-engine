@@ -61,7 +61,7 @@ namespace redc
     // Send out any messages to the peer
     void step() noexcept override;
 
-    // Potentially handles recieved data returning true if it is our peer.
+    // Potentially handles received data returning true if it is our peer.
     bool post_recieve(ENetEvent& event) noexcept;
 
     net::Host* host() const noexcept { return host_; }
