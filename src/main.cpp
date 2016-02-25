@@ -5,6 +5,9 @@
 #include <iostream>
 #include <chrono>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
@@ -13,12 +16,13 @@
 
 #include "common/log.h"
 #include "use/mesh.h"
+#include "gfx/gl/driver.h"
 #include "gfx/camera.h"
+#include "fps/camera_controller.h"
 
 #include "redcrane.hpp"
 #include "minilua.h"
 
-#include "gfx/gl/driver.h"
 #include "sdl_helper.h"
 
 namespace po = boost::program_options;
@@ -174,6 +178,8 @@ int main(int argc, char* argv[])
                                    {1000,1000}, false, false};
   auto sdl_window = sdl_init_raii_lock.window;
 
+  SDL_SetRelativeMouseMode(SDL_TRUE);
+
   int x, y;
   SDL_GetWindowSize(sdl_window, &x, &y);
 
@@ -237,13 +243,27 @@ int main(int argc, char* argv[])
   cam.perspective.near = 0.01f;
   cam.perspective.fov = 68.0f;
 
+  auto cam_controller = fps::Camera_Controller{};
+  cam_controller.camera(cam);
+  cam_controller.set_pitch_limit(M_PI / 2, true);
+
   // Load objects
-  auto cube = gfx::load_mesh(driver, {"obj/cube.obj", false}).chunk;
+  auto cube = gfx::load_mesh(driver, {"../assets/obj/cube.obj", false}).chunk;
 
   // Load shader
   auto shader = driver.make_shader_repr();
+  shader->load_vertex_part("../assets/shader/basic/vs.glsl");
+  shader->load_fragment_part("../assets/shader/basic/fs.glsl");
+
+  shader->set_model_name("model");
+  shader->set_view_name("view");
+  shader->set_projection_name("proj");
+
+  driver.use_shader(*shader);
 
   auto before = std::chrono::high_resolution_clock::now();
+
+  driver.clear_color_value(colors::white);
 
   bool running = true;
   while(running)
@@ -256,6 +276,10 @@ int main(int argc, char* argv[])
         case SDL_QUIT:
           running = false;
           break;
+        case SDL_MOUSEMOTION:
+          cam_controller.apply_delta_yaw(-event.motion.xrel / 1000.0f);
+          cam_controller.apply_delta_pitch(-event.motion.yrel / 1000.0f);
+          break;
       }
     }
 
@@ -267,6 +291,9 @@ int main(int argc, char* argv[])
     driver.clear();
     gfx::use_camera(driver, cam);
 
+    auto model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(10.0f, 0.0f, 10.0f));
+    shader->set_model(model);
     gfx::render_chunk(cube);
 
     SDL_GL_SwapWindow(sdl_window);
