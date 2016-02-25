@@ -29,15 +29,19 @@ find_package(Freetype REQUIRED)
 add_subdirectory(use)
 add_subdirectory(assets)
 
+find_package(Bullet REQUIRED)
+
 add_executable(redc main.cpp minilua.cpp redcrane.cpp sdl_helper.cpp)
 
-target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS})
+target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
+                                       ${BULLET_INCLUDE_DIRS})
 
 target_link_libraries(redc PUBLIC commonlib netlib gfxlib uselib
                                   ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
                                   ${Boost_FILESYSTEM_LIBRARY}
-                                  ${SDL2_LIBRARIES})
+                                  ${SDL2_LIBRARIES}
+                                  ${BULLET_LIBRARIES})
 
 target_link_libraries(redc PUBLIC ${LuaJit_LIBRARY})
 target_include_directories(redc PUBLIC ${LuaJit_INCLUDE_DIR})

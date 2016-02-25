@@ -87,15 +87,6 @@ namespace redc { namespace sail
 
   //using namespace redc::literals;
 
-  template <class T>
-  double time_since(T before) noexcept
-  {
-    T now = std::chrono::high_resolution_clock::now();
-    using sec_t = std::chrono::duration<double, std::chrono::seconds::period>;
-    return sec_t(now - before).count();
-  }
-
-
   int start_game(po::variables_map const& vm) noexcept
   {
     Game game;

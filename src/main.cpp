@@ -3,11 +3,17 @@
  * All rights reserved.
  */
 #include <iostream>
+#include <chrono>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+
 #include "common/log.h"
+#include "use/mesh.h"
+#include "gfx/camera.h"
 
 #include "redcrane.hpp"
 #include "minilua.h"
@@ -71,6 +77,15 @@ po::options_description command_options_desc() noexcept
 
   return desc;
 }
+
+template <class T>
+double time_since(T before) noexcept
+{
+  T now = std::chrono::high_resolution_clock::now();
+  using sec_t = std::chrono::duration<double, std::chrono::seconds::period>;
+  return sec_t(now - before).count();
+}
+
 int main(int argc, char* argv[])
 {
   // At this point we assume we are in a directory where the config can be
@@ -164,6 +179,8 @@ int main(int argc, char* argv[])
 
   gfx::gl::Driver driver{{x, y}};
 
+#if 0
+
   auto eng = redc::Engine{driver, sdl_window};
 
   lua_pushlightuserdata(lua, &eng);
@@ -185,5 +202,75 @@ int main(int argc, char* argv[])
   // Now get the return value as an integer and return that
   int ret = lua_tointeger(lua, -1);
 
-  return ret;
+#endif
+
+  btDefaultCollisionConfiguration bt_config;
+  btCollisionDispatcher bt_dispatcher{&bt_config};
+  btDbvtBroadphase bt_broadphase;
+  btSequentialImpulseConstraintSolver bt_solver;
+
+  btDiscreteDynamicsWorld bt_world{&bt_dispatcher, &bt_broadphase, &bt_solver,
+                                   &bt_config};
+
+  bt_world.setGravity(btVector3(0.0f, -10.0f, 0.0f));
+
+  btStaticPlaneShape bt_plane{btVector3(0.0f, 1.0f, 0.0f), 0.0f};
+  btScalar plane_mass = 0.;
+  btTransform plane_transform;
+  plane_transform.setIdentity();
+  btDefaultMotionState plane_state{plane_transform};
+
+  btRigidBody::btRigidBodyConstructionInfo rb_info{plane_mass, &plane_state,
+                                                   &bt_plane};
+
+  btRigidBody bt_plane_body(rb_info);
+  bt_world.addRigidBody(&bt_plane_body);
+
+  btSphereShape sphere_shape(1.2f);
+  btScalar sphere_mass = 5.;
+  btTransform sphere_transform;
+
+  // Build camera
+  auto cam = gfx::make_fps_camera(driver);
+  cam.perspective.aspect = 1.0;
+  cam.perspective.far = 10000.0f;
+  cam.perspective.near = 0.01f;
+  cam.perspective.fov = 68.0f;
+
+  // Load objects
+  auto cube = gfx::load_mesh(driver, {"obj/cube.obj", false}).chunk;
+
+  // Load shader
+  auto shader = driver.make_shader_repr();
+
+  auto before = std::chrono::high_resolution_clock::now();
+
+  bool running = true;
+  while(running)
+  {
+    SDL_Event event;
+    while(SDL_PollEvent(&event))
+    {
+      switch(event.type)
+      {
+        case SDL_QUIT:
+          running = false;
+          break;
+      }
+    }
+
+    float dt = time_since(before);
+    before = std::chrono::high_resolution_clock::now();
+
+    bt_world.stepSimulation(dt, 10);
+
+    driver.clear();
+    gfx::use_camera(driver, cam);
+
+    gfx::render_chunk(cube);
+
+    SDL_GL_SwapWindow(sdl_window);
+  }
+
+  return EXIT_SUCCESS;
 }
