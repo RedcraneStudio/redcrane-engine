@@ -48,4 +48,4 @@ target_include_directories(redc PUBLIC ${LuaJit_INCLUDE_DIR})
 target_compile_options(redc PUBLIC ${LuaJit_COMPILE_OPTIONS})
 
 add_dependencies(redc survival)
-
+add_dependencies(redc assets)

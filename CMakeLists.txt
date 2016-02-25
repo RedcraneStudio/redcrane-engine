@@ -24,10 +24,10 @@ include(data_target)
 add_subdirectory(gl)
 add_subdirectory(opensimplex)
 add_subdirectory(mods)
-add_subdirectory(src)
 add_subdirectory(assets)
-add_subdirectory(tests)
 add_subdirectory(survival)
+add_subdirectory(src)
+add_subdirectory(tests)
 
 # Copy the run script to the build directory but don't install!
 add_custom_target(runscript ALL)
