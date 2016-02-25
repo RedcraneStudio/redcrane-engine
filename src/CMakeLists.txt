@@ -26,6 +26,7 @@ add_subdirectory(gfx)
 find_package(LuaJit REQUIRED)
 find_package(Freetype REQUIRED)
 
+add_subdirectory(fps)
 add_subdirectory(use)
 add_subdirectory(assets)
 
@@ -36,7 +37,7 @@ add_executable(redc main.cpp minilua.cpp redcrane.cpp sdl_helper.cpp)
 target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
                                        ${BULLET_INCLUDE_DIRS})
 
-target_link_libraries(redc PUBLIC commonlib netlib gfxlib uselib
+target_link_libraries(redc PUBLIC commonlib netlib gfxlib uselib fpslib
                                   ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
                                   ${Boost_FILESYSTEM_LIBRARY}
