@@ -9,9 +9,11 @@
 
 #include "common/log.h"
 
+#include "redcrane.hpp"
 #include "minilua.h"
 
-#include "redcrane.hpp"
+#include "gfx/gl/driver.h"
+#include "sdl_helper.h"
 
 namespace po = boost::program_options;
 
@@ -59,6 +61,9 @@ po::options_description command_options_desc() noexcept
 
   config_opt.add_options()("game.entry_file", po::value<std::string>(),
                            "Lua main file");
+
+  config_opt.add_options()("game.window_title", po::value<std::string>(),
+                           "Window title");
 
   po::options_description desc("Allowed Options");
 
@@ -150,7 +155,17 @@ int main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  auto eng = Redc_Engine{Engine_State::None, std::move(vm)};
+  SDL_Init_Lock sdl_init_raii_lock{vm["game.window_title"].as<std::string>(),
+                                   {1000,1000}, false, false};
+  auto sdl_window = sdl_init_raii_lock.window;
+
+  int x, y;
+  SDL_GetWindowSize(sdl_window, &x, &y);
+
+  gfx::gl::Driver driver{{x, y}};
+
+  auto eng = redc::Engine{driver, sdl_window};
+
   lua_pushlightuserdata(lua, &eng);
 
   if(lua::handle_err(lua, lua_pcall(lua, 1, 1, 0)))

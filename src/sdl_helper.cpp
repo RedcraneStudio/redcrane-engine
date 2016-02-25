@@ -3,10 +3,9 @@
  * All rights reserved.
  */
 #include "sdl_helper.h"
-#include "../../common/log.h"
+#include "common/log.h"
 namespace redc
 {
-
   SDL_Init_Lock::SDL_Init_Lock(std::string title, Vec<int> res, bool fs,
                                bool vsync) noexcept
   {

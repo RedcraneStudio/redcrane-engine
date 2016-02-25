@@ -6,19 +6,14 @@
  */
 #include <cstdint>
 
-extern "C"
+#include "gfx/idriver.h"
+#include "SDL.h"
+
+namespace redc
 {
-#include "redcrane_decl.h"
+  struct Engine
+  {
+    gfx::IDriver& driver;
+    SDL_Window* window;
+  };
 }
-
-enum class Engine_State
-{
-  None, Client
-};
-
-struct Redc_Engine
-{
-  Engine_State state;
-
-  boost::program_options::variables_map config;
-};

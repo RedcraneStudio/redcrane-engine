@@ -6,62 +6,37 @@
  * specifically tailored for LuaJIT's FFI facilities.
  */
 
-#include "common/log.h"
-
 #include <cstdint>
 
-#include <boost/program_options.hpp>
-#include <boost/any.hpp>
+#include "common/log.h"
+#include "use/mesh.h"
+
 #include "redcrane.hpp"
 
 using namespace redc;
 
 extern "C"
 {
-  const char* redc_get_config_opt(Redc_Engine* rce, const char* opt)
+  void* redc_load_mesh(void* engine, const char* str)
   {
-    if(rce->config.count(opt))
-    {
-      try
-      {
-        auto str = boost::any_cast<std::string>(rce->config[opt].value());
-        auto data = (char*) malloc((str.size() + 1) * sizeof(char));
-        std::memcpy((void*) data, &str[0], str.size());
-        data[str.size()] = '\0';
-      }
-      catch(boost::bad_any_cast& bac)
-      {
-        log_w("Failed to retrieve config option: '%'", opt);
-        auto data = (char*) malloc(sizeof(char));
-        *data = '\0';
-      }
-    }
-    else
-    {
-      log_w("'%' does not exist in config", opt);
-      auto data = (char *) malloc(sizeof(char));
-      *data = '\0';
-    }
+    auto rce = (redc::Engine*) engine;
 
+    auto res = gfx::load_mesh(rce->driver, {std::string{str}, false});
+
+    // Allocate a mesh_chunk to store it
+    auto chunk = (gfx::Mesh_Chunk*) malloc(sizeof(gfx::Mesh_Chunk));
+    *chunk = copy_mesh_chunk_move_mesh(res.chunk);
+    return chunk;
+  }
+  void redc_draw_mesh(void* engine, void* mesh)
+  {
+    gfx::Mesh_Chunk* chunk = (gfx::Mesh_Chunk*) mesh;
+    gfx::render_chunk(*chunk);
   }
 
-  void redc_start_connect(Redc_Engine* rce, const char* ip,
-                          uint16_t port)
+  void redc_swap_window(void* engine)
   {
-    if(rce->state != Engine_State::None)
-    {
-      // Shit, we're already in the middle of something
-      log_w("Cannot connect to %:%, already in the middle of something",
-            ip, port);
-    }
-
-    // We are officially now in client mode.
-    rce->state = Engine_State::Client;
-
-    // Queue an event?
-    // Nah, for now they will just wait
-
-    // Start a connection
+    auto rce = (redc::Engine*) engine;
+    SDL_GL_SwapWindow(rce->window);
   }
-
 }

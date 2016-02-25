@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <string>
-#include "../../common/vec.h"
+#include "common/vec.h"
 #include "SDL.h"
 #include "glad/glad.h"
 namespace redc
