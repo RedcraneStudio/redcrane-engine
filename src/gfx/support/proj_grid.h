@@ -3,19 +3,19 @@
  * All rights reserved.
  */
 #pragma once
-#include "../common/vec.h"
-#include "../common/value_map.h"
-#include "../gfx/mesh_data.h"
-#include "../gfx/texture.h"
-#include "../gfx/camera.h"
-#include "../common/plane.h"
+#include "../../common/vec.h"
+#include "../../common/value_map.h"
+#include "../mesh_data.h"
+#include "../texture.h"
+#include "../camera.h"
+#include "../../common/plane.h"
 
 extern "C"
 {
   #include "opensimplex/open-simplex-noise.h"
 }
 
-namespace redc { namespace water
+namespace redc { namespace proj_grid
 {
   std::vector<glm::vec3> find_visible(gfx::Camera const& cam, float y,
                                       float max_disp) noexcept;

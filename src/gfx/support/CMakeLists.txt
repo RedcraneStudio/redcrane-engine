@@ -6,7 +6,7 @@ add_library(gfxsupportlib STATIC load_wavefront.cpp texture_load.cpp
                                  location_cache.cpp scoped_shader_lock.cpp
                                  mesh_conversion.cpp write_data_to_mesh.cpp
                                  generate_aabb.cpp allocate.cpp format.cpp
-                                 unproject.cpp render_normals.cpp)
+                                 unproject.cpp render_normals.cpp proj_grid.cpp)
 target_link_libraries(gfxsupportlib gfxlib commonlib)
 
 # We need this for boost::optional.

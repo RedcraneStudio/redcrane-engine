@@ -39,7 +39,7 @@
 #include "use/mesh.h"
 #include "use/texture.h"
 
-#include "water/grid.h"
+#include "gfx/support/proj_grid.h"
 #include "terrain/chunks.h"
 
 #include "common/json.h"

@@ -25,4 +25,11 @@ namespace redc
   {
     return pt - signed_distance(plane, pt) * plane.normal;
   }
+
+  glm::vec3 intercept_plane(Plane pl, glm::vec3 start, glm::vec3 dir)
+  {
+    float t = (-pl.dist - glm::dot(pl.normal, start)) / dot(pl.normal, dir);
+
+    return start + (t * dir);
+  }
 }

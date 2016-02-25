@@ -5,7 +5,7 @@
 #include "ocean.h"
 #include "../use/texture.h"
 
-#include "../water/grid.h"
+#include "../gfx/support/proj_grid.h"
 
 namespace redc { namespace effects
 {

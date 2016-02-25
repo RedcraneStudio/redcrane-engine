@@ -2,12 +2,12 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
-#include "grid.h"
-#include "../common/log.h"
+#include "proj_grid.h"
+#include "../../common/log.h"
 
 #include <vector>
 #include <glm/glm.hpp>
-#include "../common/vec.h"
+#include "../../common/vec.h"
 namespace redc { namespace water
 {
   glm::vec3 ray_intersection(Plane const& plane, glm::vec3 pt1,
