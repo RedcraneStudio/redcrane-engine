@@ -59,23 +59,6 @@ add_subdirectory(steamlib)
 
 add_subdirectory(assets)
 
-#add_executable(strategy main.cpp)
-#target_link_libraries(strategy gfxlib gfxsupportlib commonlib uilib stratlib
-                               #genlib terrainlib)
-#target_link_libraries(strategy ${CMAKE_THREAD_LIBS_INIT})
-
-
-add_executable(fps_exe main_fps.cpp)
-target_link_libraries(fps_exe gfxlib gfxsupportlib commonlib fpslib
-                              collisionlib)
-
-add_executable(sl main_sail.cpp)
-target_link_libraries(sl gfxlib gfxsupportlib commonlib fpslib collisionlib
-                         waterlib terrainlib uselib saillib effectslib netlib
-                         boatlib steamlib
-                         ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
-
 add_executable(redc main.cpp minilua.cpp redcrane.cpp)
 target_link_libraries(redc PUBLIC commonlib ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
@@ -91,16 +74,16 @@ add_dependencies(redc survival)
 # We don't need these rpath settings on windows, the only thing we are
 # installing is libsteam_api which will be installed in the binary directory on
 # windows anyway.
-if(UNIX)
-    if(APPLE)
-        set_target_properties(sl PROPERTIES INSTALL_RPATH
-                                 "@executable_path/../lib")
-    else()
-        set_target_properties(sl PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
-    endif()
-endif()
+#if(UNIX)
+    #if(APPLE)
+        #set_target_properties(sl PROPERTIES INSTALL_RPATH
+                                 #"@executable_path/../lib")
+    #else()
+        #set_target_properties(sl PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+    #endif()
+#endif()
 
-install(TARGETS sl RUNTIME DESTINATION bin)
+#install(TARGETS sl RUNTIME DESTINATION bin)
 
 # Install the steamworks redistributable in bin/ if we are on windows and
 # into lib/ otherwise
@@ -113,10 +96,10 @@ endif()
 # add_executable(play_snd play_snd.cpp)
 # target_link_libraries(play_snd sndlib commonlib)
 
-add_subdirectory(luaint)
+#add_subdirectory(luaint)
 
-add_executable(map_gen map_gen.cpp)
-target_link_libraries(map_gen genlib luaintlib)
+#add_executable(map_gen map_gen.cpp)
+#target_link_libraries(map_gen genlib luaintlib)
 
 # add_executable(event_spread_test event_spread.cpp)
 # target_link_libraries(event_spread_test stratlib commonlib)
