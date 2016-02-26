@@ -41,13 +41,14 @@ namespace redc { namespace gfx
 
     m.mesh->set_primitive_type(m.type);
 
-    if(m.base_vertex.value_or(0) == 0)
+    // Ahh this function is deprecated as of 1.56 I think
+    if(m.base_vertex.get_value_or(0) == 0)
     {
       m.mesh->draw_elements(m.start, m.count);
     }
     else
     {
-      m.mesh->draw_elements_base_vertex(m.start, m.count, *m.base_vertex);
+      m.mesh->draw_elements_base_vertex(m.start, m.count, m.base_vertex.get());
     }
   }
 } }
