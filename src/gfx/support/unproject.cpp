@@ -18,7 +18,7 @@ namespace redc { namespace gfx
     float depth = 0.0f;
     if(depth_in)
     {
-      depth = depth_in.value();
+      depth = depth_in.get();
     }
     else
     {
