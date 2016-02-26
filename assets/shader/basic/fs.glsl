@@ -12,7 +12,7 @@ uniform sampler2D tex;
 
 void main()
 {
-  diffuse_out = dif;
+  diffuse_out = texture(tex, uv) * dif;
   diffuse_out.a = 1.0;
 
   float light_intensity = dot(normalize(world_normal),
