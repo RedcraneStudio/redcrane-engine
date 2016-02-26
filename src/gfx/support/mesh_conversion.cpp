@@ -49,7 +49,7 @@ namespace redc { namespace gfx
     {
       if(index_opt)
       {
-        auto val = index_opt.value();
+        auto val = index_opt.get();
         if(val < vec.size())
         {
           input_vert.*member = vec[val];
