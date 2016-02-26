@@ -19,6 +19,7 @@
 #include "gfx/gl/driver.h"
 #include "gfx/camera.h"
 #include "fps/camera_controller.h"
+#include "use/texture.h"
 
 #include "redcrane.hpp"
 #include "minilua.h"
@@ -239,16 +240,17 @@ int main(int argc, char* argv[])
   // Build camera
   auto cam = gfx::make_fps_camera(driver);
   cam.perspective.aspect = 1.0;
-  cam.perspective.far = 10000.0f;
+  cam.perspective.far = 1000.0f;
   cam.perspective.near = 0.01f;
   cam.perspective.fov = glm::radians(68.0f);
+  cam.fp.pos = glm::vec3(0.0f, 1.0f, 0.0f);
 
   auto cam_controller = fps::Camera_Controller{};
   cam_controller.camera(cam);
   cam_controller.set_pitch_limit(M_PI / 2, true);
 
   // Load objects
-  auto cube = gfx::load_mesh(driver, {"../assets/obj/cube.obj", false}).chunk;
+  auto plane = gfx::load_mesh(driver, {"../assets/obj/plane.obj", false}).chunk;
 
   // Load shader
   auto shader = driver.make_shader_repr();
@@ -258,8 +260,18 @@ int main(int argc, char* argv[])
   shader->set_model_name("model");
   shader->set_view_name("view");
   shader->set_projection_name("proj");
+  shader->set_sampler_name("tex");
+  shader->set_diffuse_name("dif");
+
+  auto light_loc = shader->get_location("light_pos");
+  shader->set_vec3(light_loc, glm::vec3(0.0f, 10.0f, 0.0f));
+
+  shader->set_diffuse(colors::white);
 
   driver.use_shader(*shader);
+
+  auto tex = gfx::load_texture(driver, "../assets/tex/sand.png");
+  driver.bind_texture(*tex, 0);
 
   auto before = std::chrono::high_resolution_clock::now();
 
@@ -291,10 +303,12 @@ int main(int argc, char* argv[])
     driver.clear();
     gfx::use_camera(driver, cam);
 
+    shader->set_sampler(0);
+
     auto model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(10.0f, 0.0f, 10.0f));
+    model = glm::scale(model, glm::vec3(5.0f, 1.0f, 5.0f));
     shader->set_model(model);
-    gfx::render_chunk(cube);
+    gfx::render_chunk(plane);
 
     SDL_GL_SwapWindow(sdl_window);
   }

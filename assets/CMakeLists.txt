@@ -31,6 +31,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     tex/envmap/left.png
                     tex/envmap/right.png
 
+                    tex/sand.png
+
                     cfg.ini
 
                     tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
