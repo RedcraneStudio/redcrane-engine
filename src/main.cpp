@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
   btDiscreteDynamicsWorld bt_world{&bt_dispatcher, &bt_broadphase, &bt_solver,
                                    &bt_config};
 
-  bt_world.setGravity(btVector3(0.0f, -10.0f, 0.0f));
+  bt_world.setGravity(btVector3(0.0f, -9.81f, 0.0f));
 
   btStaticPlaneShape bt_plane{btVector3(0.0f, 1.0f, 0.0f), 0.0f};
   btScalar plane_mass = 0.;
@@ -233,9 +233,20 @@ int main(int argc, char* argv[])
   btRigidBody bt_plane_body(rb_info);
   bt_world.addRigidBody(&bt_plane_body);
 
-  btSphereShape sphere_shape(1.2f);
+  btSphereShape sphere_shape(0.45f);
   btScalar sphere_mass = 5.;
   btTransform sphere_transform;
+  sphere_transform.setIdentity();
+  sphere_transform.setOrigin(btVector3(0.0f, 5.0f, -5.0f));
+  btDefaultMotionState sphere_state{sphere_transform};
+
+  btRigidBody::btRigidBodyConstructionInfo sphere_cb_info{sphere_mass,
+                                                          &sphere_state,
+                                                          &sphere_shape};
+  btRigidBody bt_sphere_body(sphere_cb_info);
+  bt_sphere_body.setRestitution(1.0f);
+  bt_plane_body.setRestitution(.8f);
+  bt_world.addRigidBody(&bt_sphere_body);
 
   // Build camera
   auto cam = gfx::make_fps_camera(driver);
@@ -243,7 +254,7 @@ int main(int argc, char* argv[])
   cam.perspective.far = 1000.0f;
   cam.perspective.near = 0.01f;
   cam.perspective.fov = glm::radians(68.0f);
-  cam.fp.pos = glm::vec3(0.0f, 1.0f, 0.0f);
+  cam.fp.pos = glm::vec3(0.0f, 0.5f, 0.0f);
 
   auto cam_controller = fps::Camera_Controller{};
   cam_controller.camera(cam);
@@ -251,6 +262,7 @@ int main(int argc, char* argv[])
 
   // Load objects
   auto plane = gfx::load_mesh(driver, {"../assets/obj/plane.obj", false}).chunk;
+  auto sphere = gfx::load_mesh(driver, {"../assets/obj/sphere.obj", false}).chunk;
 
   // Load shader
   auto shader = driver.make_shader_repr();
@@ -309,6 +321,19 @@ int main(int argc, char* argv[])
     model = glm::scale(model, glm::vec3(5.0f, 1.0f, 5.0f));
     shader->set_model(model);
     gfx::render_chunk(plane);
+
+    model = glm::mat4(1.0f);
+
+    btTransform sphere_transform;
+    sphere_state.getWorldTransform(sphere_transform);
+    model = glm::translate(model, glm::vec3(sphere_transform.getOrigin().x(),
+                                            sphere_transform.getOrigin().y(),
+                                            sphere_transform.getOrigin().z()));
+
+    log_i("%", model[3][1]);
+
+    shader->set_model(model);
+    gfx::render_chunk(sphere);
 
     SDL_GL_SwapWindow(sdl_window);
   }
