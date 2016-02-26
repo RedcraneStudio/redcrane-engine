@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
   cam.perspective.aspect = 1.0;
   cam.perspective.far = 10000.0f;
   cam.perspective.near = 0.01f;
-  cam.perspective.fov = 68.0f;
+  cam.perspective.fov = glm::radians(68.0f);
 
   auto cam_controller = fps::Camera_Controller{};
   cam_controller.camera(cam);
@@ -277,8 +277,8 @@ int main(int argc, char* argv[])
           running = false;
           break;
         case SDL_MOUSEMOTION:
-          cam_controller.apply_delta_yaw(-event.motion.xrel / 1000.0f);
-          cam_controller.apply_delta_pitch(-event.motion.yrel / 1000.0f);
+          cam_controller.apply_delta_yaw(event.motion.xrel / 1000.0f);
+          cam_controller.apply_delta_pitch(event.motion.yrel / 1000.0f);
           break;
       }
     }

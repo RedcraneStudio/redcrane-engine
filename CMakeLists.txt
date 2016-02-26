@@ -11,6 +11,9 @@ project(Red_Crane_Engine VERSION 0.0 LANGUAGES C CXX)
 add_definitions(-DREDC_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions(-DREDC_SHARE_DIR="${PROJECT_NAME}")
 
+# Use radians everywhere
+add_definitions(-DGLM_FORCE_RADIANS)
+
 # Include our own modules
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/ ${CMAKE_MODULE_PATH})
 
