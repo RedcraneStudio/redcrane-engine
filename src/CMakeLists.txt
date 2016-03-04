@@ -32,7 +32,7 @@ add_subdirectory(assets)
 
 find_package(Bullet REQUIRED)
 
-add_executable(redc main.cpp minilua.cpp redcrane.cpp sdl_helper.cpp)
+add_executable(redc main.cpp minilua.cpp redcrane.cpp sdl_helper.cpp player.cpp)
 
 target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
                                        ${BULLET_INCLUDE_DIRS})
