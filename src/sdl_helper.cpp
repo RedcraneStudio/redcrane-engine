@@ -58,7 +58,6 @@ namespace redc
     if(vsync) SDL_GL_SetSwapInterval(1);
     else SDL_GL_SetSwapInterval(0);
 
-
     auto context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
 
