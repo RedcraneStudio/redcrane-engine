@@ -235,14 +235,17 @@ namespace redc { namespace net
 
   // Helper functions to send and receive.
   template <class T>
-  void send_data(T const& t, ENetPeer* peer) noexcept
+  void send_data(T const& t, ENetPeer* peer, bool reliable = true) noexcept
   {
     msgpack::sbuffer buf;
     msgpack::pack(buf, t);
 
+    uint32_t flags = 0;
+    if(reliable) flags = ENET_PACKET_FLAG_RELIABLE;
+
+
     // Make the version packet
-    auto packet = enet_packet_create(buf.data(), buf.size(),
-                                     ENET_PACKET_FLAG_RELIABLE);
+    auto packet = enet_packet_create(buf.data(), buf.size(), flags);
     enet_peer_send(peer, 0, packet);
   }
 
