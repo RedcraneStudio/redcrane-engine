@@ -129,7 +129,7 @@ namespace redc { namespace net
       }
       case Client_State::Sending_Client_Info:
       {
-        send_data(ctx.player_info, event->peer);
+        send_data(ctx.player_info, ctx.server_peer);
         set_state(res, ctx, Client_State::Waiting_For_Spawn);
         break;
       }
