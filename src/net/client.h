@@ -191,48 +191,6 @@ namespace redc { namespace net
   // constructed packets that say "This team now has this name" we can just
   // resend the definition, we can let the client figure out the differences.
 
-  // Sent from client to server.
-  struct Input
-  {
-    // Standard movement
-    // bool forward;
-    // bool left;
-    // bool right;
-    // bool backward;
-    // *** SEE BELOW ***
-
-    // Put this in a single byte? From most significant bit to least:
-    // Forward, left, right, backward; remaining bits are the client's current
-    // weapon.
-    uint8_t input;
-
-    // Hmm, I guess the server can make the call as to whether the user shot
-    // too earlier with respect to when this changed, then again we can write
-    // our own packer that optionally packs this or nothing otherwise, etc.
-    // *** SEE ABOVE ***
-    // uint8_t cur_weapon;
-    // *** SEE ABOVE ***
-
-    // This is the time of the water simulation for the client. Double
-    // precision?
-    float time;
-
-    MSGPACK_DEFINE(input, time);
-  };
-
-  // weapon should be in the range [0,0xff]
-  inline Input pack_input(bool forward, bool left, bool right, bool backward,
-                          uint8_t weapon, float time) noexcept
-  {
-    Input ret;
-
-    ret.input = (forward << 7) | (left << 6) | (right << 5) | (backward << 4) |
-                (weapon & 0xff);
-    ret.time = time;
-
-    return ret;
-  }
-
   // Helper functions to send and receive.
   template <class T>
   void send_data(T const& t, ENetPeer* peer, bool reliable = true) noexcept

@@ -6,6 +6,8 @@
 #include "client.h"
 
 #include "../common/id_map.hpp"
+
+#include "../input/input.h"
 namespace redc { namespace net
 {
   // Sent from server to client about all clients (even the owner).

@@ -22,6 +22,7 @@ find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
 find_package(SDL2 REQUIRED)
 add_subdirectory(gfx)
+add_subdirectory(input)
 
 find_package(LuaJit REQUIRED)
 find_package(Freetype REQUIRED)
@@ -38,6 +39,7 @@ target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
                                        ${BULLET_INCLUDE_DIRS})
 
 target_link_libraries(redc PUBLIC commonlib netlib gfxlib uselib fpslib
+                                  inputlib
                                   ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
                                   ${Boost_FILESYSTEM_LIBRARY}
