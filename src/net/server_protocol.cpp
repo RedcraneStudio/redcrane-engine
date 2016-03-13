@@ -32,7 +32,10 @@ namespace redc { namespace net
     for(auto client_id_pair : ctx.clients)
     {
       // Duplicate!
-      if(client_id_pair.second.player_info.id == id) return false;
+      if(client_id_pair.second.player_info)
+      {
+        if(client_id_pair.second.player_info->id == id) return false;
+      }
     }
     // No duplicate
     return true;
@@ -102,13 +105,17 @@ namespace redc { namespace net
       }
       case Remote_Client_State::Client_Info:
       {
-        // Failed to read client info
-        if(!receive_data(client.player_info, event.packet)) break;
+        // Read client info, break if it doesn't work
+        Player_Info player_info;
+        if(!receive_data(player_info, event.packet)) break;
+
+        // Don't add this player info to the client yet so the player id search
+        // doesn't find itself and falsely trigger a duplicate
 
         // Verify user id in some way!
         // For now we are expected random numbers that won't collide, but when
         // it inevitably happens we will disconnect the client for this reason
-        if(!is_valid_player_id(ctx, client.player_info.id))
+        if(!is_valid_player_id(ctx, player_info.id))
         {
           // Disconnect the client
           enet_peer_disconnect_later(client.peer, 0);
@@ -118,6 +125,9 @@ namespace redc { namespace net
         }
         else
         {
+          // Else we have a valid player id
+          client.player_info = player_info;
+
           // Otherwise send spawn info
           send_data(Spawn{}, event.peer);
           client.state = Remote_Client_State::Playing;
