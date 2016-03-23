@@ -138,6 +138,8 @@ namespace redc { namespace net
           send_data(Spawn{}, event.peer);
           client.state = Remote_Client_State::Playing;
 
+          log_i("Spawning player %", client.player_info->name);
+
           // We just added a new player...
           ctx.must_resend_server_info = true;
         }
