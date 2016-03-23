@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <boost/optional.hpp>
 #include "client.h"
 
 #include "../common/id_map.hpp"
@@ -44,7 +45,7 @@ namespace redc { namespace net
     Remote_Client_State state;
 
     Version_Info version;
-    Player_Info player_info;
+    boost::optional<Player_Info> player_info;
 
     // Somehow limit this to a certain amount? Circular buffer?
     std::vector<Input> inputs;

@@ -21,7 +21,13 @@ namespace redc { namespace net
     for(auto& client_id_pair : ctx.clients)
     {
       // They will need to select a team at some point.
-      players.push_back(client_id_pair.second.player_info);
+
+      // Only if the client has player info do we care about it, otherwise that
+      // client probably hasn't finished connecting, etc.
+      if(client_id_pair.second.player_info)
+      {
+        players.push_back(*client_id_pair.second.player_info);
+      }
     }
 
     return Server_Info{ctx.rules, players, ctx.teams};
