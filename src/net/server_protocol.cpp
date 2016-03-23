@@ -172,19 +172,6 @@ namespace redc { namespace net
 
   void step_server(Server_Context& ctx, ENetEvent const& event) noexcept
   {
-    if(ctx.must_resend_server_info)
-    {
-      auto server_info = make_server_info(ctx);
-      for(auto& client : ctx.clients)
-      {
-        // First send this identifier which says we are sending this not state.
-        send_data(0x01, client.second.peer);
-
-        // Send that info to everyone
-        send_data(server_info, client.second.peer);
-      }
-    }
-
     switch(event.type)
     {
       case ENET_EVENT_TYPE_CONNECT:
@@ -227,7 +214,6 @@ namespace redc { namespace net
         break;
       }
       case ENET_EVENT_TYPE_DISCONNECT:
-      default:
       {
         log_i("Disconnect event");
 
@@ -241,6 +227,7 @@ namespace redc { namespace net
           // wat
           // RIP
           // A client we don't know just disconnected from us.
+          log_w("A client we don't know got disconnected");
         }
         else
         {
@@ -252,6 +239,27 @@ namespace redc { namespace net
 
         break;
       }
+      case ENET_EVENT_TYPE_NONE:
+      default:
+        break;
+    }
+
+    if(ctx.must_resend_server_info)
+    {
+      auto server_info = make_server_info(ctx);
+      for(auto& client : ctx.clients)
+      {
+        // First send this identifier which says we are sending this not state.
+        send_data(0x01, client.second.peer);
+
+        // Send that info to everyone
+        send_data(server_info, client.second.peer);
+      }
+
+      // I've found that enet will refuse to clean up a packet if the client
+      // we give it has disconnected, which is why we put this after handling
+      // events (which importantly includes the disconnect event)
+      ctx.must_resend_server_info = false;
     }
   }
 } }
