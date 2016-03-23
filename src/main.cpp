@@ -28,6 +28,29 @@
 
 namespace po = boost::program_options;
 
+enum class Server_Mode
+{
+    Bad, Dedicated, Connect, Local
+};
+
+Server_Mode pick_server_mode(po::variables_map const& vm)
+{
+  bool dedicated = vm.count("dedicated-server");
+  bool local = vm.count("local-server");
+  bool connect = vm.count("connect");
+
+  int total = dedicated + local + connect;
+  if(total > 1)
+  {
+    return Server_Mode::Bad;
+  }
+
+  if(dedicated) return Server_Mode::Dedicated;
+  if(connect) return Server_Mode::Connect;
+    // By default, start a local server.
+  else return Server_Mode::Local;
+}
+
 po::options_description command_options_desc() noexcept
 {
   po::options_description general_opt("General");

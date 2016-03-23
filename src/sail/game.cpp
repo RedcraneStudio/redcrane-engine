@@ -67,23 +67,6 @@ namespace redc { namespace sail
 
     return vm;
   }
-  Server_Mode pick_server_mode(po::variables_map const& vm) noexcept
-  {
-    bool dedicated = vm.count("dedicated-server");
-    bool local = vm.count("local-server");
-    bool connect = vm.count("connect");
-
-    int total = dedicated + local + connect;
-    if(total > 1)
-    {
-      return Server_Mode::Bad;
-    }
-
-    if(dedicated) return Server_Mode::Dedicated;
-    if(connect) return Server_Mode::Connect;
-    // By default, start a local server.
-    else return Server_Mode::Local;
-  }
 
   //using namespace redc::literals;
 
