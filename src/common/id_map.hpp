@@ -10,7 +10,7 @@
 
 namespace redc
 {
-  template <typename T, typename Id = uint8_t>
+  template <typename T, typename Id = uint16_t>
   struct ID_Map
   {
     using id_type = Id;
