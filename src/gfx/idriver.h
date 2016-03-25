@@ -20,8 +20,6 @@ namespace redc
       Depth
     };
 
-    struct Mesh_Cache;
-
     struct IDriver
     {
       IDriver(Vec<int> size) noexcept : extents_(size) {}
@@ -64,14 +62,8 @@ namespace redc
 
       virtual void check_error() noexcept = 0;
 
-      void set_active_mesh_cache(Mesh_Cache* cache) noexcept
-      { mesh_cache_ = cache; }
-      Mesh_Cache* get_active_mesh_cache() const noexcept { return mesh_cache_; }
-
     private:
       Vec<int> extents_;
-
-      Mesh_Cache* mesh_cache_;
     };
   }
 }
