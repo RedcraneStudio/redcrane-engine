@@ -17,6 +17,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     obj/cube.obj
                     obj/sphere.obj
 
+                    obj/character/hands.obj
+
                     scene/default.json structure/structures.json
                     shader/basic/fs.glsl shader/basic/vs.glsl
                     shader/hud/fs.glsl shader/hud/vs.glsl
