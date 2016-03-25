@@ -8,6 +8,8 @@
 #include "id_gen.hpp"
 #include "cache.h"
 
+#include <boost/optional.hpp>
+
 namespace redc
 {
   template <typename T, typename Id = uint16_t>
@@ -183,4 +185,64 @@ namespace redc
   {
     return *this->ids_cache_.cache();
   }
+
+  template <class T>
+  struct Active_Map : public ID_Map<T>
+  {
+    using id_type = typename ID_Map<T>::id_type;
+    // Don't delete through a pointer to base!!
+
+    void active_element(id_type id);
+    id_type active_element() const;
+  private:
+    boost::optional<id_type> active_elem;
+
+    void on_insert(id_type id) override;
+    void on_erase(id_type id) override;
+  };
+
+  template <class T>
+  void Active_Map<T>::active_element(id_type id)
+  {
+    // Should we check?
+    active_elem = id;
+  }
+  template <class T>
+  typename Active_Map<T>::id_type Active_Map<T>::active_element() const
+  {
+    if(this->size() == 0 || active_elem)
+    {
+      // Return a bad id?
+      // Is zero a bad id?
+      return 0;
+    }
+
+    // Otherwise this should be set
+    return active_elem.value();
+  }
+
+  template <class T>
+  void Active_Map<T>::on_insert(id_type id)
+  {
+    // Called after insertion
+
+    // If there is only one element or we don't have an active element for
+    // whatever reason.
+    if(this->size() == 1 || !active_elem)
+    {
+      // Our active element is the first one inserted
+      active_elem = id;
+    }
+
+    // Otherwise, we don't care about it, the user will set it
+  }
+  template <class T>
+  void Active_Map<T>::on_erase(id_type id)
+  {
+    if(this->size() == 0)
+    {
+      active_elem = boost::none;
+    }
+  }
+
 }
