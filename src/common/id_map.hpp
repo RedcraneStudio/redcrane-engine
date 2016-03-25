@@ -67,6 +67,11 @@ namespace redc
     ID_Gen<id_type> id_counter_;
 
     mutable Cache<std::vector<id_type> > ids_cache_;
+
+    // Overall this is a pretty limited mechanism but it really is all we need
+    // to implement Active_Map.
+    virtual void on_insert(id_type id) {}
+    virtual void on_erase(id_type id) {}
   };
 
   template <class T, class Id>
@@ -77,6 +82,10 @@ namespace redc
 
     this->objs_.emplace(id, obj);
     this->ids_cache_.invalidate();
+
+    // Do the callback
+    on_insert(id);
+
     return id;
   }
 
@@ -89,6 +98,9 @@ namespace redc
 
     this->objs_.emplace(id, T{std::forward<Args>(args)...});
     this->ids_cache_.invalidate();
+
+    on_insert(id);
+
     return id;
   }
 
@@ -99,7 +111,13 @@ namespace redc
     if(pos != end(this->objs_)) this->id_counter_.remove(pos->first);
 
     this->ids_cache_.invalidate();
-    return this->objs_.erase(pos);
+
+    auto ret = this->objs_.erase(pos);
+
+    // We need to do this only after doing the removal
+    on_erase(pos->first);
+
+    return ret;
   }
   template <class T, class Id>
   inline auto ID_Map<T, Id>::erase(const_iterator first,
@@ -109,7 +127,12 @@ namespace redc
     for(; first != last; ++first) this->id_counter_.remove(first->first);
 
     this->ids_cache_.invalidate();
-    return this->objs_.erase(orig_first, last);
+    auto ret = this->objs_.erase(orig_first, last);
+
+    // Remove each id
+    for(first = orig_first; first != last; ++first) on_erase(orig_first->first);
+
+    return ret;
   }
   template <class T, class Id>
   inline auto ID_Map<T, Id>::erase(key_type id) -> size_type
@@ -119,7 +142,11 @@ namespace redc
       this->id_counter_.remove(id);
 
     this->ids_cache_.invalidate();
-    return this->objs_.erase(id);
+    auto ret = this->objs_.erase(id);
+
+    on_erase(id);
+
+    return ret;
   }
 
   template <class T, class Id>
