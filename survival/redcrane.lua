@@ -4,17 +4,33 @@
 
 local ffi = require("ffi")
 
-local c_header = io.open("/home/luke/projects/redcrane/engine/src/redcrane_decl.h", "r")
-local c_decl = c_header:read("*all")
-c_header:close()
-ffi.cdef(c_decl)
+ffi.cdef[[
+    typedef struct
+    {
+        const char* window_title;
+    } Redc_Config;
+
+    void* redc_init_engine(Redc_Config cfg);
+    void redc_uninit_engine(void* eng);
+    bool redc_running(void* eng);
+    void redc_step(void* eng);
+]]
 
 local rc = {}
 
--- rc.engine is expected to be set by the main script
+-- TODO: Potentially clean up the config
+local config = require("config")
 
-function rc:default_scene()
-    return ffi.C.redc_get_default_scene(self.engine)
+rc.engine = ffi.gc(ffi.C.redc_init_engine(config), ffi.C.redc_uninit_engine)
+
+rc.scene = require("scene")
+rc.mesh_pool = require("mesh_pool")
+
+function rc:running()
+    ffi.C.redc_running(rc.engine)
+end
+function rc:step()
+    ffi.C.redc_step(rc.engine)
 end
 
 return rc

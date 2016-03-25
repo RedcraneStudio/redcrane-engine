@@ -4,30 +4,32 @@
 
 local rc = require("redcrane")
 
-local scene = require("scene")
-local mesh_pool = require("mesh_pool")
-
 local client = {}
 
-function client:init(eng)
+function client:init()
+    -- TODO: Move engine init here, and share stuff between client and server
+
     -- What scene shall we use?
-    self.scene = scene.make_scene(rc.engine)
+    self.scene = rc.scene.make_scene(rc.engine)
 
     -- Use an fps camera, it's the only one so it will be made active.
     self.scene:add_camera("fps")
 
     -- Load in the character's hands
-    self.mesh_pool = mesh_pool.make_mesh_pool(rc.engine)
+    self.mesh_pool = rc.mesh_pool.make_mesh_pool(rc.engine)
     local hand_mesh = self.mesh_pool:load_mesh("character/hands")
 
     -- Attach the hands to the camera
-    self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())
+    --self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())
+    self.hands = self.scene:attach(hand_mesh)
 
     -- HUD elements?
 end
 
-function client:render()
-    self.scene:render()
+client:init()
+
+while rc:running() do
+    rc:step()
 end
 
-return client
+return 0

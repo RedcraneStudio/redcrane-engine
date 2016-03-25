@@ -17,12 +17,15 @@
 
 #include "common/log.h"
 #include "use/mesh.h"
+#include "use/mesh_cache.h"
 #include "gfx/gl/driver.h"
 #include "gfx/camera.h"
 #include "fps/camera_controller.h"
 #include "use/texture.h"
 #include "net/client.h"
 #include "net/server_protocol.h"
+
+#include "assets/load_dir.h"
 
 #include "player.h"
 #include "redcrane.hpp"
@@ -99,11 +102,10 @@ po::options_description command_options_desc() noexcept
   config_opt.add_options()("game.cwd", po::value<std::string>(),
                            "Current working directory");
 
-  config_opt.add_options()("game.entry_file", po::value<std::string>(),
-                           "Lua main file");
-
-  config_opt.add_options()("game.window_title", po::value<std::string>(),
-                           "Window title");
+  config_opt.add_options()("game.client_entry", po::value<std::string>(),
+                           "Client main file");
+  config_opt.add_options()("game.server_entry", po::value<std::string>(),
+                           "Server main file");
 
   po::options_description desc("Allowed Options");
 
@@ -334,31 +336,15 @@ int start_local(po::variables_map const& vm)
   }
 
   // Load a file
-  auto entry_file = vm["game.entry_file"].as<std::string>();
+  auto entry_file = vm["game.client_entry"].as<std::string>();
   if(lua::handle_err(lua, luaL_loadfile(lua, entry_file.data())))
   {
     // Rip
     return EXIT_FAILURE;
   }
 
-  SDL_Init_Lock sdl_init_raii_lock{vm["game.window_title"].as<std::string>(),
-                                   {1000,1000}, false, false};
-  auto sdl_window = sdl_init_raii_lock.window;
-
-  SDL_SetRelativeMouseMode(SDL_TRUE);
-
-  int x, y;
-  SDL_GetWindowSize(sdl_window, &x, &y);
-
-  gfx::gl::Driver driver{{x, y}};
-
-#if 0
-
-  auto eng = redc::Engine{driver, sdl_window};
-
-  lua_pushlightuserdata(lua, &eng);
-
-  if(lua::handle_err(lua, lua_pcall(lua, 1, 1, 0)))
+  // Call the file
+  if(lua::handle_err(lua, lua_pcall(lua, 0, 1, 0)))
   {
     return EXIT_FAILURE;
   }
@@ -375,8 +361,8 @@ int start_local(po::variables_map const& vm)
   // Now get the return value as an integer and return that
   int ret = lua_tointeger(lua, -1);
 
-#endif
-
+  return ret;
+#if 0
   btDefaultCollisionConfiguration bt_config;
   btCollisionDispatcher bt_dispatcher{&bt_config};
   btDbvtBroadphase bt_broadphase;
@@ -556,6 +542,7 @@ int start_local(po::variables_map const& vm)
   }
 
   return EXIT_SUCCESS;
+#endif
 }
 
 int main(int argc, char* argv[])
