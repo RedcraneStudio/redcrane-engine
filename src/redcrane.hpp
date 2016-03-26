@@ -37,6 +37,8 @@ namespace redc
     std::unique_ptr<gfx::IDriver> driver;
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
 
+    std::vector<std::shared_ptr<gfx::Shader> > shaders;
+
     bool running = true;
 
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it

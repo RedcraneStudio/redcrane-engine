@@ -106,6 +106,25 @@ extern "C"
             std::make_unique<gfx::Mesh_Cache>(share_path / "obj",
                                               share_path / "obj_cache");
 
+    // Load default shader, etc.
+    std::shared_ptr<gfx::Shader> df_shade = eng->driver->make_shader_repr();
+
+    // TODO: Load shaders like we load mesh. Right now is bad
+    auto basic_shade_path = share_path / "shader" / "basic";
+    df_shade->load_vertex_part((basic_shade_path / "vs.glsl").native());
+    df_shade->load_fragment_part((basic_shade_path / "fs.glsl").native());
+
+    df_shade->set_model_name("model");
+    df_shade->set_view_name("view");
+    df_shade->set_projection_name("proj");
+
+    // Make it the default
+    eng->driver->use_shader(*df_shade);
+
+    // Make sure we don't delete it later by linking its lifetime with that of
+    // the engines.
+    eng->shaders.push_back(std::move(df_shade));
+
     return eng;
   }
   void redc_uninit_engine(void* eng)
