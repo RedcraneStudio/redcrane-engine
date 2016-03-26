@@ -4,18 +4,6 @@
 
 local ffi = require("ffi")
 
--- Try not to be redundant
-ffi.cdef[[
-    void *redc_make_scene(void *engine);
-    void redc_unmake_scene(void *scene);
-
-    uint16_t redc_scene_add_camera(void* sc, const char* tp);
-    void redc_scene_activate_camera(void* sc, uint16_t cam);
-    uint16_t redc_scene_get_active_camera(void* sc);
-
-    void redc_scene_attach(void* sc, void* mesh, void* parent);
-]]
-
 local scene = {}
 
 function scene.make_scene(eng)

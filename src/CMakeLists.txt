@@ -52,3 +52,6 @@ target_compile_options(redc PUBLIC ${LuaJit_COMPILE_OPTIONS})
 
 add_dependencies(redc survival)
 add_dependencies(redc assets)
+
+add_data(ffi_decl_header ALL share/${PROJECT_NAME}/src redcrane_decl.h)
+add_dependencies(redc ffi_decl_header)

@@ -22,17 +22,18 @@
 
 #include "sdl_helper.h"
 
+extern "C"
+{
+#include "redcrane_decl.h"
+}
+
 using namespace redc;
 
 extern "C"
 {
   // See redcrane.lua
 
-  struct Config
-  {
-    const char* window_title;
-  };
-  void* redc_init_engine(Config cfg)
+  void* redc_init_engine(Redc_Config cfg)
   {
     SDL_Init_Lock sdl_init_raii_lock{cfg.window_title, {1000,1000}, false, false};
     auto sdl_window = sdl_init_raii_lock.window;

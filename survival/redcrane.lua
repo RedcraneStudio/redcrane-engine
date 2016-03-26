@@ -4,17 +4,13 @@
 
 local ffi = require("ffi")
 
-ffi.cdef[[
-    typedef struct
-    {
-        const char* window_title;
-    } Redc_Config;
+local io = require("io")
 
-    void* redc_init_engine(Redc_Config cfg);
-    void redc_uninit_engine(void* eng);
-    bool redc_running(void* eng);
-    void redc_step(void* eng);
-]]
+local c_header = io.open("../src/redcrane_decl.h", "r")
+local c_decl = c_header:read("*all")
+c_header:close()
+
+ffi.cdef(c_decl)
 
 local rc = {}
 

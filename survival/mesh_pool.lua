@@ -4,11 +4,6 @@
 
 local ffi = require("ffi")
 
-ffi.cdef[[
-  void *redc_load_mesh(void *engine, const char *str);
-  void redc_unload_mesh(void *mesh);
-]]
-
 local mesh_pool = {}
 
 -- So far no engine support, so we just load individual meshes
