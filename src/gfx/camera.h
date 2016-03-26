@@ -76,6 +76,7 @@ namespace redc
 
     glm::mat4 camera_view_matrix(Camera const& cam) noexcept;
     glm::mat4 camera_proj_matrix(Camera const& cam) noexcept;
+    glm::mat4 camera_model_matrix(Camera const& cam) noexcept;
 
     inline glm::vec3 camera_forward(Camera const& cam) noexcept
     {

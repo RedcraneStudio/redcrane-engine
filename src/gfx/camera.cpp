@@ -72,6 +72,32 @@ namespace redc
       }
       return glm::mat4(1.0);
     }
+    glm::mat4 camera_model_matrix(Camera const& cam) noexcept
+    {
+      if(cam.definition == Camera_Definition::Look_At)
+      {
+        auto ret = glm::lookAt(cam.look_at.eye, cam.look_at.look,
+                               cam.look_at.up);
+
+        // Invert the negative translation.
+        glm::translate(ret, cam.look_at.eye * 2.0f);
+        return ret;
+      }
+      else if(cam.definition == Camera_Definition::Pitch_Yaw_Pos)
+      {
+        // Do a translation, then the rotations.
+
+        glm::mat4 ret(1.0f);
+        ret = glm::rotate(ret, cam.fp.pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+        ret = glm::rotate(ret, cam.fp.yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+        ret = glm::translate(ret, -cam.fp.pos);
+
+        // Invert the negative translation.
+        glm::translate(ret, cam.fp.pos * 2.0f);
+        return ret;
+      }
+      return glm::mat4(1.0);
+    }
     Camera make_isometric_camera(IDriver const& driver) noexcept
     {
       auto cam = Camera{};
