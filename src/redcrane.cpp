@@ -156,7 +156,7 @@ extern "C"
     // We can be sure at this point the id is non-zero (because of CHECK_ID).
 
     // If this is our first camera
-    if(!scene->active_camera) scene->active_camera = (obj_id) id - 1;
+    if(!scene->active_camera) scene->active_camera = id;
 
     // Return the id
     return id;
@@ -196,7 +196,7 @@ extern "C"
     auto scene = (redc::Scene*) sc;
     auto mesh = (redc::gfx::Mesh_Chunk*) ms;
 
-    auto id = scene->index_gen.get() - 1;
+    auto id = scene->index_gen.get();
     CHECK_ID(id);
     scene->objs[id-1].obj = Mesh_Object{gfx::copy_mesh_chunk_share_mesh(*mesh)};
     if(parent)
