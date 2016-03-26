@@ -11,6 +11,7 @@
 #include "redcrane.hpp"
 
 #include "common/log.h"
+#include "common/debugging.h"
 
 #include "use/mesh.h"
 #include "use/mesh_cache.h"
@@ -29,9 +30,34 @@ extern "C"
 
 using namespace redc;
 
+namespace
+{
+  void redc_lua_log(Log_Severity s, const char *msg)
+  {
+    redc::log(s, "(Mod) %", msg);
+  }
+}
+
 extern "C"
 {
   // See redcrane.lua
+
+  void redc_log_d(const char* str)
+  {
+    redc_lua_log(Log_Severity::Debug, str);
+  }
+  void redc_log_i(const char* str)
+  {
+    redc_lua_log(Log_Severity::Info, str);
+  }
+  void redc_log_w(const char* str)
+  {
+    redc_lua_log(Log_Severity::Warning, str);
+  }
+  void redc_log_e(const char* str)
+  {
+    redc_lua_log(Log_Severity::Error, str);
+  }
 
   void* redc_init_engine(Redc_Config cfg)
   {

@@ -9,6 +9,11 @@ typedef struct
   uint16_t default_port;
 } Redc_Config;
 
+void redc_log_d(const char* str);
+void redc_log_i(const char* str);
+void redc_log_w(const char* str);
+void redc_log_e(const char* str);
+
 void* redc_init_engine(Redc_Config cfg);
 void redc_uninit_engine(void* eng);
 

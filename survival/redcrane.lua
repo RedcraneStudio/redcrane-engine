@@ -29,4 +29,26 @@ function rc:step()
     ffi.C.redc_step(rc.engine)
 end
 
+
+-- Logging functions
+function stringify(str, ...)
+    for n=1,select('#', ...) do
+        local e = select(n, ...)
+        str = str .. ' ' .. tostring(e)
+    end
+    return str
+end
+function rc:log_d(str, ...)
+    ffi.C.redc_log_d(stringify(str, ...))
+end
+function rc:log_i(str, ...)
+    ffi.C.redc_log_i(stringify(str, ...))
+end
+function rc:log_w(str, ...)
+    ffi.C.redc_log_w(stringify(str, ...))
+end
+function rc:log_e(str, ...)
+    ffi.C.redc_log_e(stringify(str, ...))
+end
+
 return rc

@@ -27,6 +27,7 @@ function client:init()
 end
 
 client:init()
+rc:log_i("Done initializing")
 
 while rc:running() do
     rc:step()
