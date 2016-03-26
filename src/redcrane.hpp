@@ -21,15 +21,16 @@
 
 #include "fps/camera_controller.h"
 
-#include "SDL.h"
+#include "sdl_helper.h"
 
 namespace redc
 {
   struct Engine
   {
+    redc::SDL_Init_Lock sdl_raii;
+
     std::unique_ptr<gfx::IDriver> driver;
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
-    SDL_Window* window;
 
     bool running = true;
 

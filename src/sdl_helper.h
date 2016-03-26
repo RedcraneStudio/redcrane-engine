@@ -11,13 +11,18 @@ namespace redc
 {
   struct SDL_Init_Lock
   {
-    SDL_Init_Lock(std::string title, Vec<int> res, bool fs,
-                  bool vsync) noexcept;
-    ~SDL_Init_Lock() noexcept;
+    SDL_Init_Lock() {}
+
+    SDL_Init_Lock(SDL_Init_Lock&&);
+    SDL_Init_Lock& operator=(SDL_Init_Lock&& lock);
+
+    ~SDL_Init_Lock();
 
     SDL_Window* window;
+
+    // I'm pretty sure this is actually a pointer. SDL treats it like one and
+    // it can apparently be set to NULL so I guess we'll work with that.
+    SDL_GLContext gl_context;
   };
-  SDL_Window* init_sdl(std::string title, Vec<int> res, bool fs,
-                       bool vsync) noexcept;
-  void uninit_sdl(SDL_Window* window) noexcept;
+  SDL_Init_Lock init_sdl(std::string title, Vec<int> res, bool fs, bool vsync);
 }

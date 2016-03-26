@@ -65,7 +65,8 @@ extern "C"
 
   void* redc_init_engine(Redc_Config cfg)
   {
-    SDL_Init_Lock sdl_init_raii_lock{cfg.window_title, {1000,1000}, false, false};
+    auto sdl_init_raii_lock =
+            redc::init_sdl(cfg.window_title, {1000,1000}, false, false);
     auto sdl_window = sdl_init_raii_lock.window;
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -73,7 +74,7 @@ extern "C"
     int x, y;
     SDL_GetWindowSize(sdl_window, &x, &y);
 
-    auto eng = new Engine{nullptr, nullptr, sdl_window};
+    auto eng = new Engine{std::move(sdl_init_raii_lock), nullptr, nullptr};
     eng->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
     auto share_path = assets::share_path();
