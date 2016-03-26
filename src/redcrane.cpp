@@ -21,6 +21,37 @@
 
 #include "assets/load_dir.h"
 
+namespace redc
+{
+  struct Model_Visitor : boost::static_visitor<glm::mat4>
+  {
+    glm::mat4 operator()(Mesh_Object const& msh) const
+    {
+      return msh.model;
+    }
+    glm::mat4 operator()(Cam_Object const& cam) const
+    {
+      return gfx::camera_model_matrix(cam.cam);
+    }
+  };
+
+  glm::mat4 object_model(Object const& obj)
+  {
+    // Find current
+    auto this_model = boost::apply_visitor(Model_Visitor{}, obj.obj);
+
+    // Find parent
+    glm::mat4 parent_model(1.0f);
+    if(obj.parent)
+    {
+      parent_model = object_model(*obj.parent);
+    }
+
+    // First apply the child transformations then the parent transformations.
+    return parent_model * this_model;
+  }
+}
+
 using namespace redc;
 
 #define CHECK_ID(id) \
@@ -198,7 +229,8 @@ extern "C"
 
     auto id = scene->index_gen.get();
     CHECK_ID(id);
-    scene->objs[id-1].obj = Mesh_Object{gfx::copy_mesh_chunk_share_mesh(*mesh)};
+    scene->objs[id-1].obj = Mesh_Object{gfx::copy_mesh_chunk_share_mesh(*mesh),
+                                        glm::mat4(1.0f)};
     if(parent)
     {
       scene->objs[id-1].parent = &scene->objs[parent];

@@ -47,6 +47,7 @@ namespace redc
   struct Mesh_Object
   {
     gfx::Mesh_Chunk chunk;
+    glm::mat4 model;
   };
 
   struct Cam_Object
@@ -71,6 +72,8 @@ namespace redc
     // Non-owned parent, they should all be in the vector.
     Object* parent;
   };
+
+  glm::mat4 object_model(Object const& obj);
 
   struct Scene
   {
