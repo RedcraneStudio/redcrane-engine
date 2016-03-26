@@ -31,6 +31,8 @@ rc:log_i("Done initializing")
 
 while rc:running() do
     rc:step()
+    client.scene:render()
+    rc:swap_window()
 end
 
 return 0

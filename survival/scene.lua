@@ -33,6 +33,10 @@ function scene.make_scene(eng)
         end
     end
 
+    function sc:render()
+        ffi.C.redc_scene_render(self._scene_ptr)
+    end
+
     return sc
 end
 
