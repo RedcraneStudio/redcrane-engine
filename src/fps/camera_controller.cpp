@@ -3,58 +3,37 @@
  * All rights reserved.
  */
 #include "camera_controller.h"
+#include "../common/clamp.hpp"
 namespace redc
 {
   namespace fps
   {
-    namespace
-    {
-      template <class T>
-      T clamp(T lower_bound, T upper_bound, T val) noexcept
-      {
-        if(val < lower_bound) { return lower_bound; }
-        else if(upper_bound < val) { return upper_bound; }
-        else { return val; }
-      }
-    }
-
-    void Camera_Controller::set_yaw_limit(double limit, bool use) noexcept
+    void Camera_Controller::set_yaw_limit(double limit, bool use)
     {
       yaw_limit_ = limit;
       limit_yaw_ = use;
     }
-    void Camera_Controller::set_pitch_limit(double limit, bool use) noexcept
+    void Camera_Controller::set_pitch_limit(double limit, bool use)
     {
       pitch_limit_ = limit;
       limit_pitch_ = use;
     }
-    void Camera_Controller::apply_delta_yaw(double val) noexcept
+    void Camera_Controller::apply_delta_yaw(gfx::Camera& cam, double val)
     {
-      if(!cam_) return;
       if(limit_yaw_)
       {
-        cam_->fp.yaw = clamp(-yaw_limit_, yaw_limit_, cam_->fp.yaw + val);
+        cam.fp.yaw = (float) clamp(-yaw_limit_, yaw_limit_, cam.fp.yaw + val);
       }
-      else cam_->fp.yaw += val;
+      else cam.fp.yaw += val;
     }
-    void Camera_Controller::apply_delta_pitch(double val) noexcept
+    void Camera_Controller::apply_delta_pitch(gfx::Camera& cam, double val)
     {
-      if(!cam_) return;
       if(limit_pitch_)
       {
-        cam_->fp.pitch = clamp(-pitch_limit_, pitch_limit_,
-                               cam_->fp.pitch + val);
+        cam.fp.pitch = (float) clamp(-pitch_limit_, pitch_limit_,
+                                     cam.fp.pitch + val);
       }
-      else cam_->fp.pitch += val;
-    }
-
-    void Camera_Controller::camera(gfx::Camera& cam) noexcept
-    {
-      cam_ = &cam;
-    }
-    gfx::Camera* Camera_Controller::camera() const noexcept
-    {
-      return cam_;
+      else cam.fp.pitch += val;
     }
   }
 }
