@@ -6,6 +6,7 @@
 typedef struct
 {
   const char* window_title;
+  uint16_t default_port;
 } Redc_Config;
 
 void* redc_init_engine(Redc_Config cfg);
