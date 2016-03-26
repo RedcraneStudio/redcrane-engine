@@ -26,7 +26,11 @@ function scene.make_scene(eng)
     -- A transformation applied to a mesh only really makes sense in the context
     -- of a scene!
     function sc:attach(mesh, parent)
-        ffi.C.redc_scene_attach(self._scene_ptr, mesh, parent)
+        if parent == nil then
+            ffi.C.redc_scene_attach(self._scene_ptr, mesh, 0)
+        else
+            ffi.C.redc_scene_attach(self._scene_ptr, mesh, parent)
+        end
     end
 
     return sc

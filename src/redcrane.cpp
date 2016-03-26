@@ -30,6 +30,10 @@ extern "C"
 
 using namespace redc;
 
+#define CHECK_ID(id) \
+        REDC_ASSERT_MSG(id != 0, "No more room for any more objects"); \
+        if(id == 0) return id;
+
 namespace
 {
   void redc_lua_log(Log_Severity s, const char *msg)
@@ -149,7 +153,16 @@ extern "C"
     // The first camera will be set as active automatically by Active_Map from
     // id_map.hpp.
     auto scene = (redc::Scene*) sc;
-    auto id = scene->cams.insert(cam_func(*scene->engine->driver));
+
+    auto id = scene->index_gen.get();
+    CHECK_ID(id);
+    auto& obj = scene->objs[id-1];
+    obj.obj = Cam_Object{cam_func(*scene->engine->driver)};
+
+    // We can be sure at this point the id is non-zero (because of CHECK_ID).
+
+    // If this is our first camera
+    if(!scene->active_camera) scene->active_camera = (Scene::obj_id) (id - 1);
 
     // Return the id
     return id;
@@ -159,30 +172,42 @@ extern "C"
   {
     auto scene = (redc::Scene*) sc;
 
-    return scene->cams.active_element();
+    // This will be zero when there isn't an active camera.
+    return scene->active_camera;
   }
   void redc_scene_activate_camera(void* sc, uint16_t cam)
   {
+    if(!cam)
+    {
+      log_w("Cannot make an invalid object the active camera, "
+            "ignoring request");
+      return;
+    }
+
     // We have a camera
     auto scene = (redc::Scene*) sc;
 
-    scene->cams.active_element(cam);
+    if(scene->objs[cam].obj.which() == Object::Cam)
+    {
+      scene->active_camera = cam;
+    }
+    else
+    {
+      log_w("Cannot make non-camera the active camera, ignoring request");
+    }
   }
 
-  void redc_scene_attach(void* sc, void* mesh, void* parent)
+  uint16_t redc_scene_attach(void* sc, void* ms, uint16_t parent)
   {
-    log_e("I don't know how to attach a mesh to an object");
-  }
+    auto scene = (redc::Scene*) sc;
+    auto mesh = (redc::gfx::Mesh_Chunk*) ms;
 
-  void redc_draw_mesh(void* engine, void* mesh)
-  {
-    gfx::Mesh_Chunk* chunk = (gfx::Mesh_Chunk*) mesh;
-    gfx::render_chunk(*chunk);
-  }
-
-  void redc_swap_window(void* engine)
-  {
-    auto rce = (redc::Engine*) engine;
-    SDL_GL_SwapWindow(rce->window);
+    auto id = scene->index_gen.get() - 1;
+    CHECK_ID(id);
+    scene->objs[id-1].obj = Mesh_Object{gfx::copy_mesh_chunk_share_mesh(*mesh)};
+    if(parent)
+    {
+      scene->objs[id-1].parent = &scene->objs[parent];
+    }
   }
 }

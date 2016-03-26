@@ -30,9 +30,7 @@ void redc_unmake_scene(void* scene);
 
 uint16_t redc_scene_add_camera(void* sc, const char* tp);
 uint16_t redc_scene_get_active_camera(void* sc);
+
 void redc_scene_activate_camera(void* sc, uint16_t cam);
 
-void redc_scene_attach(void* sc, void* mesh, void* parent);
-
-void redc_draw_mesh(void* engine, void* mesh);
-void redc_swap_window(void* engine);
+uint16_t redc_scene_attach(void* sc, void* mesh, uint16_t parent);
