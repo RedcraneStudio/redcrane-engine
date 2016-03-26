@@ -14,8 +14,8 @@ namespace redc
     id_type count = 0;
     queue_type removed_id_queue;
 
-    inline id_type get() noexcept;
-    inline void remove(id_type id) noexcept;
+    inline id_type get();
+    inline void remove(id_type id);
   };
 
   /*!
@@ -24,7 +24,7 @@ namespace redc
    * \returns 0 if there are no ids available.
    */
   template <typename id_type>
-  id_type ID_Gen<id_type>::get() noexcept
+  id_type ID_Gen<id_type>::get()
   {
     if(!removed_id_queue.empty())
     {
@@ -34,10 +34,14 @@ namespace redc
       return id;
     }
 
+    // What do we do on integer overflow?
     if(++this->count == 0)
     {
-      // If we subtract one from it, this will continue forever.
+      // If we subtract one from it, this case will continue forever, the only
+      // way to get ids back is of course to remove them.
       --this->count;
+
+      // Return zero, signifying a bad id
       return 0;
     }
 
@@ -45,7 +49,7 @@ namespace redc
   }
 
   template <typename id_type>
-  void ID_Gen<id_type>::remove(id_type id) noexcept
+  void ID_Gen<id_type>::remove(id_type id)
   {
     this->removed_id_queue.push(id);
   }
