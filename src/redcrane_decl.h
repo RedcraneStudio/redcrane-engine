@@ -26,11 +26,11 @@ void redc_unload_mesh(void* mesh);
 void* redc_make_scene(void* engine);
 void redc_unmake_scene(void* scene);
 
-// TODO: Change the way cameras work
+typedef uint16_t obj_id;
 
-uint16_t redc_scene_add_camera(void* sc, const char* tp);
-uint16_t redc_scene_get_active_camera(void* sc);
+obj_id redc_scene_add_camera(void* sc, const char* tp);
+obj_id redc_scene_get_active_camera(void* sc);
 
-void redc_scene_activate_camera(void* sc, uint16_t cam);
+void redc_scene_activate_camera(void* sc, obj_id cam);
 
 uint16_t redc_scene_attach(void* sc, void* mesh, uint16_t parent);

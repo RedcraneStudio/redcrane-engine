@@ -21,13 +21,6 @@
 
 #include "assets/load_dir.h"
 
-#include "sdl_helper.h"
-
-extern "C"
-{
-#include "redcrane_decl.h"
-}
-
 using namespace redc;
 
 #define CHECK_ID(id) \
@@ -163,7 +156,7 @@ extern "C"
     // We can be sure at this point the id is non-zero (because of CHECK_ID).
 
     // If this is our first camera
-    if(!scene->active_camera) scene->active_camera = (Scene::obj_id) (id - 1);
+    if(!scene->active_camera) scene->active_camera = (obj_id) id - 1;
 
     // Return the id
     return id;

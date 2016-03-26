@@ -23,6 +23,11 @@
 
 #include "sdl_helper.h"
 
+extern "C"
+{
+  #include "redcrane_decl.h"
+}
+
 namespace redc
 {
   struct Engine
@@ -72,8 +77,6 @@ namespace redc
     // This is an unordered map that also keeps an active camera available to
     // us.
     Engine* engine;
-
-    using obj_id = uint16_t;
 
     // Should always be a Obj_Type::Cam!! Can we enforce that with the type
     // system?
