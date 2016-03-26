@@ -23,7 +23,7 @@ rc.scene = require("scene")
 rc.mesh_pool = require("mesh_pool")
 
 function rc:running()
-    ffi.C.redc_running(rc.engine)
+    return ffi.C.redc_running(rc.engine)
 end
 function rc:step()
     ffi.C.redc_step(rc.engine)
