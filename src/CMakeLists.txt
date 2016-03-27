@@ -31,6 +31,12 @@ add_subdirectory(fps)
 add_subdirectory(use)
 add_subdirectory(assets)
 
+# These are just here for testing, not that they need to be tested if they
+# aren't used.
+add_subdirectory(terrain)
+add_subdirectory(collisionlib)
+add_subdirectory(gen)
+
 find_package(Bullet REQUIRED)
 
 add_executable(redc main.cpp minilua.cpp sdl_helper.cpp player.cpp
