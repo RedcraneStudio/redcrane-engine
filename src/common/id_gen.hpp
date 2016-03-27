@@ -4,6 +4,7 @@
  */
 #pragma once
 #include <vector>
+#include <algorithm>
 namespace redc
 {
   template <typename id_type>
