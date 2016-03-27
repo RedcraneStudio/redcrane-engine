@@ -95,6 +95,8 @@ namespace redc
   template <class id_type>
   bool ID_Gen<id_type>::is_removed(id_type id)
   {
+    if(id == 0) return false;
+
     auto it = std::find(begin(removed_id_queue_), end(removed_id_queue_), id);
     return it != end(removed_id_queue_);
   }
@@ -102,6 +104,8 @@ namespace redc
   template <class id_type>
   bool ID_Gen<id_type>::is_valid(id_type id)
   {
+    if(id == 0) return false;
+
     // A valid id can't be removed and must be below/equal to count_
     return !is_removed(id) &&  id <= count_;
   }
