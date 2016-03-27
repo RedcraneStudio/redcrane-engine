@@ -28,7 +28,7 @@
 #include "assets/load_dir.h"
 
 #include "player.h"
-#include "redcrane.hpp"
+#include "cwrap/redcrane.hpp"
 #include "minilua.h"
 
 #include "sdl_helper.h"

@@ -9,24 +9,27 @@
 
 #include <boost/variant.hpp>
 
-#include "minilua.h"
+#include "../minilua.h"
 
-#include "common/id_map.hpp"
+#include "../common/id_map.hpp"
 
-#include "use/mesh_cache.h"
+#include "../use/mesh_cache.h"
 
-#include "gfx/idriver.h"
-#include "gfx/camera.h"
-#include "gfx/mesh_chunk.h"
+#include "../gfx/idriver.h"
+#include "../gfx/camera.h"
+#include "../gfx/mesh_chunk.h"
 
-#include "fps/camera_controller.h"
+#include "../fps/camera_controller.h"
 
-#include "sdl_helper.h"
+#include "../sdl_helper.h"
 
+#ifndef REDC_REDCRANE_DECL_H
+#define REDC_REDCRANE_DECL_H
 extern "C"
 {
-  #include "redcrane_decl.h"
+  #include "../redcrane_decl.h"
 }
+#endif
 
 namespace redc
 {

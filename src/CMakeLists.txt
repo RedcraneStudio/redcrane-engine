@@ -33,7 +33,12 @@ add_subdirectory(assets)
 
 find_package(Bullet REQUIRED)
 
-add_executable(redc main.cpp minilua.cpp redcrane.cpp sdl_helper.cpp player.cpp)
+add_executable(redc main.cpp minilua.cpp sdl_helper.cpp player.cpp
+                    cwrap/engine.cpp cwrap/mesh.cpp cwrap/scene.cpp
+                    cwrap/redcrane.cpp)
+
+add_data(ffi_decl_header ALL share/${PROJECT_NAME}/src redcrane_decl.h)
+add_dependencies(redc ffi_decl_header)
 
 target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
                                        ${BULLET_INCLUDE_DIRS})
@@ -53,5 +58,3 @@ target_compile_options(redc PUBLIC ${LuaJit_COMPILE_OPTIONS})
 add_dependencies(redc survival)
 add_dependencies(redc assets)
 
-add_data(ffi_decl_header ALL share/${PROJECT_NAME}/src redcrane_decl.h)
-add_dependencies(redc ffi_decl_header)
