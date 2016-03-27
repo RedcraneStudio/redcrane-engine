@@ -37,6 +37,10 @@ function scene.make_scene(eng)
         ffi.C.redc_scene_render(self._scene_ptr)
     end
 
+    function sc:step()
+        ffi.C.redc_scene_step(self._scene_ptr)
+    end
+
     return sc
 end
 

@@ -25,9 +25,6 @@ rc.mesh_pool = require("mesh_pool")
 function rc:running()
     return ffi.C.redc_running(rc.engine)
 end
-function rc:step()
-    ffi.C.redc_step(rc.engine)
-end
 function rc:swap_window()
     ffi.C.redc_window_swap(rc.engine)
 end

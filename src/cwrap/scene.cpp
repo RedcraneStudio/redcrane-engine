@@ -115,9 +115,16 @@ extern "C"
     return ((redc::Engine *) eng)->running;
   }
 
-  void redc_step(void *eng)
+  void redc_scene_step(void *sc)
   {
-    auto engine = (redc::Engine *) eng;
+    auto scene = (redc::Scene *) sc;
+
+    Cam_Object* active_camera;
+    if(scene->active_camera)
+    {
+      active_camera =
+              &boost::get<Cam_Object>(scene->objs[scene->active_camera-1].obj);
+    }
 
     SDL_Event event;
     while(SDL_PollEvent(&event))
@@ -129,11 +136,17 @@ extern "C"
       switch(event.type)
       {
         case SDL_QUIT:
-          engine->running = false;
+          scene->engine->running = false;
           break;
         case SDL_MOUSEMOTION:
-          //cam_controller.apply_delta_yaw(event.motion.xrel / 1000.0f);
-          //cam_controller.apply_delta_pitch(event.motion.yrel / 1000.0f);
+          if(active_camera)
+          {
+            active_camera->control.apply_delta_yaw(active_camera->cam,
+                    event.motion.xrel / 1000.0f);
+
+            active_camera->control.apply_delta_pitch(active_camera->cam,
+                    event.motion.yrel / 1000.0f);
+          }
           break;
         case SDL_KEYDOWN:
           //if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) running = false;

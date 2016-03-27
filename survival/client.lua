@@ -30,7 +30,7 @@ client:init()
 rc:log_i("Done initializing")
 
 while rc:running() do
-    rc:step()
+    client.scene:step()
     client.scene:render()
     rc:swap_window()
 end

@@ -33,7 +33,8 @@ void redc_scene_activate_camera(void* sc, obj_id cam);
 uint16_t redc_scene_attach(void* sc, void* mesh, uint16_t parent);
 
 bool redc_running(void* eng);
-void redc_step(void* eng);
+
+void redc_scene_step(void* sc);
 
 void redc_scene_render(void* sc);
 void redc_window_swap(void* eng);
