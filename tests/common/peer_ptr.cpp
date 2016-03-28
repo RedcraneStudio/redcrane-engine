@@ -5,7 +5,7 @@
 #include "catch/catch.hpp"
 #include "common/peer_ptr.hpp"
 
-TEST_CASE("Peer pointer works", "[Peer_Ptr]")
+TEST_CASE("Peer pointer and locking works", "[Peer_Ptr]")
 {
   auto peer_ptrs = redc::make_peer_ptrs<int>();
 
@@ -17,17 +17,51 @@ TEST_CASE("Peer pointer works", "[Peer_Ptr]")
   CHECK(5 == *peer_ptrs.first);
   CHECK(5 == *peer_ptrs.second);
 
-  // And when one goes out of scope
+  SECTION("No locking")
   {
-    auto second_ptr = std::move(peer_ptrs.second);
+    // And when one goes out of scope
+    {
+      auto second_ptr = std::move(peer_ptrs.second);
 
-    // Still valid...
-    CHECK(peer_ptrs.first.get() == second_ptr.get());
-    CHECK(peer_ptrs.first.get() != nullptr);
+      // Still valid...
+      CHECK(peer_ptrs.first.get() == second_ptr.get());
+      CHECK(peer_ptrs.first.get() != nullptr);
 
-    // Dead
+      CHECK(peer_ptrs.second.get() == nullptr);
+
+      // Dead
+    }
+
+    CHECK(peer_ptrs.first.get() == nullptr);
+    CHECK(peer_ptrs.second.get() == nullptr);
   }
+  SECTION("Locking")
+  {
+    {
+      // Lock the resource
+      auto lock = peer_ptrs.first.lock();
 
-  CHECK(peer_ptrs.first.get() == nullptr);
-  CHECK(peer_ptrs.second.get() == nullptr);
+      // Is the lock reasonable?
+      CHECK(lock.get() == peer_ptrs.first.get());
+      CHECK(lock.get() == peer_ptrs.second.get());
+      {
+        // Now move a peer out of the pair and let it be destructed.
+        auto peer = std::move(peer_ptrs.first);
+        CHECK(peer.get() == peer_ptrs.second.get());
+
+        // The one we moved from should be a nullptr;
+        CHECK(peer_ptrs.first.get() == nullptr);
+      }
+
+      // The data should still be valid here, because we still have an active
+      // lock.
+      CHECK(lock.get() != nullptr);
+      CHECK(lock.get() == peer_ptrs.second.get());
+    }
+    // But not valid here
+    CHECK(peer_ptrs.second.get() == nullptr);
+
+    // Unfortunately we can't verify that the data container has been properly
+    // deallocated, that's a test for a valgrind.
+  }
 }
