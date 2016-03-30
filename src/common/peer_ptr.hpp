@@ -106,6 +106,7 @@ namespace redc
   template <class T>
   struct Peer_Lock
   {
+    Peer_Lock() : data_(nullptr) {}
     ~Peer_Lock();
 
     Peer_Lock(Peer_Lock&& ptr);
@@ -122,7 +123,7 @@ namespace redc
     void reset();
 
   private:
-    Peer_Lock(detail::Peer_Ptr_Data<T>* data = nullptr);
+    Peer_Lock(detail::Peer_Ptr_Data<T>* data);
 
     detail::Peer_Ptr_Data<T>* data_;
 
@@ -214,6 +215,14 @@ namespace redc
   template <class T>
   struct Peer_Ptr
   {
+    Peer_Ptr() : data_(nullptr) {}
+
+    template <class U>
+    Peer_Ptr(std::unique_ptr<U> ptr);
+
+    template <class U>
+    Peer_Ptr& operator=(std::unique_ptr<U> ptr);
+
     ~Peer_Ptr();
 
     Peer_Ptr(Peer_Ptr&& ptr);
@@ -227,18 +236,44 @@ namespace redc
 
     T* get() const;
 
+    Peer_Ptr<T> peer() const;
     Peer_Lock<T> lock() const;
 
     void reset();
 
   private:
-    Peer_Ptr(detail::Peer_Ptr_Data<T>* data = nullptr);
+    Peer_Ptr(detail::Peer_Ptr_Data<T>* data);
 
     detail::Peer_Ptr_Data<T>* data_;
-
-    template <class U, class... Args>
-    friend std::pair<Peer_Ptr<U>, Peer_Ptr<U> > make_peer_ptrs(Args&&... args);
   };
+
+  // Unique pointer construction, the engine will probably make new peers later
+  // with peer().
+  template <class T>
+  template <class U>
+  Peer_Ptr<T>::Peer_Ptr(std::unique_ptr<U> ptr) : data_(nullptr)
+  {
+    *this = std::move(ptr);
+  }
+  template <class T>
+  template <class U>
+  Peer_Ptr<T>& Peer_Ptr<T>::operator=(std::unique_ptr<U> ptr)
+  {
+    reset();
+
+    // Don't worry about it if this ia nullptr.
+    if(!ptr) return *this;
+
+    data_ = new detail::Peer_Ptr_Data<T>;
+    data_->ptr = ptr.release();
+    data_->lock_count = 0;
+    data_->keep_alive = true;
+
+    // Us!
+    data_->peer_count = 1;
+
+    return *this;
+  }
 
   template <class T>
   Peer_Ptr<T>::~Peer_Ptr()
@@ -285,6 +320,13 @@ namespace redc
   {
     return Peer_Lock<T>{data_};
   }
+  template <class T>
+  Peer_Ptr<T> Peer_Ptr<T>::peer() const
+  {
+    // Be careful! We are making yet another in for the data to be delete'd
+    // from under us!
+    return Peer_Ptr{data_};
+  }
 
   template <class T>
   void Peer_Ptr<T>::reset()
@@ -308,26 +350,53 @@ namespace redc
   template <class T>
   Peer_Ptr<T>::Peer_Ptr(detail::Peer_Ptr_Data<T>* data) : data_(data)
   {
-    ++data_->peer_count;
+    if(data_) ++data_->peer_count;
+  }
+
+  template <class T, class... Args>
+  Peer_Ptr<T> make_peer_ptr(Args&&... args)
+  {
+    auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
+    return Peer_Ptr<T>{std::move(ptr)};
   }
 
   // How client code must construct a Peer_Ptr.
-
-  template <class T, class... Args>
-  std::pair<Peer_Ptr<T>, Peer_Ptr<T> > make_peer_ptrs(Args&&... args)
+  template <class T, unsigned int N, class... Args>
+  std::enable_if_t<N == (sizeof...(Args) + 1), std::array<Peer_Ptr<T>, N> >
+  make_peer_array_impl(Peer_Ptr<T>&& ptr, Args&&... args)
   {
-    // Initialize the actual data / payload.
-    auto payload = new T(std::forward<Args>(args)...);
-
-    // Allocate a container for our payload.
-    auto data = new detail::Peer_Ptr_Data<T>();
-    data->ptr = payload;
-    data->lock_count = 0;
-    data->peer_count = 0;
-    data->keep_alive = true;
-
-    // The peer_ptr constructor will increment the peer_count.
-    return std::make_pair(Peer_Ptr<T>{data}, Peer_Ptr<T>{data});
+    // We have all peer pointers we need, move them into a new array.
+    return std::array<Peer_Ptr<T>, N>{std::move(ptr), std::forward<Args>(args)...};
   }
 
+  template <class T, unsigned int N, class... Args>
+  std::enable_if_t<N != (sizeof...(Args) + 1), std::array<Peer_Ptr<T>, N> >
+  make_peer_array_impl(Peer_Ptr<T>&& ptr, Args&&... args)
+  {
+    // We can't use fill because we do want many (independent) instances of a
+    // peer and we can't do a copy.
+
+    // Add a peer, we are not there yet!
+    return make_peer_array_impl<T, N>(std::move(ptr),
+                                      std::forward<Args>(args)...,
+                                      ptr.peer());
+  }
+
+
+  template <class T, unsigned int N, class... Args>
+  std::array<Peer_Ptr<T>, N> make_peer_array(Args&&... args)
+  {
+    // Our args are for the payload
+
+    // Initialize the actual data / payload.
+    auto peer = make_peer_ptr<T>(std::forward<Args>(args)...);
+    return make_peer_array_impl<T, N>(std::move(peer));
+  }
+
+  template <class T, class... Args>
+  std::pair<Peer_Ptr<T>, Peer_Ptr<T> > make_peer_pair(Args&&... args)
+  {
+    auto arr = make_peer_array<T, 2>(std::forward<Args>(args)...);
+    return std::make_pair(std::move(arr[0]), std::move(arr[1]));
+  }
 }

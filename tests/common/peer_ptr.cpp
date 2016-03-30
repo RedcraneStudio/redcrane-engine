@@ -7,7 +7,7 @@
 
 TEST_CASE("Peer pointer and locking works", "[Peer_Ptr]")
 {
-  auto peer_ptrs = redc::make_peer_ptrs<int>();
+  auto peer_ptrs = redc::make_peer_pair<int>();
 
   // Make sure they own the same pointer
   CHECK(peer_ptrs.first.get() == peer_ptrs.second.get());
@@ -63,5 +63,56 @@ TEST_CASE("Peer pointer and locking works", "[Peer_Ptr]")
 
     // Unfortunately we can't verify that the data container has been properly
     // deallocated, that's a test for a valgrind.
+  }
+}
+TEST_CASE("Making peers works", "[Peer_Ptr]")
+{
+  auto peer = redc::make_peer_ptr<int>(8);
+
+  CHECK(*peer == 8);
+
+  SECTION("Making a new valid peer")
+  {
+    {
+      auto new_peer = peer.peer();
+      CHECK(new_peer.get() == peer.get());
+      CHECK(*new_peer == *peer);
+    }
+    // A peer was deallocated, this means the peer data should no longer be
+    // valid
+    CHECK(peer.get() == nullptr);
+  }
+  SECTION("Making a valid peer and locks")
+  {
+    {
+      auto lock = peer.lock();
+      {
+        auto new_peer = peer.peer();
+      }
+      // A peer has deallocated!
+      // But we still have a lock!
+      CHECK(lock.get() == peer.get());
+      CHECK(*lock == *peer);
+    }
+    // Byebye lock
+    CHECK(peer.get() == nullptr);
+  }
+  SECTION("locking via new peers")
+  {
+    redc::Peer_Lock<int> lock = peer.lock();
+    {
+      // Move the peer into here.
+      auto new_peer = std::move(peer);
+      auto other_peer = new_peer.peer();
+
+      CHECK(other_peer.get() == new_peer.get());
+    }
+
+    // No peers alive (we moved out of top-level 'peer') - make sure the data
+    // is still alive (because of the lock).
+
+    CHECK(lock.get() != nullptr);
+    CHECK(*lock == 8);
+
   }
 }
