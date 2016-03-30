@@ -239,6 +239,8 @@ namespace redc
     Peer_Ptr<T> peer() const;
     Peer_Lock<T> lock() const;
 
+    std::size_t peers() const;
+
     void reset();
 
   private:
@@ -326,6 +328,13 @@ namespace redc
     // Be careful! We are making yet another in for the data to be delete'd
     // from under us!
     return Peer_Ptr{data_};
+  }
+
+  template <class T>
+  std::size_t Peer_Ptr<T>::peers() const
+  {
+    if(!data_) return 0;
+    return data_->peer_count.load();
   }
 
   template <class T>
