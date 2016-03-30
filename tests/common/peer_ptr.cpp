@@ -65,6 +65,20 @@ TEST_CASE("Peer pointer and locking works", "[Peer_Ptr]")
     // deallocated, that's a test for a valgrind.
   }
 }
+TEST_CASE("Peer pointers properly constructed from std::unique_ptrs", "[Peer_Ptr]")
+{
+  auto unique = std::make_unique<char>('h');
+  auto ptr = unique.get();
+
+  auto peer = redc::Peer_Ptr<char>(std::move(unique));
+  CHECK(unique.get() == nullptr);
+
+  // We shouldn't be reallocating the object
+  CHECK(ptr == peer.get());
+
+  // The old pointer from the unique pointer should work!
+  CHECK(*ptr == *peer);
+}
 TEST_CASE("Making peers works", "[Peer_Ptr]")
 {
   auto peer = redc::make_peer_ptr<int>(8);
