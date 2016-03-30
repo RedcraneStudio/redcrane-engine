@@ -36,5 +36,7 @@ bool redc_running(void* eng);
 
 void redc_scene_step(void* sc);
 
+const char* redc_get_asset_path(void* eng);
+
 void redc_scene_render(void* sc);
 void redc_window_swap(void* eng);

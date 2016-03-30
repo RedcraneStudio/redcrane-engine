@@ -89,6 +89,12 @@ extern "C"
     auto rce = (redc::Engine*) eng;
     delete rce;
   }
+  const char* redc_get_asset_path(void*)
+  {
+    // Will this ever change mid-execution?
+    static auto str = redc::assets::share_path().native();
+    return str.data();
+  }
   void redc_window_swap(void* eng)
   {
     auto engine = (redc::Engine*) eng;

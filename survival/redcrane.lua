@@ -29,6 +29,10 @@ function rc:swap_window()
     ffi.C.redc_window_swap(rc.engine)
 end
 
+function rc:asset_path()
+    -- This memory doesn't have to be freed
+    return ffi.C.redc_get_asset_path(rc.engine)
+end
 
 -- Logging functions
 function stringify(str, ...)
