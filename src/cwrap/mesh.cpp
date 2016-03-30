@@ -11,7 +11,6 @@
 #include "redcrane.hpp"
 
 #include "../use/mesh.h"
-#include "../use/mesh_cache.h"
 
 using namespace redc;
 
@@ -23,18 +22,29 @@ extern "C"
     // TODO: Load many static objects into the same mesh.
     auto rce = (redc::Engine *) engine;
 
-    auto res = gfx::load_mesh(*rce->driver,
-                              *rce->mesh_cache,
-                              {std::string{str}, false});
+    auto mesh = gfx::load_mesh(*rce->driver,
+                               *rce->mesh_cache,
+                               {std::string{str}, false});
 
-    // Allocate a mesh_chunk to store it
-    auto chunk = new gfx::Mesh_Chunk;
-    *chunk = copy_mesh_chunk_move_mesh(res.chunk);
-    return chunk;
+    // Make a peer pointer.
+    auto chunk = make_peer_ptr<gfx::Mesh_Chunk>();
+
+    // Move our loaded mesh into it
+    *chunk = copy_mesh_chunk_move_mesh(mesh.chunk);
+
+    // Lua is one peer
+    auto ret = new Peer_Ptr<gfx::Mesh_Chunk>(chunk.peer());
+
+    // The engine is the other.
+    rce->meshs.push_back(std::move(chunk));
+
+    return ret;
   }
   void redc_unload_mesh(void *mesh)
   {
-    auto chunk = (gfx::Mesh_Chunk *) mesh;
-    delete chunk;
+    // This will deallocate the mesh in the engine if it hasn't been deallocated
+    // already.
+    auto peer = (Peer_Ptr<gfx::Mesh_Chunk>*) mesh;
+    delete peer;
   }
 }

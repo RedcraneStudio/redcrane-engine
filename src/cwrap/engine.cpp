@@ -64,7 +64,7 @@ extern "C"
                                               share_path / "obj_cache");
 
     // Load default shader, etc.
-    std::shared_ptr<gfx::Shader> df_shade = eng->driver->make_shader_repr();
+    auto df_shade = eng->driver->make_shader_repr();
 
     // TODO: Load shaders like we load mesh. Right now is bad
     auto basic_shade_path = share_path / "shader" / "basic";

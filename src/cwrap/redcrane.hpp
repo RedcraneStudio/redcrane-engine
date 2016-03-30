@@ -12,8 +12,10 @@
 #include "../minilua.h"
 
 #include "../common/id_map.hpp"
+#include "../common/peer_ptr.hpp"
 
 #include "../use/mesh_cache.h"
+#include "../use/texture.h"
 
 #include "../gfx/idriver.h"
 #include "../gfx/camera.h"
@@ -37,10 +39,16 @@ namespace redc
   {
     redc::SDL_Init_Lock sdl_raii;
 
+    // Make sure we put this at the top so it is uninitialized relatively after
+    // we have to deallocate all the meshes, textures, etc.
+    // in the game.
     std::unique_ptr<gfx::IDriver> driver;
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
 
-    std::vector<std::shared_ptr<gfx::Shader> > shaders;
+    // Resources
+    std::vector<Peer_Ptr<Texture> > textures;
+    std::vector<Peer_Ptr<gfx::Mesh_Chunk> > meshs;
+    std::vector<Peer_Ptr<gfx::Shader> > shaders;
 
     bool running = true;
 
