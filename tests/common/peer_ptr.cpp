@@ -79,6 +79,38 @@ TEST_CASE("Peer pointers properly constructed from std::unique_ptrs", "[Peer_Ptr
   // The old pointer from the unique pointer should work!
   CHECK(*ptr == *peer);
 }
+TEST_CASE("Constructing an array of peers works", "[Peer_Ptr]")
+{
+  // Make an array of peers that all manage one integer constructed as a copy
+  // of two.
+  auto arr = redc::make_peer_array<int, 4>(2);
+
+  CHECK(arr[0].peers() == 4);
+  CHECK(arr[1].peers() == 4);
+  CHECK(arr[2].peers() == 4);
+  CHECK(arr[3].peers() == 4);
+
+  CHECK(arr[0].get() == arr[1].get());
+  CHECK(arr[0].get() == arr[2].get());
+  CHECK(arr[0].get() == arr[3].get());
+
+  CHECK(*arr[0] == 2);
+  CHECK(*arr[1] == 2);
+  CHECK(*arr[2] == 2);
+  CHECK(*arr[3] == 2);
+
+  CHECK(arr.size() == 4);
+
+  // Move one of the peers outta there.
+  {
+    auto peer = std::move(arr[3]);
+  }
+
+  CHECK(arr[0].get() == nullptr);
+  CHECK(arr[1].get() == nullptr);
+  CHECK(arr[2].get() == nullptr);
+  CHECK(arr[3].get() == nullptr);
+}
 TEST_CASE("Making peers works", "[Peer_Ptr]")
 {
   auto peer = redc::make_peer_ptr<int>(8);
