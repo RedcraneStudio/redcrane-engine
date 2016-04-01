@@ -98,12 +98,13 @@ extern "C"
   uint16_t redc_scene_attach(void *sc, void *ms, uint16_t parent)
   {
     auto scene = (redc::Scene *) sc;
-    auto mesh = (redc::gfx::Mesh_Chunk *) ms;
+    auto mesh = (redc::Peer_Ptr<redc::gfx::Mesh_Chunk> *) ms;
 
     auto id = scene->index_gen.get();
     CHECK_ID(id);
-    scene->objs[id - 1].obj = Mesh_Object{gfx::copy_mesh_chunk_share_mesh(*mesh),
-                                          glm::mat4(1.0f)};
+    scene->objs[id - 1].obj =
+            Mesh_Object{gfx::copy_mesh_chunk_share_mesh(*mesh->get()),
+                        glm::mat4(1.0f)};
     if(parent)
     {
       scene->objs[id - 1].parent = &scene->objs[parent];
