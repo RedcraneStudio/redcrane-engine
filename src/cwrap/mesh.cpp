@@ -26,19 +26,16 @@ extern "C"
                                *rce->mesh_cache,
                                {std::string{str}, false});
 
-    // Make a peer pointer.
-    auto chunk = make_peer_ptr<gfx::Mesh_Chunk>();
+    // Lua is one peer
+    auto peer = new Peer_Ptr<gfx::Mesh_Chunk>(new gfx::Mesh_Chunk);
 
     // Move our loaded mesh into it
-    *chunk = copy_mesh_chunk_move_mesh(mesh.chunk);
-
-    // Lua is one peer
-    auto ret = new Peer_Ptr<gfx::Mesh_Chunk>(chunk.peer());
+    *peer->get() = copy_mesh_chunk_move_mesh(mesh.chunk);
 
     // The engine is the other.
-    rce->meshs.push_back(std::move(chunk));
+    rce->meshs.push_back(peer->peer());
 
-    return ret;
+    return peer;
   }
   void redc_unload_mesh(void *mesh)
   {
