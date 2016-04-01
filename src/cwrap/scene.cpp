@@ -183,7 +183,7 @@ extern "C"
     // i is the loop counter, id is our current id.
     // Loop however many times as we have ids.
     int cur_id = 0;
-    for(int i = 0; i < scene->index_gen.reserved(); ++i);
+    for(int i = 0; i < scene->index_gen.reserved(); ++i)
     {
       // Check to make sure the current id hasn't been removed.
       // Remember to add one
@@ -193,14 +193,18 @@ extern "C"
       // get far enough to exceed count but whatever this makes more semantic
       // sense. Then again if we exceed count_ we could enter a loop where we
       // exit only at overflow.
-      while(!scene->index_gen.is_valid((cur_id + 1))) { ++cur_id; }
+
+      // Put the increment in the expression because we always want to be
+      // incrementing the counter, otherwise we risk rendering the same object
+      // many times
+      while(!scene->index_gen.is_valid((++cur_id)));
 
       // If the above scenario becomes an issue, replace !is_valid with
       // is_removed and check if it's valid here. If it hasn't been removed
       // but isn't valid we went to far, so exit early. I'm not doing that here
       // because I don't think it will be an issue.
 
-      auto &obj = scene->objs[cur_id];
+      auto &obj = scene->objs[cur_id-1];
       if(obj.obj.which() == Object::Cam)
       {
         // Debugging enabled? Render cameras in some way?
