@@ -218,6 +218,9 @@ namespace redc
     Peer_Ptr() : data_(nullptr) {}
 
     template <class U>
+    explicit Peer_Ptr(U* pointer);
+
+    template <class U>
     Peer_Ptr(std::unique_ptr<U> ptr);
 
     template <class U>
@@ -249,6 +252,15 @@ namespace redc
     detail::Peer_Ptr_Data<T>* data_;
   };
 
+  template <class T>
+  template <class U>
+  Peer_Ptr<T>::Peer_Ptr(U* data) : data_(new detail::Peer_Ptr_Data<T>())
+  {
+    data_->ptr = data;
+    data_->lock_count = 0;
+    data_->keep_alive = true;
+    data_->peer_count = 1;
+  }
   // Unique pointer construction, the engine will probably make new peers later
   // with peer().
   template <class T>
