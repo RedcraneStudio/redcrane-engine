@@ -87,7 +87,7 @@ extern "C"
 
     if(scene->objs[cam].obj.which() == Object::Cam)
     {
-      scene->active_camera = cam;
+      scene->active_camera = cam+1;
     }
     else
     {
