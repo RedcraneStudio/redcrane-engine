@@ -58,16 +58,16 @@ extern "C"
     auto eng = new Engine{std::move(sdl_init_raii_lock), nullptr, nullptr};
     eng->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
-    auto share_path = assets::share_path();
+    eng->share_path = assets::share_path();
     eng->mesh_cache =
-            std::make_unique<gfx::Mesh_Cache>(share_path / "obj",
-                                              share_path / "obj_cache");
+            std::make_unique<gfx::Mesh_Cache>(eng->share_path / "obj",
+                                              eng->share_path / "obj_cache");
 
     // Load default shader, etc.
     auto df_shade = eng->driver->make_shader_repr();
 
     // TODO: Load shaders like we load mesh. Right now is bad
-    auto basic_shade_path = share_path / "shader" / "basic";
+    auto basic_shade_path = eng->share_path / "shader" / "basic";
     df_shade->load_vertex_part((basic_shade_path / "vs.glsl").native());
     df_shade->load_fragment_part((basic_shade_path / "fs.glsl").native());
 

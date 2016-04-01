@@ -25,6 +25,8 @@
 
 #include "../sdl_helper.h"
 
+#include <boost/filesystem.hpp>
+
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H
 extern "C"
@@ -49,6 +51,8 @@ namespace redc
     std::vector<Peer_Ptr<Texture> > textures;
     std::vector<Peer_Ptr<gfx::Mesh_Chunk> > meshs;
     std::vector<Peer_Ptr<gfx::Shader> > shaders;
+
+    boost::filesystem::path share_path;
 
     bool running = true;
 
