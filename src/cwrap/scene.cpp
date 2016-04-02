@@ -162,6 +162,16 @@ extern "C"
   {
     auto scene = (redc::Scene *) sc;
 
+#ifdef REDC_LOG_FRAMES
+    ++scene->frame_count;
+    if(scene->frame_timer.has_been(std::chrono::seconds(1)))
+    {
+      log_d("fps: %", scene->frame_count);
+      scene->frame_count = 0;
+      scene->frame_timer.reset();
+    }
+#endif
+
     // Make sure we have an active camera
     if(!scene->active_camera)
     {

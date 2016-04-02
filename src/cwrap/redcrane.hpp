@@ -11,6 +11,7 @@
 
 #include "../minilua.h"
 
+#include "../common/timer.hpp"
 #include "../common/id_map.hpp"
 #include "../common/peer_ptr.hpp"
 
@@ -104,5 +105,10 @@ namespace redc
 
     ID_Gen<obj_id> index_gen;
     std::array<Object, std::numeric_limits<obj_id>::max()> objs;
+
+#ifdef REDC_LOG_FRAMES
+    int16_t frame_count = 0;
+    Timer<> frame_timer;
+#endif
   };
 }
