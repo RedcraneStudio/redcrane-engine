@@ -90,9 +90,9 @@ extern "C"
     // We have a camera
     auto scene = lock_resource<redc::Scene>(sc);
 
-    if(scene->objs[cam].obj.which() == Object::Cam)
+    if(scene->objs[cam-1].obj.which() == Object::Cam)
     {
-      scene->active_camera = cam+1;
+      scene->active_camera = cam;
     }
     else
     {
@@ -112,8 +112,10 @@ extern "C"
 
     if(parent)
     {
-      scene->objs[id - 1].parent = &scene->objs[parent];
+      scene->objs[id - 1].parent = &scene->objs[parent-1];
     }
+
+    return id;
   }
 
   bool redc_running(void *eng)
