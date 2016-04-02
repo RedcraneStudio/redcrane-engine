@@ -79,6 +79,7 @@ namespace redc
                         SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
                         SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 
     ret.gl_context = SDL_GL_CreateContext(ret.window);
     SDL_GL_MakeCurrent(ret.window, ret.gl_context);
