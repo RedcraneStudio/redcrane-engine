@@ -23,6 +23,9 @@ void redc_unload_mesh(void* mesh);
 void* redc_make_scene(void* engine);
 void redc_unmake_scene(void* scene);
 
+void* redc_make_shader(void* engine, const char*);
+void redc_unmake_shader(void *shader);
+
 typedef uint16_t obj_id;
 
 obj_id redc_scene_add_camera(void* sc, const char* tp);

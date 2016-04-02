@@ -21,6 +21,7 @@ rc.engine = ffi.gc(ffi.C.redc_init_engine(config), ffi.C.redc_uninit_engine)
 
 rc.scene = require("scene")
 rc.mesh_pool = require("mesh_pool")
+rc.shader = require("shader")
 
 function rc:running()
     return ffi.C.redc_running(rc.engine)

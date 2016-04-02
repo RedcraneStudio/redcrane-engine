@@ -15,6 +15,11 @@ function client:init()
     -- Use an fps camera, it's the only one so it will be made active.
     self.scene:add_camera("fps")
 
+    self.shaders = {}
+    self.shaders.basic = rc.shader.load_shader(rc.engine, "basic");
+    self.shaders.envmap = rc.shader.load_shader(rc.engine, "envmap");
+    self.shaders.hud = rc.shader.load_shader(rc.engine, "hud");
+
     -- Load in the character's hands
     self.mesh_pool = rc.mesh_pool.make_mesh_pool(rc.engine)
     local hand_mesh = self.mesh_pool:load_mesh("character/hands")

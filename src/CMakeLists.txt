@@ -41,7 +41,7 @@ find_package(Bullet REQUIRED)
 
 add_executable(redc main.cpp minilua.cpp sdl_helper.cpp player.cpp
                     cwrap/engine.cpp cwrap/mesh.cpp cwrap/scene.cpp
-                    cwrap/redcrane.cpp)
+                    cwrap/shader.cpp cwrap/redcrane.cpp)
 
 add_data(ffi_decl_header ALL share/${PROJECT_NAME}/src redcrane_decl.h)
 add_dependencies(redc ffi_decl_header)
