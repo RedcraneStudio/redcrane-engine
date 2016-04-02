@@ -40,3 +40,4 @@ const char* redc_get_asset_path(void* eng);
 
 void redc_scene_render(void* sc);
 void redc_window_swap(void* eng);
+void redc_gc(void* eng);

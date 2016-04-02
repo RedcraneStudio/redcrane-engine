@@ -100,4 +100,28 @@ extern "C"
     auto engine = (redc::Engine*) eng;
     SDL_GL_SwapWindow(engine->sdl_raii.window);
   }
+
+  void redc_gc(void* eng)
+  {
+    auto rce = (redc::Engine*) eng;
+
+    auto is_null = [](auto const& peer)
+    {
+      return peer.get() == nullptr;
+    };
+
+    // Go through the vector of peer pointers and removed deallocated ones.
+    using std::begin; using std::end;
+
+    auto mesh_end = std::remove_if(begin(rce->meshs), end(rce->meshs), is_null);
+    rce->meshs.erase(mesh_end, end(rce->meshs));
+
+    auto textures_end = std::remove_if(begin(rce->textures),
+                                       end(rce->textures), is_null);
+    rce->textures.erase(textures_end, end(rce->textures));
+
+    auto shaders_end = std::remove_if(begin(rce->shaders),
+                                       end(rce->shaders), is_null);
+    rce->shaders.erase(shaders_end, end(rce->shaders));
+  }
 }
