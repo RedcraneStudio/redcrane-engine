@@ -232,6 +232,7 @@ extern "C"
 
         // Find out the model
         auto model = object_model(obj);
+        scene->engine->driver->active_shader()->set_model(model);
 
         gfx::render_chunk(*mesh_obj.chunk);
       }
