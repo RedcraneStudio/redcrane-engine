@@ -5,8 +5,8 @@
 #include "render.h"
 #include "../common/log.h"
 #include "../common/plane.h"
-#include "../common/crash.h"
 #include "../common/gen_noise.h"
+#include "../common/debugging.h"
 
 #include "../assets/load_dir.h"
 

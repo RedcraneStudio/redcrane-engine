@@ -10,6 +10,12 @@
 
   namespace redc
   {
+    [[noreturn]] inline void crash()
+    {
+      redc::flush_log_full();
+      std::abort();
+    }
+
     template <class... Msg_Args>
     void assert_fn(bool val, char const* const condition,
                    char const* const filename, int long line,
