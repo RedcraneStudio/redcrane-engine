@@ -59,7 +59,7 @@ extern "C"
     auto id = scene->index_gen.get();
     CHECK_ID(id);
 
-    auto &obj = scene->objs[id - 1];
+    auto &obj = at_id(scene->objs, id);
     obj.obj = Cam_Object{cam_func(*scene->engine->driver)};
 
     // We can be sure at this point the id is non-zero (because of CHECK_ID).
@@ -90,7 +90,7 @@ extern "C"
     // We have a camera
     auto scene = lock_resource<redc::Scene>(sc);
 
-    if(scene->objs[cam-1].obj.which() == Object::Cam)
+    if(at_id(scene->objs, cam).obj.which() == Object::Cam)
     {
       scene->active_camera = cam;
     }
@@ -108,11 +108,13 @@ extern "C"
     CHECK_ID(id);
 
     auto mesh = lock_resource<gfx::Mesh_Chunk>(ms);
-    scene->objs[id - 1].obj = Mesh_Object{std::move(mesh), glm::mat4(1.0f)};
+
+    auto& obj = at_id(scene->objs, id);
+    obj.obj = Mesh_Object{std::move(mesh), glm::mat4(1.0f)};
 
     if(parent)
     {
-      scene->objs[id - 1].parent = &scene->objs[parent-1];
+      obj.parent = &at_id(scene->objs, parent);
     }
 
     return id;
@@ -130,8 +132,8 @@ extern "C"
     Cam_Object* active_camera;
     if(scene->active_camera)
     {
-      active_camera =
-              &boost::get<Cam_Object>(scene->objs[scene->active_camera-1].obj);
+      active_camera = &boost::get<Cam_Object>(at_id(scene->objs,
+                                                    scene->active_camera).obj);
     }
 
     SDL_Event event;
@@ -188,7 +190,9 @@ extern "C"
 
     // Load the active camera
     auto active_camera =
-            boost::get<Cam_Object>(scene->objs[scene->active_camera - 1].obj);
+            boost::get<Cam_Object>(at_id(scene->objs,
+                                         scene->active_camera).obj);
+
     gfx::use_camera(*scene->engine->driver, active_camera.cam);
 
     // Clear the screen
@@ -221,7 +225,7 @@ extern "C"
       // but isn't valid we went to far, so exit early. I'm not doing that here
       // because I don't think it will be an issue.
 
-      auto &obj = scene->objs[cur_id-1];
+      auto &obj = at_id(scene->objs, cur_id);
       if(obj.obj.which() == Object::Cam)
       {
         // Debugging enabled? Render cameras in some way?

@@ -104,6 +104,12 @@ namespace redc
 
   glm::mat4 object_model(Object const& obj);
 
+  template <class Arr>
+  inline auto at_id(Arr& arr, obj_id id) -> decltype(auto)
+  {
+    return arr[id-1];
+  };
+
   struct Scene
   {
     // This is an unordered map that also keeps an active camera available to
