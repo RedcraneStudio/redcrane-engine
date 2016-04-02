@@ -5,6 +5,10 @@
 find_library(LuaJIT_LIBRARY luajit-5.1)
 find_path(LuaJIT_INCLUDE_DIR luajit.h PATH_SUFFIXES luajit-2.0)
 
+# Is it possible we find a luajit binary that produces bytecode incompatible
+# from the library found above?
+find_program(LuaJIT_BIN luajit)
+
 if(APPLE)
   set(LuaJIT_COMPILE_OPTIONS "-pagezero_size 10000 -image_base 100000000")
 else()
