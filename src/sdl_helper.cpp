@@ -80,11 +80,17 @@ namespace redc
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
                         SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
-    if(vsync) SDL_GL_SetSwapInterval(1);
-    else SDL_GL_SetSwapInterval(0);
-
     ret.gl_context = SDL_GL_CreateContext(ret.window);
     SDL_GL_MakeCurrent(ret.window, ret.gl_context);
+
+    // Set vsync setting
+    int sync_interval = 0;
+    if(vsync) sync_interval = 1;
+    if(SDL_GL_SetSwapInterval(sync_interval) == -1)
+    {
+      // Shit, failed to set that
+      log_w("Failed to set swap interval: %", SDL_GetError());
+    }
 
     gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress);
 
