@@ -19,15 +19,19 @@ using namespace redc;
 extern "C"
 {
   // See scene.lua
-  void *redc_make_scene(void *engine)
+  void *redc_make_scene(void *eng)
   {
-    auto sc = new redc::Scene;
-    sc->engine = (redc::Engine *) engine;
+    auto engine= (Engine*) eng;
+
+    auto sc = new Peer_Ptr<Scene>(new Scene);
+    sc->get()->engine = engine;
+
+    engine->scenes.push_back(sc->peer());
     return sc;
   }
   void redc_unmake_scene(void *scene)
   {
-    auto sc = (redc::Scene *) scene;
+    auto sc = (Peer_Ptr<Scene> *) scene;
     delete sc;
   }
 
@@ -50,10 +54,11 @@ extern "C"
 
     // The first camera will be set as active automatically by Active_Map from
     // id_map.hpp.
-    auto scene = (redc::Scene *) sc;
+    auto scene = lock_resource<redc::Scene>(sc);
 
     auto id = scene->index_gen.get();
     CHECK_ID(id);
+
     auto &obj = scene->objs[id - 1];
     obj.obj = Cam_Object{cam_func(*scene->engine->driver)};
 
@@ -68,7 +73,7 @@ extern "C"
 
   uint16_t redc_scene_get_active_camera(void *sc)
   {
-    auto scene = (redc::Scene *) sc;
+    auto scene = lock_resource<redc::Scene>(sc);
 
     // This will be zero when there isn't an active camera.
     return scene->active_camera;
@@ -83,7 +88,7 @@ extern "C"
     }
 
     // We have a camera
-    auto scene = (redc::Scene *) sc;
+    auto scene = lock_resource<redc::Scene>(sc);
 
     if(scene->objs[cam].obj.which() == Object::Cam)
     {
@@ -97,14 +102,14 @@ extern "C"
 
   uint16_t redc_scene_attach(void *sc, void *ms, uint16_t parent)
   {
-    auto scene = (redc::Scene *) sc;
-    auto mesh = (redc::Peer_Ptr<redc::gfx::Mesh_Chunk> *) ms;
+    auto scene = lock_resource<redc::Scene>(sc);
 
     auto id = scene->index_gen.get();
     CHECK_ID(id);
-    scene->objs[id - 1].obj =
-            Mesh_Object{gfx::copy_mesh_chunk_share_mesh(*mesh->get()),
-                        glm::mat4(1.0f)};
+
+    auto mesh = lock_resource<gfx::Mesh_Chunk>(ms);
+    scene->objs[id - 1].obj = Mesh_Object{std::move(mesh), glm::mat4(1.0f)};
+
     if(parent)
     {
       scene->objs[id - 1].parent = &scene->objs[parent];
@@ -118,7 +123,7 @@ extern "C"
 
   void redc_scene_step(void *sc)
   {
-    auto scene = (redc::Scene *) sc;
+    auto scene = lock_resource<redc::Scene>(sc);
 
     Cam_Object* active_camera;
     if(scene->active_camera)
@@ -160,7 +165,7 @@ extern "C"
 
   void redc_scene_render(void *sc)
   {
-    auto scene = (redc::Scene *) sc;
+    auto scene = lock_resource<redc::Scene>(sc);
 
 #ifdef REDC_LOG_FRAMES
     ++scene->frame_count;
@@ -226,7 +231,7 @@ extern "C"
         // Find out the model
         auto model = object_model(obj);
 
-        gfx::render_chunk(mesh_obj.chunk);
+        gfx::render_chunk(*mesh_obj.chunk);
       }
     }
   }

@@ -38,6 +38,15 @@ extern "C"
 
 namespace redc
 {
+  template <class T>
+  inline Peer_Lock<T> lock_resource(void* ptr)
+  {
+    auto peer = (Peer_Ptr<T>*) ptr;
+    return peer->lock();
+  }
+
+  struct Scene;
+
   struct Engine
   {
     redc::SDL_Init_Lock sdl_raii;
@@ -47,6 +56,8 @@ namespace redc
     // in the game.
     std::unique_ptr<gfx::IDriver> driver;
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
+
+    std::vector<Peer_Ptr<Scene> > scenes;
 
     // Resources
     std::vector<Peer_Ptr<Texture> > textures;
@@ -64,7 +75,7 @@ namespace redc
 
   struct Mesh_Object
   {
-    gfx::Mesh_Chunk chunk;
+    Peer_Lock<gfx::Mesh_Chunk> chunk;
     glm::mat4 model;
   };
 
