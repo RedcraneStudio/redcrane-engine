@@ -6,10 +6,10 @@ add_library(luaintlib STATIC common.cpp gen.cpp)
 
 target_link_libraries(luaintlib PUBLIC genlib)
 
-target_link_libraries(luaintlib PUBLIC ${LuaJit_LIBRARY})
-target_include_directories(luaintlib PUBLIC ${LuaJit_INCLUDE_DIR})
+target_link_libraries(luaintlib PUBLIC ${LuaJIT_LIBRARY})
+target_include_directories(luaintlib PUBLIC ${LuaJIT_INCLUDE_DIR})
 
-target_compile_options(luaintlib INTERFACE ${LuaJit_COMPILE_OPTIONS})
+target_compile_options(luaintlib INTERFACE ${LuaJIT_COMPILE_OPTIONS})
 
 target_link_libraries(luaintlib PUBLIC ${LIBUV_LIBRARIES})
 target_include_directories(luaintlib PUBLIC ${LIBUV_INCLUDE_DIR})

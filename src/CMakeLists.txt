@@ -24,7 +24,7 @@ find_package(SDL2 REQUIRED)
 add_subdirectory(gfx)
 add_subdirectory(input)
 
-find_package(LuaJit REQUIRED)
+find_package(LuaJIT REQUIRED)
 find_package(Freetype REQUIRED)
 
 add_subdirectory(fps)
@@ -57,10 +57,9 @@ target_link_libraries(redc PUBLIC commonlib netlib gfxlib uselib fpslib
                                   ${SDL2_LIBRARIES}
                                   ${BULLET_LIBRARIES})
 
-target_link_libraries(redc PUBLIC ${LuaJit_LIBRARY})
-target_include_directories(redc PUBLIC ${LuaJit_INCLUDE_DIR})
-target_compile_options(redc PUBLIC ${LuaJit_COMPILE_OPTIONS})
+target_link_libraries(redc PUBLIC ${LuaJIT_LIBRARY})
+target_include_directories(redc PUBLIC ${LuaJIT_INCLUDE_DIR})
+target_compile_options(redc PUBLIC ${LuaJIT_COMPILE_OPTIONS})
 
 add_dependencies(redc survival)
 add_dependencies(redc assets)
-
