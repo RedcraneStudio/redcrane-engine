@@ -12,6 +12,9 @@ namespace redc
   {
     struct Shader
     {
+
+      virtual ~Shader() {}
+
       // These functions should, if called more than once, discard the one it
       // was last initialized with.
       virtual void load_vertex_part(std::string const&) noexcept {}
