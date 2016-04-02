@@ -19,6 +19,11 @@ namespace redc { namespace lua
     lua_State* lua;
   };
 
+  // Put in preload important lua engine code that won't run with a sandbox
+  int preload_engine_lua(lua_State* L);
+
+  void set_sandbox_env(lua_State* L, int fn);
+
   bool handle_err(lua_State* L, int err);
 } }
 #endif

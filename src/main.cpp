@@ -335,6 +335,9 @@ int start_local(po::variables_map const& vm)
                   "allocation error");
   }
 
+  // Load (without a sandbox) lua engine code.
+  lua::preload_engine_lua(lua);
+
   // Load a file
   auto entry_file = vm["game.client_entry"].as<std::string>();
   if(lua::handle_err(lua, luaL_loadfile(lua, entry_file.data())))
@@ -342,6 +345,9 @@ int start_local(po::variables_map const& vm)
     // Rip
     return EXIT_FAILURE;
   }
+
+  // Use the sandbox
+  lua::set_sandbox_env(lua, 1);
 
   // Call the file
   if(lua::handle_err(lua, lua_pcall(lua, 0, 1, 0)))
