@@ -1,6 +1,7 @@
 Red Crane Engine
 ----------------
-An engine designed  and created by your nemesis from New York, Luke San Antonio-Bialecki.
+An engine designed and created by Luke San Antonio-Bialecki:
+[@luke_sanantonio](https://twitter.com/Luke_SanAntonio)
 
 Setup
 -----
@@ -9,7 +10,7 @@ Setup
 - Mac
     - currently not supported
 - Linux
-    - **Arch Linux** - refer to pacman for dependencies
+    - **Arch Linux** - refer to yaourt for dependencies
     - **Ubuntu/Debian** - see below: *Installing dependencies for Debian/Ubuntu*
 
 Building
@@ -19,14 +20,14 @@ Building
     git clone https://bitbucket.org/lukesanantonio/redcrane-engine.git
     cd ../build
     cmake ../engine/redcrane-engine
-    sudo make
+    make
 
 Running the game
 ----------------
 Go to source directory in the build folder
 
 ```
-./redc --out-log-level=0 -config=../survival/cfg.ini
+./redc --out-log-level=0 --config=../survival/cfg.ini
 ```
 
 Installing dependencies for Debian/Ubuntu
@@ -44,3 +45,4 @@ in the current iteration of the aptitude package manager.
 * libuv-dev: http://dist.libuv.org/dist/v1.8.0/
 * boost: http://sourceforge.net/projects/boost/files/boost/1.60.0/
 * libglm-dev: http://glm.g-truc.net/0.9.7/index.html
+* ImageMagick
