@@ -20,10 +20,11 @@ extern "C"
   void *redc_load_mesh(void *engine, const char *str)
   {
     // TODO: Load many static objects into the same mesh.
-    auto rce = (redc::Engine *) engine;
+    auto rce = (Engine *) engine;
+    REDC_ASSERT_HAS_CLIENT(rce);
 
-    auto mesh = gfx::load_mesh(*rce->driver,
-                               *rce->mesh_cache,
+    auto mesh = gfx::load_mesh(*rce->client->driver,
+                               *rce->client->mesh_cache,
                                {std::string{str}, false});
 
     // Lua is one peer
@@ -33,7 +34,7 @@ extern "C"
     *peer->get() = copy_mesh_chunk_move_mesh(mesh.chunk);
 
     // The engine is the other.
-    rce->meshs.push_back(peer->peer());
+    rce->client->meshs.push_back(peer->peer());
 
     return peer;
   }

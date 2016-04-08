@@ -15,9 +15,10 @@ extern "C"
 {
   void *redc_make_shader(void *eng, const char* dir)
   {
-    auto rce = (redc::Engine*) eng;
+    auto rce = (Engine*) eng;
+    REDC_ASSERT_HAS_CLIENT(rce);
 
-    auto shade = rce->driver->make_shader_repr();
+    auto shade = rce->client->driver->make_shader_repr();
 
     using namespace std::literals;
     auto base_path = rce->share_path / "shader"s / std::string{dir};
@@ -33,7 +34,7 @@ extern "C"
     auto peer = new Peer_Ptr<gfx::Shader>(std::move(shade));
 
     // Give the engine a peer
-    rce->shaders.push_back(peer->peer());
+    rce->client->shaders.push_back(peer->peer());
 
     return peer;
   }

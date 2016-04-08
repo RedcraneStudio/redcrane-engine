@@ -4,9 +4,12 @@
 
 local ffi = require("ffi")
 
+local rc = require("redcrane")
+
 local shader = {}
 
-function shader.load_shader(eng, dir)
+function shader.load_shader(dir)
+    local eng = rc.engine
     return ffi.gc(ffi.C.redc_make_shader(eng, dir), ffi.C.redc_unmake_shader)
 end
 

@@ -36,6 +36,10 @@ extern "C"
 }
 #endif
 
+// This doesn't have to be a macro
+#define REDC_ASSERT_HAS_CLIENT(rce) \
+REDC_ASSERT_MSG(rce->client != nullptr, "Client must be initialized")
+
 namespace redc
 {
   template <class T>
@@ -45,10 +49,24 @@ namespace redc
     return peer->lock();
   }
 
-  struct Scene;
+  struct Client;
 
   struct Engine
   {
+    Redc_Config config;
+    boost::filesystem::path share_path;
+    bool running = true;
+
+    std::unique_ptr<Client> client;
+    //std::unique_ptr<Server> server;
+  };
+
+  struct Scene;
+
+  struct Client
+  {
+    Client(redc::SDL_Init_Lock l) : sdl_raii(std::move(l)) {}
+
     redc::SDL_Init_Lock sdl_raii;
 
     // Make sure we put this at the top so it is uninitialized relatively after
@@ -63,10 +81,6 @@ namespace redc
     std::vector<Peer_Ptr<Texture> > textures;
     std::vector<Peer_Ptr<gfx::Mesh_Chunk> > meshs;
     std::vector<Peer_Ptr<gfx::Shader> > shaders;
-
-    boost::filesystem::path share_path;
-
-    bool running = true;
 
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it
     // We should reserve some amount of memory for each scene so that we can

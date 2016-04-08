@@ -21,12 +21,13 @@ extern "C"
   // See scene.lua
   void *redc_make_scene(void *eng)
   {
-    auto engine= (Engine*) eng;
+    auto engine = (Engine*) eng;
+    REDC_ASSERT_HAS_CLIENT(engine);
 
     auto sc = new Peer_Ptr<Scene>(new Scene);
     sc->get()->engine = engine;
 
-    engine->scenes.push_back(sc->peer());
+    engine->client->scenes.push_back(sc->peer());
     return sc;
   }
   void redc_unmake_scene(void *scene)
@@ -35,7 +36,7 @@ extern "C"
     delete sc;
   }
 
-  uint16_t redc_scene_add_camera(void *sc, const char *tp)
+  obj_id redc_scene_add_camera(void *sc, const char *tp)
   {
     // For the moment, this is the only kind of camera we support
 
@@ -55,12 +56,13 @@ extern "C"
     // The first camera will be set as active automatically by Active_Map from
     // id_map.hpp.
     auto scene = lock_resource<redc::Scene>(sc);
+    REDC_ASSERT_HAS_CLIENT(scene->engine);
 
     auto id = scene->index_gen.get();
     CHECK_ID(id);
 
     auto &obj = at_id(scene->objs, id);
-    obj.obj = Cam_Object{cam_func(*scene->engine->driver)};
+    obj.obj = Cam_Object{cam_func(*scene->engine->client->driver)};
 
     // We can be sure at this point the id is non-zero (because of CHECK_ID).
 
@@ -71,14 +73,14 @@ extern "C"
     return id;
   }
 
-  uint16_t redc_scene_get_active_camera(void *sc)
+  obj_id redc_scene_get_active_camera(void *sc)
   {
     auto scene = lock_resource<redc::Scene>(sc);
 
     // This will be zero when there isn't an active camera.
     return scene->active_camera;
   }
-  void redc_scene_activate_camera(void *sc, uint16_t cam)
+  void redc_scene_activate_camera(void *sc, obj_id cam)
   {
     if(!cam)
     {
@@ -100,7 +102,7 @@ extern "C"
     }
   }
 
-  uint16_t redc_scene_attach(void *sc, void *ms, uint16_t parent)
+  obj_id redc_scene_attach(void *sc, void *ms, obj_id parent)
   {
     auto scene = lock_resource<redc::Scene>(sc);
 
@@ -171,6 +173,10 @@ extern "C"
   {
     auto scene = lock_resource<redc::Scene>(sc);
 
+    // We got to have a client component or whatever-you-want-to-call-it
+    // available.
+    REDC_ASSERT_HAS_CLIENT(scene->engine);
+
 #ifdef REDC_LOG_FRAMES
     ++scene->frame_count;
     if(scene->frame_timer.has_been(std::chrono::seconds(1)))
@@ -193,13 +199,13 @@ extern "C"
             boost::get<Cam_Object>(at_id(scene->objs,
                                          scene->active_camera).obj);
 
-    gfx::use_camera(*scene->engine->driver, active_camera.cam);
+    gfx::use_camera(*scene->engine->client->driver, active_camera.cam);
 
     // Clear the screen
-    scene->engine->driver->clear();
+    scene->engine->client->driver->clear();
 
     // Find active shader.
-    auto active_shader = scene->engine->driver->active_shader();
+    auto active_shader = scene->engine->client->driver->active_shader();
 
     // i is the loop counter, id is our current id.
     // Loop however many times as we have ids.
@@ -214,6 +220,15 @@ extern "C"
       // get far enough to exceed count but whatever this makes more semantic
       // sense. Then again if we exceed count_ we could enter a loop where we
       // exit only at overflow.
+
+      // TODO: Things that are confusing about this design
+      // - Ids
+      // Use of peer pointers vs. raw pointers vs. non-zero based ids
+      // Use locks to simplify this!
+      // Sandboxing
+      // Networking - Lua
+      // Write about significance of LLVM considering many new languages come
+      // out that could be better for more niche things.
 
       // Put the increment in the expression because we always want to be
       // incrementing the counter, otherwise we risk rendering the same object
@@ -236,7 +251,7 @@ extern "C"
 
         // Find out the model
         auto model = object_model(obj);
-        scene->engine->driver->active_shader()->set_model(model);
+        scene->engine->client->driver->active_shader()->set_model(model);
 
         gfx::render_chunk(*mesh_obj.chunk);
       }

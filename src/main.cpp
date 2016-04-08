@@ -35,9 +35,9 @@
 
 namespace po = boost::program_options;
 
-enum class Server_Mode
+enum class Server_Mode : int
 {
-    Bad, Dedicated, Connect, Local
+    Bad = -1, Dedicated = 0, Local = 1, Connect = 2
 };
 
 Server_Mode pick_server_mode(po::variables_map const& vm)
@@ -98,14 +98,6 @@ po::options_description command_options_desc() noexcept
                            "Baseline water quality");
 
   config_opt.add_options()("hud.scale", po::value<float>(), "Hud scale");
-
-  config_opt.add_options()("game.cwd", po::value<std::string>(),
-                           "Current working directory");
-
-  config_opt.add_options()("game.client_entry", po::value<std::string>(),
-                           "Client main file");
-  config_opt.add_options()("game.server_entry", po::value<std::string>(),
-                           "Server main file");
 
   po::options_description desc("Allowed Options");
 
@@ -322,21 +314,8 @@ int start_dedicated(po::variables_map const& vm)
 }
 int start_local(po::variables_map const& vm)
 {
+#if 0
   using namespace redc;
-
-  // Initialize LuaJIT
-  lua::Scoped_Lua_Init lua_init_raii_lock{};
-  auto lua = lua_init_raii_lock.lua;
-
-  // Everything alright?
-  if(!lua)
-  {
-    log_e("Failed to initialize LuaJIT. This is generally caused by a memory"
-                  "allocation error");
-  }
-
-  // Load (without a sandbox) lua engine code.
-  lua::preload_engine_lua(lua);
 
   // Load a file
   auto entry_file = vm["game.client_entry"].as<std::string>();
@@ -368,6 +347,7 @@ int start_local(po::variables_map const& vm)
   int ret = lua_tointeger(lua, -1);
 
   return ret;
+#endif
 #if 0
   btDefaultCollisionConfiguration bt_config;
   btCollisionDispatcher bt_dispatcher{&bt_config};
@@ -565,6 +545,8 @@ int main(int argc, char* argv[])
   po::variables_map vm;
   auto command_desc = command_options_desc();
   po::store(po::parse_command_line(argc, argv, command_desc), vm);
+  // I don't think we need this but maybe.
+  po::notify(vm);
 
   if(vm.count("help"))
   {
@@ -572,62 +554,88 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
   }
 
-  namespace fs = boost::filesystem;
-
-  // If the user specified a config file on the command line use that one
-  auto cfg_path = fs::path("cfg.ini");
-  if(vm.count("config-file"))
-  {
-    cfg_path = fs::path(vm["config-file"].as<std::string>());
-  }
-  if(!fs::exists(cfg_path))
-  {
-    log_e("Config % doesn't exist", cfg_path.native());
-    return EXIT_FAILURE;
-  }
-
-  // Otherwise we have a configuration file
-  po::store(po::parse_config_file<char>(cfg_path.native().c_str(),
-                                        command_desc), vm);
-
-  // I don't think we need this but maybe.
-  po::notify(vm);
-
-  // Set log severities
-  set_out_log_level((Log_Severity) vm["out-log-level"].as<unsigned int>());
-  set_file_log_level((Log_Severity) vm["file-log-level"].as<unsigned int>());
-
   // Log file
   if(vm.count("log-file"))
   {
     set_log_file(vm["log-file"].as<std::string>());
   }
 
-  // Everything we need is in vm now.
+  // Set log severities
+  set_out_log_level((Log_Severity) vm["out-log-level"].as<unsigned int>());
+  set_file_log_level((Log_Severity) vm["file-log-level"].as<unsigned int>());
 
-  // First change directory
-  auto game_cwd =
-          cfg_path.parent_path() / fs::path(vm["game.cwd"].as<std::string>());
-  if(!exists(game_cwd))
+  // Initialize LuaJIT
+  lua::Scoped_Lua_Init lua_init_raii_lock{};
+  auto lua = lua_init_raii_lock.lua;
+
+  // Everything alright?
+  if(!lua)
   {
-    log_e("Failed to enter game directory '%': it doesn't exist!",
-          game_cwd.native());
+    log_e("Failed to initialize LuaJIT. This is generally caused by a memory"
+                  "allocation error");
+  }
+
+  // First load c functions into ffi.C
+  if(lua::handle_err(lua, lua::load_c_functions(lua)))
+  {
     return EXIT_FAILURE;
   }
-  current_path(game_cwd);
 
-  // Delegate depending on our server mode
+  namespace fs = boost::filesystem;
+
+  // Check for config file
+  if(!vm.count("config-file"))
+  {
+    log_e("No config file specified");
+    return EXIT_FAILURE;
+  }
+
+  // Check to make sure it exists
+  auto cfg_path = fs::path(vm["config-file"].as<std::string>());
+  if(!fs::exists(cfg_path))
+  {
+    log_e("Config % doesn't exist", cfg_path.native());
+    return EXIT_FAILURE;
+  }
+
+  // Make the configuration path absolute so we can be sure that it will still
+  // point to a valid filename after switching directories.
+  cfg_path = absolute(cfg_path);
+
+  // Switch to its directory
+  current_path(cfg_path.parent_path());
+
+  // If there is no error, we should have the engine on the top of the lua
+  // stack now.
+  // Now we have a configuration file, preload our API and config file this
+  // does both because the whole operation is pretty coupled.
+  if(lua::handle_err(lua, lua::load_engine_lua(lua, cfg_path)))
+  {
+    return EXIT_FAILURE;
+  }
+
+  // Pick the server mode
   auto server_mode = pick_server_mode(vm);
+
+  int ret_code = EXIT_SUCCESS;
+
   switch(server_mode)
   {
     case Server_Mode::Dedicated:
-      return start_dedicated(vm);
+      ret_code = lua::run_engine(lua, "dedicated");
+      break;
     case Server_Mode::Connect:
-      return start_connect(vm);
+      ret_code = lua::run_engine(lua, "connect");
+      break;
     case Server_Mode::Local:
-      return start_local(vm);
+      ret_code = lua::run_engine(lua, "local");
+      break;
+    default:
     case Server_Mode::Bad:
       log_e("Must pick either dedicated, local or connect server mode");
-      return EXIT_FAILURE;
+      ret_code = EXIT_FAILURE;
+      break;
   }
+
+  return ret_code;
 }

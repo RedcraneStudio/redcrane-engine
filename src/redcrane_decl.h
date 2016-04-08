@@ -3,10 +3,15 @@
  * All rights reserved.
  */
 
+// See cwrap/engine.cpp
+
 typedef struct
 {
-  const char* window_title;
+  const char* cwd;
+  const char* mod_name;
   uint16_t default_port;
+  const char* client_entry;
+  const char* server_entry;
 } Redc_Config;
 
 void redc_log_d(const char* str);
@@ -15,32 +20,36 @@ void redc_log_w(const char* str);
 void redc_log_e(const char* str);
 
 void* redc_init_engine(Redc_Config cfg);
+void redc_init_client(void* eng);
 void redc_uninit_engine(void* eng);
+
+const char* redc_get_asset_path(void* eng);
+void redc_window_swap(void* eng);
+
+void redc_gc(void* eng);
+
+// See cwrap/mesh.cpp
 
 void* redc_load_mesh(void* engine, const char* str);
 void redc_unload_mesh(void* mesh);
 
-void* redc_make_scene(void* engine);
-void redc_unmake_scene(void* scene);
-
-void* redc_make_shader(void* engine, const char*);
-void redc_unmake_shader(void *shader);
+// See cwrap/scene.cpp
 
 typedef uint16_t obj_id;
 
-obj_id redc_scene_add_camera(void* sc, const char* tp);
-obj_id redc_scene_get_active_camera(void* sc);
+void* redc_make_scene(void* engine);
+void redc_unmake_scene(void* scene);
 
-void redc_scene_activate_camera(void* sc, obj_id cam);
+obj_id redc_scene_add_camera(void *sc, const char *tp);
+obj_id redc_scene_get_active_camera(void *sc);
 
-uint16_t redc_scene_attach(void* sc, void* mesh, uint16_t parent);
+obj_id redc_scene_attach(void *sc, void *ms, obj_id parent);
 
-bool redc_running(void* eng);
+bool redc_running(void *eng);
+void redc_scene_step(void *sc);
+void redc_scene_render(void *sc);
 
-void redc_scene_step(void* sc);
+// See cwrap/shader.cpp
 
-const char* redc_get_asset_path(void* eng);
-
-void redc_scene_render(void* sc);
-void redc_window_swap(void* eng);
-void redc_gc(void* eng);
+void *redc_make_shader(void *eng, const char* dir);
+void redc_unmake_shader(void *shader);

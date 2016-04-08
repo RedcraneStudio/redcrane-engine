@@ -46,28 +46,44 @@ extern "C"
 
   void* redc_init_engine(Redc_Config cfg)
   {
+    // Switch into the current working directory requested by the mod
+    if(!exists(boost::filesystem::path(cfg.cwd)))
+    {
+      log_e("Failed to enter requested '%' directory", cfg.cwd);
+      return nullptr;
+    }
+
+    auto eng = new Engine{cfg, assets::share_path(), true, nullptr};
+    log_i("Initialized the Red Crane Engine alpha version 0.0");
+
+    return eng;
+  }
+  void redc_init_client(void* eng)
+  {
+    auto rce = (Engine*) eng;
+
     auto sdl_init_raii_lock =
-            redc::init_sdl(cfg.window_title, {1000,1000}, false, false);
+            redc::init_sdl(rce->config.mod_name, {1000,1000}, false, false);
     auto sdl_window = sdl_init_raii_lock.window;
+
+    rce->client = std::make_unique<Client>(std::move(sdl_init_raii_lock));
 
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
     int x, y;
     SDL_GetWindowSize(sdl_window, &x, &y);
 
-    auto eng = new Engine{std::move(sdl_init_raii_lock), nullptr, nullptr};
-    eng->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
+    rce->client->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
-    eng->share_path = assets::share_path();
-    eng->mesh_cache =
-            std::make_unique<gfx::Mesh_Cache>(eng->share_path / "obj",
-                                              eng->share_path / "obj_cache");
+    rce->client->mesh_cache =
+            std::make_unique<gfx::Mesh_Cache>(rce->share_path / "obj",
+                                              rce->share_path / "obj_cache");
 
     // Load default shader, etc.
-    auto df_shade = eng->driver->make_shader_repr();
+    auto df_shade = rce->client->driver->make_shader_repr();
 
     // TODO: Load shaders like we load mesh. Right now is bad
-    auto basic_shade_path = eng->share_path / "shader" / "basic";
+    auto basic_shade_path = rce->share_path / "shader" / "basic";
     df_shade->load_vertex_part((basic_shade_path / "vs.glsl").native());
     df_shade->load_fragment_part((basic_shade_path / "fs.glsl").native());
 
@@ -76,34 +92,35 @@ extern "C"
     df_shade->set_projection_name("proj");
 
     // Make it the default
-    eng->driver->use_shader(*df_shade);
+    rce->client->driver->use_shader(*df_shade);
 
     // Make sure we don't delete it later by linking its lifetime with that of
     // the engines.
-    eng->shaders.push_back(std::move(df_shade));
-
-    return eng;
+    rce->client->shaders.push_back(std::move(df_shade));
   }
   void redc_uninit_engine(void* eng)
   {
-    auto rce = (redc::Engine*) eng;
+    auto rce = (Engine*) eng;
     delete rce;
   }
-  const char* redc_get_asset_path(void*)
+  const char* redc_get_asset_path(void* eng)
   {
     // Will this ever change mid-execution?
-    static auto str = redc::assets::share_path().native();
-    return str.data();
+    auto rce = (Engine*) eng;
+    return rce->share_path.native().c_str();
   }
   void redc_window_swap(void* eng)
   {
-    auto engine = (redc::Engine*) eng;
-    SDL_GL_SwapWindow(engine->sdl_raii.window);
+    auto engine = (Engine*) eng;
+    if(engine->client)
+    {
+      SDL_GL_SwapWindow(engine->client->sdl_raii.window);
+    }
   }
 
   void redc_gc(void* eng)
   {
-    auto rce = (redc::Engine*) eng;
+    auto rce = (Engine*) eng;
 
     auto is_null = [](auto const& peer)
     {
@@ -113,15 +130,21 @@ extern "C"
     // Go through the vector of peer pointers and removed deallocated ones.
     using std::begin; using std::end;
 
-    auto mesh_end = std::remove_if(begin(rce->meshs), end(rce->meshs), is_null);
-    rce->meshs.erase(mesh_end, end(rce->meshs));
+    if(rce->client)
+    {
+      auto& client = *rce->client;
 
-    auto textures_end = std::remove_if(begin(rce->textures),
-                                       end(rce->textures), is_null);
-    rce->textures.erase(textures_end, end(rce->textures));
+      auto mesh_end = std::remove_if(begin(client.meshs), end(client.meshs),
+                                     is_null);
+      client.meshs.erase(mesh_end, end(client.meshs));
 
-    auto shaders_end = std::remove_if(begin(rce->shaders),
-                                       end(rce->shaders), is_null);
-    rce->shaders.erase(shaders_end, end(rce->shaders));
+      auto textures_end = std::remove_if(begin(client.textures),
+                                         end(client.textures), is_null);
+      client.textures.erase(textures_end, end(client.textures));
+
+      auto shaders_end = std::remove_if(begin(client.shaders),
+                                        end(client.shaders), is_null);
+      client.shaders.erase(shaders_end, end(client.shaders));
+    }
   }
 }

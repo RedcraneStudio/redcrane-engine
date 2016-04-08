@@ -4,10 +4,14 @@
 
 local ffi = require("ffi")
 
+local rc = require("redcrane")
+
 local mesh_pool = {}
 
 -- So far no engine support, so we just load individual meshes
-function mesh_pool.make_mesh_pool(eng)
+function mesh_pool.make_mesh_pool()
+  local eng = rc.engine
+
   local mp = {}
 
   function mp:load_mesh(str)

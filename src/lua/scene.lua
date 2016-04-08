@@ -4,9 +4,14 @@
 
 local ffi = require("ffi")
 
+local rc = require("redcrane")
+
 local scene = {}
 
-function scene.make_scene(eng)
+function scene.make_scene()
+
+    local eng = rc.engine
+
     local sc = {}
     sc._scene_ptr = ffi.gc(ffi.C.redc_make_scene(eng), ffi.C.redc_unmake_scene)
 

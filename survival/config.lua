@@ -3,6 +3,5 @@
 -- All rights reserved.
 
 return {
-    window_title = "Survival Game";
-    default_port = 28222
+    window_title = "Survival Game",
 }
