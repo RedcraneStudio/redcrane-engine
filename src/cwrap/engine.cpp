@@ -54,7 +54,8 @@ extern "C"
     }
 
     auto eng = new Engine{cfg, assets::share_path(), true, nullptr};
-    log_i("Initialized the Red Crane Engine alpha version 0.0");
+    log_i("Initialized the Red Crane Engine alpha version 0.0 (Mod: %)",
+          cfg.mod_name);
 
     return eng;
   }
