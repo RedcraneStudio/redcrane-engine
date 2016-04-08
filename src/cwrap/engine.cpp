@@ -10,6 +10,8 @@
 
 #include "redcrane.hpp"
 
+#include "../common/version.h"
+
 #include "../assets/load_dir.h"
 #include "../gfx/gl/driver.h"
 
@@ -54,8 +56,9 @@ extern "C"
     }
 
     auto eng = new Engine{cfg, assets::share_path(), true, nullptr};
-    log_i("Initialized the Red Crane Engine alpha version 0.0 (Mod: %)",
-          cfg.mod_name);
+    log_i("Initialized the Red Crane Engine alpha version %.%.% (Mod: %)",
+          REDC_ENGINE_VERSION_MAJOR, REDC_ENGINE_VERSION_MINOR,
+          REDC_ENGINE_VERSION_PATCH, cfg.mod_name);
 
     return eng;
   }
