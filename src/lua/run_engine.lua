@@ -4,7 +4,7 @@
 
 local rc = require("redcrane")
 
-local eng, server_mode, sandbox = ...
+local server_mode, sandbox = ...
 
 if server_mode == "dedicated" then
   rc:log_i("Starting dedicated server")

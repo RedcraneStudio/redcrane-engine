@@ -87,15 +87,13 @@ namespace redc { namespace lua
     luaL_loadbuffer(L, luaJIT_BC_run_engine, luaJIT_BC_run_engine_SIZE,
                     "run_engine");
 
-    // The engine was at the top of the stack
-    lua_pushvalue(L, -2);
     // Push the server mode
     lua_pushstring(L, server_mode);
     // Make a sandbox
     push_sandbox_env(L, true);
 
     // Call the game loop
-    if(handle_err(L, lua_pcall(L, 3, 1, 0)))
+    if(handle_err(L, lua_pcall(L, 2, 1, 0)))
     {
       // Error, return a bad error code
       return EXIT_FAILURE;

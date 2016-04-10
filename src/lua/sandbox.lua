@@ -28,7 +28,9 @@ return function()
     if include_redcrane == true then
 
         sandbox.redcrane = {
+            engine = rc.engine,
             config = rc.config,
+
             running = rc.running,
             swap_window = rc.swap_window,
             asset_path = rc.asset_path,
