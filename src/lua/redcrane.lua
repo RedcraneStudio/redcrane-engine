@@ -17,6 +17,10 @@ function rc:init(config)
     return self.engine
 end
 
+function rc:init_client()
+    ffi.C.redc_init_client(self.engine)
+end
+
 function rc:running()
     return ffi.C.redc_running(self.engine)
 end

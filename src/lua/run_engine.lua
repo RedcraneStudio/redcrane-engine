@@ -12,6 +12,14 @@ elseif server_mode == "connect" then
   rc:log_i("Connecting")
 elseif server_mode == "local" then
   rc:log_i("Starting local server")
+
+  -- Initialize the engine client
+  rc:init_client()
+
+  -- Pass control to the user client script
+  local client = loadfile(rc.config.client_entry)
+  setfenv(client, sandbox)
+  return client()
 else
   rc:log_i("Invalid server mode '"..server_mode.."'")
   return 1
