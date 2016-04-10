@@ -85,13 +85,13 @@ for key, option in pairs(options) do
 
         -- Fail
         set_fn = function(self, value)
-            error("Config option '"..self.name.. "' read-only during runtime")
+            error("Config option '"..self.desc.. "' read-only during runtime")
         end
     end
 
     -- Put it in the new config
     newcfg[key] = {
-        name = option.name,
+        desc = option.desc,
         value = option_value,
         get = get_fn,
         set = set_fn
@@ -99,18 +99,16 @@ for key, option in pairs(options) do
     -- Use this config to initialize the engine
     engcfg[key] = option_value
 end
-
-newcfg = setmetatable(newcfg, {
+rc.config = setmetatable({config_ = newcfg}, {
     __index = function(table, key)
         -- Call the individual get function for this particular option with
         -- itself as the parameter.
-        return rawget(table, key):get()
+        return table.config_[key]:get()
     end,
     __newindex = function(table, key, value)
-        local option = rawget(table, key)
+        local option = table.config_[key]
         option.value = option:set(value)
     end
 })
 
 rc:init(engcfg)
-rc.config = newcfg
