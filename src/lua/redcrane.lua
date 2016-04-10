@@ -38,16 +38,16 @@ function stringify(str, ...)
     return str
 end
 function rc:log_d(str, ...)
-    ffi.C.redc_log_d(stringify(str, ...))
+    ffi.C.redc_log_d(stringify(tostring(str), ...))
 end
 function rc:log_i(str, ...)
-    ffi.C.redc_log_i(stringify(str, ...))
+    ffi.C.redc_log_i(stringify(tostring(str), ...))
 end
 function rc:log_w(str, ...)
-    ffi.C.redc_log_w(stringify(str, ...))
+    ffi.C.redc_log_w(stringify(tostring(str), ...))
 end
 function rc:log_e(str, ...)
-    ffi.C.redc_log_e(stringify(str, ...))
+    ffi.C.redc_log_e(stringify(tostring(str), ...))
 end
 
 return rc
