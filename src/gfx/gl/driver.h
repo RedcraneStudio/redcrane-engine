@@ -30,8 +30,8 @@ namespace redc
     std::unique_ptr<Texture> make_texture_repr() noexcept override;
     void bind_texture(Texture& tex, unsigned int loc) noexcept override;
 
-    void clear_color_value(Color const&) noexcept override;
-    void clear_depth_value(float) noexcept override;
+    void set_clear_color(Color const&) noexcept override;
+    void set_clear_depth(float) noexcept override;
 
     void clear() noexcept override;
     void clear_color() noexcept override;

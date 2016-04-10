@@ -35,8 +35,8 @@ namespace redc
       virtual std::unique_ptr<Texture> make_texture_repr() noexcept = 0;
       virtual void bind_texture(Texture& tex, unsigned int loc) noexcept = 0;
 
-      virtual void clear_color_value(Color const& color) noexcept = 0;
-      virtual void clear_depth_value(float val) noexcept = 0;
+      virtual void set_clear_color(Color const& color) noexcept = 0;
+      virtual void set_clear_depth(float val) noexcept = 0;
 
       virtual void clear() noexcept = 0;
       virtual void clear_color() noexcept = 0;

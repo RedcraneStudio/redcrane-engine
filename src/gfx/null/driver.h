@@ -22,8 +22,8 @@ namespace redc { namespace gfx
       std::unique_ptr<Texture> make_texture_repr() noexcept override;
       void bind_texture(Texture&, unsigned int) noexcept override {}
 
-      void clear_color_value(Color const&) noexcept override {}
-      void clear_depth_value(float) noexcept override {}
+      void set_clear_color(Color const&) noexcept override {}
+      void set_clear_depth(float) noexcept override {}
 
       void clear() noexcept override {}
       void clear_color() noexcept override {}

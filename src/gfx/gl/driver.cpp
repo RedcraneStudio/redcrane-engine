@@ -92,12 +92,12 @@ namespace redc
         gl_tex->bind(loc);
       }
 
-      void Driver::clear_color_value(Color const& c) noexcept
+      void Driver::set_clear_color(Color const& c) noexcept
       {
         glClearColor(c.r / (float) 0xff, c.g / (float) 0xff,
                      c.b / (float) 0xff, 1.0);
       }
-      void Driver::clear_depth_value(float f) noexcept
+      void Driver::set_clear_depth(float f) noexcept
       {
         glClearDepth(f);
       }
