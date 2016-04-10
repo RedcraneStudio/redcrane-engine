@@ -122,11 +122,6 @@ extern "C"
     return id;
   }
 
-  bool redc_running(void *eng)
-  {
-    return ((redc::Engine *) eng)->running;
-  }
-
   void redc_scene_step(void *sc)
   {
     auto scene = lock_resource<redc::Scene>(sc);

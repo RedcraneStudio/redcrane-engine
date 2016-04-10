@@ -107,6 +107,13 @@ extern "C"
     auto rce = (Engine*) eng;
     delete rce;
   }
+
+  bool redc_running(void *eng)
+  {
+    auto rce = (Engine*) eng;
+    return rce->running;
+  }
+
   const char* redc_get_asset_path(void* eng)
   {
     // Will this ever change mid-execution?

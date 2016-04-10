@@ -23,6 +23,8 @@ void* redc_init_engine(Redc_Config cfg);
 void redc_init_client(void* eng);
 void redc_uninit_engine(void* eng);
 
+bool redc_running(void *eng);
+
 const char* redc_get_asset_path(void* eng);
 void redc_window_swap(void* eng);
 
@@ -45,7 +47,6 @@ obj_id redc_scene_get_active_camera(void *sc);
 
 obj_id redc_scene_attach(void *sc, void *ms, obj_id parent);
 
-bool redc_running(void *eng);
 void redc_scene_step(void *sc);
 void redc_scene_render(void *sc);
 
