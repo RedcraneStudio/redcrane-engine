@@ -79,6 +79,8 @@ extern "C"
 
     rce->client->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
+    rce->client->driver->set_clear_color(colors::white);
+
     rce->client->mesh_cache =
             std::make_unique<gfx::Mesh_Cache>(rce->share_path / "obj",
                                               rce->share_path / "obj_cache");
