@@ -36,8 +36,7 @@ function client:init()
     local hand_mesh = self.mesh_pool:load_mesh("character/hands")
 
     -- Attach the hands to the camera
-    --self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())
-    self.hands = self.scene:attach(hand_mesh)
+    self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())
 
     -- HUD elements?
 end
