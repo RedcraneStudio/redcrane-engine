@@ -18,7 +18,7 @@ namespace redc
     }
     glm::mat4 operator()(Cam_Object const& cam) const
     {
-      return gfx::camera_model_matrix(cam.cam);
+      return glm::inverse(gfx::camera_view_matrix(cam.cam));
     }
   };
 
@@ -38,4 +38,3 @@ namespace redc
     return parent_model * this_model;
   }
 }
-
