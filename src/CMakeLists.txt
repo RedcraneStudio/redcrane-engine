@@ -128,3 +128,16 @@ target_compile_options(redc PUBLIC ${LuaJIT_COMPILE_OPTIONS})
 
 add_dependencies(redc survival)
 add_dependencies(redc assets)
+
+add_executable(test_cel main_cel.cpp sdl_helper.cpp)
+
+target_include_directories(test_cel PUBLIC ${SDL2_INCLUDE_DIRS}
+                                       ${BULLET_INCLUDE_DIRS})
+
+target_link_libraries(test_cel PUBLIC commonlib netlib gfxlib uselib fpslib
+                                  inputlib
+                                  ${Boost_SYSTEM_LIBRARY}
+                                  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                                  ${Boost_FILESYSTEM_LIBRARY}
+                                  ${SDL2_LIBRARIES}
+                                  ${BULLET_LIBRARIES})

@@ -19,6 +19,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
 
                     obj/character/hands.obj
 
+                    obj/monkey.obj
+
                     scene/default.json structure/structures.json
                     shader/basic/fs.glsl shader/basic/vs.glsl
                     shader/hud/fs.glsl shader/hud/vs.glsl
@@ -26,6 +28,7 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     shader/terrain/vs.glsl shader/terrain/fs.glsl
                     shader/water/vs.glsl shader/water/fs.glsl
                     shader/envmap/vs.glsl shader/envmap/fs.glsl
+                    shader/cel/vs.glsl shader/cel/fs.glsl
 
                     tex/envmap/down.png
                     tex/envmap/up.png
