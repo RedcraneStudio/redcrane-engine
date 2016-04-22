@@ -19,6 +19,10 @@ namespace redc
     {
       Depth
     };
+    enum class Cull_Side
+    {
+      Front, Back
+    };
 
     struct IDriver
     {
@@ -46,6 +50,7 @@ namespace redc
       virtual void write_depth(bool enable) noexcept = 0;
       virtual void blending(bool enable) noexcept = 0;
       virtual void face_culling(bool enable) noexcept = 0;
+      virtual void cull_side(Cull_Side side) noexcept = 0;
 
       // For now we are only going to abstract a single point in the
       // framebuffer. In addition, it'll get a bit complicated should we want

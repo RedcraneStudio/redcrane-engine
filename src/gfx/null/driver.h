@@ -33,6 +33,7 @@ namespace redc { namespace gfx
       void write_depth(bool) noexcept override {}
       void blending(bool) noexcept override {}
       void face_culling(bool) noexcept override {}
+      void cull_side(Cull_Side) noexcept override {}
 
       float read_pixel(Framebuffer, Vec<int>) noexcept override
       { return 0.0f; }

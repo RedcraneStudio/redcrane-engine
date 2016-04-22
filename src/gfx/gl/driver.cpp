@@ -133,6 +133,20 @@ namespace redc
         if(enable) glEnable(GL_CULL_FACE);
         else glDisable(GL_CULL_FACE);
       }
+      void Driver::cull_side(Cull_Side side) noexcept
+      {
+        switch(side)
+        {
+        case Cull_Side::Front:
+          glCullFace(GL_FRONT);
+          break;
+        case Cull_Side::Back:
+          glCullFace(GL_BACK);
+          break;
+        default:
+          break;
+        }
+      }
       float Driver::read_pixel(Framebuffer fb, Vec<int> pt) noexcept
       {
         auto f = get_gl_pixel_format(fb);

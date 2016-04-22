@@ -41,6 +41,7 @@ namespace redc
     void write_depth(bool enable) noexcept override;
     void blending(bool enable) noexcept override;
     void face_culling(bool enable) noexcept override;
+    void cull_side(Cull_Side side) noexcept override;
 
     float read_pixel(Framebuffer, Vec<int> pt) noexcept override;
 
