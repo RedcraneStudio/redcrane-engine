@@ -123,9 +123,9 @@ namespace redc
       auto win_size = driver.window_extents();
 
       cam.projection_mode = Camera_Type::Perspective;
-      cam.perspective = Perspective_Cam_Params{glm::radians(50.0f),
+      cam.perspective = Perspective_Cam_Params{glm::radians(68.0f),
                                                win_size.x / (float) win_size.y,
-                                               .01f, 68.0f * M_PI / 180.0f};
+                                               .01f, 100.0f};
 
       cam.definition = Camera_Definition::Pitch_Yaw_Pos;
       cam.fp.pos = glm::vec3(0.0);
