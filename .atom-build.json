@@ -3,7 +3,7 @@
   "name": "Ninja build",
   "args": [],
   "sh": false,
-  "cwd": "{PROJECT_PATH}/../build",
+  "cwd": "{PROJECT_PATH}/../engine-build",
   "env": {},
   "errorMatch": [
     "\n(?<file>[\\/0-9a-zA-Z\\._]+):(?<line>\\d+):(?<col>\\d+)"
@@ -14,7 +14,7 @@
       "name": "Ninja clean",
       "args": ["clean"],
       "sh": false,
-      "cwd": "{PROJECT_PATH}/../build",
+      "cwd": "{PROJECT_PATH}/../engine-build",
       "env": {},
       "errorMatch": []
     }
