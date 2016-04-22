@@ -57,6 +57,8 @@ namespace redc
     boost::filesystem::path share_path;
     bool running = true;
 
+    std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
+
     std::unique_ptr<Client> client;
     //std::unique_ptr<Server> server;
   };
@@ -73,7 +75,6 @@ namespace redc
     // we have to deallocate all the meshes, textures, etc.
     // in the game.
     std::unique_ptr<gfx::IDriver> driver;
-    std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
 
     std::vector<Peer_Ptr<Scene> > scenes;
 

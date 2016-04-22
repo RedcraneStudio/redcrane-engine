@@ -56,6 +56,11 @@ extern "C"
     }
 
     auto eng = new Engine{cfg, assets::share_path(), true, nullptr};
+
+    eng->mesh_cache =
+            std::make_unique<gfx::Mesh_Cache>(eng->share_path / "obj",
+                                              eng->share_path / "obj_cache");
+
     log_i("Initialized the Red Crane Engine alpha version %.%.% (Mod: %)",
           REDC_ENGINE_VERSION_MAJOR, REDC_ENGINE_VERSION_MINOR,
           REDC_ENGINE_VERSION_PATCH, cfg.mod_name);
@@ -80,10 +85,6 @@ extern "C"
     rce->client->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
     rce->client->driver->set_clear_color(colors::white);
-
-    rce->client->mesh_cache =
-            std::make_unique<gfx::Mesh_Cache>(rce->share_path / "obj",
-                                              rce->share_path / "obj_cache");
 
     // Load default shader, etc.
     auto df_shade = rce->client->driver->make_shader_repr();
