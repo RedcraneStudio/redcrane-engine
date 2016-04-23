@@ -162,3 +162,25 @@ TEST_CASE("Making peers works", "[Peer_Ptr]")
 
   }
 }
+TEST_CASE("Peer pointer custom deleter works", "[Peer_Ptr]")
+{
+  int num = 0;
+  auto custom_deleter = [&num](auto* ptr)
+  {
+    num = *ptr;
+    delete ptr;
+  };
+
+  {
+    redc::Peer_Lock<void> lock;
+    {
+      redc::Peer_Ptr<void> peer(new int(5), custom_deleter);
+      lock = peer.lock();
+    }
+    // No deallocation yet
+    CHECK(num == 0);
+  }
+
+  // Now things should have been deallocated
+  CHECK(num == 5);
+}

@@ -58,11 +58,41 @@ namespace redc
 
   namespace detail
   {
+    struct Deleter_Base
+    {
+      virtual void unallocate() = 0;
+    };
+
     template <class T>
+    struct Default_Deleter : public Deleter_Base
+    {
+      Default_Deleter(T* ptr) : ptr(ptr) {}
+
+      T* ptr;
+
+      inline void unallocate() override
+      {
+        delete ptr;
+      }
+    };
+
+    template <class T, class D>
+    struct Deleter_Wrapper : public Deleter_Base
+    {
+      Deleter_Wrapper(T* ptr, D deleter) : ptr(ptr), deleter(deleter) {}
+
+      T* ptr;
+      D deleter;
+
+      inline void unallocate() override
+      {
+        deleter(ptr);
+      }
+    };
+
     struct Peer_Ptr_Data
     {
-      // Aka payload
-      T* ptr;
+      std::unique_ptr<Deleter_Base> deleter;
 
       std::atomic<unsigned long> lock_count;
       std::atomic<unsigned long> peer_count;
@@ -73,8 +103,7 @@ namespace redc
     };
 
     // Attempt to delete the data, based on new values of peer_count, etc.
-    template <class T>
-    void attempt_reset(Peer_Ptr_Data<T>*& data)
+    inline void attempt_reset(Peer_Ptr_Data*& data)
     {
       // We can't do anything if there is a lock on the resource.
       if(data->lock_count.load() == 0)
@@ -82,16 +111,17 @@ namespace redc
         // If we aren't compelled to keep the pointer alive, deallocate it.
         if(!data->keep_alive.load())
         {
-          // TODO: Support custom deleter!!
-          delete data->ptr;
-          data->ptr = nullptr;
+          if(data->deleter) data->deleter->unallocate();
+          data->deleter.release();
         }
 
         // If we are the last peer, we can also deallocate the container.
         if(data->peer_count.load() == 0)
         {
-          // The fact that we use delete is coupled to the fact that
-          // make_peer_ptrs uses new.
+          // TODO: Support allocators for this, not necessarily C++ allocators
+          // just so we don't go allocating / deallocating willy-nilly.
+
+          // Delete the container.
           delete data;
           data = nullptr;
         }
@@ -109,23 +139,31 @@ namespace redc
     Peer_Lock() : data_(nullptr) {}
     ~Peer_Lock();
 
-    Peer_Lock(Peer_Lock&& ptr);
-    Peer_Lock(Peer_Lock const&);
+    template <class U>
+    Peer_Lock(Peer_Lock<U>&& ptr);
 
-    Peer_Lock& operator=(Peer_Lock&& ptr);
-    Peer_Lock& operator=(Peer_Lock const& ptr);
+    template <class U>
+    Peer_Lock(Peer_Lock<U> const&);
+
+    template <class U>
+    Peer_Lock& operator=(Peer_Lock<U>&& ptr);
+
+    template <class U>
+    Peer_Lock& operator=(Peer_Lock<U> const& ptr);
 
     T* operator->() const;
-    T& operator*() const;
+    typename std::add_lvalue_reference<T>::type operator*() const;
 
     T* get() const;
 
     void reset();
 
   private:
-    Peer_Lock(detail::Peer_Ptr_Data<T>* data);
+    template <class U>
+    Peer_Lock(U* ptr, detail::Peer_Ptr_Data* data);
 
-    detail::Peer_Ptr_Data<T>* data_;
+    T* ptr_;
+    detail::Peer_Ptr_Data* data_;
 
     template <class U>
     friend class Peer_Ptr;
@@ -138,33 +176,47 @@ namespace redc
   }
 
   template <class T>
-  Peer_Lock<T>::Peer_Lock(Peer_Lock&& ptr) : data_(ptr.data_)
+  template <class U>
+  Peer_Lock<T>::Peer_Lock(Peer_Lock<U>&& ptr)
+    : ptr_(ptr.ptr_), data_(ptr.data_)
   {
+    // There is no net increase or decrease in the amount of locks so just take
+    // data directly from the other lock.
+    ptr.ptr_ = nullptr;
     ptr.data_ = nullptr;
   }
   template <class T>
-  Peer_Lock<T>::Peer_Lock(Peer_Lock const& rhs) : data_(rhs.data_)
+  template <class U>
+  Peer_Lock<T>::Peer_Lock(Peer_Lock<U> const& rhs)
+    : ptr_(rhs.ptr_), data_(rhs.data_)
   {
     // If we are given data, inform the container that there is a new lock (us).
     if(data_) ++data_->lock_count;
   }
 
   template <class T>
-  Peer_Lock<T>& Peer_Lock<T>::operator=(Peer_Lock&& rhs)
+  template <class U>
+  Peer_Lock<T>& Peer_Lock<T>::operator=(Peer_Lock<U>&& rhs)
   {
+    // U* must be compatible with T* otherwise there will be a compile error.
+    this->ptr_  = rhs.ptr_;
     this->data_ = rhs.data_;
+
+    rhs.ptr_ = nullptr;
     rhs.data_ = nullptr;
 
     return *this;
   }
   template <class T>
-  Peer_Lock<T>& Peer_Lock<T>::operator=(Peer_Lock const& rhs)
+  template <class U>
+  Peer_Lock<T>& Peer_Lock<T>::operator=(Peer_Lock<U> const& rhs)
   {
     // Are we actually locking the same thing?
     if(data_ == rhs.data_) return *this;
 
     // Nope, reset our data and grab theirs
     reset();
+    ptr_ = rhs.ptr_;
     data_ = rhs.data_;
 
     // One more lock
@@ -178,7 +230,7 @@ namespace redc
     return get();
   }
   template <class T>
-  T& Peer_Lock<T>::operator*() const
+  typename std::add_lvalue_reference<T>::type Peer_Lock<T>::operator*() const
   {
     return *get();
   }
@@ -186,12 +238,14 @@ namespace redc
   template <class T>
   T* Peer_Lock<T>::get() const
   {
-    if(data_) return data_->ptr;
+    if(ptr_ && data_ && data_->deleter.get()) return ptr_;
     else return nullptr;
   }
 
   template <class T>
-  Peer_Lock<T>::Peer_Lock(detail::Peer_Ptr_Data<T>* data) : data_(data)
+  template <class U>
+  Peer_Lock<T>::Peer_Lock(U* ptr, detail::Peer_Ptr_Data* data)
+    : ptr_(ptr), data_(data)
   {
     ++data->lock_count;
   }
@@ -208,34 +262,45 @@ namespace redc
     // Do any cleanup that is necessary at this point.
     attempt_reset(data_);
 
-    // We did all we could do, now it's time to say our farewells.
+    // We did all we could do, now it's time to bid our farewells.
+    ptr_ = nullptr;
     data_ = nullptr;
   }
 
+  // Does not support array types or allocators
   template <class T>
   struct Peer_Ptr
   {
-    Peer_Ptr() : data_(nullptr) {}
+    Peer_Ptr() : ptr_(nullptr), data_(nullptr) {}
 
     template <class U>
     explicit Peer_Ptr(U* pointer);
 
-    template <class U>
-    Peer_Ptr(std::unique_ptr<U> ptr);
+    template <class U, class D>
+    Peer_Ptr(U* pointer, D deleter);
 
-    template <class U>
-    Peer_Ptr& operator=(std::unique_ptr<U> ptr);
+    // D must be CopyConstructable because we aren't able to move it from the
+    // unique_ptr.
+    template <class U, class D>
+    Peer_Ptr(std::unique_ptr<U, D> ptr);
+
+    // See above
+    template <class U, class D>
+    Peer_Ptr& operator=(std::unique_ptr<U, D> ptr);
 
     ~Peer_Ptr();
 
-    Peer_Ptr(Peer_Ptr&& ptr);
-    Peer_Ptr(Peer_Ptr const&) = delete;
+    template <class U>
+    Peer_Ptr(Peer_Ptr<U>&& ptr);
 
-    Peer_Ptr& operator=(Peer_Ptr&& ptr);
+    template <class U>
+    Peer_Ptr& operator=(Peer_Ptr<U>&& ptr);
+
+    Peer_Ptr(Peer_Ptr const&) = delete;
     Peer_Ptr& operator=(Peer_Ptr const& ptr) = delete;
 
     T* operator->() const;
-    T& operator*() const;
+    typename std::add_lvalue_reference<T>::type operator*() const;
 
     T* get() const;
 
@@ -243,20 +308,43 @@ namespace redc
     Peer_Lock<T> lock() const;
 
     std::size_t peers() const;
+    std::size_t locks() const;
 
     void reset();
 
   private:
-    Peer_Ptr(detail::Peer_Ptr_Data<T>* data);
+    template <class U>
+    Peer_Ptr(U* ptr, detail::Peer_Ptr_Data* data);
 
-    detail::Peer_Ptr_Data<T>* data_;
+    T* ptr_;
+    detail::Peer_Ptr_Data* data_;
+
+    template <class U>
+    friend class Peer_Ptr;
   };
 
   template <class T>
   template <class U>
-  Peer_Ptr<T>::Peer_Ptr(U* data) : data_(new detail::Peer_Ptr_Data<T>())
+  Peer_Ptr<T>::Peer_Ptr(U* pointer)
+    : ptr_(pointer), data_(new detail::Peer_Ptr_Data)
   {
-    data_->ptr = data;
+    // Use the default deleter (it just calls delete).
+    // TODO: Use delete[] if U is an array type.
+    data_->deleter = std::make_unique<detail::Default_Deleter<U> >(pointer);
+
+    data_->lock_count = 0;
+    data_->keep_alive = true;
+    data_->peer_count = 1;
+  }
+
+  template <class T>
+  template <class U, class D>
+  Peer_Ptr<T>::Peer_Ptr(U* pointer, D del)
+    : ptr_(pointer), data_(new detail::Peer_Ptr_Data)
+  {
+    data_->deleter =
+            std::make_unique<detail::Deleter_Wrapper<U, D> >(pointer, del);
+
     data_->lock_count = 0;
     data_->keep_alive = true;
     data_->peer_count = 1;
@@ -264,22 +352,31 @@ namespace redc
   // Unique pointer construction, the engine will probably make new peers later
   // with peer().
   template <class T>
-  template <class U>
-  Peer_Ptr<T>::Peer_Ptr(std::unique_ptr<U> ptr) : data_(nullptr)
+  template <class U, class D>
+  Peer_Ptr<T>::Peer_Ptr(std::unique_ptr<U, D> uniq_ptr)
+    : ptr_(nullptr), data_(nullptr)
   {
-    *this = std::move(ptr);
+    *this = std::move(uniq_ptr);
   }
   template <class T>
-  template <class U>
-  Peer_Ptr<T>& Peer_Ptr<T>::operator=(std::unique_ptr<U> ptr)
+  template <class U, class D>
+  Peer_Ptr<T>& Peer_Ptr<T>::operator=(std::unique_ptr<U, D> uniq_ptr)
   {
     reset();
 
-    // Don't worry about it if this ia nullptr.
-    if(!ptr) return *this;
+    // Don't worry about it if this is a nullptr.
+    if(!uniq_ptr) return *this;
 
-    data_ = new detail::Peer_Ptr_Data<T>;
-    data_->ptr = ptr.release();
+    data_ = new detail::Peer_Ptr_Data;
+
+    // Get a copy of the deleter first so the unique_ptr doesn't do anything
+    // clever with it.
+    data_->deleter =
+      std::make_unique<detail::Deleter_Wrapper<U, D> >(uniq_ptr.get(),
+                                                       uniq_ptr.get_deleter());
+
+    this->ptr_ = uniq_ptr.release();
+
     data_->lock_count = 0;
     data_->keep_alive = true;
 
@@ -296,15 +393,23 @@ namespace redc
   }
 
   template <class T>
-  Peer_Ptr<T>::Peer_Ptr(Peer_Ptr&& rhs) : data_(rhs.data_)
+  template <class U>
+  Peer_Ptr<T>::Peer_Ptr(Peer_Ptr<U>&& rhs) : ptr_(rhs.ptr_), data_(rhs.data_)
   {
+    // No net increase in number of peers, and no reason to queue a pointer
+    // dealloc.
+    rhs.ptr_ = nullptr;
     rhs.data_ = nullptr;
   }
 
   template <class T>
-  Peer_Ptr<T>& Peer_Ptr<T>::operator=(Peer_Ptr&& rhs)
+  template <class U>
+  Peer_Ptr<T>& Peer_Ptr<T>::operator=(Peer_Ptr<U>&& rhs)
   {
+    this->ptr_ = rhs.ptr_;
     this->data_ = rhs.data_;
+
+    rhs.ptr_ = nullptr;
     rhs.data_ = nullptr;
 
     return *this;
@@ -317,7 +422,7 @@ namespace redc
   }
 
   template <class T>
-  T& Peer_Ptr<T>::operator*() const
+  typename std::add_lvalue_reference<T>::type Peer_Ptr<T>::operator*() const
   {
     return *get();
   }
@@ -325,21 +430,23 @@ namespace redc
   template <class T>
   T* Peer_Ptr<T>::get() const
   {
-    if(data_) return data_->ptr;
+    // If we have a pointer, data, and a data deleter all valid it means the
+    // pointer points to something meaningful.
+    if(ptr_ && data_ && data_->deleter.get()) return ptr_;
     else return nullptr;
   }
 
   template <class T>
   Peer_Lock<T> Peer_Ptr<T>::lock() const
   {
-    return Peer_Lock<T>{data_};
+    return Peer_Lock<T>{ptr_, data_};
   }
   template <class T>
   Peer_Ptr<T> Peer_Ptr<T>::peer() const
   {
-    // Be careful! We are making yet another in for the data to be delete'd
+    // Be careful! We are making yet another in for the data to be delete'd out
     // from under us!
-    return Peer_Ptr{data_};
+    return Peer_Ptr{ptr_, data_};
   }
 
   template <class T>
@@ -347,6 +454,12 @@ namespace redc
   {
     if(!data_) return 0;
     return data_->peer_count.load();
+  }
+  template <class T>
+  std::size_t Peer_Ptr<T>::locks() const
+  {
+    if(!data_) return 0;
+    return data_->lock_count.load();
   }
 
   template <class T>
@@ -365,11 +478,14 @@ namespace redc
     attempt_reset(data_);
 
     // Byebye data
+    ptr_ = nullptr;
     data_ = nullptr;
   }
 
   template <class T>
-  Peer_Ptr<T>::Peer_Ptr(detail::Peer_Ptr_Data<T>* data) : data_(data)
+  template <class U>
+  Peer_Ptr<T>::Peer_Ptr(U* ptr, detail::Peer_Ptr_Data* data)
+    : ptr_(ptr), data_(data)
   {
     if(data_) ++data_->peer_count;
   }
