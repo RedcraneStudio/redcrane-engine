@@ -2,7 +2,8 @@
  * Copyright (C) 2016 Luke San Antonio
  * All rights reserved.
  *
- * The engine's C interface for the engine to use
+ * C++ code + structs that will not be exposed to the C interface but will be
+ * useful for its implementation.
  */
 #include <cstdint>
 #include <memory>
