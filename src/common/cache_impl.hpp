@@ -15,8 +15,8 @@ namespace redc
   /*!
    * \brief Move constructor, moves the cache!
    */
-  template <typename T, class D, class... Depends>
-  Cache_Impl<T, D, Depends...>::Cache_Impl(Cache_Impl&& c) noexcept
+  template <typename T, class F, class D, class... Depends>
+  Cache_Impl<T, F, D, Depends...>::Cache_Impl(Cache_Impl&& c) noexcept
                                            : cache_(std::move(c.cache_)),
                                              gen_func_(std::move(c.gen_func_)),
                                              deps_(std::move(c.deps_)){}
@@ -24,8 +24,8 @@ namespace redc
   /*!
    * \brief Move assignment operator, moves the cache!
    */
-  template <typename T, class D, class... Depends>
-  auto Cache_Impl<T, D, Depends...>::operator=(Cache_Impl&& c) noexcept
+  template <typename T, class F, class D, class... Depends>
+  auto Cache_Impl<T, F, D, Depends...>::operator=(Cache_Impl&& c) noexcept
                                                             -> Cache_Impl&
   {
     this->cache_ = std::move(c.cache_);
@@ -39,16 +39,16 @@ namespace redc
   /*!
    * \brief Copies the generation function only.
    */
-  template <typename T, class D, class... Depends>
-  Cache_Impl<T, D, Depends...>::Cache_Impl(const Cache_Impl& c) noexcept
+  template <typename T, class F, class D, class... Depends>
+  Cache_Impl<T, F, D, Depends...>::Cache_Impl(const Cache_Impl& c) noexcept
                                            : gen_func_(c.gen_func_),
                                              deps_(c.deps_){}
 
   /*!
    * \brief Copies the generation function only.
    */
-  template <typename T, class D, class... Depends>
-  auto Cache_Impl<T, D, Depends...>::operator=(const Cache_Impl& c) noexcept
+  template <typename T, class F, class D, class... Depends>
+  auto Cache_Impl<T, F, D, Depends...>::operator=(const Cache_Impl& c) noexcept
                                                                  -> Cache_Impl&
   {
     this->gen_func_ = c.gen_func_;
@@ -64,8 +64,8 @@ namespace redc
    *
    * \returns The current state of the cache currently (no generation is done.)
    */
-  template <typename T, class D, class... Depends>
-  inline const T* Cache_Impl<T, D, Depends...>::ccache() const noexcept
+  template <typename T, class F, class D, class... Depends>
+  inline const T* Cache_Impl<T, F, D, Depends...>::ccache() const noexcept
   {
     return this->cache_.get();
   }
@@ -76,8 +76,8 @@ namespace redc
    * A generation occurs if the returned pointer will be a nullptr, if it
    * still is a nullptr after the generation than that is what is returned.
    */
-  template <typename T, class D, class... Depends>
-  inline T* Cache_Impl<T, D, Depends...>::cache()
+  template <typename T, class F, class D, class... Depends>
+  inline T* Cache_Impl<T, F, D, Depends...>::cache()
   {
     if(!this->cache_) this->generate();
     return this->cache_.get();
@@ -90,9 +90,9 @@ namespace redc
    *
    * \sa Cache_Impl::cache_
    */
-  template <typename T, class D, class... Depends>
+  template <typename T, class F, class D, class... Depends>
   template <std::size_t N>
-  inline auto Cache_Impl<T, D, Depends...>::get_dependency() const noexcept ->
+  inline auto Cache_Impl<T, F, D, Depends...>::get_dependency() const noexcept ->
                 typename std::tuple_element<N, depends_tuple_type>::type const&
   {
     return std::get<N>(this->deps_);
@@ -109,9 +109,9 @@ namespace redc
    * \warning Storing the reference and using it later can cause the cache to
    * become out of date without warning. It's best used with discretion.
    */
-  template <typename T, class D, class... Depends>
+  template <typename T, class F, class D, class... Depends>
   template <std::size_t N> inline auto
-  Cache_Impl<T, D, Depends...>::grab_dependency() noexcept ->
+  Cache_Impl<T, F, D, Depends...>::grab_dependency() noexcept ->
                       typename std::tuple_element<N, depends_tuple_type>::type&
   {
     return std::get<N>(this->deps_);
@@ -142,9 +142,9 @@ namespace redc
    *
    * \sa Cache_Impl::cache_
    */
-  template <typename T, class D, class... Depends>
+  template <typename T, class F, class D, class... Depends>
   template <std::size_t N>
-  inline void Cache_Impl<T, D, Depends...>::set_dependency(typename
+  inline void Cache_Impl<T, F, D, Depends...>::set_dependency(typename
            std::tuple_element<N, depends_tuple_type>::type const& dep) noexcept
   {
     if(maybe_equality(dep, std::get<N>(this->deps_))) return;
@@ -160,8 +160,8 @@ namespace redc
    *
    * \note This function will always (re)generate the cache.
    */
-  template <typename T, class D, class... Depends>
-  inline auto Cache_Impl<T, D, Depends...>::generate() -> bool
+  template <typename T, class F, class D, class... Depends>
+  inline auto Cache_Impl<T, F, D, Depends...>::generate() -> bool
   {
     this->cache_ = call(this->gen_func_, this->deps_, std::move(this->cache_));
     return static_cast<bool>(this->cache_);
@@ -172,8 +172,8 @@ namespace redc
    *
    * This means it will have to be completely regenerated at some later time.
    */
-  template <typename T, class D, class... Depends>
-  inline auto Cache_Impl<T, D, Depends...>::invalidate() noexcept -> void
+  template <typename T, class F, class D, class... Depends>
+  inline auto Cache_Impl<T, F, D, Depends...>::invalidate() noexcept -> void
   {
     this->cache_.reset(nullptr);
   }
@@ -183,9 +183,9 @@ namespace redc
    *
    * \returns Cache_Impl::gen_func_.
    */
-  template <typename T, class D, class... Depends>
+  template <typename T, class F, class D, class... Depends>
   inline auto
-  Cache_Impl<T, D, Depends...>::gen_func() const noexcept -> gen_func_type
+  Cache_Impl<T, F, D, Depends...>::gen_func() const noexcept -> F
   {
     return this->gen_func_;
   }
@@ -196,9 +196,9 @@ namespace redc
    * \param f The new function. If empty this function is a complete no-op.
    * \post Invalidates the cache if f is nonempty.
    */
-  template <typename T, class D, class... Depends>
+  template <typename T, class F, class D, class... Depends>
   inline
-  void Cache_Impl<T, D, Depends...>::gen_func(gen_func_type f) noexcept
+  void Cache_Impl<T, F, D, Depends...>::gen_func(F f) noexcept
   {
     // f is empty? Get out!
     if(!f) return;

@@ -12,6 +12,31 @@
 
 namespace redc
 {
+  template <typename T, typename Id>
+  struct ID_Map;
+
+  template <typename T, typename Id>
+  struct Gen_ID_Vec
+  {
+    Gen_ID_Vec(ID_Map<T, Id>* map) : map_(map) {}
+
+    using ptr_type = std::unique_ptr<std::vector<Id> >;
+    ptr_type operator()(ptr_type);
+
+    ID_Map<T, Id>* map_;
+  };
+
+  template <typename T, class Id>
+  typename Gen_ID_Vec<T, Id>::ptr_type Gen_ID_Vec<T, Id>::operator()(ptr_type)
+  {
+    auto ids = std::make_unique<std::vector<Id> >();
+    for(auto&& pair : *map_)
+    {
+      ids->push_back(std::get<0>(pair));
+    }
+    return ids;
+  }
+
   template <typename T, typename Id = uint16_t>
   struct ID_Map
   {
@@ -25,18 +50,8 @@ namespace redc
     using key_type = typename map_type::key_type;
     using size_type = typename map_type::size_type;
 
-    inline ID_Map() noexcept
-    {
-      this->ids_cache_.gen_func([this](auto)
-      {
-        auto ids = std::make_unique<std::vector<id_type> >();
-        for(auto&& pair : *this)
-        {
-          ids->push_back(std::get<0>(pair));
-        }
-        return ids;
-      });
-    }
+    inline ID_Map() noexcept : ids_cache_{this} {}
+
     inline id_type insert(T const& obj) noexcept;
 
     template <class... Args>
@@ -68,7 +83,7 @@ namespace redc
     map_type objs_;
     ID_Gen<id_type> id_counter_;
 
-    mutable Cache<std::vector<id_type> > ids_cache_;
+    mutable Cache<std::vector<id_type>, Gen_ID_Vec<T, id_type> > ids_cache_;
 
     // Overall this is a pretty limited mechanism but it really is all we need
     // to implement Active_Map.

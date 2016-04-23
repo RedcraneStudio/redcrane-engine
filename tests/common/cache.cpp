@@ -10,7 +10,7 @@ using redc::Cache;
 
 TEST_CASE("Simple tests", "[cache]")
 {
-  Cache<int> cache;
+  Cache<int, std::function<std::unique_ptr<int> (std::unique_ptr<int>)> > cache;
   using ptr_type = decltype(cache)::ptr_type;
   int generates = 0;
 
@@ -72,7 +72,8 @@ TEST_CASE("Simple tests", "[cache]")
 }
 TEST_CASE("Cache with dependency tests", "[cache]")
 {
-  Cache<int, int> cache;
+  Cache<int,
+      std::function<std::unique_ptr<int> (std::unique_ptr<int>, int&)>, int> cache;
   using ptr_type = decltype(cache)::ptr_type;
 
   SECTION("Dependencies are set")

@@ -11,7 +11,7 @@ namespace redc
   /*!
    * \brief Implements a caching system for arbitrary pointers.
    */
-  template <typename T, class D, class... Depends>
+  template <typename T, class Func, class D, class... Depends>
   class Cache_Impl
   {
   public:
@@ -19,10 +19,6 @@ namespace redc
      * \brief Smart pointer type which will manage the cache.
      */
     using ptr_type = std::unique_ptr<T, D>;
-    /*!
-     * \brief Generation function type.
-     */
-    using gen_func_type = std::function<ptr_type (ptr_type, Depends&...)>;
 
     /*!
      * \brief Dependencies tuple type.
@@ -36,11 +32,11 @@ namespace redc
      * still invalid/empty, an exception is thrown. Change that with
      * Cache_Impl::gen_func(const gen_func_type&).
      */
-    Cache_Impl() noexcept : gen_func_() {}
+    Cache_Impl() noexcept : gen_func_(Func{}) {}
     /*!
      * \brief Constructs a cache with a generation function.
      */
-    Cache_Impl(gen_func_type f) noexcept : gen_func_(f) {}
+    Cache_Impl(Func f) noexcept : gen_func_(f) {}
 
     Cache_Impl(Cache_Impl&&) noexcept;
     Cache_Impl& operator=(Cache_Impl&&) noexcept;
@@ -64,8 +60,8 @@ namespace redc
     inline bool generate();
     inline void invalidate() noexcept;
 
-    inline gen_func_type gen_func() const noexcept;
-    inline void gen_func(gen_func_type f) noexcept;
+    inline Func gen_func() const noexcept;
+    inline void gen_func(Func f) noexcept;
   private:
 
     /*!
@@ -76,7 +72,7 @@ namespace redc
     /*!
      * \brief Function used to generate the cache.
      */
-    gen_func_type gen_func_;
+    Func gen_func_;
 
     /*!
      * \brief Tuple of dependencies.
@@ -86,11 +82,11 @@ namespace redc
     depends_tuple_type deps_;
   };
 
-  template <typename T, class... Depends>
-  using Cache = Cache_Impl<T, std::default_delete<T>, Depends...>;
+  template <typename T, class Func, class... Depends>
+  using Cache = Cache_Impl<T, Func, std::default_delete<T>, Depends...>;
 
-  template <typename T, class D, class... Depends>
-  using Cache_With_Deleter = Cache_Impl<T, D, Depends...>;
+  template <typename T, class Func, class D, class... Depends>
+  using Cache_With_Deleter = Cache_Impl<T, Func, D, Depends...>;
 };
 
 #include "cache_impl.hpp"
