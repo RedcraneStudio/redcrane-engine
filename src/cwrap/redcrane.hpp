@@ -22,11 +22,16 @@
 #include "../gfx/camera.h"
 #include "../gfx/mesh_chunk.h"
 
+#include "../common/cache.h"
+
 #include "../fps/camera_controller.h"
 
 #include "../sdl_helper.h"
 
 #include <boost/filesystem.hpp>
+
+#include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H
@@ -50,6 +55,7 @@ namespace redc
   }
 
   struct Client;
+  struct Map;
 
   struct Engine
   {
@@ -59,11 +65,24 @@ namespace redc
 
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
 
+    Peer_Lock<Map> active_map;
+    std::vector<Peer_Ptr<Map> > maps;
+
     std::unique_ptr<Client> client;
     //std::unique_ptr<Server> server;
   };
 
   struct Scene;
+
+  struct Upload_Map_Mesh
+  {
+    using ptr_type = std::unique_ptr<gfx::Mesh_Chunk>;
+
+    ptr_type operator()(ptr_type chunk, Map* map);
+
+    // Make sure to set this!
+    gfx::IDriver* driver;
+  };
 
   struct Client
   {
@@ -82,6 +101,8 @@ namespace redc
     std::vector<Peer_Ptr<Texture> > textures;
     std::vector<Peer_Ptr<gfx::Mesh_Chunk> > meshs;
     std::vector<Peer_Ptr<gfx::Shader> > shaders;
+
+    Cache<gfx::Mesh_Chunk, Upload_Map_Mesh, Map*> map_chunk;
 
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it
     // We should reserve some amount of memory for each scene so that we can
@@ -142,5 +163,13 @@ namespace redc
     int16_t frame_count = 0;
     Timer<> frame_timer;
 #endif
+  };
+
+  struct Map
+  {
+    Map(Indexed_Mesh_Data&& data) noexcept;
+    Indexed_Mesh_Data render_mesh;
+    btTriangleIndexVertexArray collis_mesh;
+    btBvhTriangleMeshShape collis_shape;
   };
 }

@@ -202,6 +202,15 @@ extern "C"
     // Find active shader.
     auto active_shader = scene->engine->client->driver->active_shader();
 
+    // Given a map, generate a mesh chunk for the map.
+    scene->engine->client->map_chunk.set_dependency<0>(
+            scene->engine->active_map.get()
+    );
+
+    // Render the map
+    active_shader->set_model(glm::mat4(1.0f));
+    gfx::render_chunk(*scene->engine->client->map_chunk.cache());
+
     // i is the loop counter, id is our current id.
     // Loop however many times as we have ids.
     int cur_id = 0;

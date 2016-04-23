@@ -54,3 +54,7 @@ void redc_scene_render(void *sc);
 
 void *redc_make_shader(void *eng, const char* dir);
 void redc_unmake_shader(void *shader);
+
+// See cwrap/map.cpp
+
+void* redc_map_load(void* eng, const char* file);

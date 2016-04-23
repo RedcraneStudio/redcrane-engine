@@ -33,6 +33,10 @@ function rc:asset_path()
     return ffi.C.redc_get_asset_path(self.engine)
 end
 
+function rc:load_map(filename)
+    return ffi.C.redc_map_load(self.engine, filename)
+end
+
 -- Logging functions
 function stringify(str, ...)
     for n=1,select('#', ...) do

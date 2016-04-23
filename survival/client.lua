@@ -38,6 +38,8 @@ function client:init()
     -- Attach the hands to the camera
     self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())
 
+    self.map = rc:load_map("map")
+
     -- HUD elements?
 end
 

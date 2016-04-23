@@ -84,6 +84,8 @@ extern "C"
 
     rce->client->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
+    rce->client->map_chunk.gen_func({rce->client->driver.get()});
+
     rce->client->driver->set_clear_color(colors::white);
 
     // Load default shader, etc.
