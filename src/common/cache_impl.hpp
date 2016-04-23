@@ -200,8 +200,6 @@ namespace redc
   inline
   void Cache_Impl<T, F, D, Depends...>::gen_func(F f) noexcept
   {
-    // f is empty? Get out!
-    if(!f) return;
     this->invalidate();
     this->gen_func_ = f;
   }
