@@ -27,7 +27,7 @@ extern "C"
     auto sc = new Peer_Ptr<Scene>(new Scene);
     sc->get()->engine = engine;
 
-    engine->client->scenes.push_back(sc->peer());
+    engine->client->peers.push_back(sc->peer());
     return sc;
   }
   void redc_unmake_scene(void *scene)

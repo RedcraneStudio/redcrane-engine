@@ -34,7 +34,7 @@ extern "C"
     auto peer = new Peer_Ptr<gfx::Shader>(std::move(shade));
 
     // Give the engine a peer
-    rce->client->shaders.push_back(peer->peer());
+    rce->client->peers.push_back(peer->peer());
 
     return peer;
   }

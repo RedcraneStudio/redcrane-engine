@@ -96,12 +96,8 @@ namespace redc
     // in the game.
     std::unique_ptr<gfx::IDriver> driver;
 
-    std::vector<Peer_Ptr<Scene> > scenes;
-
-    // Resources
-    std::vector<Peer_Ptr<Texture> > textures;
-    std::vector<Peer_Ptr<gfx::Mesh_Chunk> > meshs;
-    std::vector<Peer_Ptr<gfx::Shader> > shaders;
+    // Destruct all these together, if lua hasn't already.
+    std::vector<Peer_Ptr<void> > peers;
 
     Cache<gfx::Mesh_Chunk, Upload_Map_Mesh, Map*> map_chunk;
 

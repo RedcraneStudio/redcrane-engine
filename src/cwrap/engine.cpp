@@ -105,7 +105,7 @@ extern "C"
 
     // Make sure we don't delete it later by linking its lifetime with that of
     // the engines.
-    rce->client->shaders.push_back(std::move(df_shade));
+    rce->client->peers.push_back(std::move(df_shade));
   }
   void redc_uninit_engine(void* eng)
   {
@@ -150,17 +150,9 @@ extern "C"
     {
       auto& client = *rce->client;
 
-      auto mesh_end = std::remove_if(begin(client.meshs), end(client.meshs),
+      auto peer_end = std::remove_if(begin(client.peers), end(client.peers),
                                      is_null);
-      client.meshs.erase(mesh_end, end(client.meshs));
-
-      auto textures_end = std::remove_if(begin(client.textures),
-                                         end(client.textures), is_null);
-      client.textures.erase(textures_end, end(client.textures));
-
-      auto shaders_end = std::remove_if(begin(client.shaders),
-                                        end(client.shaders), is_null);
-      client.shaders.erase(shaders_end, end(client.shaders));
+      client.peers.erase(peer_end, end(client.peers));
     }
   }
 }

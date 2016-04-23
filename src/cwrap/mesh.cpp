@@ -34,7 +34,7 @@ extern "C"
     *peer->get() = copy_mesh_chunk_move_mesh(mesh.chunk);
 
     // The engine is the other.
-    rce->client->meshs.push_back(peer->peer());
+    rce->client->peers.push_back(peer->peer());
 
     return peer;
   }
