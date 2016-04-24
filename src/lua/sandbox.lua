@@ -35,6 +35,8 @@ return function()
             swap_window = rc.swap_window,
             asset_path = rc.asset_path,
 
+            step_server = rc.step_server,
+
             load_map = rc.load_map,
 
             scene = {

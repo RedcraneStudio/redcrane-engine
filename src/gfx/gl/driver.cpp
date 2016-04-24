@@ -69,6 +69,14 @@ namespace redc
       }
       void Driver::bind_mesh(Mesh& mesh) noexcept
       {
+        // This kind of design can be more cache friendly. But the good thing
+        // is when we are efficiently storing mesh data in a single mesh we
+        // don't even have to dereference the pointer we just do a comparison.
+        // In other words, this will not thrash the cache *too* often, despite
+        // the fact that it would indeed be more efficient to instead literally
+        // keep a list of integers representing each vao to switch to in that
+        // order. I don't know, I guess this isn't the most efficient, but will
+        // get faster as we optimize our mesh use so it's not bad!
         if(&mesh == cur_mesh_) return;
 
         auto gl_mesh = CAST_PTR<GL_Mesh*>(&mesh);

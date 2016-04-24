@@ -21,6 +21,7 @@ void redc_log_e(const char* str);
 
 void* redc_init_engine(Redc_Config cfg);
 void redc_init_client(void* eng);
+void redc_init_server(void* eng);
 void redc_uninit_engine(void* eng);
 
 bool redc_running(void *eng);
@@ -58,3 +59,8 @@ void redc_unmake_shader(void *shader);
 // See cwrap/map.cpp
 
 void* redc_map_load(void* eng, const char* file);
+
+// See cwrap/server.cpp
+
+obj_id redc_server_add_player(void *eng);
+void redc_server_step(void *eng);

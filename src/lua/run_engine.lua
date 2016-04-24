@@ -15,6 +15,7 @@ elseif server_mode == "local" then
 
   -- Initialize the engine client
   rc:init_client()
+  rc:init_server()
 
   -- Pass control to the user client script
   local client = loadfile(rc.config.client_entry)

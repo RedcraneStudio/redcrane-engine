@@ -20,6 +20,13 @@ end
 function rc:init_client()
     ffi.C.redc_init_client(self.engine)
 end
+function rc:init_server()
+    ffi.C.redc_init_server(self.engine)
+end
+
+function rc:step_server()
+    ffi.C.redc_server_step(self.engine)
+end
 
 function rc:running()
     return ffi.C.redc_running(self.engine)

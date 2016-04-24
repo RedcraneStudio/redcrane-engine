@@ -108,6 +108,15 @@ extern "C"
     // Make sure we don't delete it later by linking its lifetime with that of
     // the engines.
     rce->client->peers.push_back(std::move(df_shade));
+
+    log_i("Initializing client subsystem ... Successful");
+  }
+  void redc_init_server(void* eng)
+  {
+    auto rce = (Engine*) eng;
+    rce->server = std::make_unique<Server>();
+
+    log_i("Initializing server subsystem ... Successful");
   }
   void redc_uninit_engine(void* eng)
   {

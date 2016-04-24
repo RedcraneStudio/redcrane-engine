@@ -31,8 +31,12 @@
 
 #include <boost/filesystem.hpp>
 
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
+
+#include "../player.h"
 
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H
@@ -46,6 +50,9 @@ extern "C"
 #define REDC_ASSERT_HAS_CLIENT(rce) \
 REDC_ASSERT_MSG(rce->client != nullptr, "Client must be initialized")
 
+#define REDC_ASSERT_HAS_SERVER(rce) \
+REDC_ASSERT_MSG(rce->server != nullptr, "Server must be initialized")
+
 namespace redc
 {
   template <class T>
@@ -56,6 +63,7 @@ namespace redc
   }
 
   struct Client;
+  struct Server;
   struct Map;
 
   struct Engine
@@ -70,7 +78,7 @@ namespace redc
     std::vector<Peer_Ptr<Map> > maps;
 
     std::unique_ptr<Client> client;
-    //std::unique_ptr<Server> server;
+    std::unique_ptr<Server> server;
 
     std::chrono::high_resolution_clock::time_point start_time;
   };
@@ -114,6 +122,25 @@ namespace redc
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it
     // We should reserve some amount of memory for each scene so that we can
     // pass around pointers and no they won't suddenly become invalid.
+  };
+
+  struct Player
+  {
+    Player_Controller controller;
+  };
+
+  struct Server
+  {
+    Server();
+    std::unique_ptr<btDefaultCollisionConfiguration> bt_config;
+    std::unique_ptr<btCollisionDispatcher> bt_dispatcher;
+    std::unique_ptr<btDbvtBroadphase> bt_broadphase;
+    std::unique_ptr<btSequentialImpulseConstraintSolver> bt_solver;
+
+    std::unique_ptr<btDiscreteDynamicsWorld> bt_world;
+
+    ID_Gen<obj_id> index_gen;
+    std::array<Player, std::numeric_limits<obj_id>::max()> players;
   };
 
   struct Mesh_Object
