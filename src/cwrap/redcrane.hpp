@@ -71,7 +71,17 @@ namespace redc
 
     std::unique_ptr<Client> client;
     //std::unique_ptr<Server> server;
+
+    std::chrono::high_resolution_clock::time_point start_time;
   };
+
+  template <class T>
+  double time_since(T before) noexcept
+  {
+    T now = std::chrono::high_resolution_clock::now();
+    using sec_t = std::chrono::duration<double, std::chrono::seconds::period>;
+    return sec_t(now - before).count();
+  }
 
   struct Scene;
 

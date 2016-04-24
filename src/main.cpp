@@ -105,15 +105,6 @@ po::options_description command_options_desc() noexcept
 
   return desc;
 }
-
-template <class T>
-double time_since(T before) noexcept
-{
-  T now = std::chrono::high_resolution_clock::now();
-  using sec_t = std::chrono::duration<double, std::chrono::seconds::period>;
-  return sec_t(now - before).count();
-}
-
 int start_connect(po::variables_map const& vm)
 {
   using namespace redc;

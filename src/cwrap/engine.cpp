@@ -65,6 +65,8 @@ extern "C"
           REDC_ENGINE_VERSION_MAJOR, REDC_ENGINE_VERSION_MINOR,
           REDC_ENGINE_VERSION_PATCH, cfg.mod_name);
 
+    eng->start_time = std::chrono::high_resolution_clock::now();
+
     return eng;
   }
   void redc_init_client(void* eng)
