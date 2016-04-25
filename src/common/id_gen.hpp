@@ -5,9 +5,31 @@
 #pragma once
 #include <vector>
 #include <algorithm>
+#include <atomic>
+#include <mutex>
 namespace redc
 {
-  template <typename id_type>
+  template <class T>
+  struct Unsafe_Lock_Policy
+  {
+    using counter_type = T;
+
+    inline void lock() {}
+    inline void unlock() {}
+  };
+
+  template <class T>
+  struct Safe_Lock_Policy
+  {
+    using counter_type = std::atomic<T>;
+
+    std::mutex mutex;
+
+    inline void lock() { mutex.lock(); }
+    inline void unlock() { mutex.unlock(); }
+  };
+
+  template <typename id_type, class Lock_Policy = Unsafe_Lock_Policy<id_type> >
   struct ID_Gen
   {
     id_type get();
@@ -21,7 +43,9 @@ namespace redc
     id_type reserved();
 
   private:
-    id_type count_ = 0;
+    typename Lock_Policy::counter_type count_;
+
+    mutable Lock_Policy lock_;
 
     // We could technically use a set here, but the performance is never going
     // to be better than the vector for the amount of ids that we are going to
@@ -29,14 +53,19 @@ namespace redc
     std::vector<id_type> removed_id_queue_;
   };
 
+  template <class T>
+  std::unique_lock<T> lock(T& t) { return std::unique_lock<T>{t}; }
+
   /*!
    * \brief Returns some valid which can be used on a new Object.
    *
    * \returns 0 if there are no ids available.
    */
-  template <typename id_type>
-  id_type ID_Gen<id_type>::get()
+  template <typename id_type, class Lock_Policy>
+  id_type ID_Gen<id_type, Lock_Policy>::get()
   {
+    auto lock_guard = lock(this->lock_);
+
     // If we have ids to use
     if(!removed_id_queue_.empty())
     {
@@ -56,9 +85,11 @@ namespace redc
     return ret;
   }
 
-  template <typename id_type>
-  id_type ID_Gen<id_type>::peek()
+  template <typename id_type, class Lock_Policy>
+  id_type ID_Gen<id_type, Lock_Policy>::peek()
   {
+    auto lock_guard = lock(this->lock_);
+
     if(!removed_id_queue_.empty())
     {
       return removed_id_queue_.front();
@@ -70,12 +101,14 @@ namespace redc
     }
   }
 
-  template <typename id_type>
-  void ID_Gen<id_type>::remove(id_type id)
+  template <typename id_type, class Lock_Policy>
+  void ID_Gen<id_type, Lock_Policy>::remove(id_type id)
   {
     // This is a bad id, ignore it or we may just go about returning them
     // erroneously.
     if(id == 0) return;
+
+    auto lock_guard = lock(this->lock_);
 
     // The id can't be bigger than count, because count is the last id that was
     // returned. In fact, if we end up overflowing it will always be that one
@@ -92,27 +125,33 @@ namespace redc
       // else the id was found, we don't need to remove it again.
     }
   }
-  template <class id_type>
-  bool ID_Gen<id_type>::is_removed(id_type id)
+  template <class id_type, class Lock_Policy>
+  bool ID_Gen<id_type, Lock_Policy>::is_removed(id_type id)
   {
     if(id == 0) return false;
+
+    auto lock_guard = lock(this->lock_);
 
     auto it = std::find(begin(removed_id_queue_), end(removed_id_queue_), id);
     return it != end(removed_id_queue_);
   }
 
-  template <class id_type>
-  bool ID_Gen<id_type>::is_valid(id_type id)
+  template <class id_type, class Lock_Policy>
+  bool ID_Gen<id_type, Lock_Policy>::is_valid(id_type id)
   {
     if(id == 0) return false;
 
+    auto lock_guard = lock(this->lock_);
+
     // A valid id can't be removed and must be below/equal to count_
-    return !is_removed(id) &&  id <= count_;
+    return !is_removed(id) && id <= count_;
   }
 
-  template <typename id_type>
-  id_type ID_Gen<id_type>::reserved()
+  template <typename id_type, class Lock_Policy>
+  id_type ID_Gen<id_type, Lock_Policy>::reserved()
   {
+    auto lock_guard = lock(this->lock_);
+
     return count_ - removed_id_queue_.size();
   }
 }
