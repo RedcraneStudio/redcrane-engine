@@ -34,6 +34,9 @@ namespace redc
 
     inline btTransform getWorldTransform(btTransform& t) const
     { t = ghost_.getWorldTransform(); }
+
+    void apply_delta_yaw(double dv);
+    void apply_delta_pitch(double dv);
   private:
     bool inited_;
     btPairCachingGhostObject ghost_;
@@ -49,11 +52,11 @@ namespace redc
     // Player state (FSM)
   };
 
-  inline glm::vec3 get_player_position(Player& p)
+  inline glm::vec3 get_camera_position(Player_Controller& pc)
   {
-    btTransform transform;
-    p.controller.getWorldTransform(transform);
-    auto origin = transform.getOrigin();
+    btTransform trans;
+    pc.getWorldTransform(trans);
+    auto origin = trans.getOrigin();
     return {origin.x(), origin.y(), origin.z()};
   }
 }

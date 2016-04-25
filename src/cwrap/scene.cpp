@@ -193,7 +193,8 @@ extern "C"
     if(active_camera->follow_player && scene->active_player)
     {
       // Set the camera to the player.
-      active_camera->cam.fp.pos = get_player_position(*scene->active_player);
+      active_camera->cam.fp.pos =
+        get_camera_position(scene->active_player->controller);
     }
 
     SDL_Event event;
@@ -210,15 +211,23 @@ extern "C"
           scene->engine->running = false;
           break;
         case SDL_MOUSEMOTION:
+        {
+          auto dy = event.motion.xrel / 1000.0f;
+          auto dp = event.motion.yrel / 1000.0f;
+          if(scene->active_player)
+          {
+            scene->active_player->controller.apply_delta_yaw(dy);
+            scene->active_player->controller.apply_delta_pitch(dp);
+          }
           if(active_camera)
           {
-            active_camera->control.apply_delta_yaw(active_camera->cam,
-                    event.motion.xrel / 1000.0f);
-
-            active_camera->control.apply_delta_pitch(active_camera->cam,
-                    event.motion.yrel / 1000.0f);
+            // TODO: Better solution: Get the camera orientation and position
+            // from the player controller!
+            active_camera->control.apply_delta_yaw(active_camera->cam, dy);
+            active_camera->control.apply_delta_pitch(active_camera->cam, dp);
           }
           break;
+        }
         default:
           break;
       }

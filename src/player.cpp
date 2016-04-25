@@ -42,31 +42,47 @@ namespace redc
 
     auto xform = ghost_.getWorldTransform();
 
+    btVector3 local_dpos;
+
     if(input_ref_->forward)
     {
-      auto orig = xform.getOrigin();
-      orig.setZ(orig.getZ() + .01f);
-      xform.setOrigin(orig);
+      local_dpos.setZ(-.1f);
     }
     if(input_ref_->backward)
     {
-      auto orig = xform.getOrigin();
-      orig.setZ(orig.getZ() - .01f);
-      xform.setOrigin(orig);
+      local_dpos.setZ(+.1f);
     }
     if(input_ref_->strafe_left)
     {
-      auto orig = xform.getOrigin();
-      orig.setX(orig.getX() - .01f);
-      xform.setOrigin(orig);
+      local_dpos.setX(-.1f);
     }
     if(input_ref_->strafe_right)
     {
-      auto orig = xform.getOrigin();
-      orig.setX(orig.getX() + .01f);
-      xform.setOrigin(orig);
+      local_dpos.setX(+.1f);
     }
+    auto orig = xform.getOrigin();
+    orig += btMatrix3x3(xform.getRotation()) * local_dpos;
+    xform.setOrigin(orig);
 
     ghost_.setWorldTransform(xform);
+  }
+
+  void Player_Controller::apply_delta_yaw(double yaw)
+  {
+    auto xform = ghost_.getWorldTransform();
+    auto rot = xform.getRotation();
+    rot *= btQuaternion(-yaw, 0.0f, 0.0f);
+    xform.setRotation(rot);
+    ghost_.setWorldTransform(xform);
+  }
+  void Player_Controller::apply_delta_pitch(double pitch)
+  {
+    // We don't care about pitch as of now from a physics standpoint
+    /*
+    auto xform = ghost_.getWorldTransform();
+    auto rot = xform.getRotation();
+    rot *= btQuaternion(0.0f, pitch, 0.0f);
+    ghost_.setWorldTransform(xform);
+    */
   }
 }
