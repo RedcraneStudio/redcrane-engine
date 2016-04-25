@@ -66,6 +66,7 @@ extern "C"
           REDC_ENGINE_VERSION_PATCH, cfg.mod_name);
 
     eng->start_time = std::chrono::high_resolution_clock::now();
+    eng->last_frame = eng->start_time;
 
     return eng;
   }

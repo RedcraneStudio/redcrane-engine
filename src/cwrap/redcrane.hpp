@@ -37,6 +37,7 @@
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 
 #include "../player.h"
+#include "../server.h"
 
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H
@@ -81,6 +82,7 @@ namespace redc
     std::unique_ptr<Server> server;
 
     std::chrono::high_resolution_clock::time_point start_time;
+    std::chrono::high_resolution_clock::time_point last_frame;
   };
 
   template <class T>
@@ -105,9 +107,12 @@ namespace redc
 
   struct Client
   {
-    Client(redc::SDL_Init_Lock l) : sdl_raii(std::move(l)) {}
+    Client(redc::SDL_Init_Lock l)
+      : sdl_raii(std::move(l)), input_cfg(get_default_input_config()) {}
 
     redc::SDL_Init_Lock sdl_raii;
+
+    Input_Config input_cfg;
 
     // Make sure we put this at the top so it is uninitialized relatively after
     // we have to deallocate all the meshes, textures, etc.
@@ -124,14 +129,13 @@ namespace redc
     // pass around pointers and no they won't suddenly become invalid.
   };
 
-  struct Player
-  {
-    Player_Controller controller;
-  };
-
-  struct Server
+  struct Server : public Server_Base
   {
     Server();
+
+    void req_player() override;
+    Player& player(player_id id) override;
+
     std::unique_ptr<btDefaultCollisionConfiguration> bt_config;
     std::unique_ptr<btCollisionDispatcher> bt_dispatcher;
     std::unique_ptr<btDbvtBroadphase> bt_broadphase;
@@ -153,10 +157,12 @@ namespace redc
 
   struct Cam_Object
   {
-    Cam_Object(gfx::Camera const& c) : cam(c), control() {}
+    Cam_Object(gfx::Camera const& c) : cam(c), control(),follow_player(false){}
 
     gfx::Camera cam;
     fps::Camera_Controller control;
+
+    bool follow_player;
   };
 
   struct Object
@@ -192,6 +198,8 @@ namespace redc
     // system?
     obj_id active_camera;
 
+    Player* active_player;
+
     ID_Gen<obj_id> index_gen;
     std::array<Object, std::numeric_limits<obj_id>::max()> objs;
 
@@ -199,6 +207,8 @@ namespace redc
     int16_t frame_count = 0;
     Timer<> frame_timer;
 #endif
+
+    Input cur_input;
   };
 
   struct Map

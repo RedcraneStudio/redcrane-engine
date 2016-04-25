@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <glm/glm.hpp>
 #include <LinearMath/btMotionState.h>
 #include <BulletDynamics/btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
@@ -23,6 +24,8 @@ namespace redc
   {
     Player_Controller();
 
+    inline void reset() { inited_ = false; }
+
     void updateAction(btCollisionWorld* world, btScalar dt) override;
     void debugDraw(btIDebugDraw*) {}
 
@@ -38,4 +41,19 @@ namespace redc
 
     Input* input_ref_;
   };
+
+  struct Player
+  {
+    Player_Controller controller;
+
+    // Player state (FSM)
+  };
+
+  inline glm::vec3 get_player_position(Player& p)
+  {
+    btTransform transform;
+    p.controller.getWorldTransform(transform);
+    auto origin = transform.getOrigin();
+    return {origin.x(), origin.y(), origin.z()};
+  }
 }

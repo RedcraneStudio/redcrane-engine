@@ -45,25 +45,25 @@ namespace redc
     if(input_ref_->forward)
     {
       auto orig = xform.getOrigin();
-      orig.setZ(orig.getZ() + .1f);
+      orig.setZ(orig.getZ() + .01f);
       xform.setOrigin(orig);
     }
     if(input_ref_->backward)
     {
       auto orig = xform.getOrigin();
-      orig.setZ(orig.getZ() - .1f);
+      orig.setZ(orig.getZ() - .01f);
       xform.setOrigin(orig);
     }
     if(input_ref_->strafe_left)
     {
       auto orig = xform.getOrigin();
-      orig.setX(orig.getX() - .1f);
+      orig.setX(orig.getX() - .01f);
       xform.setOrigin(orig);
     }
     if(input_ref_->strafe_right)
     {
       auto orig = xform.getOrigin();
-      orig.setX(orig.getX() + .1f);
+      orig.setX(orig.getX() + .01f);
       xform.setOrigin(orig);
     }
 

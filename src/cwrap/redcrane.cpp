@@ -76,4 +76,35 @@ namespace redc
     collis_mesh.addIndexedMesh(indexed_mesh, PHY_INTEGER);
     collis_shape.buildOptimizedBvh();
   }
+
+  Server::Server()
+  {
+    bt_config = std::make_unique<btDefaultCollisionConfiguration>();
+    bt_dispatcher = std::make_unique<btCollisionDispatcher>(bt_config.get());
+    bt_broadphase = std::make_unique<btDbvtBroadphase>();
+    bt_solver = std::make_unique<btSequentialImpulseConstraintSolver>();
+
+    bt_world = std::make_unique<btDiscreteDynamicsWorld>(bt_dispatcher.get(),
+                                                         bt_broadphase.get(),
+                                                         bt_solver.get(),
+                                                         bt_config.get());
+
+    bt_world->setGravity(btVector3(0.0f, -9.81f, 0.0f));
+  }
+
+  void Server::req_player()
+  {
+    // New id
+    auto id = this->index_gen.get();
+
+    // Be careful about reusing the memory for the player controller here.
+    at_id(this->players, id).controller.reset();
+
+    // New player, notify anyone who cares
+    push_outgoing_event(New_Player_Event{id, true});
+  }
+  Player& Server::player(player_id id)
+  {
+    return players[id-1];
+  }
 }

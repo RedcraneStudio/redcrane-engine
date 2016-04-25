@@ -51,6 +51,10 @@ obj_id redc_scene_add_player(void* sc);
 void redc_scene_set_active_camera(void *sc, obj_id);
 obj_id redc_scene_get_active_camera(void *sc);
 
+// Set a camera to follow the active player. Multiple cameras can have this
+// property even if that isn't really helpful.
+void redc_scene_camera_set_follow_player(void *sc, obj_id cam, bool en);
+
 void redc_scene_set_parent(void* sc, obj_id obj, obj_id parent);
 
 void redc_scene_step(void *sc);
@@ -64,3 +68,7 @@ void redc_unmake_shader(void *shader);
 // See cwrap/map.cpp
 
 void* redc_map_load(void* eng, const char* file);
+
+// See cwrap/server.cpp
+
+void redc_server_req_player(void *eng);

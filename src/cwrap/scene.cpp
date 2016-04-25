@@ -102,6 +102,21 @@ extern "C"
     }
   }
 
+  void redc_scene_camera_set_follow_player(void *sc, obj_id cam, bool en)
+  {
+    auto scene = lock_resource<Scene>(sc);
+
+    auto& object = at_id(scene->objs, cam);
+    if(object.obj.which() != Object::Cam)
+    {
+      log_w("Cannot set non-camera object as player camera");
+    }
+    else
+    {
+      boost::get<Cam_Object>(object.obj).follow_player = en;
+    }
+  }
+
   obj_id redc_scene_add_mesh(void *sc, void *ms)
   {
     auto scene = lock_resource<redc::Scene>(sc);
@@ -131,6 +146,43 @@ extern "C"
   {
     auto scene = lock_resource<redc::Scene>(sc);
 
+    // Find the engine
+    auto engine = scene->engine;
+
+    // ===
+    // Server Events
+    // ===
+    if(engine->server)
+    {
+      Server_Event event;
+      while(engine->server->poll_event(event))
+      {
+        switch(event.which())
+        {
+          case 0:
+          {
+            // New player, if they are our own we can attach a camera
+            New_Player_Event np = boost::get<New_Player_Event>(event);
+            if(np.owned)
+            {
+              // This is our new owned player.
+              // TODO: Verify the address will never change!
+              // Nevermind it won't but it's still important to keep in mind.
+              scene->active_player = &engine->server->player(np.id);
+
+              // Give it access to the current input state.
+              scene->active_player->controller.set_input_ref(&scene->cur_input);
+
+              engine->server->bt_world->addAction(&scene->active_player->controller);
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      }
+    }
+
     Cam_Object* active_camera;
     if(scene->active_camera)
     {
@@ -138,11 +190,18 @@ extern "C"
                                                     scene->active_camera).obj);
     }
 
+    if(active_camera->follow_player && scene->active_player)
+    {
+      // Set the camera to the player.
+      active_camera->cam.fp.pos = get_player_position(*scene->active_player);
+    }
+
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
       // If we already used the event, bail.
-      //if(collect_input(input, event, input_cfg)) continue;
+      if(collect_input(scene->cur_input, event,
+                       engine->client->input_cfg)) continue;
 
       // Otherwise
       switch(event.type)
@@ -160,13 +219,14 @@ extern "C"
                     event.motion.yrel / 1000.0f);
           }
           break;
-        case SDL_KEYDOWN:
-          //if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) running = false;
-          break;
         default:
           break;
       }
     }
+
+    // The controller has access to input, step the simulation
+    engine->server->bt_world->stepSimulation(time_since(engine->last_frame), 10);
+    engine->last_frame = std::chrono::high_resolution_clock::now();
   }
 
   void redc_scene_render(void *sc)

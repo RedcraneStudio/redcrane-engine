@@ -26,7 +26,10 @@ function scene.make_scene()
 
     function sc:add_player()
         -- Load gun for player hud and camera for a player.
-        -- TODO: Make a request for the player state data from the server.
+
+        -- Request a new player (TODO Should fail when we already have one,
+        -- this function is mostly a suggestion to get things moving).
+        rc.server:req_player()
 
         local hand_mesh = rc.mesh:load_mesh("character/hands")
         local player = {
@@ -34,6 +37,10 @@ function scene.make_scene()
             camera = self:add_camera("fps")
         }
         self:set_parent(player.hands, player.camera)
+
+        -- Figure the camera will follow the player whoever that be.
+        self:camera_set_follow_player(player.camera, true)
+
         return player
     end
 
@@ -46,6 +53,11 @@ function scene.make_scene()
             -- Get the camera
             return ffi.C.redc_scene_set_active_camera(self._scene_ptr, cam)
         end
+    end
+
+    function sc:camera_set_follow_player(cam, val)
+        val = val or true
+        ffi.C.redc_scene_camera_set_follow_player(self._scene_ptr, cam, val)
     end
 
     -- A transformation applied to a mesh only really makes sense in the context
