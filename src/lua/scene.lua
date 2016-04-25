@@ -25,6 +25,9 @@ function scene.make_scene()
     end
 
     function sc:add_player()
+        -- Load gun for player hud and camera for a player.
+        -- TODO: Make a request for the player state data from the server.
+
         local hand_mesh = rc.mesh:load_mesh("character/hands")
         local player = {
             hands = self:add_mesh(hand_mesh);
