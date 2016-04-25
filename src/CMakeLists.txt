@@ -58,7 +58,7 @@ endfunction()
 
 # These are the lua files we want to compile and link into the executable, for
 # access by luajit. The file name will the module name put in package.preload
-set(REDC_LUAJIT_COMPILED_BYTECODE lua/mesh_pool.obj
+set(REDC_LUAJIT_COMPILED_BYTECODE lua/mesh.obj
                                   lua/redcrane.obj
                                   lua/scene.obj
                                   lua/shader.obj

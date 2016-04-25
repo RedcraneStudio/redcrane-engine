@@ -32,8 +32,7 @@ function client:init()
     self.shaders.hud = rc.shader.load_shader("hud");
 
     -- Load in the character's hands
-    self.mesh_pool = rc.mesh_pool.make_mesh_pool()
-    local hand_mesh = self.mesh_pool:load_mesh("character/hands")
+    local hand_mesh = rc.mesh:load_mesh("character/hands")
 
     -- Attach the hands to the camera
     self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())

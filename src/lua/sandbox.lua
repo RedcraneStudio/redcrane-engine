@@ -42,8 +42,8 @@ return function()
             scene = {
                 make_scene = rc.scene.make_scene
             },
-            mesh_pool = {
-                make_mesh_pool = rc.mesh_pool.make_mesh_pool
+            mesh = {
+                load_mesh = rc.mesh.load_mesh
             },
             shader = {
                 load_shader = rc.shader.load_shader

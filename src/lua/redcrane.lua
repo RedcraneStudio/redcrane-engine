@@ -11,7 +11,7 @@ function rc:init(config)
                                         ffi.C.redc_uninit_engine)
 
     self.scene = require("scene")
-    self.mesh_pool = require("mesh_pool")
+    self.mesh = require("mesh")
     self.shader = require("shader")
 
     return self.engine
