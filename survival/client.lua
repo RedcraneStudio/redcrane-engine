@@ -37,6 +37,11 @@ function client:init()
     -- Attach the hands to the camera
     self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())
 
+    -- First load a player
+    self.player = rc.server:make_player();
+    -- And attach the camera to the player
+    self.scene:attach(self.scene:active_camera(), self.player);
+
     self.map = rc:load_map("map")
 
     -- HUD elements?

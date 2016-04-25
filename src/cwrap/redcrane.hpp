@@ -139,6 +139,8 @@ namespace redc
 
     std::unique_ptr<btDiscreteDynamicsWorld> bt_world;
 
+    obj_id active_player;
+
     ID_Gen<obj_id> index_gen;
     std::array<Player, std::numeric_limits<obj_id>::max()> players;
   };

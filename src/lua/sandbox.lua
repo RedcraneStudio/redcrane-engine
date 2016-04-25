@@ -48,6 +48,9 @@ return function()
             shader = {
                 load_shader = rc.shader.load_shader
             },
+            server = {
+                make_player = rc.server.make_player
+            },
 
             log_d = rc.log_d,
             log_i = rc.log_i,

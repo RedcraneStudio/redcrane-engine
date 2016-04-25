@@ -30,7 +30,7 @@ namespace redc
   }
 }
 
-obj_id redc_server_add_player(void *eng)
+obj_id redc_server_make_player(void *eng)
 {
   auto rce = (Engine*) eng;
   REDC_ASSERT_HAS_SERVER(rce);
@@ -40,6 +40,11 @@ obj_id redc_server_add_player(void *eng)
 
   // Add local player controller action interface to player controller.
   rce->server->bt_world->addAction(&rce->server->players[id-1].controller);
+
+  if(!rce->server->active_player)
+  {
+    rce->server->active_player = id;
+  }
 
   return id;
 }

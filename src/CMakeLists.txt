@@ -62,6 +62,7 @@ set(REDC_LUAJIT_COMPILED_BYTECODE lua/mesh.obj
                                   lua/redcrane.obj
                                   lua/scene.obj
                                   lua/shader.obj
+                                  lua/server.obj
                                   lua/config_sandbox.obj)
 
 # This directory isn't automatically made for us

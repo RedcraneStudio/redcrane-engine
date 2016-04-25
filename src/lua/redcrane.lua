@@ -13,6 +13,7 @@ function rc:init(config)
     self.scene = require("scene")
     self.mesh = require("mesh")
     self.shader = require("shader")
+    self.server = require("server")
 
     return self.engine
 end
