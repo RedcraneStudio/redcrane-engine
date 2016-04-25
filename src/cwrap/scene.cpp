@@ -80,7 +80,7 @@ extern "C"
     // This will be zero when there isn't an active camera.
     return scene->active_camera;
   }
-  void redc_scene_activate_camera(void *sc, obj_id cam)
+  void redc_scene_set_active_camera(void *sc, obj_id cam)
   {
     if(!cam)
     {
@@ -102,7 +102,7 @@ extern "C"
     }
   }
 
-  obj_id redc_scene_attach(void *sc, void *ms, obj_id parent)
+  obj_id redc_scene_add_mesh(void *sc, void *ms)
   {
     auto scene = lock_resource<redc::Scene>(sc);
 
@@ -111,15 +111,20 @@ extern "C"
 
     auto mesh = lock_resource<gfx::Mesh_Chunk>(ms);
 
-    auto& obj = at_id(scene->objs, id);
-    obj.obj = Mesh_Object{std::move(mesh), glm::mat4(1.0f)};
-
-    if(parent)
-    {
-      obj.parent = &at_id(scene->objs, parent);
-    }
+    at_id(scene->objs, id) =
+            {Mesh_Object{std::move(mesh), glm::mat4(1.0f)}, nullptr};
 
     return id;
+  }
+
+  void redc_scene_set_parent(void* sc, obj_id obj, obj_id parent)
+  {
+    auto scene = lock_resource<Scene>(sc);
+
+    // Set parent of this object
+    // We could just use ids for the parent reference too but it makes things
+    // a little easier on our end to manage.
+    at_id(scene->objs, obj).parent = &at_id(scene->objs, parent);
   }
 
   void redc_scene_step(void *sc)

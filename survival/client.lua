@@ -23,24 +23,12 @@ function client:init()
     -- What scene shall we use?
     self.scene = rc.scene.make_scene()
 
-    -- Use an fps camera, it's the only one so it will be made active.
-    self.scene:add_camera("fps")
+    self.player = self.scene:add_player()
 
     self.shaders = {}
     self.shaders.basic = rc.shader.load_shader("basic");
     self.shaders.envmap = rc.shader.load_shader("envmap");
     self.shaders.hud = rc.shader.load_shader("hud");
-
-    -- Load in the character's hands
-    local hand_mesh = rc.mesh:load_mesh("character/hands")
-
-    -- Attach the hands to the camera
-    self.hands = self.scene:attach(hand_mesh, self.scene:active_camera())
-
-    -- First load a player
-    self.player = rc.server:make_player();
-    -- And attach the camera to the player
-    self.scene:attach(self.scene:active_camera(), self.player);
 
     self.map = rc:load_map("map")
 

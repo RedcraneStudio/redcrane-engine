@@ -44,9 +44,14 @@ void* redc_make_scene(void* engine);
 void redc_unmake_scene(void* scene);
 
 obj_id redc_scene_add_camera(void *sc, const char *tp);
+obj_id redc_scene_add_mesh(void* sc, void* msh);
+
+obj_id redc_scene_add_player(void* sc);
+
+void redc_scene_set_active_camera(void *sc, obj_id);
 obj_id redc_scene_get_active_camera(void *sc);
 
-obj_id redc_scene_attach(void *sc, void *ms, obj_id parent);
+void redc_scene_set_parent(void* sc, obj_id obj, obj_id parent);
 
 void redc_scene_step(void *sc);
 void redc_scene_render(void *sc);
