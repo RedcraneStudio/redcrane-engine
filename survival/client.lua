@@ -39,7 +39,6 @@ client:init()
 rc:log_i("Done initializing")
 
 while rc:running() do
-    rc:step_server()
     client.scene:step()
     client.scene:render()
     rc:swap_window()

@@ -64,8 +64,3 @@ void redc_unmake_shader(void *shader);
 // See cwrap/map.cpp
 
 void* redc_map_load(void* eng, const char* file);
-
-// See cwrap/server.cpp
-
-obj_id redc_server_make_player(void *eng);
-void redc_server_step(void *eng);
