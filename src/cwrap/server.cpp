@@ -49,5 +49,8 @@ void redc_server_step(void *eng)
   auto rce = (Engine*) eng;
   REDC_ASSERT_HAS_SERVER(rce);
 
+  Input input;
+  rce->server->players[rce->server->active_player-1].controller.set_input_ref(&input);
+
   rce->server->bt_world->stepSimulation(time_since(rce->start_time), 10);
 }
