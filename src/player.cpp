@@ -1,10 +1,16 @@
 #include "player.h"
 
+#include "common/log.h"
+
+#define PLAYER_CAPSULE_HEIGHT 1.8f
+#define PLAYER_CAPSULE_RADIUS 0.25f
+
 namespace redc
 {
   Player_Controller::Player_Controller() : inited_(false),
                                            ghost_(),
-                                           shape_(.25f, 1.8f) {}
+                                           shape_(PLAYER_CAPSULE_RADIUS,
+                                                  PLAYER_CAPSULE_HEIGHT) {}
 
   // They are expected to add the action to the dynamics world and then this
   // will be called, then we init then we start
@@ -25,6 +31,36 @@ namespace redc
       return;
     }
 
+    auto xform = ghost_.getWorldTransform();
+    {
+      auto orig = xform.getOrigin();
+
+      // Apply some sort of gravity
+      orig.setY(orig.getY() - .05f);
+
+      xform.setOrigin(orig);
+    }
+
+    auto cur_pos = xform.getOrigin();
+    auto end_pos = cur_pos;
+
+    // The player's height ought to be enough
+    end_pos.setY(cur_pos.getY() - PLAYER_CAPSULE_HEIGHT);
+
+    // Perform a raytest from the character to the ground and lock it there.
+    btCollisionWorld::ClosestRayResultCallback ray_cb(cur_pos, end_pos);
+    world->rayTest(cur_pos, end_pos, ray_cb);
+    if(ray_cb.hasHit())
+    {
+      auto end = ray_cb.m_hitPointWorld;
+      log_i("% % %", end.getX(), end.getY(), end.getZ());
+
+      // Put it right on top!
+      end.setY(end.getY() + PLAYER_CAPSULE_HEIGHT / 2.0f);
+      xform.setOrigin(end);
+    }
+
+#if 0
     // Recover from intersection
     btVector3 min_aabb, max_aabb;
     shape_.getAabb(ghost_.getWorldTransform(), min_aabb, max_aabb);
@@ -36,11 +72,8 @@ namespace redc
             world->getDispatchInfo(),
             world->getDispatcher());
 
-    auto cur_pos = ghost_.getWorldTransform().getOrigin();
-
     btScalar maxPen = btScalar(0.0);
-
-    auto xform = ghost_.getWorldTransform();
+#endif
 
     btVector3 local_dpos;
 
@@ -60,6 +93,15 @@ namespace redc
     {
       local_dpos.setX(+.1f);
     }
+    if(input_ref_->primary_attack)
+    {
+      local_dpos.setY(+.1f);
+    }
+    if(input_ref_->secondary_attack)
+    {
+      local_dpos.setY(-.1f);
+    }
+
     auto orig = xform.getOrigin();
     orig += btMatrix3x3(xform.getRotation()) * local_dpos;
     xform.setOrigin(orig);
