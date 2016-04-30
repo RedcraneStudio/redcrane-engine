@@ -35,7 +35,7 @@ namespace redc { namespace assets
             // to one of the two paths below it but in the case we install
             // someplace weird use this.
             path(REDC_INSTALL_PREFIX "/share/" REDC_SHARE_DIR),
-            path("/usr/local/share" REDC_SHARE_DIR),
+            path("/usr/local/share/" REDC_SHARE_DIR),
             path("/usr/share/" REDC_SHARE_DIR)
     };
 
