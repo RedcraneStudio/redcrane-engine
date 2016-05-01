@@ -75,7 +75,7 @@ namespace redc
     btScalar maxPen = btScalar(0.0);
 #endif
 
-    btVector3 local_dpos;
+    btVector3 local_dpos(0.0f, 0.0f, 0.0f);
 
     if(input_ref_->forward)
     {
