@@ -53,7 +53,6 @@ namespace redc
     if(ray_cb.hasHit())
     {
       auto end = ray_cb.m_hitPointWorld;
-      log_i("% % %", end.getX(), end.getY(), end.getZ());
 
       // Put it right on top!
       end.setY(end.getY() + PLAYER_CAPSULE_HEIGHT / 2.0f);
