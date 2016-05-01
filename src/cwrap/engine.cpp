@@ -55,7 +55,9 @@ extern "C"
       return nullptr;
     }
 
-    auto eng = new Engine{cfg, assets::share_path(), true, nullptr};
+    auto eng = new Engine;
+    eng->config = cfg;
+    eng->share_path = assets::share_path();
 
     eng->mesh_cache =
             std::make_unique<gfx::Mesh_Cache>(eng->share_path / "obj",
@@ -87,8 +89,6 @@ extern "C"
 
     rce->client->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
-    rce->client->map_chunk.gen_func({rce->client->driver.get()});
-
     rce->client->driver->set_clear_color(colors::white);
 
     // Load default shader, etc.
@@ -115,7 +115,7 @@ extern "C"
   void redc_init_server(void* eng)
   {
     auto rce = (Engine*) eng;
-    rce->server = std::make_unique<Server>();
+    rce->server = std::make_unique<Server>(*rce);
 
     log_i("Initializing server subsystem ... Successful");
   }
@@ -123,6 +123,18 @@ extern "C"
   {
     auto rce = (Engine*) eng;
     delete rce;
+  }
+
+  void redc_step_engine(void* eng)
+  {
+    auto rce = (Engine*) eng;
+    Event event;
+    while(rce->poll_event(event))
+    {
+      // Please branch predictor save me
+      if(rce->client) rce->client->process_event(event);
+      if(rce->server) rce->server->process_event(event);
+    }
   }
 
   bool redc_running(void *eng)

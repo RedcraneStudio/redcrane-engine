@@ -33,11 +33,12 @@
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
-#include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
-#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 
+#include "../map.h"
 #include "../player.h"
 #include "../server.h"
+#include "../event.h"
+#include "../reactor.h"
 
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H
@@ -66,7 +67,6 @@ namespace redc
   struct Client;
   struct Server;
   struct Map;
-
   struct Engine
   {
     Redc_Config config;
@@ -75,14 +75,16 @@ namespace redc
 
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
 
-    Peer_Lock<Map> active_map;
-    std::vector<Peer_Ptr<Map> > maps;
-
     std::unique_ptr<Client> client;
     std::unique_ptr<Server> server;
 
     std::chrono::high_resolution_clock::time_point start_time;
     std::chrono::high_resolution_clock::time_point last_frame;
+
+    void push_outgoing_event(Event event);
+    bool poll_event(Event& event);
+  private:
+    Queue_Event_Source<Event> event_queue_;
   };
 
   template <class T>
@@ -95,17 +97,7 @@ namespace redc
 
   struct Scene;
 
-  struct Upload_Map_Mesh
-  {
-    using ptr_type = std::unique_ptr<gfx::Mesh_Chunk>;
-
-    ptr_type operator()(ptr_type chunk, Map* map);
-
-    // Make sure to set this!
-    gfx::IDriver* driver;
-  };
-
-  struct Client
+  struct Client : public Event_Sink<Event>
   {
     Client(redc::SDL_Init_Lock l)
       : sdl_raii(std::move(l)), input_cfg(get_default_input_config()) {}
@@ -122,19 +114,24 @@ namespace redc
     // Destruct all these together, if lua hasn't already.
     std::vector<Peer_Ptr<void> > peers;
 
-    Cache<gfx::Mesh_Chunk, Upload_Map_Mesh, Map*> map_chunk;
+    // Scenes
+    std::vector<Peer_Ptr<Scene> > scenes;
 
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it
     // We should reserve some amount of memory for each scene so that we can
     // pass around pointers and no they won't suddenly become invalid.
+
+    void process_event(event_t const& event) override;
   };
 
   struct Server : public Server_Base
   {
-    Server();
+    Server(Engine& eng);
 
     void req_player() override;
     Player& player(player_id id) override;
+
+    void load_map(std::string const& map) override;
 
     std::unique_ptr<btDefaultCollisionConfiguration> bt_config;
     std::unique_ptr<btCollisionDispatcher> bt_dispatcher;
@@ -147,10 +144,20 @@ namespace redc
 
     ID_Gen<obj_id> index_gen;
     std::array<Player, std::numeric_limits<obj_id>::max()> players;
+
+    // Use a unique pointer so we can have pointers to maps.
+    std::vector<std::unique_ptr<Map> > maps;
+
+    void process_event(event_t const& event) override;
+
+  private:
+    Engine* engine_;
   };
 
   struct Mesh_Object
   {
+    // TODO: To make this work with the map, make an aliasing constructor like
+    // shared_ptr has for the peer_lock / peer_ptr.
     Peer_Lock<gfx::Mesh_Chunk> chunk;
     glm::mat4 model;
   };
@@ -188,7 +195,7 @@ namespace redc
     return arr[id-1];
   };
 
-  struct Scene
+  struct Scene : public Event_Sink<Event>
   {
     // This is an unordered map that also keeps an active camera available to
     // us.
@@ -208,14 +215,12 @@ namespace redc
     Timer<> frame_timer;
 #endif
 
-    Input cur_input;
-  };
+    // Should this be a peer lock? Not that it actually be! Maps are completely
+    // referenced in the engine?
+    observer_ptr<Map> active_map;
 
-  struct Map
-  {
-    Map(Indexed_Mesh_Data&& data) noexcept;
-    Indexed_Mesh_Data render_mesh;
-    btTriangleIndexVertexArray collis_mesh;
-    btBvhTriangleMeshShape collis_shape;
+    Input cur_input;
+
+    void process_event(event_t const& event) override;
   };
 }

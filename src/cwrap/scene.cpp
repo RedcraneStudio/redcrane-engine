@@ -27,7 +27,7 @@ extern "C"
     auto sc = new Peer_Ptr<Scene>(new Scene);
     sc->get()->engine = engine;
 
-    engine->client->peers.push_back(sc->peer());
+    engine->client->scenes.push_back(sc->peer());
     return sc;
   }
   void redc_unmake_scene(void *scene)
@@ -149,40 +149,6 @@ extern "C"
     // Find the engine
     auto engine = scene->engine;
 
-    // ===
-    // Server Events
-    // ===
-    if(engine->server)
-    {
-      Server_Event event;
-      while(engine->server->poll_event(event))
-      {
-        switch(event.which())
-        {
-          case 0:
-          {
-            // New player, if they are our own we can attach a camera
-            New_Player_Event np = boost::get<New_Player_Event>(event);
-            if(np.owned)
-            {
-              // This is our new owned player.
-              // TODO: Verify the address will never change!
-              // Nevermind it won't but it's still important to keep in mind.
-              scene->active_player = &engine->server->player(np.id);
-
-              // Give it access to the current input state.
-              scene->active_player->controller.set_input_ref(&scene->cur_input);
-
-              engine->server->bt_world->addAction(&scene->active_player->controller);
-            }
-            break;
-          }
-          default:
-            break;
-        }
-      }
-    }
-
     Cam_Object* active_camera;
     if(scene->active_camera)
     {
@@ -276,14 +242,9 @@ extern "C"
     // Find active shader.
     auto active_shader = scene->engine->client->driver->active_shader();
 
-    // Given a map, generate a mesh chunk for the map.
-    scene->engine->client->map_chunk.set_dependency<0>(
-            scene->engine->active_map.get()
-    );
-
-    // Render the map
+    // Render the current / active map
     active_shader->set_model(glm::mat4(1.0f));
-    gfx::render_chunk(*scene->engine->client->map_chunk.cache());
+    gfx::render_chunk(scene->active_map->render->chunk);
 
     // i is the loop counter, id is our current id.
     // Loop however many times as we have ids.

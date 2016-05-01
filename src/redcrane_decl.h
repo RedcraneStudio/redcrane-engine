@@ -24,6 +24,8 @@ void redc_init_client(void* eng);
 void redc_init_server(void* eng);
 void redc_uninit_engine(void* eng);
 
+void redc_step_engine(void* eng);
+
 bool redc_running(void *eng);
 
 const char* redc_get_asset_path(void* eng);
@@ -67,7 +69,7 @@ void redc_unmake_shader(void *shader);
 
 // See cwrap/map.cpp
 
-void* redc_map_load(void* eng, const char* file);
+void redc_map_load(void* eng, const char* file);
 
 // See cwrap/server.cpp
 

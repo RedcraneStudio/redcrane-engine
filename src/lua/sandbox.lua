@@ -31,6 +31,7 @@ return function()
             engine = rc.engine,
             config = rc.config,
 
+            step = rc.step,
             running = rc.running,
             swap_window = rc.swap_window,
             asset_path = rc.asset_path,
