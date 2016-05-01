@@ -303,6 +303,7 @@ namespace redc
     typename std::add_lvalue_reference<T>::type operator*() const;
 
     T* get() const;
+    explicit operator bool() const;
 
     Peer_Ptr<T> peer() const;
     Peer_Lock<T> lock() const;
@@ -434,6 +435,12 @@ namespace redc
     // pointer points to something meaningful.
     if(ptr_ && data_ && data_->deleter.get()) return ptr_;
     else return nullptr;
+  }
+
+  template <class T>
+  Peer_Ptr<T>::operator bool() const
+  {
+    return get() != nullptr;
   }
 
   template <class T>
