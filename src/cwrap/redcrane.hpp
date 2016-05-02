@@ -5,6 +5,7 @@
  * C++ code + structs that will not be exposed to the C interface but will be
  * useful for its implementation.
  */
+#pragma once
 #include <cstdint>
 #include <memory>
 
