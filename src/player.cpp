@@ -45,7 +45,7 @@ namespace redc
     auto end_pos = cur_pos;
 
     // The player's height ought to be enough
-    end_pos.setY(cur_pos.getY() - PLAYER_CAPSULE_HEIGHT);
+    end_pos.setY(cur_pos.getY() - PLAYER_CAPSULE_HEIGHT / 2.0f);
 
     // Perform a raytest from the character to the ground and lock it there.
     btCollisionWorld::ClosestRayResultCallback ray_cb(cur_pos, end_pos);
