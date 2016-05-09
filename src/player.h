@@ -27,13 +27,13 @@ namespace redc
     inline void reset() { inited_ = false; }
 
     void updateAction(btCollisionWorld* world, btScalar dt) override;
-    void debugDraw(btIDebugDraw*) {}
+    void debugDraw(btIDebugDraw*) override {}
 
     inline void set_input_ref(Input* input) { input_ref_ = input; }
     Input* get_input_ref() { return input_ref_; }
 
     inline btTransform getWorldTransform(btTransform& t) const
-    { t = ghost_.getWorldTransform(); }
+    { t = ghost_.getWorldTransform(); return t; }
 
     void apply_delta_yaw(double dv);
     void apply_delta_pitch(double dv);
