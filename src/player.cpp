@@ -27,6 +27,8 @@ namespace redc
       ghost_.setCollisionFlags(ghost_.getCollisionFlags() |
                                btCollisionObject::CF_KINEMATIC_OBJECT);
       ghost_.setActivationState(DISABLE_DEACTIVATION);
+
+      world->getPairCache()->setInternalGhostPairCallback(&ghost_cb_);
       inited_ = true;
       return;
     }

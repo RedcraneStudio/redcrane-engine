@@ -41,6 +41,7 @@ namespace redc
     bool inited_;
     btPairCachingGhostObject ghost_;
     btCapsuleShape shape_;
+    btGhostPairCallback ghost_cb_;
 
     Input* input_ref_;
   };
