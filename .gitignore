@@ -1,5 +1,20 @@
+# Vim YCM-related files
 *.pyc
 .ycm_extra_conf.*
+
+# Vim swap files
 *.swp
 *.swo
+
+# CLion files
 .idea/
+
+# **(Make up ya damn mind)**
+
+# Emacs-swap files
+*~
+[#]*[#]
+.\#*
+
+# Emacs dir local file
+.dir-locals.el
