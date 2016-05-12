@@ -16,12 +16,14 @@ namespace redc
     bool strafe_left;
     bool strafe_right;
 
+    bool jump;
+
     bool primary_attack;
     bool secondary_attack;
     bool tertiary_attack;
 
-    MSGPACK_DEFINE(forward, backward, strafe_left, strafe_right,
-            primary_attack, secondary_attack, tertiary_attack);
+    MSGPACK_DEFINE(forward, backward, strafe_left, strafe_right, jump,
+                   primary_attack, secondary_attack, tertiary_attack);
   };
 
   // Abstraction of an input button, may be a mouse button or key.
@@ -45,6 +47,8 @@ namespace redc
     Button backward;
     Button strafe_left;
     Button strafe_right;
+
+    Button jump;
 
     Button primary_attack;
     Button secondary_attack;

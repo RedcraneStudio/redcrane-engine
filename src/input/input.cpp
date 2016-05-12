@@ -47,8 +47,11 @@ namespace redc
     // Check each button and figure out if at least one of them was handled.
     ret |= check_button(event, cfg.forward,          input.forward);
     ret |= check_button(event, cfg.backward,         input.backward);
+
     ret |= check_button(event, cfg.strafe_left,      input.strafe_left);
     ret |= check_button(event, cfg.strafe_right,     input.strafe_right);
+
+    ret |= check_button(event, cfg.jump,             input.jump);
 
     ret |= check_button(event, cfg.primary_attack,   input.primary_attack);
     ret |= check_button(event, cfg.secondary_attack, input.secondary_attack);
@@ -73,6 +76,8 @@ namespace redc
     SET_KEY(backward, SDL_SCANCODE_S);
     SET_KEY(strafe_left, SDL_SCANCODE_A);
     SET_KEY(strafe_right, SDL_SCANCODE_D);
+
+    SET_KEY(jump, SDL_SCANCODE_SPACE);
 
     // Three-button mouse
     SET_MBUTTON(primary_attack, SDL_BUTTON_LEFT);
