@@ -103,6 +103,13 @@ extern "C"
     df_shade->set_view_name("view");
     df_shade->set_projection_name("proj");
 
+    df_shade->set_diffuse_name("dif");
+    df_shade->set_diffuse(colors::white);
+
+    // Put this somewhere meaningful
+    auto light_loc = df_shade->get_location("light_pos");
+    df_shade->set_vec3(light_loc, glm::vec3(0.0f, 5.0f, 0.0f));
+
     // Make it the default
     rce->client->driver->use_shader(*df_shade);
 
