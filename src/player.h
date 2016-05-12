@@ -20,6 +20,11 @@ namespace redc
     void getWorldTransform(btTransform& trans) const override;
   };
 
+  enum class Player_State
+  {
+    Grounded, Jumping
+  };
+
   struct Player_Controller : public btActionInterface
   {
     Player_Controller();
@@ -37,6 +42,8 @@ namespace redc
 
     void apply_delta_yaw(double dv);
     void apply_delta_pitch(double dv);
+
+    Player_State state = Player_State::Grounded;
   private:
     bool inited_;
     btPairCachingGhostObject ghost_;
@@ -44,6 +51,8 @@ namespace redc
     btGhostPairCallback ghost_cb_;
 
     Input* input_ref_;
+
+    btVector3 jump_velocity_;
   };
 
   struct Player
