@@ -99,30 +99,29 @@ namespace redc
       {
         // What is the player doing?
 
-        // When we reset our position, do so using shoe size so we don't
-        // accidentally have collisions from the ground, we are purposely
-        // avoiding that.
-        if(state == Player_State::Grounded)
-        {
-          // Reset our position there, this will allow us to go up slopes.
-          auto pt_y = ground_ray.m_hitPointWorld.getY() +
-                      PLAYER_CAPSULE_HEIGHT / 2.0f + shoe_size;
-          pos.setY(std::max(pos.getY(), pt_y));
-          pos.setY(pt_y);
-        }
-        else if(state == Player_State::Jumping && jump_velocity_.getY() < 0.0f)
-        {
-          // Reset our position, but only the player is trying to go downward,
-          // otherwise the user probably just jumped and is still sorta
-          // colliding with the ground. This could probably be done a bit more
-          // elegantly. Maybe reducing shoe_size would avoid a collision and
-          // kinda make sense like the player lifted their feet during the jump.
-          auto pt_y = ground_ray.m_hitPointWorld.getY() +
-                      PLAYER_CAPSULE_HEIGHT / 2.0f + shoe_size;
-          //pos.setY(std::max(pos.getY(), pt_y));
-          // And now we are grounded.
-          state = Player_State::Grounded;
-        }
+        // Notes:
+
+        // This section used to reset the player's y position to the ray
+        // intersection point, the issue is that it would interfere with the
+        // penetration recovery and cause a constant switch from the player
+        // being grounded to being registered as jumping. The ray trace ended up
+        // locking it too close to the ground and then the recover would push it
+        // up too far such that next frame we switched to jumping, etc.
+
+        // Anyways it works better now because we still use the player state to
+        // decide whether or not to apply gravity but we don't accidentally move
+        // the player and cause strange unexpected changes. The penetration
+        // recovery works well enough that it can handle moving the player above
+        // the floor just fine. After that, as long as gravity isn't applied the
+        // player remains stable.
+
+        // One issue that I'm seeing now that due to a large value for
+        // shoe_size, the player can get stuck low down in the range of
+        // allowable heights and then a jump becomes ineffective because even
+        // after that one tick of movement the player is still in the allowable
+        // range, which means the player is immediately considered to be on the
+        // ground. Of course, currently that means velocity is not applied.
+        if(state == Player_State::Jumping) state = Player_State::Grounded;
       }
 
       // No ground?
@@ -283,7 +282,7 @@ namespace redc
 
           btScalar dist = pt.getDistance();
 
-          if (dist < 0.0 && !handled)
+          if (dist < 0.0)
           {
             // Added notes:
 
@@ -297,7 +296,6 @@ namespace redc
             // be done with a raytrace and a state machine, etc.
             pos += pt.m_normalWorldOnB * sign * dist * btScalar(0.5);
             penetration = true;
-            handled = true;
           }
         }
       }
