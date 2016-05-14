@@ -278,7 +278,6 @@ namespace redc
         pair->m_algorithm->getAllContactManifolds(manifolds);
       }
 
-      bool handled = false;
       for (int j = 0; j < manifolds.size(); j++)
       {
         btPersistentManifold* manifold = manifolds[j];
