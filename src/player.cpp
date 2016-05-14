@@ -141,21 +141,6 @@ namespace redc
     }
 
     // ===
-    // Apply gravity
-    // ===
-
-    // When we are in the air, adjust the velocity change due to gravity.
-    if(state == Player_State::Jumping)
-    {
-      // Adjust the air velocity of the player
-      jump_velocity_ += btVector3(0.0f, -9.81f, 0.0f) * dt;
-    }
-    else
-    {
-      jump_velocity_.setZero();
-    }
-
-    // ===
     // Handle input
     // ===
 
@@ -200,6 +185,21 @@ namespace redc
       }
 
       update_ghost_transform_();
+    }
+
+    // ===
+    // Apply gravity to the velocity if necessary
+    // ===
+
+    // When we are in the air, adjust the velocity change due to gravity.
+    if(state == Player_State::Jumping)
+    {
+      // Adjust the air velocity of the player
+      jump_velocity_ += btVector3(0.0f, -9.81f, 0.0f) * dt;
+    }
+    else
+    {
+      jump_velocity_.setZero();
     }
 
     // ===
