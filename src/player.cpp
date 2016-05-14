@@ -302,7 +302,8 @@ namespace redc
             // should be considered this codes most important reason for being
             // here. Floor collision, jumping, stepping, etc should all probably
             // be done with a raytrace and a state machine, etc.
-            pos += pt.m_normalWorldOnB * sign * dist * btScalar(0.5);
+
+            pos += pt.m_normalWorldOnB * sign * dist;
             penetration = true;
           }
         }
