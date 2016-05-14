@@ -35,7 +35,7 @@ namespace redc
       // Transform
       btTransform trans;
       trans.setIdentity();
-      trans.setOrigin(btVector3(0.0f, 1.5f, 0.0f));
+      trans.setOrigin(btVector3(0.0f, 4.5f, 0.0f));
       ghost_.setWorldTransform(trans);
 
       // Shape
@@ -167,7 +167,7 @@ namespace redc
 
       if(input_ref_->jump && state == Player_State::Grounded)
       {
-        jump_velocity_ = btVector3(0.0f, 4.0f, 0.0f);
+        jump_velocity_ = btVector3(0.0f, 6.0f, 0.0f);
         state = Player_State::Jumping;
       }
 
