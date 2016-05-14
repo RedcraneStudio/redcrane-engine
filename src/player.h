@@ -53,6 +53,8 @@ namespace redc
     Input* input_ref_;
 
     btVector3 jump_velocity_;
+
+    btVector3 last_normal_;
   };
 
   struct Player

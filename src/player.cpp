@@ -24,6 +24,11 @@ namespace redc
       // Initialize velocity and impulse to zero
       jump_velocity_.setZero();
 
+      last_normal_.setZero();
+
+      // Set it to a unit vector going straight upwards
+      last_normal_.setY(1.0f);
+
       // Player state
       state = Player_State::Grounded;
 
@@ -122,6 +127,8 @@ namespace redc
         // range, which means the player is immediately considered to be on the
         // ground. Of course, currently that means velocity is not applied.
         if(state == Player_State::Jumping) state = Player_State::Grounded;
+
+        last_normal_ = ground_ray.m_hitNormalWorld;
       }
 
       // No ground?
@@ -158,19 +165,19 @@ namespace redc
 
       if(input_ref_->forward)
       {
-        local_dpos.setZ(-.1f);
+        local_dpos.setX(-1.0f);
       }
       if(input_ref_->backward)
       {
-        local_dpos.setZ(+.1f);
+        local_dpos.setX(+1.0f);
       }
       if(input_ref_->strafe_left)
       {
-        local_dpos.setX(-.1f);
+        local_dpos.setZ(+1.0f);
       }
       if(input_ref_->strafe_right)
       {
-        local_dpos.setX(+.1f);
+        local_dpos.setZ(-1.0f);
       }
 
       if(input_ref_->jump && state == Player_State::Grounded)
@@ -179,16 +186,18 @@ namespace redc
         state = Player_State::Jumping;
       }
 
-      if(input_ref_->primary_attack)
+      auto active_normal = last_normal_;
+      if(state == Player_State::Jumping)
       {
-        local_dpos.setY(+.2f);
-      }
-      if(input_ref_->secondary_attack)
-      {
-        local_dpos.setY(-.1f);
+        active_normal.setZero();
+        active_normal.setY(1.0f);
       }
 
-      pos += btMatrix3x3(xform.getRotation()) * local_dpos;
+      if(FLT_EPSILON < btFabs(local_dpos.length()))
+      {
+        auto movement = btMatrix3x3(xform.getRotation()) * local_dpos;
+        pos += movement.cross(active_normal) * btScalar(0.1f);
+      }
 
       update_ghost_transform_();
     }
