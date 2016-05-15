@@ -185,7 +185,7 @@ namespace redc
     boost::variant<Mesh_Object, Cam_Object> obj;
 
     // Non-owned parent, they should all be in the vector.
-    Object* parent;
+    Object* parent = nullptr;
   };
 
   glm::mat4 object_model(Object const& obj);
@@ -200,13 +200,13 @@ namespace redc
   {
     // This is an unordered map that also keeps an active camera available to
     // us.
-    Engine* engine;
+    Engine* engine = nullptr;
 
     // Should always be a Obj_Type::Cam!! Can we enforce that with the type
     // system?
-    obj_id active_camera;
+    obj_id active_camera = 0;
 
-    Player* active_player;
+    Player* active_player = nullptr;
 
     ID_Gen<obj_id> index_gen;
     std::array<Object, std::numeric_limits<obj_id>::max()> objs;

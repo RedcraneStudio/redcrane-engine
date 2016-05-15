@@ -32,6 +32,11 @@ namespace redc
   template <typename id_type, class Lock_Policy = Unsafe_Lock_Policy<id_type> >
   struct ID_Gen
   {
+    // Make sure to initialize count_ to zero, I believe by the standard it
+    // should be initialized to zero but that doesn't seem to be happening for
+    // some reason. Maybe GCC isn't doing it and clang is, I'm not sure.
+    ID_Gen() : count_(0), lock_(), removed_id_queue_() {}
+
     id_type get();
     id_type peek();
 
