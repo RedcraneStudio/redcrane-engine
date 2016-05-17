@@ -150,19 +150,19 @@ namespace redc
 
       if(input_ref_->forward)
       {
-        local_dpos.setX(-1.0f);
+        local_dpos.setZ(-1.0f);
       }
       if(input_ref_->backward)
       {
-        local_dpos.setX(+1.0f);
+        local_dpos.setZ(+1.0f);
       }
       if(input_ref_->strafe_left)
       {
-        local_dpos.setZ(+1.0f);
+        local_dpos.setX(-1.0f);
       }
       if(input_ref_->strafe_right)
       {
-        local_dpos.setZ(-1.0f);
+        local_dpos.setX(+1.0f);
       }
 
       if(input_ref_->jump && state == Player_State::Grounded)
@@ -180,8 +180,21 @@ namespace redc
 
       if(FLT_EPSILON < btFabs(local_dpos.length()))
       {
+        // We only really care about the direction in the x and z direction.
+        // The y direction we will find ourselves such that the final movement
+        // is perpendicular to the surface normal.
         auto movement = btMatrix3x3(xform.getRotation()) * local_dpos;
-        pos += movement.cross(active_normal) * btScalar(0.1f);
+
+        // We want our final movement vector to be perpendicular to the normal
+        // but it also has to be the same x and z value of the movement we
+        // calculated before.
+        auto partial_dot = active_normal.getX() * movement.getX() +
+                           active_normal.getZ() * movement.getZ();
+        // Use the fact that movement dot normal should be zero
+        // 0 = partial_dot + new_movement_y * active_normal.getY();
+        // -partial_dot / active_normal.getY() = new_movement_y;
+        movement.setY(-partial_dot / active_normal.getY());
+        pos += movement.normalize() * btScalar(.1f);
       }
 
       update_ghost_transform_();
