@@ -159,8 +159,7 @@ extern "C"
     if(active_camera->follow_player && scene->active_player)
     {
       // Set the camera to the player.
-      active_camera->cam.fp.pos =
-        get_camera_position(scene->active_player->controller);
+      active_camera->cam.fp.pos = scene->active_player->controller.get_cam_pos();
     }
 
     SDL_Event event;

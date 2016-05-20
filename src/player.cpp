@@ -434,4 +434,19 @@ namespace redc
     // go when the user deploys the grappling gun.
     pitch_ *= btQuaternion(0.0f, -pitch, 0.0f);
   }
+
+  glm::vec3 Player_Controller::get_cam_pos() const
+  {
+    btTransform trans;
+    this->getWorldTransform(trans);
+    auto origin = trans.getOrigin();
+
+    // The average person is 7.5 head sizes
+    constexpr auto head_size = PLAYER_CAPSULE_HEIGHT / 7.5f;
+
+    // We are at the center of the body, ie 7.5 / 2 or 3.75 heads from the
+    // ground, go up 3.50 heads so that we end up in the middle of the topmost
+    // head, which is obviously just the players head! (3.75 + 3.50 = 7.25)
+    return {origin.x(), origin.y() + 3.50f * head_size, origin.z()};
+  }
 }

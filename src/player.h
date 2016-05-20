@@ -43,6 +43,8 @@ namespace redc
     void apply_delta_yaw(double dv);
     void apply_delta_pitch(double dv);
 
+    glm::vec3 get_cam_pos() const;
+
     Player_State state = Player_State::Grounded;
   private:
     bool inited_;
@@ -66,12 +68,4 @@ namespace redc
 
     // Player state (FSM)
   };
-
-  inline glm::vec3 get_camera_position(Player_Controller& pc)
-  {
-    btTransform trans;
-    pc.getWorldTransform(trans);
-    auto origin = trans.getOrigin();
-    return {origin.x(), origin.y(), origin.z()};
-  }
 }
