@@ -2,11 +2,12 @@
 
 #include "common/log.h"
 
-#define PLAYER_CAPSULE_HEIGHT 1.8f
-#define PLAYER_CAPSULE_RADIUS 0.25f
+// Average male dimensions
+#define PLAYER_CAPSULE_HEIGHT 1.73
+#define PLAYER_CAPSULE_RADIUS 0.40f
 
-// 75 kg mass person
-#define PLAYER_MASS 75.0f
+// 78 kg mass person
+#define PLAYER_MASS 78.0f
 
 namespace redc
 {
