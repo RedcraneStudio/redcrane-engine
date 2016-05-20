@@ -22,7 +22,7 @@ namespace redc
 
   enum class Player_State
   {
-    Grounded, Jumping
+    Grounded, Jumping, Flying
   };
 
   struct Player_Controller : public btActionInterface
@@ -55,6 +55,9 @@ namespace redc
     btVector3 jump_velocity_;
 
     btVector3 last_normal_;
+
+    btQuaternion pitch_;
+    btVector3 gun_accel_;
   };
 
   struct Player

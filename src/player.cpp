@@ -62,6 +62,9 @@ namespace redc
       // Add to world
       world->addCollisionObject(&ghost_);
 
+      // Set the pitch to an identity rotation.
+      pitch_.setEuler(0.0f, 0.0f, 0.0f);
+
       inited_ = true;
       return;
     }
@@ -134,7 +137,7 @@ namespace redc
       // No ground?
       else
       {
-        state = Player_State::Jumping;
+        if(state == Player_State::Grounded) state = Player_State::Jumping;
       }
 
       update_ghost_transform_();
@@ -167,17 +170,30 @@ namespace redc
 
       if(input_ref_->jump && state == Player_State::Grounded)
       {
+        // If we are on the ground, apply an impulse to the player upward (ie
+        // change the velocity).
         jump_velocity_ = btVector3(0.0f, 6.0f, 0.0f);
         state = Player_State::Jumping;
       }
+      else if(input_ref_->jump && state == Player_State::Flying)
+      {
+        // If we were in the air, just release the player from the grappling
+        // hook (ie go into jumping mode, where gravity will be applied).
+        // Velocity will not be zero'd so it should be interesting.
+        state = Player_State::Jumping;
+      }
 
+      // The active normal is the normal of the ground beneath us, when we are
+      // not on the ground it's just the y axis. This is the normal the player
+      // moves perpendicular to when using the WASD keys, etc.
       auto active_normal = last_normal_;
-      if(state == Player_State::Jumping)
+      if(state != Player_State::Grounded)
       {
         active_normal.setZero();
         active_normal.setY(1.0f);
       }
 
+      // No movement; no problem!
       if(FLT_EPSILON < btFabs(local_dpos.length()))
       {
         // We only really care about the direction in the x and z direction.
@@ -242,20 +258,21 @@ namespace redc
         // TODO: Can we do this so willy-nilly?
         ray_rot *= pitch_;
 
-        // Rotate a forward vector by our adjusted rotation to find where the
-        // gun is pointing.
+        // Rotate a forward vector by our pithc and yaw to find where the gun is
+        // pointing.
         auto forward = btMatrix3x3(ray_rot) * btVector3(0.0f, 0.0f, -1.0f);
 
-        // Do a raycast
+        // Do a raycast from the player's head along the forward vector
         auto head_pos = pos + btVector3(0.0f, PLAYER_CAPSULE_HEIGHT / 2, 0.0f);
         auto ray_end = head_pos + forward.normalized() * 1000.0f;
+
         btCollisionWorld::ClosestRayResultCallback gun_ray(head_pos, ray_end);
         world->rayTest(head_pos, ray_end, gun_ray);
 
         if(gun_ray.hasHit())
         {
+          // Apply some acceleration in the direction of the ray hit
           gun_accel_ = (ray_end - head_pos).normalized() * 5.0f;
-          //jump_velocity_.setZero();
           state = Player_State::Flying;
         }
       }
@@ -271,8 +288,14 @@ namespace redc
       // Adjust the air velocity of the player
       jump_velocity_ += btVector3(0.0f, -9.81f, 0.0f) * dt;
     }
+    else if(state == Player_State::Flying)
+    {
+      // Only when we are flying
+      jump_velocity_ += gun_accel_ * dt;
+    }
     else
     {
+      // On the ground, we don't have to move.
       jump_velocity_.setZero();
     }
 
@@ -377,14 +400,23 @@ namespace redc
             // here. Floor collision, jumping, stepping, etc should all probably
             // be done with a raytrace and a state machine, etc.
 
-            pos += pt.m_normalWorldOnB * sign * dist;
+            auto normal = pt.m_normalWorldOnB * sign;
+            pos += normal * dist;
             penetration = true;
           }
         }
       }
     }
 
-    if(penetration) update_ghost_transform_();
+    if(penetration)
+    {
+      if(state == Player_State::Flying)
+      {
+        jump_velocity_.setZero();
+        state = Player_State::Jumping;
+      }
+      update_ghost_transform_();
+    }
   }
 
   void Player_Controller::apply_delta_yaw(double yaw)
@@ -397,12 +429,8 @@ namespace redc
   }
   void Player_Controller::apply_delta_pitch(double pitch)
   {
-    // We don't care about pitch as of now from a physics standpoint
-    /*
-    auto xform = ghost_.getWorldTransform();
-    auto rot = xform.getRotation();
-    rot *= btQuaternion(0.0f, pitch, 0.0f);
-    ghost_.setWorldTransform(xform);
-    */
+    // Don't rotate the ghost object but keep pitch around so we know where to
+    // go when the user deploys the grappling gun.
+    pitch_ *= btQuaternion(0.0f, -pitch, 0.0f);
   }
 }
