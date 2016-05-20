@@ -293,6 +293,7 @@ namespace redc
     {
       // Only when we are flying
       jump_velocity_ += (gun_target_ - pos).normalized() * 20.0f * dt;
+      jump_velocity_ += btVector3(0.0f, -9.81f, 0.0f) * dt;
     }
     else
     {
