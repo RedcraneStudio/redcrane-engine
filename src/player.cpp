@@ -190,14 +190,75 @@ namespace redc
         // calculated before.
         auto partial_dot = active_normal.getX() * movement.getX() +
                            active_normal.getZ() * movement.getZ();
+
         // Use the fact that movement dot normal should be zero
         // 0 = partial_dot + new_movement_y * active_normal.getY();
         // -partial_dot / active_normal.getY() = new_movement_y;
         movement.setY(-partial_dot / active_normal.getY());
-        pos += movement.normalize() * btScalar(.1f);
+
+        // Normalize and scale
+        movement.normalize() *= .1f;
+
+        // Cast a ray from the character's position to the position plus the
+        // movement vector. This is obviously where the player is trying to go.
+        auto end_pt = pos + movement.normalized() * PLAYER_CAPSULE_RADIUS * 4.5f;
+        btCollisionWorld::ClosestRayResultCallback move_ray(pos, end_pt);
+        world->rayTest(pos, end_pt, move_ray);
+
+        if(move_ray.hasHit())
+        {
+          auto normal = move_ray.m_hitNormalWorld;
+
+          // Find the perpendicular movement along the normal in the direction
+          // of movement.
+
+          // Movement T Normal = (Normal x Movement) x Normal
+          auto perpendicular = normal.cross(movement).cross(normal);
+
+          // The perpendicular movement is properly scaled due to the size of
+          // the movement vector (we scaled it above)
+          pos += perpendicular;
+        }
+        else
+        {
+          // The ray didn't find anything, so just move forward
+          pos += movement;
+        }
+
+        update_ghost_transform_();
       }
 
-      update_ghost_transform_();
+    }
+
+    // ===
+    // Grappling-gun physics!
+    // ===
+    {
+      if(input_ref_->primary_attack)
+      {
+        // Cast a ray in the direction of the player.
+        auto ray_rot = xform.getRotation();
+
+        // TODO: Can we do this so willy-nilly?
+        ray_rot *= pitch_;
+
+        // Rotate a forward vector by our adjusted rotation to find where the
+        // gun is pointing.
+        auto forward = btMatrix3x3(ray_rot) * btVector3(0.0f, 0.0f, -1.0f);
+
+        // Do a raycast
+        auto head_pos = pos + btVector3(0.0f, PLAYER_CAPSULE_HEIGHT / 2, 0.0f);
+        auto ray_end = head_pos + forward.normalized() * 1000.0f;
+        btCollisionWorld::ClosestRayResultCallback gun_ray(head_pos, ray_end);
+        world->rayTest(head_pos, ray_end, gun_ray);
+
+        if(gun_ray.hasHit())
+        {
+          gun_accel_ = (ray_end - head_pos).normalized() * 5.0f;
+          //jump_velocity_.setZero();
+          state = Player_State::Flying;
+        }
+      }
     }
 
     // ===
