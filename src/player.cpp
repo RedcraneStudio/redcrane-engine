@@ -173,7 +173,7 @@ namespace redc
       {
         // If we are on the ground, apply an impulse to the player upward (ie
         // change the velocity).
-        jump_velocity_ = btVector3(0.0f, 6.0f, 0.0f);
+        jump_velocity_ = btVector3(0.0f, 2.943f, 0.0f);
         state = Player_State::Jumping;
       }
       else if(input_ref_->jump && state == Player_State::Flying)
