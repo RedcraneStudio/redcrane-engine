@@ -273,7 +273,7 @@ namespace redc
         if(gun_ray.hasHit())
         {
           // Apply some acceleration in the direction of the ray hit
-          gun_accel_ = (ray_end - head_pos).normalized() * 5.0f;
+          gun_target_ = ray_end;
           state = Player_State::Flying;
         }
       }
@@ -292,7 +292,7 @@ namespace redc
     else if(state == Player_State::Flying)
     {
       // Only when we are flying
-      jump_velocity_ += gun_accel_ * dt;
+      jump_velocity_ += (gun_target_ - pos).normalized() * 20.0f * dt;
     }
     else
     {

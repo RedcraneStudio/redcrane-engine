@@ -59,7 +59,7 @@ namespace redc
     btVector3 last_normal_;
 
     btQuaternion pitch_;
-    btVector3 gun_accel_;
+    btVector3 gun_target_;
   };
 
   struct Player
