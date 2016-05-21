@@ -127,7 +127,7 @@ extern "C"
     auto mesh = lock_resource<gfx::Mesh_Chunk>(ms);
 
     at_id(scene->objs, id) =
-            {Mesh_Object{std::move(mesh), glm::mat4(1.0f)}, nullptr};
+      {Mesh_Object{std::move(mesh), {}, glm::mat4(1.0f)}, nullptr};
 
     return id;
   }
@@ -140,6 +140,22 @@ extern "C"
     // We could just use ids for the parent reference too but it makes things
     // a little easier on our end to manage.
     at_id(scene->objs, obj).parent = &at_id(scene->objs, parent);
+  }
+
+  void redc_scene_object_set_texture(void *sc, obj_id obj, void *tex)
+  {
+    auto scene = lock_resource<Scene>(sc);
+
+    auto& object = at_id(scene->objs, obj);
+    if(object.obj.which() != Object::Mesh)
+    {
+      log_w("Cannot set texture of a non-mesh object");
+    }
+    else
+    {
+      auto texture = (Peer_Ptr<Texture>*) tex;
+      boost::get<Mesh_Object>(object.obj).texture = texture->lock();
+    }
   }
 
   void redc_scene_step(void *sc)

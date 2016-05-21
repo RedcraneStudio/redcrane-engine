@@ -64,6 +64,8 @@ void redc_scene_camera_set_follow_player(void *sc, obj_id cam, bool en);
 
 void redc_scene_set_parent(void* sc, obj_id obj, obj_id parent);
 
+void redc_scene_object_set_texture(void *sc, obj_id obj, void *tex);
+
 void redc_scene_step(void *sc);
 void redc_scene_render(void *sc);
 

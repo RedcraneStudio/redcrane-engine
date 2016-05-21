@@ -23,6 +23,7 @@
 #include "../gfx/idriver.h"
 #include "../gfx/camera.h"
 #include "../gfx/mesh_chunk.h"
+#include "../gfx/texture.h"
 
 #include "../common/cache.h"
 
@@ -160,6 +161,7 @@ namespace redc
     // TODO: To make this work with the map, make an aliasing constructor like
     // shared_ptr has for the peer_lock / peer_ptr.
     Peer_Lock<gfx::Mesh_Chunk> chunk;
+    Peer_Lock<Texture> texture;
     glm::mat4 model;
   };
 

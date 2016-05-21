@@ -66,6 +66,10 @@ function scene.make_scene()
         ffi.C.redc_scene_set_parent(self._scene_ptr, obj, parent)
     end
 
+    function sc:object_set_texture(obj, texture)
+       ffi.C.redc_scene_object_set_texture(self._scene_ptr_, obj, texture)
+    end
+
     function sc:step()
         ffi.C.redc_scene_step(self._scene_ptr)
     end
