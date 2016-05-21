@@ -46,6 +46,9 @@ return function()
             mesh = {
                 load_mesh = rc.mesh.load_mesh
             },
+            texture = {
+               load_texture = rc.texture.load_texture
+            },
             shader = {
                 load_shader = rc.shader.load_shader
             },

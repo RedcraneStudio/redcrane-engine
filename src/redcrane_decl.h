@@ -38,6 +38,11 @@ void redc_gc(void* eng);
 void* redc_load_mesh(void* engine, const char* str);
 void redc_unload_mesh(void* mesh);
 
+// See cwrap/texture.cpp
+
+void* redc_load_texture(void* eng, const char* str);
+void redc_unload_texture(void* tex);
+
 // See cwrap/scene.cpp
 
 typedef uint16_t obj_id;

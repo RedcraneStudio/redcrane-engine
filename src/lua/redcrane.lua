@@ -12,6 +12,7 @@ function rc:init(config)
 
     self.scene = require("scene")
     self.mesh = require("mesh")
+    self.texture = require("texture")
     self.shader = require("shader")
     self.server = require("server")
 

@@ -58,11 +58,8 @@ endfunction()
 
 # These are the lua files we want to compile and link into the executable, for
 # access by luajit. The file name will the module name put in package.preload
-set(REDC_LUAJIT_COMPILED_BYTECODE lua/mesh.obj
-                                  lua/redcrane.obj
-                                  lua/scene.obj
-                                  lua/shader.obj
-                                  lua/server.obj
+set(REDC_LUAJIT_COMPILED_BYTECODE lua/mesh.obj lua/texture.obj lua/redcrane.obj
+                                  lua/scene.obj lua/shader.obj lua/server.obj
                                   lua/config_sandbox.obj)
 
 # This directory isn't automatically made for us
@@ -96,7 +93,8 @@ lua_compile_header(redc_ffi)
 add_executable(redc main.cpp minilua.cpp sdl_helper.cpp player.cpp
                     cwrap/engine.cpp cwrap/mesh.cpp cwrap/scene.cpp
                     cwrap/shader.cpp cwrap/redcrane.cpp cwrap/map.cpp
-                    cwrap/server.cpp server.cpp map.cpp reactor.cpp
+                    cwrap/server.cpp cwrap/texture.cpp server.cpp map.cpp
+                    reactor.cpp
                     ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_config_sandbox_BYTECODE}
                     ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_sandbox_BYTECODE}
                     ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_run_engine_BYTECODE}
