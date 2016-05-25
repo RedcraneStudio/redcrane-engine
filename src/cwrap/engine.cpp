@@ -21,7 +21,7 @@ namespace
 {
   void redc_lua_log(Log_Severity s, const char *msg)
   {
-    redc::log(s, "(Mod) %", msg);
+    redc::log(s, msg);
   }
 }
 

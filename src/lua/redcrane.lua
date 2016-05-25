@@ -54,17 +54,34 @@ function stringify(str, ...)
     end
     return str
 end
-function rc:log_d(str, ...)
+
+rc.internal = {}
+
+function rc.internal:log_d(str, ...)
     ffi.C.redc_log_d(stringify(tostring(str), ...))
 end
-function rc:log_i(str, ...)
+function rc.internal:log_i(str, ...)
     ffi.C.redc_log_i(stringify(tostring(str), ...))
 end
-function rc:log_w(str, ...)
+function rc.internal:log_w(str, ...)
     ffi.C.redc_log_w(stringify(tostring(str), ...))
 end
-function rc:log_e(str, ...)
+function rc.internal:log_e(str, ...)
     ffi.C.redc_log_e(stringify(tostring(str), ...))
+end
+
+local prefix = "(Mod) "
+function rc:log_d(str, ...)
+    rc.internal:log_d(prefix, str, ...)
+end
+function rc:log_i(str, ...)
+    rc.internal:log_i(prefix, str, ...)
+end
+function rc:log_w(str, ...)
+    rc.internal:log_w(prefix, str, ...)
+end
+function rc:log_e(str, ...)
+    rc.internal:log_e(prefix, str, ...)
 end
 
 return rc
