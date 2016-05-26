@@ -22,6 +22,7 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     obj/monkey.obj
 
                     scene/default.json structure/structures.json
+
                     shader/basic/fs.glsl shader/basic/vs.glsl
                     shader/hud/fs.glsl shader/hud/vs.glsl
                     shader/debug/vs.glsl shader/debug/fs.glsl
