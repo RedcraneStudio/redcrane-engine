@@ -257,8 +257,10 @@ extern "C"
     // Find active shader.
     auto active_shader = scene->engine->client->driver->active_shader();
 
+    using namespace gfx::tags;
+
     // Render the current / active map
-    active_shader->set_model(glm::mat4(1.0f));
+    active_shader->set_mat4(model_tag, glm::mat4(1.0f));
     gfx::render_chunk(scene->active_map->render->chunk);
 
     // i is the loop counter, id is our current id.
@@ -305,7 +307,7 @@ extern "C"
 
         // Find out the model
         auto model = object_model(obj);
-        scene->engine->client->driver->active_shader()->set_model(model);
+        active_shader->set_mat4(model_tag, model);
 
         gfx::render_chunk(*mesh_obj.chunk);
       }

@@ -8,15 +8,24 @@ namespace redc { namespace gfx
 {
   Immediate_Renderer::Immediate_Renderer(IDriver& d) noexcept : d_(&d)
   {
+    // Create our shader
     shader_ = d_->make_shader_repr();
-    shader_->load_vertex_part("shader/debug/vs.glsl");
-    shader_->load_fragment_part("shader/debug/fs.glsl");
 
-    shader_->set_view_name("view");
-    shader_->set_projection_name("proj");
+    // Load it from files
+    load_vertex_file(*shader_, "shader/debug/vs.glsl");
+    load_fragment_file(*shader_, "shader/debug/fs.glsl");
 
-    shader_->set_diffuse_name("color");
+    // Link
+    shader_->link();
 
+    using namespace tags;
+    // Tag
+    shader_->set_var_tag(view_tag, "view");
+    shader_->set_var_tag(proj_tag, "proj");
+
+    shader_->set_var_tag(diffuse_tag, "color");
+
+    // Make our mesh
     mesh_ = d_->make_mesh_repr();
 
     buf_size_ = 50000;
@@ -112,10 +121,12 @@ namespace redc { namespace gfx
   }
   void Immediate_Renderer::render(Camera const& cam) noexcept
   {
+    using namespace gfx::tags;
+
     auto shader_lock = push_shader(*shader_, *d_);
-    shader_->set_diffuse(cur_dif_);
-    shader_->set_projection(camera_proj_matrix(cam));
-    shader_->set_view(camera_view_matrix(cam));
+    shader_->set_color(diffuse_tag, cur_dif_);
+    shader_->set_mat4(proj_tag, camera_proj_matrix(cam));
+    shader_->set_mat4(view_tag, camera_view_matrix(cam));
     mesh_->draw_arrays(0, pos_pos_);
   }
 } }

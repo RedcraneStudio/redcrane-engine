@@ -135,8 +135,9 @@ namespace redc
     }
     void use_camera(IDriver& driver, Camera const& cam) noexcept
     {
-      driver.active_shader()->set_view(camera_view_matrix(cam));
-      driver.active_shader()->set_projection(camera_proj_matrix(cam));
+      using namespace tags;
+      driver.active_shader()->set_mat4(view_tag, camera_view_matrix(cam));
+      driver.active_shader()->set_mat4(proj_tag, camera_proj_matrix(cam));
     }
 
 #if 0

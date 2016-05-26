@@ -96,19 +96,23 @@ extern "C"
 
     // TODO: Load shaders like we load mesh. Right now is bad
     auto basic_shade_path = rce->share_path / "shader" / "basic";
-    df_shade->load_vertex_part((basic_shade_path / "vs.glsl").native());
-    df_shade->load_fragment_part((basic_shade_path / "fs.glsl").native());
+    load_vertex_file(*df_shade, (basic_shade_path / "vs.glsl").native());
+    load_fragment_file(*df_shade, (basic_shade_path / "fs.glsl").native());
 
-    df_shade->set_model_name("model");
-    df_shade->set_view_name("view");
-    df_shade->set_projection_name("proj");
+    df_shade->link();
 
-    df_shade->set_diffuse_name("dif");
-    df_shade->set_diffuse(colors::white);
+    using namespace gfx::tags;
+    df_shade->set_var_tag(model_tag, "model");
+    df_shade->set_var_tag(view_tag, "view");
+    df_shade->set_var_tag(proj_tag, "proj");
 
-    // Put this somewhere meaningful
-    auto light_loc = df_shade->get_location("light_pos");
-    df_shade->set_vec3(light_loc, glm::vec3(0.0f, 5.0f, 0.0f));
+    df_shade->set_var_tag(diffuse_tag, "dif");
+    df_shade->set_color(diffuse_tag, colors::white);
+
+    // TODO: Put this in a lua script so we don't have to do this.
+    df_shade->tag_var("light_pos");
+    // Set light position, maybe put standardize this tag?
+    df_shade->set_vec3("light_pos", glm::vec3(0.0f, 5.0f, 0.0f));
 
     // Make it the default
     rce->client->driver->use_shader(*df_shade);

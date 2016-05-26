@@ -30,6 +30,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     shader/envmap/vs.glsl shader/envmap/fs.glsl
                     shader/cel/vs.glsl shader/cel/fs.glsl
 
+                    shader/basic.lua
+
                     tex/envmap/down.png
                     tex/envmap/up.png
                     tex/envmap/back.png

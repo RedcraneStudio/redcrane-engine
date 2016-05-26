@@ -3,60 +3,56 @@
  * All rights reserved.
  */
 #include "shader.h"
+#include <istream>
+#include <fstream>
 namespace redc { namespace gfx
 {
-  void Shader::set_color(int loc, Color const& c) noexcept
+  void Shader::set_color(tag_t tag, Color const& c)
   {
     glm::vec4 v;
     v.r = c.r / (float) 0xff;
     v.g = c.g / (float) 0xff;
     v.b = c.b / (float) 0xff;
     v.a = c.a / (float) 0xff;
-    set_vec4(loc, v);
+    set_vec4(tag, v);
   }
-  void Shader::set_loc_(int& loc, std::string const& str) noexcept
+  std::string load_stream(std::istream& stream)
   {
-    loc = get_location(str);
-  }
-  void Shader::set_diffuse_name(std::string const& str) noexcept
-  {
-    set_loc_(diffuse_loc_, str);
-  }
-  void Shader::set_projection_name(std::string const& str) noexcept
-  {
-    set_loc_(proj_loc_, str);
-  }
-  void Shader::set_view_name(std::string const& str) noexcept
-  {
-    set_loc_(view_loc_, str);
-  }
-  void Shader::set_model_name(std::string const& str) noexcept
-  {
-    set_loc_(model_loc_, str);
-  }
-  void Shader::set_sampler_name(std::string const& str) noexcept
-  {
-    set_loc_(sampler_loc_, str);
+    std::string ret;
+    while(!stream.eof() && stream.good())
+    {
+      auto c = stream.get();
+      if(std::istream::traits_type::not_eof(c))
+      {
+        ret.push_back(c);
+      }
+    }
+    return ret;
   }
 
-  void Shader::set_diffuse(Color c) noexcept
+  Shader::shader_source_t load_file(std::string filename)
   {
-    set_color(diffuse_loc_, c);
+    // Open the file
+    auto file_st = std::ifstream(filename);
+    // Load the contents
+    auto source_str = load_stream(file_st);
+
+    // Convert to a vector of characters
+    using std::begin; using std::end;
+    return std::vector<char>(begin(source_str), end(source_str));
   }
-  void Shader::set_projection(glm::mat4 const& mat) noexcept
+
+  void load_vertex_file(Shader& shade, std::string filename)
   {
-    set_matrix(proj_loc_, mat);
+    shade.load_vertex_part(load_file(filename), filename);
   }
-  void Shader::set_view(glm::mat4 const& mat) noexcept
+  void load_fragment_file(Shader& shade, std::string filename)
   {
-    set_matrix(view_loc_, mat);
+    shade.load_fragment_part(load_file(filename), filename);
   }
-  void Shader::set_model(glm::mat4 const& mat) noexcept
+  void load_geometry_file(Shader& shade, std::string filename)
   {
-    set_matrix(model_loc_, mat);
+    shade.load_geometry_part(load_file(filename), filename);
   }
-  void Shader::set_sampler(int unit) noexcept
-  {
-    set_integer(sampler_loc_, unit);
-  }
+
 } }

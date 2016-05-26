@@ -4,10 +4,10 @@
  */
 #include "shader.h"
 
-#include <istream>
-#include <fstream>
 #include <string>
 #include "glad/glad.h"
+
+#include <glm/gtc/type_ptr.hpp>
 
 #include "../../common/log.h"
 #include "driver.h"
@@ -17,7 +17,7 @@
 // If we are debugging this will cause a crash, and just in case we return
 // should the macro be deactivated
 #define LOC_BAIL(location) \
-  REDC_ASSERT_MSG(location != -1, "Bad uniform location in shader"); \
+  //REDC_ASSERT_MSG(location != -1, "Bad uniform location in shader");  \
   if(location == -1) return
 
 #include <boost/filesystem.hpp>
@@ -29,24 +29,11 @@
 
 namespace redc { namespace gfx { namespace gl
 {
-  std::string load_stream(std::istream& stream) noexcept
-  {
-    std::string ret;
-    while(!stream.eof() && stream.good())
-    {
-      auto c = stream.get();
-      if(std::istream::traits_type::not_eof(c))
-      {
-        ret.push_back(c);
-      }
-    }
-    return ret;
-  }
-  void compile_shader(GLuint shade, std::string const& data,
+  void compile_shader(GLuint shade, GL_Shader::shader_source_t const& source,
                       std::string filename = "")
   {
-    int len = data.size();
-    auto data_cstr = data.data();
+    int len = source.size();
+    auto data_cstr = source.data();
     glShaderSource(shade, 1, &data_cstr, &len);
 
     glCompileShader(shade);
@@ -68,52 +55,70 @@ namespace redc { namespace gfx { namespace gl
       delete[] info_log;
     }
   }
-  GL_Shader::GL_Shader(Driver& d) noexcept : driver_(&d)
+  GL_Shader::GL_Shader(Driver& d) : driver_(&d)
   {
     prog_ = glCreateProgram();
   }
-  GL_Shader::~GL_Shader() noexcept
+  GL_Shader::~GL_Shader()
   {
     if(prog_) glDeleteProgram(prog_);
+    if(g_shade_) glDeleteShader(g_shade_);
     if(f_shade_) glDeleteShader(f_shade_);
     if(v_shade_) glDeleteShader(v_shade_);
   }
-  void GL_Shader::load_vertex_part(std::string const& str) noexcept
+
+  void GL_Shader::load_part(shader_source_t const& source, std::string name,
+                            GLenum part, GLuint& shade_obj)
   {
-    v_shade_ = glCreateShader(GL_VERTEX_SHADER);
-    glAttachShader(prog_, v_shade_);
+    // If the shader hasn't been created yet
+    if(!shade_obj)
+    {
+      // Create a new shader
+      shade_obj = glCreateShader(part);
+    }
 
-    ASSERT_FILE(str);
-    std::ifstream file{str};
-    compile_shader(v_shade_, load_stream(file), str);
+    // Attach it to our program
+    glAttachShader(prog_, shade_obj);
 
-    try_load_();
+    // Compile the shader with the given code
+    compile_shader(shade_obj, source, name);
   }
-  void GL_Shader::load_fragment_part(std::string const& str) noexcept
+  void GL_Shader::load_vertex_part(shader_source_t const& code,
+                                   std::string const& name)
   {
-    f_shade_ = glCreateShader(GL_FRAGMENT_SHADER);
-    glAttachShader(prog_, f_shade_);
-
-    ASSERT_FILE(str);
-    std::ifstream file{str};
-    compile_shader(f_shade_, load_stream(file), str);
-
-    try_load_();
+    load_part(code, name, GL_VERTEX_SHADER, v_shade_);
+  }
+  void GL_Shader::load_fragment_part(shader_source_t const& code,
+                                     std::string const& name)
+  {
+    load_part(code, name, GL_FRAGMENT_SHADER, f_shade_);
+  }
+  void GL_Shader::load_geometry_part(shader_source_t const& code,
+                                     std::string const& name)
+  {
+    load_part(code, name, GL_GEOMETRY_SHADER, g_shade_);
   }
 
-  void GL_Shader::try_load_() noexcept
+  bool GL_Shader::link()
   {
-    // We'll need to rework this logic if we plan on supporting geometry
-    // shaders.
-    if(!v_shade_ || !f_shade_) return;
+    // Make sure we have a vertex and fragment shader, otherwise we know it's
+    // not going to work.
+    REDC_ASSERT_MSG(v_shade_, "OpenGL shader program must have vertex shader");
+    REDC_ASSERT_MSG(f_shade_, "OpenGL shader program must have fragment shader");
 
+    // The tags are going to be invalid after a new link. Technically if the
+    // shaders haven't changed the tags don't need to be invalidated.
+    tags.clear();
+
+    // Attempt the link
     glLinkProgram(prog_);
 
+    // Check the log
     GLint result = 0;
     glGetProgramiv(prog_, GL_LINK_STATUS, &result);
     if(result == GL_FALSE)
     {
-      // Compilation failed.
+      // Link failed.
       GLint info_log_length = 0;
       glGetProgramiv(prog_, GL_INFO_LOG_LENGTH, &info_log_length);
       auto info_log = new char[info_log_length];
@@ -128,62 +133,93 @@ namespace redc { namespace gfx { namespace gl
     {
       linked_ = true;
     }
+
+    return linked_;
   }
 
-  int GL_Shader::get_location(std::string const& str) noexcept
+  void GL_Shader::set_var_tag(tag_t tag, std::string var_name)
   {
-    if(!linked_) return -1;
-    return glGetUniformLocation(prog_, str.data());
+    // The shader must have been linked by now.
+    REDC_ASSERT_MSG(linked_, "Adding tags requires a linked program");
+
+    // Get the location, we don't need to switch to our program to do this!
+    auto loc = glGetUniformLocation(prog_, var_name.data());
+    // If it's not valid don't put it in!
+    LOC_BAIL(loc);
+
+    // Commit it, this is basically insert_or_assign but we don't have C++17 yet
+    // so this will have to do.
+    if(tags.count(tag)) tags.at(tag) = loc;
+    else tags.insert({tag, loc});
   }
 
-  void GL_Shader::set_matrix(int loc, glm::mat4 const& mat) noexcept
+  // Functions to set uniforms given a tag
+
+  void GL_Shader::set_mat4(tag_t tag, glm::mat4 const& mat)
   {
+    auto loc = get_location_from_tag(tag);
     LOC_BAIL(loc);
 
     USE_THIS_SHADER();
-    glUniformMatrix4fv(loc, 1, GL_FALSE, &mat[0][0]);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
   }
 
-  void GL_Shader::set_integer(int loc, int tex_unit) noexcept
+  void GL_Shader::set_integer(tag_t tag, int i)
   {
+    auto loc = get_location_from_tag(tag);
     LOC_BAIL(loc);
 
     USE_THIS_SHADER();
-    glUniform1i(loc, tex_unit);
+    glUniform1i(loc, i);
   }
 
-  void GL_Shader::set_vec2(int loc, glm::vec2 const& v) noexcept
+  void GL_Shader::set_vec2(tag_t tag, glm::vec2 const& v)
   {
+    auto loc = get_location_from_tag(tag);
     LOC_BAIL(loc);
 
     USE_THIS_SHADER();
     glUniform2fv(loc, 1, &v[0]);
   }
-  void GL_Shader::set_vec3(int loc, glm::vec3 const& v) noexcept
+  void GL_Shader::set_vec3(tag_t tag, glm::vec3 const& v)
   {
+    auto loc = get_location_from_tag(tag);
     LOC_BAIL(loc);
 
     USE_THIS_SHADER();
     glUniform3fv(loc, 1, &v[0]);
   }
-  void GL_Shader::set_vec4(int loc, glm::vec4 const& v) noexcept
+  void GL_Shader::set_vec4(tag_t tag, glm::vec4 const& v)
   {
+    auto loc = get_location_from_tag(tag);
     LOC_BAIL(loc);
 
     USE_THIS_SHADER();
     glUniform4fv(loc, 1, &v[0]);
   }
-  void GL_Shader::set_float(int loc, float f) noexcept
+  void GL_Shader::set_float(tag_t tag, float f)
   {
+    auto loc = get_location_from_tag(tag);
     LOC_BAIL(loc);
 
     USE_THIS_SHADER();
     glUniform1f(loc, f);
   }
-  void GL_Shader::use() noexcept
+  void GL_Shader::use()
   {
-    if(!linked_) return;
+    REDC_ASSERT_MSG(linked_, "Cannot activate a non-linked shader program");
     glUseProgram(prog_);
+  }
+
+  GLint GL_Shader::get_location_from_tag(tag_t tag)
+  {
+    if(tags.count(tag))
+    {
+      // If the tag exists return that value from the map
+      return tags.at(tag);
+    }
+    // Otherwise we the tag isn't valid, return a bad location
+    return 0;
   }
 } } }
 

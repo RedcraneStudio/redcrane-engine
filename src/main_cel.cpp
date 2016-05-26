@@ -45,20 +45,24 @@ int main(int argc, char** argv)
   auto def_shade = driver.make_shader_repr();
 
   auto cel_shade_path = share_path / "shader" / "cel";
-  def_shade->load_vertex_part((cel_shade_path / "vs.glsl").native());
-  def_shade->load_fragment_part((cel_shade_path / "fs.glsl").native());
+  load_vertex_file(*def_shade, (cel_shade_path / "vs.glsl").native());
+  load_fragment_file(*def_shade, (cel_shade_path / "fs.glsl").native());
 
-  def_shade->set_model_name("model");
-  def_shade->set_view_name("view");
-  def_shade->set_projection_name("proj");
-  def_shade->set_diffuse_name("dif");
+  def_shade->link();
 
-  def_shade->set_diffuse(colors::white);
+  using namespace gfx::tags;
+  def_shade->set_var_tag(model_tag, "model");
+  def_shade->set_var_tag(view_tag, "view");
+  def_shade->set_var_tag(proj_tag, "proj");
+  def_shade->set_var_tag(diffuse_tag, "dif");
 
-  auto light_loc = def_shade->get_location("light_pos");
-  def_shade->set_vec3(light_loc, glm::vec3(0.0f, 0.0f, 1.0f));
+  def_shade->set_color(diffuse_tag, colors::white);
 
-  auto offset_loc = def_shade->get_location("offset");
+  // Cache the positions of these variables
+  def_shade->tag_var("light_pos");
+  def_shade->tag_var("offset");
+
+  def_shade->set_vec3("light_pos", glm::vec3(0.0f, 0.0f, 1.0f));
 
   driver.use_shader(*def_shade);
 
@@ -96,16 +100,16 @@ int main(int argc, char** argv)
     model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
     model = glm::rotate(model, (float) time_since(begin), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    driver.active_shader()->set_model(model);
+    driver.active_shader()->set_mat4(model_tag, model);
 
-    def_shade->set_float(offset_loc, 0.f);
-    def_shade->set_diffuse(colors::white);
+    def_shade->set_float("offset", 0.f);
+    def_shade->set_color(diffuse_tag, colors::white);
     driver.cull_side(gfx::Cull_Side::Back);
     gfx::render_chunk(monkey);
 
     // Render it again, with an offset along the normal in black
-    def_shade->set_float(offset_loc, .05f);
-    def_shade->set_diffuse(colors::black);
+    def_shade->set_float("offset", .05f);
+    def_shade->set_color(diffuse_tag, colors::black);
     driver.cull_side(gfx::Cull_Side::Front);
     gfx::render_chunk(monkey);
 

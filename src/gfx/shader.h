@@ -4,61 +4,68 @@
  */
 #pragma once
 #include <string>
+#include <vector>
 #include <glm/glm.hpp>
 #include "../common/color.h"
 namespace redc
 {
   namespace gfx
   {
+    namespace tags
+    {
+      constexpr const char* proj_tag = "projection";
+      constexpr const char* view_tag = "view";
+      constexpr const char* model_tag = "model";
+      constexpr const char* diffuse_tag = "diffuse";
+    }
     struct Shader
     {
-
       virtual ~Shader() {}
 
-      // These functions should, if called more than once, discard the one it
-      // was last initialized with.
-      virtual void load_vertex_part(std::string const&) noexcept {}
-      virtual void load_fragment_part(std::string const&) noexcept {}
-      virtual void load_geometry_part(std::string const&) noexcept {}
+      using shader_source_t = std::vector<char>;
 
-      virtual int get_location(std::string const&) noexcept { return 0; }
+      // These functions should, if called more than once, discard the last
+      // shader source it was called it, ie this is not an append operation it
+      // is a replace operation just like glShaderSource.
+      virtual void load_vertex_part(shader_source_t const&,
+                                    std::string const&) {}
+      virtual void load_fragment_part(shader_source_t const&,
+                                      std::string const&) {}
+      virtual void load_geometry_part(shader_source_t const&,
+                                      std::string const&) {}
 
-      virtual void set_matrix(int, glm::mat4 const&) noexcept {}
+      virtual bool link() { return false; }
+      virtual bool linked() { return false; }
 
-      virtual void set_integer(int, int) noexcept {}
+      using tag_t = std::string;
+      virtual void set_var_tag(tag_t, std::string) {}
 
-      virtual void set_vec2(int, glm::vec2 const&) noexcept {}
-      virtual void set_vec3(int, glm::vec3 const&) noexcept {}
-      virtual void set_vec4(int, glm::vec4 const&) noexcept {}
+      // Creates a tag with the same name of a given variable.
+      inline void tag_var(std::string tag)
+      { set_var_tag(tag, tag); }
 
-      virtual void set_float(int, float) noexcept {}
+      virtual void set_mat4(tag_t, glm::mat4 const&) {}
+
+      virtual void set_integer(tag_t, int) {}
+
+      virtual void set_vec2(tag_t, glm::vec2 const&) {}
+      virtual void set_vec3(tag_t, glm::vec3 const&) {}
+      virtual void set_vec4(tag_t, glm::vec4 const&) {}
+
+      virtual void set_float(tag_t, float) {}
 
       // Defaults to wrapping over set_vec4 converting the colors to
       // a floating point value out of 0xff.
-      virtual void set_color(int, Color const&) noexcept;
-
-      // Although consider the interface below mildly deprecated. In other
-      // prefer some other form of uniform location caching.
-      void set_diffuse_name(std::string const&) noexcept;
-      void set_projection_name(std::string const&) noexcept;
-      void set_view_name(std::string const&) noexcept;
-      void set_model_name(std::string const&) noexcept;
-      void set_sampler_name(std::string const&) noexcept;
-
-      void set_diffuse(Color) noexcept;
-      void set_projection(glm::mat4 const&) noexcept;
-      void set_view(glm::mat4 const&) noexcept;
-      void set_model(glm::mat4 const&) noexcept;
-      void set_sampler(int) noexcept;
-
-    private:
-      int diffuse_loc_ = -1;
-      int proj_loc_ = -1;
-      int view_loc_ = -1;
-      int model_loc_ = -1;
-      int sampler_loc_ = -1;
-
-      void set_loc_(int&, std::string const&) noexcept;
+      virtual void set_color(tag_t, Color const&);
     };
+
+    // Load shader source from file
+    Shader::shader_source_t load_file(std::string filename);
+
+    // Load contents of a file into the respective shader part of a given shader
+    // program.
+    void load_vertex_file(Shader& shade, std::string filename);
+    void load_fragment_file(Shader& shade, std::string filename);
+    void load_geometry_file(Shader& shade, std::string filename);
   }
 }

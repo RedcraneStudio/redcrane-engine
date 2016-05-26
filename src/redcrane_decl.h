@@ -71,8 +71,42 @@ void redc_scene_render(void *sc);
 
 // See cwrap/shader.cpp
 
-void *redc_make_shader(void *eng, const char* dir);
-void redc_unmake_shader(void *shader);
+void *redc_make_shader_builder(void *eng, const char *name);
+// DON'T call this if you've already compiled the shader. DO call this if you
+// want to cancel the creation of a shader, etc.
+void redc_unmake_shader_builder(void *builder);
+
+// These functions append code to a given shader kind or whatever you want to
+// call it. Append as much code as necessary, then move on to compile.
+void redc_shader_append_vertex_part(void *builder, const char *str);
+void redc_shader_append_fragment_part(void *builder, const char *str);
+void redc_shader_append_geometry_part(void *builder, const char *str);
+
+// This function gives a certain variable name a tag, these tags should be well
+// known in the code. Right now we will use the mechanism that was already in
+// place where the shader stores the location of a few commonly-used uniform
+// variables, for example the projection matrix, the diffuse color, etc. Sooner
+// or later it might be better to put that information in a hashmap so we don't
+// commit to anything. Right now we have a couple of tags that we want to
+// recognize in the engine.
+// - projection: The projection matrix (mat4)
+// - view: The view matrix (mat4)
+// - model: The model matrix (mat4)
+void redc_shader_tag_uniform(void *build, const char *tag, const char *name);
+
+void redc_shader_compile_vertex_part(void *builder);
+void redc_shader_compile_fragment_part(void *builder);
+void redc_shader_compile_geometry_part(void *builder);
+
+// Returns an actual shader object ready to be set for an object or maybe
+// scene-wide (TODO: That). This function will deallocate the shader builder and
+// will return a new, compiled shader that must be deallocated with a call to
+// redc_shader_destroy.
+void *redc_shader_link(void *shade);
+
+// This should be called on a fully-linked shader (ie the return value of
+// redc_shader_compile).
+void redc_shader_destroy(void *shader);
 
 // See cwrap/map.cpp
 
