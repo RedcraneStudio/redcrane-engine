@@ -244,13 +244,6 @@ extern "C"
       return;
     }
 
-    // Load the active camera
-    auto active_camera =
-            boost::get<Cam_Object>(at_id(scene->objs,
-                                         scene->active_camera).obj);
-
-    gfx::use_camera(*scene->engine->client->driver, active_camera.cam);
-
     // Clear the screen
     scene->engine->client->driver->clear();
 
@@ -259,6 +252,14 @@ extern "C"
     // Render the current / active map with the default shader
     auto& default_shader = scene->engine->client->default_shader;
     scene->engine->client->driver->use_shader(*default_shader);
+
+    // Load the active camera now, since we just activated the proper shader
+    auto active_camera =
+            boost::get<Cam_Object>(at_id(scene->objs,
+                                         scene->active_camera).obj);
+
+    gfx::use_camera(*scene->engine->client->driver, active_camera.cam);
+
     default_shader->set_mat4(model_tag, glm::mat4(1.0f));
     gfx::render_chunk(scene->active_map->render->chunk);
 
@@ -308,6 +309,14 @@ extern "C"
         auto shader = scene->engine->client->default_shader.get();
         if(mesh_obj.shader) shader = mesh_obj.shader.get();
         scene->engine->client->driver->use_shader(*shader);
+
+        // TODO: Make this easier to do, I had to avoid the use_camera function
+        // because it went through the driver. The thing is, with our new shader
+        // interface it's easier to deal with shaders directly so use_camera
+        // just got less useful.
+        using namespace gfx::tags;
+        shader->set_mat4(proj_tag, camera_proj_matrix(active_camera.cam));
+        shader->set_mat4(view_tag, camera_view_matrix(active_camera.cam));
 
         // Find out the model
         auto model = object_model(obj);
