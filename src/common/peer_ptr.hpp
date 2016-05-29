@@ -151,6 +151,8 @@ namespace redc
     template <class U>
     Peer_Lock& operator=(Peer_Lock<U> const& ptr);
 
+    explicit operator bool() const;
+
     T* operator->() const;
     typename std::add_lvalue_reference<T>::type operator*() const;
 
@@ -222,6 +224,12 @@ namespace redc
     // One more lock
     if(data_) ++data_->lock_count;
     return *this;
+  }
+
+  template <class T>
+  Peer_Lock<T>::operator bool() const
+  {
+    return get() != nullptr;
   }
 
   template <class T>
