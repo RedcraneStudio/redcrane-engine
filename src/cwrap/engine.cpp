@@ -117,9 +117,8 @@ extern "C"
     // Make it the default
     rce->client->driver->use_shader(*df_shade);
 
-    // Make sure we don't delete it later by linking its lifetime with that of
-    // the engines.
-    rce->client->peers.push_back(std::move(df_shade));
+    // Keep the shader alive for the lifetime of the client.
+    rce->client->default_shader = std::move(df_shade);
 
     log_i("Initializing client subsystem ... Successful");
   }

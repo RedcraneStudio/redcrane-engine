@@ -127,7 +127,7 @@ extern "C"
     auto mesh = lock_resource<gfx::Mesh_Chunk>(ms);
 
     at_id(scene->objs, id) =
-      {Mesh_Object{std::move(mesh), {}, glm::mat4(1.0f)}, nullptr};
+      {Mesh_Object{std::move(mesh), {}, {}, glm::mat4(1.0f)}, nullptr};
 
     return id;
   }
@@ -254,13 +254,12 @@ extern "C"
     // Clear the screen
     scene->engine->client->driver->clear();
 
-    // Find active shader.
-    auto active_shader = scene->engine->client->driver->active_shader();
-
     using namespace gfx::tags;
 
-    // Render the current / active map
-    active_shader->set_mat4(model_tag, glm::mat4(1.0f));
+    // Render the current / active map with the default shader
+    auto& default_shader = scene->engine->client->default_shader;
+    scene->engine->client->driver->use_shader(*default_shader);
+    default_shader->set_mat4(model_tag, glm::mat4(1.0f));
     gfx::render_chunk(scene->active_map->render->chunk);
 
     // i is the loop counter, id is our current id.
@@ -305,9 +304,14 @@ extern "C"
       {
         auto mesh_obj = boost::get<Mesh_Object>(obj.obj);
 
+        // Select a shader to use, either default or mesh-specific.
+        auto shader = scene->engine->client->default_shader.get();
+        if(mesh_obj.shader) shader = mesh_obj.shader.get();
+        scene->engine->client->driver->use_shader(*shader);
+
         // Find out the model
         auto model = object_model(obj);
-        active_shader->set_mat4(model_tag, model);
+        shader->set_mat4(model_tag, model);
 
         gfx::render_chunk(*mesh_obj.chunk);
       }

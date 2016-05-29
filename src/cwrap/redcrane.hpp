@@ -119,6 +119,10 @@ namespace redc
     // Scenes
     std::vector<Peer_Ptr<Scene> > scenes;
 
+    // The default shader scenes should use when an object doesn't have a
+    // specific shader.
+    std::unique_ptr<gfx::Shader> default_shader;
+
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it
     // We should reserve some amount of memory for each scene so that we can
     // pass around pointers and no they won't suddenly become invalid.
@@ -162,6 +166,7 @@ namespace redc
     // shared_ptr has for the peer_lock / peer_ptr.
     Peer_Lock<gfx::Mesh_Chunk> chunk;
     Peer_Lock<Texture> texture;
+    Peer_Lock<gfx::Shader> shader;
     glm::mat4 model;
   };
 
