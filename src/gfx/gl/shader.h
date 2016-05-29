@@ -46,9 +46,9 @@ namespace redc { namespace gfx { namespace gl
     Driver* driver_;
 
     // Shader objects
-    GLuint v_shade_;
-    GLuint f_shade_;
-    GLuint g_shade_;
+    GLuint v_shade_ = 0;
+    GLuint f_shade_ = 0;
+    GLuint g_shade_ = 0;
 
     // Program object
     GLuint prog_;
