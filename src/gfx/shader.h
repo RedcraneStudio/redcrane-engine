@@ -16,7 +16,11 @@ namespace redc
       constexpr const char* proj_tag = "projection";
       constexpr const char* view_tag = "view";
       constexpr const char* model_tag = "model";
+
       constexpr const char* diffuse_tag = "diffuse";
+
+      constexpr const char* dif_tex_tag = "dif_tex";
+      constexpr const char* bump_tex_tag = "bump_tex";
     }
     struct Shader
     {
