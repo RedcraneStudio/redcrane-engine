@@ -9,6 +9,7 @@
  */
 
 #include "redcrane.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #define CHECK_ID(id) \
         REDC_ASSERT_MSG(id != 0, "No more room for any more objects"); \
@@ -27,6 +28,61 @@ extern "C"
     auto sc = new Peer_Ptr<Scene>(new Scene);
     sc->get()->engine = engine;
 
+    // Add a crosshair to the camera, this is only used though if there is a
+    // camera following the player which is why we can go ahead and add it now,
+    // no problem.
+    // TODO: Fix filename
+    sc->get()->crosshair = gfx::load_texture(*engine->client->driver,
+                                             "../assets/tex/crosshair.png");
+    engine->client->driver->bind_texture(*sc->get()->crosshair, 0);
+
+    {
+      // Set up the mesh shader
+      sc->get()->ch_mesh = engine->client->driver->make_mesh_repr();
+
+      // Initialize mesh data
+      std::array<float, 24> crosshair_data = {
+        0.49f, 0.51f, 0.0f, 1.0f,
+        0.51f, 0.51f, 1.0f, 1.0f,
+        0.49f, 0.49f, 0.0f, 0.0f,
+
+        0.51f, 0.51f, 1.0f, 1.0f,
+        0.51f, 0.49f, 1.0f, 0.0f,
+        0.49f, 0.49f, 0.0f, 0.0f
+      };
+
+      auto sz = sizeof(float) * crosshair_data.size();
+      auto buf =sc->get()->ch_mesh->allocate_buffer(sz, Usage_Hint::Draw,
+                                                           Upload_Hint::Static);
+      sc->get()->ch_mesh->buffer_data(buf, 0, sz, &crosshair_data[0]);
+      // 2D Positions
+      sc->get()->ch_mesh->format_buffer(buf, 0, 2, Buffer_Format::Float,
+                                               4 * sizeof(float), 0);
+      sc->get()->ch_mesh->enable_vertex_attrib(0);
+
+      // UV coordinates
+      sc->get()->ch_mesh->format_buffer(buf, 1, 2, Buffer_Format::Float,
+                                               4 * sizeof(float),
+                                               2 * sizeof(float));
+      sc->get()->ch_mesh->enable_vertex_attrib(1);
+
+      sc->get()->ch_mesh->set_primitive_type(Primitive_Type::Triangle);
+
+      // Set up the HUD shader
+      sc->get()->ch_shader = engine->client->driver->make_shader_repr();
+      load_vertex_file(*sc->get()->ch_shader, "../assets/shader/hud/vs.glsl");
+      load_fragment_file(*sc->get()->ch_shader, "../assets/shader/hud/fs.glsl");
+
+      sc->get()->ch_shader->link();
+
+      sc->get()->ch_shader->set_var_tag(gfx::tags::proj_tag, "ortho");
+      sc->get()->ch_shader->set_mat4(gfx::tags::proj_tag,
+                                     glm::ortho(0.0f, 1.0f, 0.0f, 1.0f,
+                                                -1.0f, 1.0f));
+
+      sc->get()->ch_shader->set_var_tag(gfx::tags::dif_tex_tag, "tex");
+      sc->get()->ch_shader->set_integer(gfx::tags::dif_tex_tag, 0);
+    }
     engine->client->scenes.push_back(sc->peer());
     return sc;
   }
@@ -325,5 +381,16 @@ extern "C"
         gfx::render_chunk(*mesh_obj.chunk);
       }
     }
+
+    // Render the crosshair only if the active camera is a camera that follows
+    // the player.
+    scene->engine->client->driver->blending(true);
+    scene->engine->client->driver->write_depth(false);
+    scene->engine->client->driver->depth_test(false);
+    scene->engine->client->driver->use_shader(*scene->ch_shader);
+    scene->ch_mesh->draw_arrays(0, 6);
+    scene->engine->client->driver->blending(false);
+    scene->engine->client->driver->write_depth(true);
+    scene->engine->client->driver->depth_test(true);
   }
 }

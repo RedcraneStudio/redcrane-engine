@@ -227,6 +227,10 @@ namespace redc
     // referenced in the engine?
     observer_ptr<Map> active_map;
 
+    std::unique_ptr<Texture> crosshair;
+    std::unique_ptr<Mesh> ch_mesh;
+    std::unique_ptr<gfx::Shader> ch_shader;
+
     Input cur_input;
 
     void process_event(event_t const& event) override;
