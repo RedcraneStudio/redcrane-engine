@@ -32,27 +32,45 @@ namespace redc { namespace gfx { namespace gl
   void compile_shader(GLuint shade, GL_Shader::shader_source_t const& source,
                       std::string filename = "")
   {
+    // Copy the shader source
     int len = source.size();
     auto data_cstr = source.data();
     glShaderSource(shade, 1, &data_cstr, &len);
 
+    // Compile
     glCompileShader(shade);
 
-    GLint result = 0;
-    glGetShaderiv(shade, GL_COMPILE_STATUS, &result);
-    if(result == GL_FALSE)
+    // What are the severity of these messages
+    auto severity = Log_Severity::Warning;
+
+    GLint compiled = 0;
+    glGetShaderiv(shade, GL_COMPILE_STATUS, &compiled);
+
+    // If the compile failed, they are errors
+    if(compiled == GL_FALSE)
     {
-      // Compilation failed.
-      GLint info_log_length = 0;
-      glGetShaderiv(shade, GL_INFO_LOG_LENGTH, &info_log_length);
-      auto info_log = new char[info_log_length];
+      severity = Log_Severity::Error;
+      log_e("Shader '%' failed to compile", filename);
+    }
 
-      glGetShaderInfoLog(shade, info_log_length, NULL, info_log);
-
-      log_e("Shader compilation failed in '%' (info log):\n%", filename,
-            info_log);
-
-      delete[] info_log;
+    // Check the info log for any messages
+    GLint info_log_length = 0;
+    glGetShaderiv(shade, GL_INFO_LOG_LENGTH, &info_log_length);
+    if(info_log_length != 0)
+    {
+      std::string info_log(info_log_length, 0x00);
+      glGetShaderInfoLog(shade, info_log_length, NULL, &info_log[0]);
+      log(severity, "Shader info log of '%' (info log):\n%", filename,
+          info_log);
+    }
+    else
+    {
+      // By default, the no shader info log message has info severity.
+      auto no_info_sev = Log_Severity::Info;
+      // But a compile failure makes this important
+      if(!compiled) no_info_sev = Log_Severity::Error;
+      // Now do the log
+      log(no_info_sev, "No shader info log for '%'", filename);
     }
   }
   GL_Shader::GL_Shader(Driver& d) : driver_(&d)
@@ -121,13 +139,18 @@ namespace redc { namespace gfx { namespace gl
       // Link failed.
       GLint info_log_length = 0;
       glGetProgramiv(prog_, GL_INFO_LOG_LENGTH, &info_log_length);
-      auto info_log = new char[info_log_length];
 
-      glGetProgramInfoLog(prog_, info_log_length, NULL, info_log);
+      if(info_log_length == 0)
+      {
+        log_e("Program link failed (no info log)");
+      }
+      else
+      {
+        std::string info_log(info_log_length, 0x00);
+        glGetProgramInfoLog(prog_, info_log_length, NULL, &info_log[0]);
 
-      log_e("Program link failed (info log):\n%", info_log);
-
-      delete[] info_log;
+        log_e("Program link failed (info log):\n%", info_log);
+      }
     }
     else
     {
