@@ -273,7 +273,7 @@ namespace redc
         if(gun_ray.hasHit())
         {
           // Apply some acceleration in the direction of the ray hit
-          gun_target_ = ray_end;
+          gun_target_ = gun_ray.m_hitPointWorld;
           state = Player_State::Flying;
         }
       }
