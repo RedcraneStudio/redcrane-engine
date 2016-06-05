@@ -3,8 +3,11 @@
 #include "common/log.h"
 
 // Average male dimensions
-#define PLAYER_CAPSULE_HEIGHT 1.73
-#define PLAYER_CAPSULE_RADIUS 0.40f
+#define PLAYER_HEIGHT 1.73f
+#define PLAYER_RADIUS 0.40f
+
+#define PLAYER_CAPSULE_HEIGHT (PLAYER_HEIGHT - 2 * PLAYER_RADIUS)
+#define PLAYER_CAPSULE_RADIUS PLAYER_RADIUS
 
 // 78 kg mass person
 #define PLAYER_MASS 78.0f
@@ -92,10 +95,10 @@ namespace redc
       // longer have to apply gravity, for example.
 
       // How far should the ray extend past the bottom of the ghost object.
-      constexpr float shoe_size = 0.7f;
+      constexpr float shoe_size = 0.1f;
 
       auto start_pos = pos;
-      start_pos.setY(pos.getY() - PLAYER_CAPSULE_HEIGHT / 2.0f);
+      start_pos.setY(pos.getY() - PLAYER_HEIGHT / 2.0f);
 
       auto end_pos = pos;
       end_pos.setY(start_pos.getY() - shoe_size);
@@ -218,7 +221,7 @@ namespace redc
 
         // Cast a ray from the character's position to the position plus the
         // movement vector. This is obviously where the player is trying to go.
-        auto end_pt = pos + movement.normalized() * PLAYER_CAPSULE_RADIUS * 4.5f;
+        auto end_pt = pos + movement.normalized() * PLAYER_RADIUS * 4.5f;
         btCollisionWorld::ClosestRayResultCallback move_ray(pos, end_pt);
         world->rayTest(pos, end_pt, move_ray);
 
@@ -264,7 +267,7 @@ namespace redc
         auto forward = btMatrix3x3(ray_rot) * btVector3(0.0f, 0.0f, -1.0f);
 
         // Do a raycast from the player's head along the forward vector
-        auto head_pos = pos + btVector3(0.0f, PLAYER_CAPSULE_HEIGHT / 2, 0.0f);
+        auto head_pos = pos + btVector3(0.0f, PLAYER_HEIGHT / 2, 0.0f);
         auto ray_end = head_pos + forward.normalized() * 1000.0f;
 
         btCollisionWorld::ClosestRayResultCallback gun_ray(head_pos, ray_end);
@@ -443,7 +446,7 @@ namespace redc
     auto origin = trans.getOrigin();
 
     // The average person is 7.5 head sizes
-    constexpr auto head_size = PLAYER_CAPSULE_HEIGHT / 7.5f;
+    constexpr auto head_size = PLAYER_HEIGHT / 7.5f;
 
     // We are at the center of the body, ie 7.5 / 2 or 3.75 heads from the
     // ground, go up 3.50 heads so that we end up in the middle of the topmost
