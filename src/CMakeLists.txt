@@ -37,6 +37,8 @@ add_subdirectory(terrain)
 add_subdirectory(collisionlib)
 add_subdirectory(gen)
 
+add_subdirectory(scene)
+
 find_package(Bullet REQUIRED)
 
 function(lua_compile_bytecode srcfile outfile)

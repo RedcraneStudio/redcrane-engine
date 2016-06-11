@@ -1,0 +1,8 @@
+= glTF loading
+Luke San Antonio <lukesanantonio@gmail.com>
+v0.0 2016-06-11
+
+This code loads glTF json files.
+
+.Purposely unsupported tags
+* buffer.type
