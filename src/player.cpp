@@ -17,7 +17,37 @@ namespace redc
   Player_Controller::Player_Controller() : inited_(false), ghost_(),
                                            shape_(PLAYER_CAPSULE_RADIUS,
                                                   PLAYER_CAPSULE_HEIGHT),
-                                           jump_velocity_() {}
+                                           jump_velocity_()
+  {
+    // Initialize velocity and impulse to zero
+    jump_velocity_.setZero();
+
+    last_normal_.setZero();
+
+    // Set it to a unit vector going straight upwards
+    last_normal_.setY(1.0f);
+
+    // Player state
+    state = Player_State::Grounded;
+
+    // Transform
+    btTransform trans;
+    trans.setIdentity();
+    trans.setOrigin(btVector3(0.0f, 4.5f, 0.0f));
+    ghost_.setWorldTransform(trans);
+
+    // Shape
+    ghost_.setCollisionShape(&shape_);
+
+    // Flags
+    ghost_.setCollisionFlags(ghost_.getCollisionFlags() |
+                             btCollisionObject::CF_KINEMATIC_OBJECT);
+    ghost_.setActivationState(DISABLE_DEACTIVATION);
+
+
+    // Set the pitch to an identity rotation.
+    pitch_.setEuler(0.0f, 0.0f, 0.0f);
+  }
 
   // They are expected to add the action to the dynamics world and then this
   // will be called, then we init then we start
@@ -25,31 +55,6 @@ namespace redc
   {
     if(!inited_)
     {
-      // Initialize velocity and impulse to zero
-      jump_velocity_.setZero();
-
-      last_normal_.setZero();
-
-      // Set it to a unit vector going straight upwards
-      last_normal_.setY(1.0f);
-
-      // Player state
-      state = Player_State::Grounded;
-
-      // Transform
-      btTransform trans;
-      trans.setIdentity();
-      trans.setOrigin(btVector3(0.0f, 4.5f, 0.0f));
-      ghost_.setWorldTransform(trans);
-
-      // Shape
-      ghost_.setCollisionShape(&shape_);
-
-      // Flags
-      ghost_.setCollisionFlags(ghost_.getCollisionFlags() |
-                               btCollisionObject::CF_KINEMATIC_OBJECT);
-      ghost_.setActivationState(DISABLE_DEACTIVATION);
-
       // Ghost callback, this updates any ghost object with any and all objects
       // it collides with so later on we can collision dispatching on only those
       // pairs (and get contacts back, etc).
@@ -65,9 +70,6 @@ namespace redc
 
       // Add to world
       world->addCollisionObject(&ghost_);
-
-      // Set the pitch to an identity rotation.
-      pitch_.setEuler(0.0f, 0.0f, 0.0f);
 
       inited_ = true;
       return;
