@@ -8,7 +8,6 @@
 #include <vector>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
-#include "rapidjson/document.h"
 namespace redc
 {
   namespace fs = boost::filesystem;
@@ -62,7 +61,5 @@ namespace redc
     std::unordered_map<std::string, Accessor> accessors;
   };
 
-  Asset load_gltf(rapidjson::Value& doc,
-                  boost::optional<fs::path> path = boost::none);
-  Asset load_gltf_file(std::string name);
+  boost::optional<bool> load_gltf_file(std::string name);
 }
