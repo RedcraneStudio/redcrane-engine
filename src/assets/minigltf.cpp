@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 
-#include "node.h"
+#include "minigltf.h"
 #include <cstdio>
 #include "rapidjson/filereadstream.h"
 #include "../common/log.h"
@@ -25,7 +25,8 @@ namespace redc
     buf.resize(nsz);
     return buf;
   }
-  Buffer load_buffer(Desc const& d, std::string const& name, rapidjson::Value& js)
+  Buffer load_buffer(Desc const& d, std::string const& name,
+                     rapidjson::Value& js)
   {
     Buffer b;
 
@@ -46,6 +47,10 @@ namespace redc
 
     return b;
   }
+  std::string get_js_string(rapidjson::Value const& name)
+  {
+    return {name.GetString(), name.GetStringLength()};
+  }
   Desc load_desc(rapidjson::Value& js, boost::optional<fs::path> path)
   {
     Desc d;
@@ -54,9 +59,59 @@ namespace redc
     auto& buffers = js["buffers"];
     for(auto iter = buffers.MemberBegin(); iter != buffers.MemberEnd(); ++iter)
     {
-      std::string name(iter->name.GetString(), iter->name.GetStringLength());
+      auto name = get_js_string(iter->name);
       auto buf = load_buffer(d, name, iter->value);
       d.buffers.emplace(name, std::move(buf));
+    }
+
+    auto& buf_views = js["bufferViews"];
+    for(auto iter = buf_views.MemberBegin(); iter != buf_views.MemberEnd();
+        ++iter)
+    {
+      auto name = get_js_string(iter->name);
+      Buffer_View buf_view;
+      buf_view.name = name;
+
+      auto buffer_name = get_js_string(iter->value["buffer"]);
+      auto buffer_iter = d.buffers.find(buffer_name);
+      if(buffer_iter == d.buffers.end())
+      {
+        // No buffer found, this buffer view is fucked
+        log_e("% bufferView references bad buffer: '%'", name, buffer_name);
+        continue;
+      }
+
+      buf_view.base = &buffer_iter->second.buf[0];
+
+      buf_view.size = iter->value["byteLength"].GetUint();
+      buf_view.offset = iter->value["byteOffset"].GetUint();
+
+      auto& target_js = iter->value["target"];
+      if(target_js.IsString())
+      {
+        if(strcmp("ARRAY_BUFFER", target_js.GetString()) == 0)
+          buf_view.target = Buf_View_Target::Array;
+        if(strcmp("ELEMENT_ARRAY_BUFFER", target_js.GetString()) == 0)
+          buf_view.target = Buf_View_Target::Element_Array;
+      }
+      else if(target_js.IsUint())
+      {
+        switch(target_js.GetUint())
+        {
+        case 34962:
+          buf_view.target = Buf_View_Target::Array;
+          break;
+        case 34963:
+          buf_view.target = Buf_View_Target::Element_Array;
+          break;
+        }
+      }
+      else
+      {
+        log_e("Could not load target for bufferView: '%'", name);
+        continue;
+      }
+      d.buf_views.emplace(name, std::move(buf_view));
     }
 
     return d;

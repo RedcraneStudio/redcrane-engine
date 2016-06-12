@@ -37,8 +37,6 @@ add_subdirectory(terrain)
 add_subdirectory(collisionlib)
 add_subdirectory(gen)
 
-add_subdirectory(scene)
-
 find_package(Bullet REQUIRED)
 
 function(lua_compile_bytecode srcfile outfile)
@@ -143,3 +141,7 @@ target_link_libraries(test_cel PUBLIC commonlib netlib gfxlib uselib fpslib
                                   ${Boost_FILESYSTEM_LIBRARY}
                                   ${SDL2_LIBRARIES}
                                   ${BULLET_LIBRARIES})
+
+add_executable(load_gltf load_gltf.cpp)
+target_link_libraries(load_gltf assetslib commonlib)
+
