@@ -15,7 +15,7 @@ int main(int argc, char** argv)
   }
 
   auto before = std::chrono::high_resolution_clock::now();
-  auto desc = redc::load_desc_file(argv[1]);
+  auto desc = redc::load_gltf_file(argv[1]);
   auto after = std::chrono::high_resolution_clock::now();
 
   auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(after - before);
@@ -26,16 +26,29 @@ int main(int argc, char** argv)
   {
     redc::log_i("buffer.name: %", buf.second.name);
     redc::log_i("\tbuffer.buf: %", (intptr_t) &buf.second.buf[0]);
+    redc::flush_log_full();
   }
 
   for(auto const& buf_view : desc.buf_views)
   {
     redc::log_i("bufferView.name: %", buf_view.second.name);
-    redc::log_i("\tbufferView.base: %", (intptr_t) buf_view.second.base);
+    redc::log_i("\tbufferView.base: %", (intptr_t) buf_view.second.base_ptr);
     redc::log_i("\tbufferView.size: %", buf_view.second.size);
-    redc::log_i("\tbufferView.offset: %", buf_view.second.offset);
     redc::log_i("\tbufferView.target: %",
                 static_cast<unsigned int>(buf_view.second.target));
+    redc::flush_log_full();
+  }
+  for(auto const& accessor : desc.accessors)
+  {
+    redc::log_i("accessor.name: %", accessor.second.name);
+    redc::log_i("\taccessor.base_ptr: %", (intptr_t) accessor.second.base_ptr);
+    redc::log_i("\taccessor.count: %", accessor.second.count);
+    redc::log_i("\taccessor.stride: %", accessor.second.stride);
+    redc::log_i("\taccessor.component_type: %",
+                (unsigned int) accessor.second.component_type);
+    redc::log_i("\taccessor.attribute_type: %",
+                (unsigned int) accessor.second.attribute_type);
+    redc::flush_log_full();
   }
 
   return EXIT_SUCCESS;

@@ -25,7 +25,7 @@ namespace redc
     buf.resize(nsz);
     return buf;
   }
-  Buffer load_buffer(Desc const& d, std::string const& name,
+  Buffer load_buffer(Asset const& a, std::string const& name,
                      rapidjson::Value& js)
   {
     Buffer b;
@@ -38,9 +38,9 @@ namespace redc
 
     // We don't support data URIs.
     auto url = fs::path{uri};
-    if(d.filepath)
+    if(a.filepath)
     {
-      url = d.filepath.value().parent_path() / url;
+      url = a.filepath.value().parent_path() / url;
     }
 
     b.buf = load_buf_bin(url, js["byteLength"].GetUint());
@@ -51,17 +51,17 @@ namespace redc
   {
     return {name.GetString(), name.GetStringLength()};
   }
-  Desc load_desc(rapidjson::Value& js, boost::optional<fs::path> path)
+  Asset load_gltf(rapidjson::Value& js, boost::optional<fs::path> path)
   {
-    Desc d;
-    d.filepath = path;
+    Asset a;
+    a.filepath = path;
 
     auto& buffers = js["buffers"];
     for(auto iter = buffers.MemberBegin(); iter != buffers.MemberEnd(); ++iter)
     {
       auto name = get_js_string(iter->name);
-      auto buf = load_buffer(d, name, iter->value);
-      d.buffers.emplace(name, std::move(buf));
+      auto buf = load_buffer(a, name, iter->value);
+      a.buffers.emplace(name, std::move(buf));
     }
 
     auto& buf_views = js["bufferViews"];
@@ -73,57 +73,111 @@ namespace redc
       buf_view.name = name;
 
       auto buffer_name = get_js_string(iter->value["buffer"]);
-      auto buffer_iter = d.buffers.find(buffer_name);
-      if(buffer_iter == d.buffers.end())
+      auto buffer_iter = a.buffers.find(buffer_name);
+      if(buffer_iter == a.buffers.end())
       {
         // No buffer found, this buffer view is fucked
         log_e("% bufferView references bad buffer: '%'", name, buffer_name);
         continue;
       }
 
-      buf_view.base = &buffer_iter->second.buf[0];
+      auto offset = iter->value["byteOffset"].GetUint();
 
+      buf_view.base_ptr = &buffer_iter->second.buf[0] + offset;
       buf_view.size = iter->value["byteLength"].GetUint();
-      buf_view.offset = iter->value["byteOffset"].GetUint();
 
-      auto& target_js = iter->value["target"];
-      if(target_js.IsString())
+      switch(iter->value["target"].GetUint())
       {
-        if(strcmp("ARRAY_BUFFER", target_js.GetString()) == 0)
-          buf_view.target = Buf_View_Target::Array;
-        if(strcmp("ELEMENT_ARRAY_BUFFER", target_js.GetString()) == 0)
-          buf_view.target = Buf_View_Target::Element_Array;
-      }
-      else if(target_js.IsUint())
-      {
-        switch(target_js.GetUint())
-        {
-        case 34962:
-          buf_view.target = Buf_View_Target::Array;
-          break;
-        case 34963:
-          buf_view.target = Buf_View_Target::Element_Array;
-          break;
-        }
-      }
-      else
-      {
-        log_e("Could not load target for bufferView: '%'", name);
+      case 34962:
+        buf_view.target = Buf_View_Target::Array;
+        break;
+      case 34963:
+        buf_view.target = Buf_View_Target::Element_Array;
+        break;
+      default:
+        log_e("Invalid target for bufferView: '%'", name);
         continue;
       }
-      d.buf_views.emplace(name, std::move(buf_view));
+
+      a.buf_views.emplace(name, std::move(buf_view));
     }
 
-    return d;
+    auto& accessor_arr = js["accessors"];
+    for(auto iter = accessor_arr.MemberBegin();
+        iter != accessor_arr.MemberEnd(); ++iter)
+    {
+      Accessor ac;
+
+      auto name = get_js_string(iter->name);
+      ac.name = name;
+
+      auto buffer_name = get_js_string(iter->value["bufferView"]);
+      auto buffer_iter = a.buf_views.find(buffer_name);
+      if(buffer_iter == a.buf_views.end())
+      {
+        // No buffer found, this buffer view is fucked
+        log_e("% accessor references bad bufferView: '%'", name, buffer_name);
+        continue;
+      }
+
+      auto offset = iter->value["byteOffset"].GetUint();
+
+      ac.base_ptr = buffer_iter->second.base_ptr + offset;
+
+      ac.count = iter->value["count"].GetUint();
+      ac.stride = iter->value["byteStride"].GetUint();
+
+      switch(iter->value["componentType"].GetUint())
+      {
+      case 5120:
+        ac.component_type = Component_Type::Byte;
+        break;
+      case 5121:
+        ac.component_type = Component_Type::UByte;
+        break;
+      case 5122:
+        ac.component_type = Component_Type::Short;
+        break;
+      case 5123:
+        ac.component_type = Component_Type::UShort;
+        break;
+      case 5126:
+        ac.component_type = Component_Type::Float;
+        break;
+      default:
+        log_e("Invalid componentType for accessorType: '%'", name);
+        continue;
+      }
+
+      const char* ty_str = iter->value["type"].GetString();
+      if(std::strcmp(ty_str, "SCALAR") == 0)
+        ac.attribute_type = Attribute_Type::Scalar;
+      else if(std::strcmp(ty_str, "VEC2") == 0)
+        ac.attribute_type = Attribute_Type::Vec2;
+      else if(std::strcmp(ty_str, "VEC3") == 0)
+        ac.attribute_type = Attribute_Type::Vec3;
+      else if(std::strcmp(ty_str, "VEC4") == 0)
+        ac.attribute_type = Attribute_Type::Vec4;
+      else if(std::strcmp(ty_str, "MAT2") == 0)
+        ac.attribute_type = Attribute_Type::Mat2;
+      else if(std::strcmp(ty_str, "MAT3") == 0)
+        ac.attribute_type = Attribute_Type::Mat3;
+      else if(std::strcmp(ty_str, "MAT4") == 0)
+        ac.attribute_type = Attribute_Type::Mat4;
+
+      a.accessors.emplace(name, std::move(ac));
+    }
+
+    return a;
   }
 
-  Desc load_desc_file(std::string name)
+  Asset load_gltf_file(std::string name)
   {
     auto file = std::fopen(name.c_str(), "rb");
     if(!file)
     {
       log_e("Failed to load scene file: '%'", name);
-      return Desc{};
+      return Asset{};
     }
 
     char buf[65536];
@@ -138,9 +192,9 @@ namespace redc
     {
       log_e("Json error in scene file (offset: %): %",
             d.GetErrorOffset(), rapidjson::GetParseError_En(d.GetParseError()));
-      return Desc{};
+      return Asset{};
     }
 
-    return load_desc(d, fs::path{name});
+    return load_gltf(d, fs::path{name});
   }
 }
