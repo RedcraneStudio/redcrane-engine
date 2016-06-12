@@ -8,6 +8,7 @@
 #include <vector>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
+#include "../../gltf/tiny_gltf_loader.h"
 namespace redc
 {
   namespace fs = boost::filesystem;
@@ -61,5 +62,5 @@ namespace redc
     std::unordered_map<std::string, Accessor> accessors;
   };
 
-  boost::optional<bool> load_gltf_file(std::string name);
+  boost::optional<tinygltf::Scene> load_gltf_file(std::string name);
 }

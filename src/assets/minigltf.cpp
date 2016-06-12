@@ -3,17 +3,21 @@
  * All rights reserved.
  */
 
-#include "minigltf.h"
-#include <cstdio>
-#include "../common/log.h"
-
+// Include the implementation first so that it actually works. We have to do
+// this because our header file includes the header as well, we might as well
+// put the implementation here.
 #define TINYGLTF_LOADER_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../gltf/tiny_gltf_loader.h"
 
+#include "minigltf.h"
+
+#include <cstdio>
+#include "../common/log.h"
+
 namespace redc
 {
-  boost::optional<bool> load_gltf_file(std::string name)
+  boost::optional<tinygltf::Scene> load_gltf_file(std::string name)
   {
     std::string err;
     tinygltf::Scene scene;
@@ -26,6 +30,6 @@ namespace redc
       return boost::none;
     }
 
-    return boost::none;
+    return std::move(scene);
   }
 }
