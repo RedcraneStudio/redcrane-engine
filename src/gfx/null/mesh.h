@@ -9,6 +9,10 @@ namespace redc { namespace gfx { namespace null
 {
   struct Null_Mesh : public Mesh
   {
+    void make_buffers(unsigned int, buf_t*) {};
+    void allocate_buffer(buf_t, Buffer_Type, unsigned int,
+                         void const* const, Usage_Hint, Upload_Hint) {};
+
     buf_t allocate_buffer(std::size_t, Usage_Hint,Upload_Hint) override;
 
     void reallocate_buffer(buf_t buf, std::size_t size, Usage_Hint,

@@ -16,6 +16,28 @@ namespace redc { namespace gfx { namespace gl
     unallocate_();
   }
 
+  void GL_Mesh::make_buffers(unsigned int num_bufs, buf_t* bufs)
+  {
+    glGenBuffers(num_bufs, bufs);
+  }
+  void GL_Mesh::allocate_buffer(buf_t buf, Buffer_Type t, unsigned int size,
+                                void const* const data,
+                                Usage_Hint us, Upload_Hint up)
+  {
+    GLenum buf_ty;
+    switch(t)
+    {
+    case Buffer_Type::Array:
+      buf_ty = GL_ARRAY_BUFFER;
+      break;
+    case Buffer_Type::Element_Array:
+      buf_ty = GL_ELEMENT_ARRAY_BUFFER;
+    }
+    glBindBuffer(buf_ty, buf);
+    glBufferData(buf_ty, size, data, get_gl_hint(up, us));
+  }
+
+
   GL_Mesh::buf_t GL_Mesh::allocate_buffer(std::size_t size, Usage_Hint us,
                                           Upload_Hint up)
   {

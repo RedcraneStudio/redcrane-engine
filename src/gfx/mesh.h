@@ -28,6 +28,11 @@ namespace redc
     Short
   };
 
+  enum class Buffer_Type
+  {
+    Array, Element_Array
+  };
+
   /*!
    * \brief A simple collection of buffers for vertex attributes.
    */
@@ -36,6 +41,11 @@ namespace redc
     virtual ~Mesh() noexcept {}
 
     using buf_t = unsigned int;
+
+    virtual void make_buffers(unsigned int num_bufs, buf_t* bufs) = 0;
+    virtual void allocate_buffer(buf_t, Buffer_Type, unsigned int size,
+                                 void const* const data,
+                                 Usage_Hint, Upload_Hint) = 0;
 
     virtual buf_t allocate_buffer(std::size_t sz, Usage_Hint, Upload_Hint) = 0;
     virtual void reallocate_buffer(buf_t, std::size_t size, Usage_Hint,

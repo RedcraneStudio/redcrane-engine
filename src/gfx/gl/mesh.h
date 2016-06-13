@@ -14,6 +14,12 @@ namespace redc { namespace gfx { namespace gl
     GL_Mesh(Driver& driver) noexcept;
     virtual ~GL_Mesh() noexcept;
 
+    // Try to use this interface, it's more like the OpenGL interface.
+    void make_buffers(unsigned int num_bufs, buf_t* bufs) override;
+    void allocate_buffer(buf_t, Buffer_Type t, unsigned int size,
+                         void const* const data, Usage_Hint,
+                         Upload_Hint) override;
+
     buf_t allocate_buffer(std::size_t size, Usage_Hint, Upload_Hint) override;
     buf_t allocate_element_array(unsigned int elements, Usage_Hint,
                                  Upload_Hint) override;
