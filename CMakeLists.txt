@@ -11,6 +11,9 @@ project(Red_Crane_Engine VERSION 0.0 LANGUAGES C CXX)
 add_definitions(-DREDC_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions(-DREDC_SHARE_DIR="${PROJECT_NAME}")
 
+# Right now we're using OpenGL.
+add_definitions(-DREDC_USE_OPENGL)
+
 # Use radians everywhere
 add_definitions(-DGLM_FORCE_RADIANS)
 

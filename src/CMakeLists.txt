@@ -142,6 +142,6 @@ target_link_libraries(test_cel PUBLIC commonlib netlib gfxlib uselib fpslib
                                   ${SDL2_LIBRARIES}
                                   ${BULLET_LIBRARIES})
 
-add_executable(load_gltf load_gltf.cpp)
-target_link_libraries(load_gltf assetslib commonlib)
-
+add_executable(load_gltf load_gltf.cpp sdl_helper.cpp)
+target_link_libraries(load_gltf assetslib commonlib gfxlib ${SDL2_LIBRARIES})
+target_include_directories(load_gltf PUBLIC ${SDL2_INCLUDE_DIRS})
