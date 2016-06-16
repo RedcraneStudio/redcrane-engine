@@ -29,6 +29,10 @@ namespace redc
       log_e("Error in '%': %", name, err);
       return boost::none;
     }
+    else
+    {
+      log_i("Information loading '%': %", name, err);
+    }
 
     return std::move(scene);
   }
