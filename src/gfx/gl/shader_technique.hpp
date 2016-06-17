@@ -9,6 +9,7 @@
 #include "../scene.h"
 namespace redc
 {
+  #if 0
   struct GL_Shader_Technique : public Technique
   {
     GLuint cur_vao;
@@ -319,4 +320,5 @@ namespace redc
   {
     return std::make_unique<GL_Shader_Technique>();
   }
+#endif
 }

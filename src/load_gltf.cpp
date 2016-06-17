@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
   auto before = std::chrono::high_resolution_clock::now();
   auto desc = redc::load_gltf_file(argv[1]);
-  auto scene = redc::load_scene(desc.value());
+  auto asset = redc::load_asset(desc.value());
   auto after = std::chrono::high_resolution_clock::now();
 
   auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(after - before);

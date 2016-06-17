@@ -22,7 +22,7 @@ namespace redc
   // In OpenGL, attributes are vertex shader input variables.
   struct Attribute_Bind
   {
-    GLuint loc;
+    GLint loc;
   };
 
   // Parameters are just uniforms.
@@ -49,12 +49,26 @@ namespace redc
     GLuint vao;
   };
 
+  // Shader
+  struct Shader_Repr
+  {
+    GLuint shader;
+  };
+
+  // Program
+  struct Program_Repr
+  {
+    GLuint program;
+  };
+
 #elif defined(REDC_USE_DIRECTX)
   struct Attribute_Bind {};
   struct Parameter_Bind {};
   struct Buf {};
   struct Texture_Repr {};
   struct Mesh_Repr {};
+  struct Shader_Repr {};
+  struct Program_Repr {};
 #endif
 
 #if defined(REDC_USE_OPENGL)
@@ -86,6 +100,11 @@ namespace redc
     Triangle_Strip = GL_TRIANGLE_STRIP, Triangle_Fan = GL_TRIANGLE_FAN
   };
 
+  enum class Shader_Type : GLenum
+  {
+    Vertex = GL_VERTEX_SHADER, Fragment = GL_FRAGMENT_SHADER
+  };
+
 #else
   enum class Data_Type
   {
@@ -110,6 +129,11 @@ namespace redc
   {
     Points, Lines, Line_Loop, Line_Strip, Triangles, Triangle_Strip,
     Triangle_Fan
+  };
+
+  enum class Shader_Type
+  {
+    Vertex, Fragment
   };
 
 #endif
@@ -154,22 +178,18 @@ namespace redc
   {
     Param_Type type;
     // Matrices stored in column-major order.
-    boost::variant<Texture_Repr, std::vector<float> > value;
+    boost::variant<Texture_Ref, std::vector<float> > value;
   };
 
   // Represents a semantic uniform
-  struct Param_Semantic
+  enum class Param_Semantic
   {
-    enum
-    {
-      Local, Model, View, Projection, Model_View, Model_View_Projection,
-      Model_Inverse, View_Inverse, Projection_Inverse, Model_View_Inverse,
-      Model_View_Projection_Inverse, Model_Inverse_Transpose,
-      Model_View_Inverse_Transpose, Viewport, Joint_Matrix
-    } kind;
+    Local, Model, View, Projection, Model_View, Model_View_Projection,
+    Model_Inverse, View_Inverse, Projection_Inverse, Model_View_Inverse,
+    Model_View_Projection_Inverse, Model_Inverse_Transpose,
+    Model_View_Inverse_Transpose, Viewport, Joint_Matrix
   };
 
-  // Techniques do most of the work.
   using Technique_Ref = std::size_t;
 
   // A material uses some technique to rendering the mesh given some unique
@@ -193,30 +213,82 @@ namespace redc
       Position, Normal, Texcoord, Color, Joint, Weight
     } kind;
 
-    unsigned short index;
+    // This is optional because whether it was included will effect the string
+    // we must use for lookup later I think.
+    boost::optional<unsigned short> index;
   };
 
-  // Because the material of a primitive is not going to change, we can
-  // statically bind accessors to shader bind locations using information we
-  // know about the material.
-
-  using Accessor_Ref = std::size_t;
-  using Material_Ref = std::size_t;
-  struct Primitive
+  inline bool operator==(Attrib_Semantic const& lhs, Attrib_Semantic const& rhs)
   {
-    // Accessors bound to attributes. There is no different in the use of
-    // semantic and non-semantic accessors, because they are bound to a bind
-    // point early.
-    std::vector<std::pair<Accessor_Ref, Attribute_Bind> > accessors;
-    boost::optional<Accessor_Ref> indices;
-    Material_Ref mat_i;
-    Render_Mode mode;
+    return lhs.kind == rhs.kind && lhs.index == rhs.index;
+  }
+
+  struct Attrib_Semantic_Hash
+  {
+    std::hash<uint64_t> hasher;
+    std::size_t operator()(Attrib_Semantic sem) const
+    {
+      uint64_t num = (uint64_t) sem.index.value_or(0);
+      num |= static_cast<uint64_t>(sem.kind) << 32;
+      return hasher(num);
+    }
+  };
+
+  // Techniques set up a lot of rendering, so this is where extensions should be
+  // added if at all.
+
+  struct Asset;
+
+  struct Shader
+  {
+    Shader_Repr repr;
+    Shader_Type type;
+  };
+
+  struct Program
+  {
+    // A program owns its representation and they are not shared with other
+    // programs.
+    Program_Repr repr;
+    std::unordered_map<std::string, Attribute_Bind> attributes;
+  };
+
+  using Program_Ref = std::size_t;
+
+  enum class Technique_Parameter_Type
+  {
+    Byte, UByte, Short, UShort, Int, UInt, Float, Vec2, Vec3, Vec4, IVec2,
+    IVec3, IVec4, Bool, BVec2, BVec3, BVec4, Mat2, Mat3, Mat4, Sampler2D
+  };
+
+  using Node_Ref = std::size_t;
+  struct Technique_Parameter
+  {
+    // Optional node to take transformation from
+    boost::optional<Node_Ref> node;
+
+    // Should be 1 unless we are dealing with an array. I don't this can be more
+    // than one if we are dealing with an attribute.
+    int count;
+    // Type of the parameter
+    Technique_Parameter_Type type;
+    Parameter value;
+
+    // Optional semantic meaning
+    boost::optional<boost::variant<Param_Semantic, Attrib_Semantic> > semantic;
+    // Either a parameter (uniform) or an attribute (input variable).
+    boost::variant<Parameter_Bind, Attribute_Bind> bind;
   };
 
   struct Technique
   {
     ~Technique() {}
 
+    Program_Ref program_i;
+
+    // This includes name, type and bind information.
+    std::unordered_map<std::string, Technique_Parameter> parameters;
+#if 0
     // First use a mesh
     virtual void use_mesh(Mesh_Repr repr) = 0;
 
@@ -237,42 +309,72 @@ namespace redc
     virtual Attribute_Bind get_attrib_bind(std::string as) = 0;
 
     // Render the current mesh from use_mesh
-    virtual void render() = 0;
+    // We need the asset because internally other nodes may be referenced.
+    virtual void render(Asset const& asset) = 0;
+#endif
   };
 
-  std::unique_ptr<Technique> make_diffuse_technique();
+  // Because the material of a primitive is not going to change, we can
+  // statically bind accessors to shader bind locations using information we
+  // know about the material.
+
+  using Accessor_Ref = std::size_t;
+  using Material_Ref = std::size_t;
+  struct Primitive
+  {
+    // Accessors bound to attributes. There is no difference in the use of
+    // semantic and non-semantic accessors, because they are bound to a bind
+    // point early.
+    std::vector<std::pair<Accessor_Ref, Attribute_Bind> > accessors;
+    boost::optional<Accessor_Ref> indices;
+    Material_Ref mat_i;
+    Render_Mode mode;
+  };
 
   using Mesh_Repr_Ref = std::size_t;
   struct Mesh
   {
+    // A mesh can't own its representation because it may share that with other
+    // meshes.
     Mesh_Repr_Ref repr_i;
+
+    // A mesh does own its own primitives though.
     std::vector<Primitive> primitives;
   };
+
+  using Mesh_Ref = std::size_t;
   struct Node
   {
-    std::vector<Node> children;
+    std::vector<Mesh_Ref> meshes;
 
-    boost::optional<std::array<double, 4> > rotation;
-    boost::optional<std::array<double, 3> > scale;
-    boost::optional<std::array<double, 3> > translation;
-    boost::optional<std::array<double, 16> > matrix;
+    std::vector<Node_Ref> children;
+    std::vector<Node_Ref> parents;
 
-    std::vector<Mesh> meshes;
+    boost::optional<std::array<float, 4> > rotation;
+    boost::optional<std::array<float, 3> > scale;
+    boost::optional<std::array<float, 3> > translation;
+    boost::optional<std::array<float, 16> > matrix;
   };
-  struct Scene
+
+  struct Asset
   {
+    ~Asset();
+
     std::vector<Buf> buffers;
+    std::vector<Texture_Repr> textures;
+    std::vector<Mesh_Repr> mesh_reprs;
+
     std::vector<Accessor> accessors;
 
-    std::vector<Texture_Repr> textures;
-    std::vector<std::unique_ptr<Technique> > techniques;
+    std::vector<Shader> shaders;
+    std::vector<Program> programs;
+    std::vector<Technique> techniques;
+
     std::vector<Material> materials;
 
-    std::vector<Mesh_Repr> mesh_reprs;
     std::vector<Mesh> meshes;
-
-    Node root;
+    std::vector<Node> nodes;
   };
 
-  Scene load_scene(tinygltf::Scene const& scene);
+  Asset load_asset(tinygltf::Scene const& scene);
 }
