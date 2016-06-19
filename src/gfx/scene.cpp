@@ -551,7 +551,6 @@ namespace redc
                       std::vector<std::string>& material_names,
                       std::vector<Technique> const& techs,
                       std::vector<std::string> const& tech_names,
-                      std::vector<Texture_Repr> const& textures,
                       std::vector<std::string> const& texture_names,
                       std::vector<Program> const& programs)
   {
@@ -1041,7 +1040,7 @@ namespace redc
 
     std::vector<std::string> material_names;
     load_materials(scene, ret.materials, material_names, ret.techniques,
-                   technique_names, ret.textures, texture_names, ret.programs);
+                   technique_names, texture_names, ret.programs);
 
     std::vector<std::string> mesh_names;
     load_meshes(scene, ret.meshes, mesh_names, accessor_names, material_names);
