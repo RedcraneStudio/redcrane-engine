@@ -332,7 +332,7 @@ namespace redc
     std::vector<Mesh_Ref> meshes;
 
     std::vector<Node_Ref> children;
-    Node_Ref parent;
+    boost::optional<Node_Ref> parent;
 
     boost::optional<std::array<float, 4> > rotation;
     boost::optional<std::array<float, 3> > scale;
