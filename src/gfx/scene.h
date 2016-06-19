@@ -214,7 +214,7 @@ namespace redc
     } kind;
 
     // This is optional because whether it was included will effect the string
-    // we must use for lookup later I think.
+    // we must use for lookup later.
     boost::optional<unsigned short> index;
   };
 
@@ -267,9 +267,10 @@ namespace redc
     // Optional node to take transformation from
     boost::optional<Node_Ref> node;
 
-    // Should be 1 unless we are dealing with an array. I don't this can be more
-    // than one if we are dealing with an attribute.
+    // Should be 1 unless we are dealing with an array. I don't think this can
+    // be more than one if we are dealing with an attribute.
     int count;
+
     // Type of the parameter
     Technique_Parameter_Type type;
     Parameter value;
