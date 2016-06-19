@@ -587,7 +587,7 @@ namespace redc
         mat.params.emplace_back(bind, param);
       }
 
-      materials.push_back(mat);
+      materials.push_back(std::move(mat));
     }
   }
 
