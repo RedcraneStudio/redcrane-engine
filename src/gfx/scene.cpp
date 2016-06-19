@@ -922,9 +922,9 @@ namespace redc
       // Find program of this technique
       auto program_i = find_string_index(program_names, in_technique.program,
                        "Technique references invalid program");
-      Program const& program = programs[program_i];
-
       technique.program_i = program_i;
+
+      Program const& program = programs[program_i];
 
       std::unordered_map<std::string, Attribute_Bind> attributes;
       for(auto const& attrib_pair : in_technique.attributes)
