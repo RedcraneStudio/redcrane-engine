@@ -656,10 +656,7 @@ namespace redc
   void load_meshes(tinygltf::Scene const& scene, std::vector<Mesh>& meshes,
                    std::vector<std::string>& mesh_names,
                    std::vector<std::string> const& accessor_names,
-                   std::vector<Material> const& materials,
-                   std::vector<std::string> const& mat_names,
-                   std::vector<Technique> const& techs,
-                   std::vector<Program> const& programs)
+                   std::vector<std::string> const& mat_names)
   {
     meshes.reserve(scene.meshes.size());
     mesh_names.reserve(scene.meshes.size());
@@ -684,43 +681,14 @@ namespace redc
           find_string_index(mat_names, in_prim.material,
                             "Primitive references invalid material name");
 
-        // Figure out where to bind accessors
+        // Add references to any accessors and their semantics.
         for(auto accessor_pair : in_prim.attributes)
         {
           auto name = accessor_pair.first;
           auto accessor = accessor_pair.second;
 
-          auto& tech = techs[materials[prim.mat_i].technique_i];
-          auto& program = programs[tech.program_i];
-
-          auto accessor_semantic = to_attrib_semantic(name);
-
-          auto param_find = std::find_if(tech.parameters.begin(),
-                                         tech.parameters.end(),
-                                         [&](auto const& tech_param)
-          {
-            if(tech_param.second.semantic == boost::none) return false;
-            if(tech_param.second.semantic.value().which() != 1) return false;
-
-            auto const& param_semantic =
-                boost::get<Attrib_Semantic>(tech_param.second.semantic.value());
-
-            // If these are equal we found our parameter
-            return param_semantic == accessor_semantic;
-          });
-
-          // We should have found a parameter
-          REDC_ASSERT_MSG(param_find != tech.parameters.end(),
-                          "Semantic '%' not defined in technique for mesh '%'",
-                          name, mesh_pair.first);
-
-          // It should be an attribute bind
-          REDC_ASSERT_MSG(param_find->second.bind.which() == 1,
-                          "Parameter '%' must be referencing an attribute",
-                          param_find->first);
-
-          // Now get the bind
-          auto attrib_bind = boost::get<Attribute_Bind>(param_find->second.bind);
+          // String => Semantic
+          auto semantic = to_attrib_semantic(name);
 
           // Find the index / ref of the accessor
           auto access_ref =
@@ -728,7 +696,7 @@ namespace redc
                               "Primitive references invalid accessor");
 
           // We know have an accessor bound to some attribute point.
-          prim.accessors.emplace_back(access_ref, attrib_bind);
+          prim.attributes.emplace(semantic, access_ref);
         }
 
         // Indices attribute
@@ -1076,8 +1044,7 @@ namespace redc
                    technique_names, ret.textures, texture_names, ret.programs);
 
     std::vector<std::string> mesh_names;
-    load_meshes(scene, ret.meshes, mesh_names, accessor_names, ret.materials,
-                material_names, ret.techniques, ret.programs);
+    load_meshes(scene, ret.meshes, mesh_names, accessor_names, material_names);
 
     // Load nodes
     load_nodes_given_names(scene, node_names, ret.nodes, mesh_names);

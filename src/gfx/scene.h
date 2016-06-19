@@ -234,6 +234,10 @@ namespace redc
     }
   };
 
+  template <class U, class... Args>
+  using Attrib_Semantic_Map = std::unordered_map<Attrib_Semantic, U,
+                                                 Attrib_Semantic_Hash, Args...>;
+
   // Techniques set up a lot of rendering, so this is where extensions should be
   // added if at all.
 
@@ -323,10 +327,9 @@ namespace redc
   using Material_Ref = std::size_t;
   struct Primitive
   {
-    // Accessors bound to attributes. There is no difference in the use of
-    // semantic and non-semantic accessors, because they are bound to a bind
-    // point early.
-    std::vector<std::pair<Accessor_Ref, Attribute_Bind> > accessors;
+    // Maps semantic attributes to accessors. We don't use binds because that
+    // would make it impossible to switch techniques.
+    Attrib_Semantic_Map<Accessor_Ref> attributes;
     boost::optional<Accessor_Ref> indices;
     Material_Ref mat_i;
     Render_Mode mode;
