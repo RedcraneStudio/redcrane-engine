@@ -192,7 +192,87 @@ namespace redc
     }
   }
 
+  void use_mesh(Mesh_Repr mesh)
+  {
+    glBindVertexArray(mesh.vao);
+  }
+
+
+  // Use this for rendering. It would be nice to pass in some OpenGL state
+  // structure so we don't have to redundantly set this information if it has
+  // already been set.
+  void use_array_accessor(Attribute_Bind bind, Buf buf, Accessor const& acc)
+  {
+    // We have some data
+    glBindBuffer(GL_ARRAY_BUFFER, buf.buf);
+
+    // We can't be dealing with matrices of any kind
+    REDC_ASSERT((int) acc.attrib_type & 0x10);
+
+    // Bind the buffer to a given attribute, at this point we know exactly
+    // what part of the buffer needs to be referenced.
+    glVertexAttribPointer(bind.loc, (GLint) acc.attrib_type & 0x0f,
+                          (GLenum) acc.data_type, GL_FALSE,
+                          acc.stride, (void*) acc.offset);
+  }
+  void use_element_array_accessor(Buf buf, Accessor const& acc)
+  {
+    // Use this as our element array
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.buf);
+  }
+
 #endif
+
+  template <class Bind_T, unsigned int Which_N, class Semantic_T>
+  Bind_T get_semantic_bind(
+    std::unordered_map<std::string, Technique_Parameter> const& parameters,
+    Semantic_T attrib_semantic)
+  {
+    auto param_find = std::find_if(parameters.begin(),
+                                   parameters.end(),
+    [&](auto const& tech_param)
+    {
+      if(tech_param.second.semantic == boost::none) return false;
+      if(tech_param.second.semantic.value().which() != Which_N) return false;
+
+      auto const& param_semantic =
+              boost::get<Semantic_T>(tech_param.second.semantic.value());
+
+      // If these are equal we found our parameter
+      return param_semantic == attrib_semantic;
+    });
+
+    // We should have found a parameter
+    REDC_ASSERT(param_find != parameters.end());
+
+    // It should be an attribute bind
+    REDC_ASSERT_MSG(param_find->second.bind.which() == Which_N,
+                    "Parameter '%' must be referencing an attribute",
+                    param_find->first);
+
+    // Now get the bind
+    return boost::get<Bind_T>(param_find->second.bind);
+  }
+
+  Attribute_Bind get_attrib_semantic_bind(Technique const& tech,
+                                          Attrib_Semantic attrib_semantic)
+  {
+    return get_semantic_bind<Attribute_Bind, 1>(tech.parameters,
+                                                attrib_semantic);
+  }
+
+  // TODO: Add template that accepts a type either Attribute_Bind or
+  // Parameter_Bind and a number either 1 or zero and does the above search but
+  // for either one. Move get_param_semantic_bind down here out of the Opengl
+  // ifdef.
+
+  Parameter_Bind get_param_semantic_bind(Technique const& tech,
+                                         Param_Semantic param_semantic)
+  {
+    return get_semantic_bind<Parameter_Bind, 0>(tech.parameters,
+                                                param_semantic);
+
+  }
 
   Data_Type to_data_type(int val)
   {
