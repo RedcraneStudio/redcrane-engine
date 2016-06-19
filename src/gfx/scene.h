@@ -254,11 +254,13 @@ namespace redc
     // A program owns its representation and they are not shared with other
     // programs.
     Program_Repr repr;
+
+    // Maps attribute names to bind locations. We look them up once at creation
+    // time with glGetAttribLocation.
     std::unordered_map<std::string, Attribute_Bind> attributes;
   };
 
   using Program_Ref = std::size_t;
-
   enum class Technique_Parameter_Type
   {
     Byte, UByte, Short, UShort, Int, UInt, Float, Vec2, Vec3, Vec4, IVec2,
