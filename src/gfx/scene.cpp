@@ -584,7 +584,7 @@ namespace redc
 
         // Find the bind point for this parameter.
         auto bind = get_param_bind(program.repr, name);
-        mat.params.emplace_back(param, bind);
+        mat.params.emplace_back(bind, param);
       }
 
       materials.push_back(mat);

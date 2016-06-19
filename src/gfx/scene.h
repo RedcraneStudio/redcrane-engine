@@ -190,21 +190,6 @@ namespace redc
     Model_View_Inverse_Transpose, Viewport, Joint_Matrix
   };
 
-  using Technique_Ref = std::size_t;
-
-  // A material uses some technique to rendering the mesh given some unique
-  // parameters to that material.
-  struct Material
-  {
-    Technique_Ref technique_i;
-
-    // We obtained the bind location using the technique. A technique can be
-    // shared between materials so worse case these parameters need to be set
-    // before each draw using this material, which is why we should batch first
-    // by technique then by material.
-    std::vector<std::pair<Parameter, Parameter_Bind> > params;
-  };
-
   // Used to represent things like NORMAL_0 or TEXCOORD_2.
   struct Attrib_Semantic
   {
@@ -319,6 +304,23 @@ namespace redc
     // We need the asset because internally other nodes may be referenced.
     virtual void render(Asset const& asset) = 0;
 #endif
+  };
+
+  using Technique_Ref = std::size_t;
+
+  // A material uses some technique to rendering the mesh given some unique
+  // parameters to that material.
+  struct Material
+  {
+    Technique_Ref technique_i;
+
+    // We obtained the bind location using the technique. A technique can be
+    // shared between materials so worse case these parameters need to be set
+    // before each draw using this material, which is why we should batch first
+    // by technique then by material. Because we store a bind, we give up the
+    // ability to switch the technique of a material at runtime, but that's okay
+    // because we a primitive can still switch to a new material at runtime.
+    std::vector<std::pair<Parameter_Bind, Parameter> > params;
   };
 
   // Because the material of a primitive is not going to change, we can
