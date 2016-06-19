@@ -312,9 +312,12 @@ namespace redc
     {
       destroy_shader(shader.repr);
     }
+    for(auto& mesh : meshes)
+    {
+      destroy_meshes(1, &mesh.repr);
+    }
     destroy_bufs(buffers.size(), &buffers[0]);
     destroy_textures(textures.size(), &textures[0]);
-    destroy_meshes(mesh_reprs.size(), &mesh_reprs[0]);
   }
 
   void load_nodes_given_names(tinygltf::Scene const& scene,
@@ -652,7 +655,6 @@ namespace redc
 
   void load_meshes(tinygltf::Scene const& scene, std::vector<Mesh>& meshes,
                    std::vector<std::string>& mesh_names,
-                   std::vector<Mesh_Repr> const& mesh_reprs,
                    std::vector<std::string> const& accessor_names,
                    std::vector<Material> const& materials,
                    std::vector<std::string> const& mat_names,
@@ -668,7 +670,8 @@ namespace redc
 
       Mesh our_mesh;
 
-      our_mesh.repr_i = 0;
+      // Make a representation for our mesh
+      our_mesh.repr = make_mesh_reprs(1)[0];
 
       for(auto& in_prim : mesh_pair.second.primitives)
       {
@@ -1072,13 +1075,9 @@ namespace redc
     load_materials(scene, ret.materials, material_names, ret.techniques,
                    technique_names, ret.textures, texture_names, ret.programs);
 
-    // Add a single "mesh representation" for everything. In the OpenGL case
-    // this is just a VAO.
-    ret.mesh_reprs = make_mesh_reprs(1);
-
     std::vector<std::string> mesh_names;
-    load_meshes(scene, ret.meshes, mesh_names, ret.mesh_reprs, accessor_names,
-                ret.materials, material_names, ret.techniques, ret.programs);
+    load_meshes(scene, ret.meshes, mesh_names, accessor_names, ret.materials,
+                material_names, ret.techniques, ret.programs);
 
     // Load nodes
     load_nodes_given_names(scene, node_names, ret.nodes, mesh_names);

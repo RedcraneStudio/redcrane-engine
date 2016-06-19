@@ -332,12 +332,12 @@ namespace redc
     Render_Mode mode;
   };
 
-  using Mesh_Repr_Ref = std::size_t;
   struct Mesh
   {
-    // A mesh can't own its representation because it may share that with other
-    // meshes.
-    Mesh_Repr_Ref repr_i;
+    // A mesh will own its representation so that in the best case (only one set
+    // of primitives) we don't have to constantly reformat the vertex array
+    // object.
+    Mesh_Repr repr;
 
     // A mesh does own its own primitives though.
     std::vector<Primitive> primitives;
@@ -363,7 +363,6 @@ namespace redc
 
     std::vector<Buf> buffers;
     std::vector<Texture_Repr> textures;
-    std::vector<Mesh_Repr> mesh_reprs;
 
     std::vector<Accessor> accessors;
 
