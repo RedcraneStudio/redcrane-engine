@@ -407,8 +407,8 @@ namespace redc
         // That is one of our children.
         node.children.push_back(child_index);
 
-        // And we are one of that node's parents.
-        nodes[child_index].parents.push_back(node_index_iter->second);
+        // And we are that node's parent.
+        nodes[child_index].parent = node_index_iter->second;
       }
     }
   }
