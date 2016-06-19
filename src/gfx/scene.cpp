@@ -6,10 +6,6 @@
 #include "../common/debugging.h"
 #include <boost/variant/get.hpp>
 
-#ifdef REDC_USE_OPENGL
-#include "gl/shader_technique.hpp"
-#endif
-
 namespace redc
 {
 

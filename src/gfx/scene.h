@@ -280,30 +280,6 @@ namespace redc
 
     // This includes name, type and bind information.
     std::unordered_map<std::string, Technique_Parameter> parameters;
-#if 0
-    // First use a mesh
-    virtual void use_mesh(Mesh_Repr repr) = 0;
-
-    // Use an accessor to bind the buffer properly to the attribute
-    virtual void use_array_accessor(Attribute_Bind, Buf buf,
-                                    Accessor const& acc) = 0;
-    virtual void use_element_array_accessor(Buf buf, Accessor const& acc) = 0;
-    virtual void disable_element_array() = 0;
-
-    // Set technique parameters
-    virtual void set_parameter(Parameter_Bind, Parameter const& param) = 0;
-
-    // Use these to find the bind points in the first place
-    virtual Parameter_Bind get_semantic_param_bind(Param_Semantic ps) = 0;
-    virtual Attribute_Bind get_semantic_attrib_bind(Attrib_Semantic as) = 0;
-
-    virtual Parameter_Bind get_param_bind(std::string ps) = 0;
-    virtual Attribute_Bind get_attrib_bind(std::string as) = 0;
-
-    // Render the current mesh from use_mesh
-    // We need the asset because internally other nodes may be referenced.
-    virtual void render(Asset const& asset) = 0;
-#endif
   };
 
   using Technique_Ref = std::size_t;
