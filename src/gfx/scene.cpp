@@ -342,7 +342,7 @@ namespace redc
     case Param_Type::UByte:
     case Param_Type::Short:
     case Param_Type::UShort:
-      REDC_ASSERT_MSG(false, "Byte and Short parameter types not supported");
+      REDC_UNREACHABLE_MSG("Byte and Short parameter types not supported");
       // I suppose we could just set them as integers.
       break;
     case Param_Type::Int:
@@ -494,7 +494,7 @@ namespace redc
     case TINYGLTF_COMPONENT_TYPE_DOUBLE:
       return Data_Type::Double;
     default:
-      REDC_ASSERT_MSG(false, "Unknown component type");
+      REDC_UNREACHABLE_MSG("Unknown component type");
       // This should never be reached.
       return Data_Type::Float;
     }
@@ -508,7 +508,7 @@ namespace redc
     case TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER:
       return Buffer_Target::Element_Array;
     default:
-      REDC_ASSERT_MSG(false, "Unknown buffer target");
+      REDC_UNREACHABLE_MSG("Unknown buffer target");
       // This should never be reached.
       return Buffer_Target::Array;
     }
@@ -533,7 +533,7 @@ namespace redc
     case TINYGLTF_TYPE_MAT4:
       return Attrib_Type::Mat4;
     default:
-      REDC_ASSERT_MSG(false, "Unknown attribute type");
+      REDC_UNREACHABLE_MSG("Unknown attribute type");
       // This should never be reached
       return Attrib_Type::Vec4;
     }
@@ -546,7 +546,7 @@ namespace redc
     case TINYGLTF_TEXTURE_TARGET_TEXTURE2D:
       return Texture_Target::Tex_2D;
     default:
-      REDC_ASSERT_MSG(false, "Invalid texture target");
+      REDC_UNREACHABLE_MSG("Invalid texture target");
       // This should never be reached.
       return Texture_Target::Tex_2D;
     }
@@ -563,7 +563,7 @@ namespace redc
     case TINYGLTF_TEXTURE_FORMAT_RGBA:
       return Texture_Format::Rgba;
     default:
-      REDC_ASSERT_MSG(false, "Invalid / unsupported texture format");
+      REDC_UNREACHABLE_MSG("Invalid / unsupported texture format");
       // This should never be reached.
       return Texture_Format::Rgba;
     };
@@ -654,7 +654,7 @@ namespace redc
     case TINYGLTF_MODE_TRIANGLE_FAN:
       return Render_Mode::Triangle_Fan;
     default:
-      REDC_ASSERT_MSG(false, "Invalid primitive type");
+      REDC_UNREACHABLE_MSG("Invalid primitive type");
       // This should never be reached.
       return Render_Mode::Triangles;
     }
@@ -677,7 +677,7 @@ namespace redc
       else if(str == "COLOR") ret.kind = Attrib_Semantic::Color;
       else if(str == "JOINT") ret.kind = Attrib_Semantic::Joint;
       else if(str == "WEIGHT") ret.kind = Attrib_Semantic::Weight;
-      else REDC_ASSERT_MSG(false, "Invalid attribute semantic");
+      else REDC_UNREACHABLE_MSG("Invalid attribute semantic");
 
       // Don't set this if it wasn't specified initially
       //ret.index = 0;
@@ -721,7 +721,7 @@ namespace redc
     if(str == "VIEWPORT") return Param_Semantic::Viewport;
     if(str == "JOINTMATRIX") return Param_Semantic::Joint_Matrix;
 
-    REDC_ASSERT_MSG(false, "Invalid parameter semantic");
+    REDC_UNREACHABLE_MSG("Invalid parameter semantic");
   }
 
   Param_Type to_param_type(int ty)
@@ -771,7 +771,7 @@ namespace redc
     case TINYGLTF_PARAMETER_TYPE_SAMPLER_2D:
       return Param_Type::Sampler2D;
     default:
-      REDC_ASSERT_MSG(false, "Invalid technique parameter type");
+      REDC_UNREACHABLE_MSG("Invalid technique parameter type");
       break;
     }
   }
@@ -952,7 +952,7 @@ namespace redc
 
       // Find the buffer by name
       acc.buf_i = find_string_index(buf_names, in_accessor.bufferView,
-                                    "-Accessor references invalid bufferView");
+                                    "Accessor references invalid bufferView");
 
       // Now do data and attribute type
       acc.data_type = to_data_type(in_accessor.componentType);
@@ -994,26 +994,26 @@ namespace redc
       case 1:
         if(format != Texture_Format::Alpha)
         {
-          log_w("Had to ignore texture format because it has one component");
+          log_w("Ignoring texture format because image has one component");
           format = Texture_Format::Alpha;
         }
         break;
       case 3:
         if(format != Texture_Format::Rgb)
         {
-          log_w("Had to ignore texture format because it has three components");
+          log_w("Ignoring texture format because image has three components");
           format = Texture_Format::Rgb;
         }
         break;
       case 4:
         if(format != Texture_Format::Rgba)
         {
-          log_w("Had to ignore texture format because it has four components");
+          log_w("Ignoring texture format because image has four components");
           format = Texture_Format::Rgba;
         }
         break;
       default:
-        REDC_ASSERT_MSG(false, "Unsupported amount of image components");
+        REDC_UNREACHABLE_MSG("Unsupported number of image components");
         break;
       }
 
@@ -1641,8 +1641,8 @@ namespace redc
       break;
     }
     default:
-      REDC_ASSERT_MSG(false, "Rendering code doesn't support this param "
-                      "semantic (%)", static_cast<unsigned int>(semantic));
+      REDC_UNREACHABLE_MSG("Rendering code doesn't support this param "
+                           "semantic (%)", static_cast<unsigned int>(semantic));
       break;
     }
   }
