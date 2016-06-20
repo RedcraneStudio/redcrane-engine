@@ -110,8 +110,6 @@ namespace redc
       info_log->resize(length);
       glGetShaderInfoLog(shader.repr.shader, length, &actual_length,
                          &(*info_log)[0]);
-
-      log_i("Info log this size %", actual_length);
     }
 
     // Return compile status
