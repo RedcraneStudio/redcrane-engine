@@ -8,12 +8,28 @@
   #define REDC_DEBUGGING_ENABLED
 #endif
 
+#ifdef REDC_DEBUGGING_ENABLED
+#define REDC_ASSERT_NORETURN [[noreturn]]
+#else
+#define REDC_ASSERT_NORETURN
+#endif
+
   namespace redc
   {
     [[noreturn]] inline void crash()
     {
       redc::flush_log_full();
       std::abort();
+    }
+
+    REDC_ASSERT_NORETURN inline void debug_crash()
+    {
+      // If we *are* debugging, actually abort and flush the log so we know
+      // the messages above will show up.
+#ifdef REDC_DEBUGGING_ENABLED
+      redc::flush_log_full();
+      std::abort();
+#endif
     }
 
     template <class... Msg_Args>
@@ -23,16 +39,21 @@
     {
       if(!val)
       {
-        redc::log_e(std::forward<Msg_Args>(args)...);
-        redc::log_e("Assertion '%' failed in %:%", condition, filename, line);
+        log_e(std::forward<Msg_Args>(args)...);
+        log_e("Assertion '%' failed in %:%", condition, filename, line);
 
-        // If we *are* debugging, actually abort and flush the log so we know
-        // the messages above will show up.
-#ifdef REDC_DEBUGGING_ENABLED
-        redc::flush_log_full();
-        std::abort();
-#endif
+        debug_crash();
       }
+    }
+    template <class... Msg_Args>
+    REDC_ASSERT_NORETURN
+    void unreachable_fn(char const* const fname, int long line,
+                        Msg_Args&&... args)
+    {
+      redc::log_e(std::forward<Msg_Args>(args)...);
+      redc::log_e("Unexpected code path reached in %:%", fname, line);
+
+      debug_crash();
     }
   }
 
@@ -48,19 +69,24 @@
  * crashing due to a bad filename, it is very important to provide that
  * filename in the message.
  */
-#define REDC_ASSERT_MSG(condition, ...) \
-  ::redc::assert_fn((condition), #condition, __FILE__, __LINE__, \
+#define REDC_ASSERT_MSG(condition, ...)                                 \
+  ::redc::assert_fn((condition), #condition, __FILE__, __LINE__,        \
                     __VA_ARGS__)
 
-#define REDC_ASSERT_NO_THROW(expr) \
-  try { expr; } \
-  catch(std::exception& e) \
-  { \
-    ::redc::log_e("% thrown by expression. Crashing", e.what()); \
-    ::redc::assert_fn(false, #expr, __FILE__, __LINE__); \
-  } \
-  catch(...) \
-  { \
-    ::redc::log_e("unknown exception thrown by expression. Crashing"); \
-    ::redc::assert_fn(false, #expr, __FILE__, __LINE__); \
+#define REDC_ASSERT_NO_THROW(expr)                                      \
+  try { expr; }                                                         \
+  catch(std::exception& e)                                              \
+  {                                                                     \
+    ::redc::unreachable_fn(__FILE__, __LINE__, "Exception thrown by "   \
+                           "expression '%':\ntype = %, what() = %",     \
+                           #expr, typeid(e).name(), e.what());          \
+  }                                                                     \
+  catch(...)                                                            \
+  {                                                                     \
+    ::redc::unreachable_fn(__FILE__, __LINE__, "Unknown exception "     \
+                           "thrown by expression: '%'", #expr);         \
   }
+
+#define REDC_UNREACHABLE() ::redc::unreachable_fn(__FILE__, __LINE__)
+#define REDC_UNREACHABLE_MSG(...)                                       \
+  ::redc::unreachable_fn(__FILE__, __LINE__, __VA_ARGS__)
