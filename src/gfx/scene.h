@@ -9,6 +9,7 @@
 #endif
 
 #include "../common/maybe_owned.hpp"
+#include "camera.h"
 
 #include <vector>
 #include <unordered_map>
@@ -20,13 +21,13 @@ namespace redc
 #if defined(REDC_USE_OPENGL)
 
   // In OpenGL, attributes are vertex shader input variables.
-  struct Attribute_Bind
+  struct Attrib_Bind
   {
     GLint loc;
   };
 
   // Parameters are just uniforms.
-  struct Parameter_Bind
+  struct Param_Bind
   {
     GLint loc;
   };
@@ -62,8 +63,8 @@ namespace redc
   };
 
 #elif defined(REDC_USE_DIRECTX)
-  struct Attribute_Bind {};
-  struct Parameter_Bind {};
+  struct Attrib_Bind {};
+  struct Param_Bind {};
   struct Buf {};
   struct Texture_Repr {};
   struct Mesh_Repr {};
@@ -166,19 +167,39 @@ namespace redc
     Attrib_Type attrib_type;
   };
 
-  // Type of uniform (in opengl)
+  // Type of parameter value
   enum class Param_Type
   {
-    Sampler, Float, Vec2, Vec3, Vec4, Mat2, Mat3, Mat4
+    Byte, UByte, Short, UShort, Int, UInt, Float, Vec2, Vec3, Vec4, IVec2,
+    IVec3, IVec4, Bool, BVec2, BVec3, BVec4, Mat2, Mat3, Mat4, Sampler2D
   };
 
-  using Texture_Ref = std::size_t;
   // Represents a uniform value
+  union Param_Value
+  {
+    // Signed and unsigned byte
+    int8_t byte;
+    uint8_t ubyte;
+
+    // Signed and unsigned short.
+    short shrt;
+    unsigned short ushrt;
+
+    // Unsigned int and sampler **index**
+    unsigned int uint;
+
+    // Float, vectors, and matrices
+    std::array<float, 16> floats;
+    // signed integer and ivec
+    std::array<int, 4> ints;
+    // bool and bvec
+    std::array<bool, 4> bools;
+  };
+
   struct Parameter
   {
     Param_Type type;
-    // Matrices stored in column-major order.
-    boost::variant<Texture_Ref, std::vector<float> > value;
+    Param_Value value;
   };
 
   // Represents a semantic uniform
@@ -242,18 +263,13 @@ namespace redc
 
     // Maps attribute names to bind locations. We look them up once at creation
     // time with glGetAttribLocation.
-    std::unordered_map<std::string, Attribute_Bind> attributes;
+    std::unordered_map<std::string, Attrib_Bind> attributes;
   };
 
   using Program_Ref = std::size_t;
-  enum class Technique_Parameter_Type
-  {
-    Byte, UByte, Short, UShort, Int, UInt, Float, Vec2, Vec3, Vec4, IVec2,
-    IVec3, IVec4, Bool, BVec2, BVec3, BVec4, Mat2, Mat3, Mat4, Sampler2D
-  };
 
   using Node_Ref = std::size_t;
-  struct Technique_Parameter
+  struct Param_Decl
   {
     // Optional node to take transformation from
     boost::optional<Node_Ref> node;
@@ -262,14 +278,17 @@ namespace redc
     // be more than one if we are dealing with an attribute.
     int count;
 
-    // Type of the parameter
-    Technique_Parameter_Type type;
-    Parameter value;
+    // Value and type of the parameter. I chose not to put a Parameter here and
+    // instead use both a type and value explicitely because the value here is
+    // optional I think, whereas type is not. This is distinct from a value
+    // provided in material.values.
+    Param_Type type;
+    boost::optional<Param_Value> default_value;
 
     // Optional semantic meaning
     boost::optional<boost::variant<Param_Semantic, Attrib_Semantic> > semantic;
     // Either a parameter (uniform) or an attribute (input variable).
-    boost::variant<Parameter_Bind, Attribute_Bind> bind;
+    boost::variant<Param_Bind, Attrib_Bind> bind;
   };
 
   struct Technique
@@ -279,7 +298,7 @@ namespace redc
     Program_Ref program_i;
 
     // This includes name, type and bind information.
-    std::unordered_map<std::string, Technique_Parameter> parameters;
+    std::unordered_map<std::string, Param_Decl> parameters;
   };
 
   using Technique_Ref = std::size_t;
@@ -296,7 +315,7 @@ namespace redc
     // by technique then by material. Because we store a bind, we give up the
     // ability to switch the technique of a material at runtime, but that's okay
     // because we a primitive can still switch to a new material at runtime.
-    std::vector<std::pair<Parameter_Bind, Parameter> > params;
+    std::vector<std::pair<Param_Bind, Parameter> > parameters;
   };
 
   // Because the material of a primitive is not going to change, we can
@@ -360,4 +379,13 @@ namespace redc
   };
 
   Asset load_asset(tinygltf::Scene const& scene);
+
+  struct Rendering_State
+  {
+    Technique_Ref cur_technique_i = -1;
+    Material_Ref cur_material_i = -1;
+  };
+
+  void render_asset(Asset const& asset, gfx::Camera const& camera,
+                    Rendering_State& cur_rendering_state);
 }

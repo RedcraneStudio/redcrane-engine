@@ -4,6 +4,9 @@
  */
 #include "scene.h"
 #include "../common/debugging.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <boost/variant/get.hpp>
 
 namespace redc
@@ -91,6 +94,11 @@ namespace redc
     return ret;
   }
 
+  void use_program(Program_Repr repr)
+  {
+    glUseProgram(repr.program);
+  }
+
   void upload_shader_source(Shader shade, char const * source,
                             int source_length)
   {
@@ -143,15 +151,15 @@ namespace redc
     return val == GL_TRUE;
   }
 
-  Attribute_Bind get_attrib_bind(Program_Repr program, std::string const& name)
+  Attrib_Bind get_attrib_bind(Program_Repr program, std::string const& name)
   {
-    Attribute_Bind ret;
+    Attrib_Bind ret;
     ret.loc = glGetAttribLocation(program.program, name.c_str());
     return ret;
   }
-  Parameter_Bind get_param_bind(Program_Repr program, std::string const& name)
+  Param_Bind get_param_bind(Program_Repr program, std::string const& name)
   {
-    Parameter_Bind bind;
+    Param_Bind bind;
     bind.loc = glGetUniformLocation(program.program, name.c_str());
     return bind;
   }
@@ -196,7 +204,7 @@ namespace redc
   // Use this for rendering. It would be nice to pass in some OpenGL state
   // structure so we don't have to redundantly set this information if it has
   // already been set.
-  void use_array_accessor(Attribute_Bind bind, Buf buf, Accessor const& acc)
+  void use_array_accessor(Attrib_Bind bind, Buf buf, Accessor const& acc)
   {
     // We have some data
     glBindBuffer(GL_ARRAY_BUFFER, buf.buf);
@@ -210,17 +218,201 @@ namespace redc
                           (GLenum) acc.data_type, GL_FALSE,
                           acc.stride, (void*) acc.offset);
   }
-  void use_element_array_accessor(Buf buf, Accessor const& acc)
+  void use_element_array_accessor(Buf buf, Accessor const&)
   {
     // Use this as our element array
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.buf);
   }
 
+  // = Uniform functions!
+
+  // == Int functions
+  inline void set_uint_parameter(Param_Bind bind, unsigned int const* val)
+  {
+    glUniform1uiv(bind.loc, 1, val);
+  }
+  inline void set_int_parameter(Param_Bind bind, int const* val)
+  {
+    glUniform1iv(bind.loc, 1, val);
+  }
+  inline void set_ivec2_parameter(Param_Bind bind, int const* val)
+  {
+    glUniform2iv(bind.loc, 1, val);
+  }
+  inline void set_ivec3_parameter(Param_Bind bind, int const* val)
+  {
+    glUniform3iv(bind.loc, 1, val);
+  }
+  inline void set_ivec4_parameter(Param_Bind bind, int const* val)
+  {
+    glUniform4iv(bind.loc, 1, val);
+  }
+
+  // == Bool functions
+  inline void set_bool_parameter(Param_Bind bind, bool const* val)
+  {
+    glUniform1ui(bind.loc, *val);
+  }
+  inline void set_bvec2_parameter(Param_Bind bind, bool const* val)
+  {
+    glUniform2ui(bind.loc, val[0], val[1]);
+  }
+  inline void set_bvec3_parameter(Param_Bind bind, bool const* val)
+  {
+    glUniform3ui(bind.loc, val[0], val[1], val[2]);
+  }
+  inline void set_bvec4_parameter(Param_Bind bind, bool const* val)
+  {
+    glUniform4ui(bind.loc, val[0], val[1], val[2], val[3]);
+  }
+
+  // == Float functions
+  inline void set_float_parameter(Param_Bind bind, float const* vec)
+  {
+    glUniform1fv(bind.loc, 1, vec);
+  }
+  inline void set_vec2_parameter(Param_Bind bind, float const* vec)
+  {
+    glUniform2fv(bind.loc, 1, vec);
+  }
+  inline void set_vec3_parameter(Param_Bind bind, float const* vec)
+  {
+    glUniform3fv(bind.loc, 1, vec);
+  }
+  inline void set_vec4_parameter(Param_Bind bind, float const* vec)
+  {
+    glUniform4fv(bind.loc, 1, vec);
+  }
+  inline void set_mat2_parameter(Param_Bind bind, float const* vec)
+  {
+    glUniformMatrix2fv(bind.loc, 1, GL_FALSE, vec);
+  }
+  inline void set_mat3_parameter(Param_Bind bind, float const* vec)
+  {
+    glUniformMatrix3fv(bind.loc, 1, GL_FALSE, vec);
+  }
+  inline void set_mat4_parameter(Param_Bind bind, float const* vec)
+  {
+    glUniformMatrix4fv(bind.loc, 1, GL_FALSE, vec);
+  }
+
+  void enable_vertex_attrib_arrays(Mesh_Repr mesh, unsigned int start,
+                                unsigned int end)
+  {
+// OPENGL VERSION < 4.5
+    use_mesh(mesh);
+    for(; start != end; ++start)
+    {
+      glEnableVertexAttribArray(start);
+    }
+// OPENGL VERSION 4.5
+/*
+    for(; start != end; ++start)
+    {
+      glEnableVertexArrayAttrib(mesh.vao, start);
+    }
+*/
+  }
+
+  void draw_elements(std::size_t count, Data_Type type, Render_Mode mode,
+                     std::size_t offset)
+  {
+    glDrawElements((GLenum) mode, count, (GLenum) type, (GLvoid*) offset);
+  }
+  void draw_arrays(std::size_t count, Render_Mode mode)
+  {
+    glDrawArrays((GLenum) mode, 0, count);
+  }
+
 #endif
+
+  // = Helper functions
+
+  void set_parameter(Param_Bind bind, Parameter const& param,
+                     std::vector<Texture_Repr> const& textures)
+  {
+    switch(param.type)
+    {
+    case Param_Type::Byte:
+    case Param_Type::UByte:
+    case Param_Type::Short:
+    case Param_Type::UShort:
+      REDC_ASSERT_MSG(false, "Byte and Short parameter types not supported");
+      // I suppose we could just set them as integers.
+      break;
+    case Param_Type::Int:
+      set_int_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::IVec2:
+      set_ivec2_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::IVec3:
+      set_ivec3_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::IVec4:
+      set_ivec4_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::UInt:
+      set_uint_parameter(bind, &param.value.uint);
+      break;
+    case Param_Type::Bool:
+      set_bool_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::BVec2:
+      set_bvec2_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::BVec3:
+      set_bvec3_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::BVec4:
+      set_bvec4_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::Float:
+      set_float_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Vec2:
+      set_vec2_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Vec3:
+      set_vec3_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Vec4:
+      set_vec4_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Mat2:
+      set_mat2_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Mat3:
+      set_mat3_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Mat4:
+      set_mat4_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Sampler2D:
+      // Remember: The value in uint is a reference, however, we are using the
+      // index to represent texture unit. We need a cast because samplers must
+      // be set with the signed uniform function
+      set_int_parameter(bind, (int*) &param.value.uint);
+      // Now activate that texture unit
+      glActiveTexture(GL_TEXTURE0 + param.value.uint);
+      glBindTexture(GL_TEXTURE_2D, textures[param.value.uint].tex);
+      break;
+    }
+  }
+
+  inline void set_parameter(Param_Bind bind, Param_Type type,
+                            Param_Value const& val,
+                            std::vector<Texture_Repr> const& textures)
+  {
+    Parameter param;
+    param.type = type;
+    param.value = val;
+    set_parameter(bind, param, textures);
+  }
 
   template <class Bind_T, unsigned int Which_N, class Semantic_T>
   Bind_T get_semantic_bind(
-    std::unordered_map<std::string, Technique_Parameter> const& parameters,
+    std::unordered_map<std::string, Param_Decl> const& parameters,
     Semantic_T attrib_semantic)
   {
     auto param_find = std::find_if(parameters.begin(),
@@ -249,25 +441,32 @@ namespace redc
     return boost::get<Bind_T>(param_find->second.bind);
   }
 
-  Attribute_Bind get_attrib_semantic_bind(Technique const& tech,
-                                          Attrib_Semantic attrib_semantic)
+  Attrib_Bind get_attrib_semantic_bind(Technique const& tech,
+                                       Attrib_Semantic attrib_semantic)
   {
-    return get_semantic_bind<Attribute_Bind, 1>(tech.parameters,
-                                                attrib_semantic);
+    return get_semantic_bind<Attrib_Bind, 1>(tech.parameters,
+                                             attrib_semantic);
   }
 
-  // TODO: Add template that accepts a type either Attribute_Bind or
-  // Parameter_Bind and a number either 1 or zero and does the above search but
-  // for either one. Move get_param_semantic_bind down here out of the Opengl
-  // ifdef.
-
-  Parameter_Bind get_param_semantic_bind(Technique const& tech,
-                                         Param_Semantic param_semantic)
+  Param_Bind get_param_semantic_bind(Technique const& tech,
+                                     Param_Semantic param_semantic)
   {
-    return get_semantic_bind<Parameter_Bind, 0>(tech.parameters,
+    return get_semantic_bind<Param_Bind, 0>(tech.parameters,
                                                 param_semantic);
 
   }
+
+  template <class... Args>
+  std::size_t find_string_index(std::vector<std::string> strs,
+                                std::string str,
+                                Args&&... msg_args)
+  {
+    auto find_res = std::find(strs.begin(), strs.end(), str);
+    REDC_ASSERT_MSG(find_res != strs.end(), std::forward<Args>(msg_args)...);
+    return find_res - strs.begin();
+  }
+
+  // = Conversion functions (from tinygltfloader to our enums).
 
   Data_Type to_data_type(int val)
   {
@@ -310,6 +509,286 @@ namespace redc
     }
   }
 
+  Attrib_Type to_attrib_type(int val)
+  {
+    switch(val)
+    {
+    case TINYGLTF_TYPE_SCALAR:
+      return Attrib_Type::Scalar;
+    case TINYGLTF_TYPE_VEC2:
+      return Attrib_Type::Vec2;
+    case TINYGLTF_TYPE_VEC3:
+      return Attrib_Type::Vec3;
+    case TINYGLTF_TYPE_VEC4:
+      return Attrib_Type::Vec4;
+    case TINYGLTF_TYPE_MAT2:
+      return Attrib_Type::Mat2;
+    case TINYGLTF_TYPE_MAT3:
+      return Attrib_Type::Mat3;
+    case TINYGLTF_TYPE_MAT4:
+      return Attrib_Type::Mat4;
+    default:
+      REDC_ASSERT_MSG(false, "Unknown attribute type");
+      // This should never be reached
+      return Attrib_Type::Vec4;
+    }
+  }
+
+  Texture_Target to_texture_target(int val)
+  {
+    switch(val)
+    {
+    case TINYGLTF_TEXTURE_TARGET_TEXTURE2D:
+      return Texture_Target::Tex_2D;
+    default:
+      REDC_ASSERT_MSG(false, "Invalid texture target");
+      // This should never be reached.
+      return Texture_Target::Tex_2D;
+    }
+  }
+
+  Texture_Format to_texture_format(int val)
+  {
+    switch(val)
+    {
+    case TINYGLTF_TEXTURE_FORMAT_RGBA:
+      return Texture_Format::Rgba;
+    default:
+      REDC_ASSERT_MSG(false, "Invalid texture format");
+      // This should never be reached.
+      return Texture_Format::Rgba;
+    };
+  }
+
+  Param_Value to_param_value(tinygltf::Parameter const& param, Param_Type type,
+                             std::vector<std::string> const& texture_names)
+  {
+    Param_Value ret;
+
+    switch(type)
+    {
+    case Param_Type::Byte:
+      ret.byte = static_cast<int8_t>(param.number_array[0]);
+      break;
+    case Param_Type::UByte:
+      ret.ubyte = static_cast<uint8_t>(param.number_array[0]);
+      break;
+    case Param_Type::Short:
+      ret.shrt = static_cast<short>(param.number_array[0]);
+      break;
+    case Param_Type::UShort:
+      ret.ushrt = static_cast<unsigned short>(param.number_array[0]);
+      break;
+    case Param_Type::UInt:
+      ret.uint = static_cast<unsigned int>(param.number_array[0]);
+      break;
+    case Param_Type::IVec4:
+      ret.ints[3] = static_cast<int>(param.number_array[3]);
+    case Param_Type::IVec3:
+      ret.ints[2] = static_cast<int>(param.number_array[2]);
+    case Param_Type::IVec2:
+      ret.ints[1] = static_cast<int>(param.number_array[1]);
+    case Param_Type::Int:
+      ret.ints[0] = static_cast<int>(param.number_array[0]);
+      break;
+    case Param_Type::Vec4:
+      ret.floats[3] = static_cast<float>(param.number_array[3]);
+    case Param_Type::Vec3:
+      ret.floats[2] = static_cast<float>(param.number_array[2]);
+    case Param_Type::Vec2:
+      ret.floats[1] = static_cast<float>(param.number_array[1]);
+    case Param_Type::Float:
+      ret.floats[0] = static_cast<float>(param.number_array[0]);
+      break;
+    case Param_Type::BVec4:
+      ret.bools[3] = static_cast<bool>(param.number_array[3]);
+    case Param_Type::BVec3:
+      ret.bools[2] = static_cast<bool>(param.number_array[2]);
+    case Param_Type::BVec2:
+      ret.bools[1] = static_cast<bool>(param.number_array[1]);
+    case Param_Type::Bool:
+      ret.bools[0] = static_cast<bool>(param.number_array[0]);
+      break;
+    case Param_Type::Mat2:
+    case Param_Type::Mat3:
+    case Param_Type::Mat4:
+      // Copy into our floats array
+      std::copy(param.number_array.begin(), param.number_array.end(),
+                ret.floats.begin());
+      break;
+    case Param_Type::Sampler2D:
+      REDC_ASSERT(param.string_value.size() != 0);
+      // Using the string, find a reference to that texture and store it in the
+      // uint member.
+      ret.uint = find_string_index(texture_names, param.string_value,
+                                   "Parameter value references invalid texture");
+      break;
+    }
+
+    return ret;
+  }
+
+  Render_Mode to_render_mode(int val)
+  {
+    switch(val)
+    {
+    case TINYGLTF_MODE_POINTS:
+      return Render_Mode::Points;
+    case TINYGLTF_MODE_LINE:
+      return Render_Mode::Lines;
+    case TINYGLTF_MODE_LINE_LOOP:
+      return Render_Mode::Line_Loop;
+    case TINYGLTF_MODE_TRIANGLES:
+      return Render_Mode::Triangles;
+    case TINYGLTF_MODE_TRIANGLE_STRIP:
+      return Render_Mode::Triangle_Strip;
+    case TINYGLTF_MODE_TRIANGLE_FAN:
+      return Render_Mode::Triangle_Fan;
+    default:
+      REDC_ASSERT_MSG(false, "Invalid primitive type");
+      // This should never be reached.
+      return Render_Mode::Triangles;
+    }
+  }
+
+  Attrib_Semantic to_attrib_semantic(std::string str, bool recurse = false)
+  {
+    // Check for an underscore to separate semantic from number
+    // ie: SAMPLER_2
+
+    Attrib_Semantic ret;
+
+    auto sep_find = std::find(str.begin(), str.end(), '_');
+    if(sep_find == str.end() || recurse)
+    {
+      // No separator, try to load the string as-is.
+      if(str == "POSITION") ret.kind = Attrib_Semantic::Position;
+      else if(str == "NORMAL") ret.kind = Attrib_Semantic::Normal;
+      else if(str == "TEXCOORD") ret.kind = Attrib_Semantic::Texcoord;
+      else if(str == "COLOR") ret.kind = Attrib_Semantic::Color;
+      else if(str == "JOINT") ret.kind = Attrib_Semantic::Joint;
+      else if(str == "WEIGHT") ret.kind = Attrib_Semantic::Weight;
+      else REDC_ASSERT_MSG(false, "Invalid attribute semantic");
+
+      // Don't set this if it wasn't specified initially
+      //ret.index = 0;
+
+      return ret;
+    }
+    else
+    {
+      auto offset = sep_find - str.begin();
+
+      // Recurse into this function just to parse the semantic string. This
+      // can't recurse infinitely and I only did it this way because the type of
+      // Attrib_Semantic.kind is an anonymous enum so we can't return it's value
+      // directly. I suppose we could with some sort of decltype or something
+      // but this is neater.
+      auto ret = to_attrib_semantic(str.substr(0, offset), true);
+      // Add one to the offset to account for the underscore.
+      ret.index = std::stoi(str.substr(offset+1, str.size()));
+      return ret;
+    }
+  }
+
+  Param_Semantic to_param_semantic(std::string str)
+  {
+    if(str == "LOCAL") return Param_Semantic::Local;
+    if(str == "MODEL") return Param_Semantic::Model;
+    if(str == "PROJECTION") return Param_Semantic::Projection;
+    if(str == "MODELVIEW") return Param_Semantic::Model_View;
+    if(str == "MODELVIEWPROJECTION")
+      return Param_Semantic::Model_View_Projection;
+    if(str == "MODELINVERSE") return Param_Semantic::Model_Inverse;
+    if(str == "VIEWINVERSE") return Param_Semantic::View_Inverse;
+    if(str == "PROJECTIONINVERSE") return Param_Semantic::Projection_Inverse;
+    if(str == "MODELVIEWINVERSE") return Param_Semantic::Model_View_Inverse;
+    if(str == "MODELVIEWPROJECTIONINVERSE")
+      return Param_Semantic::Model_View_Projection_Inverse;
+    if(str == "MODELINVERSETRANSPOSE")
+      return Param_Semantic::Model_Inverse_Transpose;
+    if(str == "MODELVIEWINVERSETRANSPOSE")
+      return Param_Semantic::Model_View_Inverse_Transpose;
+    if(str == "VIEWPORT") return Param_Semantic::Viewport;
+    if(str == "JOINTMATRIX") return Param_Semantic::Joint_Matrix;
+
+    REDC_ASSERT_MSG(false, "Invalid parameter semantic");
+  }
+
+  Param_Type to_param_type(int ty)
+  {
+    switch(ty)
+    {
+    case TINYGLTF_PARAMETER_TYPE_BYTE:
+      return Param_Type::Byte;
+    case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE:
+      return Param_Type::UByte;
+    case TINYGLTF_PARAMETER_TYPE_SHORT:
+      return Param_Type::Short;
+    case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
+      return Param_Type::UShort;
+    case TINYGLTF_PARAMETER_TYPE_INT:
+      return Param_Type::Int;
+    case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT:
+      return Param_Type::UInt;
+    case TINYGLTF_PARAMETER_TYPE_FLOAT:
+      return Param_Type::Float;
+    case TINYGLTF_PARAMETER_TYPE_FLOAT_VEC2:
+      return Param_Type::Vec2;
+    case TINYGLTF_PARAMETER_TYPE_FLOAT_VEC3:
+      return Param_Type::Vec3;
+    case TINYGLTF_PARAMETER_TYPE_FLOAT_VEC4:
+      return Param_Type::Vec4;
+    case TINYGLTF_PARAMETER_TYPE_INT_VEC2:
+      return Param_Type::IVec2;
+    case TINYGLTF_PARAMETER_TYPE_INT_VEC3:
+      return Param_Type::IVec3;
+    case TINYGLTF_PARAMETER_TYPE_INT_VEC4:
+      return Param_Type::IVec4;
+    case TINYGLTF_PARAMETER_TYPE_BOOL:
+      return Param_Type::Bool;
+    case TINYGLTF_PARAMETER_TYPE_BOOL_VEC2:
+      return Param_Type::BVec2;
+    case TINYGLTF_PARAMETER_TYPE_BOOL_VEC3:
+      return Param_Type::BVec3;
+    case TINYGLTF_PARAMETER_TYPE_BOOL_VEC4:
+      return Param_Type::BVec4;
+    case TINYGLTF_PARAMETER_TYPE_FLOAT_MAT2:
+      return Param_Type::Mat2;
+    case TINYGLTF_PARAMETER_TYPE_FLOAT_MAT3:
+      return Param_Type::Mat3;
+    case TINYGLTF_PARAMETER_TYPE_FLOAT_MAT4:
+      return Param_Type::Mat4;
+    case TINYGLTF_PARAMETER_TYPE_SAMPLER_2D:
+      return Param_Type::Sampler2D;
+    default:
+      REDC_ASSERT_MSG(false, "Invalid technique parameter type");
+      break;
+    }
+  }
+
+  // = Destruction
+
+  Asset::~Asset()
+  {
+    for(auto program : programs)
+    {
+      destroy_program(program.repr);
+    }
+    for(auto shader : shaders)
+    {
+      destroy_shader(shader.repr);
+    }
+    for(auto& mesh : meshes)
+    {
+      destroy_meshes(1, &mesh.repr);
+    }
+    destroy_bufs(buffers.size(), &buffers[0]);
+    destroy_textures(textures.size(), &textures[0]);
+  }
+
+  // = Load functions
+
   void load_buffers(tinygltf::Scene const& scene, std::vector<Buf>& bufs,
                     std::vector<std::string>& buf_view_names)
   {
@@ -340,59 +819,6 @@ namespace redc
 
       ++i;
     }
-  }
-
-  Attrib_Type to_attrib_type(int val)
-  {
-    switch(val)
-    {
-    case TINYGLTF_TYPE_SCALAR:
-      return Attrib_Type::Scalar;
-    case TINYGLTF_TYPE_VEC2:
-      return Attrib_Type::Vec2;
-    case TINYGLTF_TYPE_VEC3:
-      return Attrib_Type::Vec3;
-    case TINYGLTF_TYPE_VEC4:
-      return Attrib_Type::Vec4;
-    case TINYGLTF_TYPE_MAT2:
-      return Attrib_Type::Mat2;
-    case TINYGLTF_TYPE_MAT3:
-      return Attrib_Type::Mat3;
-    case TINYGLTF_TYPE_MAT4:
-      return Attrib_Type::Mat4;
-    default:
-      REDC_ASSERT_MSG(false, "Unknown attribute type");
-      // This should never be reached
-      return Attrib_Type::Vec4;
-    }
-  }
-
-  template <class... Args>
-  std::size_t find_string_index(std::vector<std::string> strs,
-                                std::string str,
-                                Args&&... msg_args)
-  {
-    auto find_res = std::find(strs.begin(), strs.end(), str);
-    REDC_ASSERT_MSG(find_res != strs.end(), std::forward<Args>(msg_args)...);
-    return find_res - strs.begin();
-  }
-
-  Asset::~Asset()
-  {
-    for(auto program : programs)
-    {
-      destroy_program(program.repr);
-    }
-    for(auto shader : shaders)
-    {
-      destroy_shader(shader.repr);
-    }
-    for(auto& mesh : meshes)
-    {
-      destroy_meshes(1, &mesh.repr);
-    }
-    destroy_bufs(buffers.size(), &buffers[0]);
-    destroy_textures(textures.size(), &textures[0]);
   }
 
   void load_nodes_given_names(tinygltf::Scene const& scene,
@@ -450,7 +876,7 @@ namespace redc
       // Add this node to the main vector of nodes
       nodes.push_back(node);
       // Add its index for later cross-referencing.
-      node_indices.insert({name, nodes.size()});
+      node_indices.insert({name, nodes.size() - 1});
     }
 
     // Now traverse the hiearchy.
@@ -529,37 +955,11 @@ namespace redc
     }
   }
 
-  Texture_Target to_texture_target(int val)
-  {
-    switch(val)
-    {
-    case TINYGLTF_TEXTURE_TARGET_TEXTURE2D:
-      return Texture_Target::Tex_2D;
-    default:
-      REDC_ASSERT_MSG(false, "Invalid texture target");
-      // This should never be reached.
-      return Texture_Target::Tex_2D;
-    }
-  }
-
-  Texture_Format to_texture_format(int val)
-  {
-    switch(val)
-    {
-    case TINYGLTF_TEXTURE_FORMAT_RGBA:
-      return Texture_Format::Rgba;
-    default:
-      REDC_ASSERT_MSG(false, "Invalid texture format");
-      // This should never be reached.
-      return Texture_Format::Rgba;
-    };
-  }
-
   void load_textures(tinygltf::Scene const& scene,
                      std::vector<Texture_Repr>& textures,
                      std::vector<std::string>& texture_names)
   {
-    textures = make_textures(textures.size());
+    textures = make_textures(scene.textures.size());
     texture_names.reserve(textures.size());
 
     std::size_t i = 0;
@@ -590,44 +990,12 @@ namespace redc
     }
   }
 
-  Parameter load_parameter_value(tinygltf::Parameter const& param,
-                                 std::vector<std::string> const& texture_names,
-                                 std::string thing)
-  {
-    Parameter ret;
-
-    // A parameter either references a texture or its a vector of values
-    if(!param.string_value.empty())
-    {
-      // Reference the texture
-      auto texture_i =
-        find_string_index(texture_names, param.string_value,
-                          thing + " references invalid texture");
-      ret.value = texture_i;
-    }
-    else
-    {
-      // Load in the values
-      std::vector<float> values;
-      values.reserve(param.number_array.size());
-      for(double d : param.number_array)
-      {
-        // Do an explicit cast.
-        values.push_back((float) d);
-      }
-      ret.value = values;
-    }
-
-    return ret;
-  }
-
   void load_materials(tinygltf::Scene const& scene,
                       std::vector<Material>& materials,
                       std::vector<std::string>& material_names,
                       std::vector<Technique> const& techs,
                       std::vector<std::string> const& tech_names,
-                      std::vector<std::string> const& texture_names,
-                      std::vector<Program> const& programs)
+                      std::vector<std::string> const& texture_names)
   {
     materials.reserve(scene.materials.size());
     material_names.reserve(scene.materials.size());
@@ -645,85 +1013,37 @@ namespace redc
                         "Material references invalid semantic");
 
       auto& technique = techs[mat.technique_i];
-      auto& program = programs[technique.program_i];
 
       // Now use the technique to find parameter bind points
       for(auto param_pair : in_mat.values)
       {
-        // This is like the name of the uniform, or tag in our case.
+        // This the name of the technique parameter.
         auto& name = param_pair.first;
 
-        Parameter param = load_parameter_value(param_pair.second, texture_names,
-                                               "Material");
+        // Find the type of that parameter using the string name
+        auto param_decl_find = technique.parameters.find(name);
+        REDC_ASSERT(param_decl_find != technique.parameters.end());
+
+        // Get the value of this parameter
+        Parameter param;
+        param.type = param_decl_find->second.type;
+        param.value = to_param_value(param_pair.second, param.type,
+                                     texture_names);
+
+        // Get the technique parameter from the name.
+        auto tech_param_find = technique.parameters.find(name);
+        REDC_ASSERT(tech_param_find != technique.parameters.end());
+        REDC_ASSERT_MSG(tech_param_find->second.bind.which() == 0, "Material "
+                        "value must reference a parameter, not an attribute");
 
         // Find the bind point for this parameter.
-        auto bind = get_param_bind(program.repr, name);
-        mat.params.emplace_back(bind, param);
+        Param_Bind bind =
+          boost::get<Param_Bind>(tech_param_find->second.bind);
+
+        mat.parameters.emplace_back(bind, param);
       }
 
       materials.push_back(std::move(mat));
-    }
-  }
-
-  Render_Mode to_render_mode(int val)
-  {
-    switch(val)
-    {
-    case TINYGLTF_MODE_POINTS:
-      return Render_Mode::Points;
-    case TINYGLTF_MODE_LINE:
-      return Render_Mode::Lines;
-    case TINYGLTF_MODE_LINE_LOOP:
-      return Render_Mode::Line_Loop;
-    case TINYGLTF_MODE_TRIANGLES:
-      return Render_Mode::Triangles;
-    case TINYGLTF_MODE_TRIANGLE_STRIP:
-      return Render_Mode::Triangle_Strip;
-    case TINYGLTF_MODE_TRIANGLE_FAN:
-      return Render_Mode::Triangle_Fan;
-    default:
-      REDC_ASSERT_MSG(false, "Invalid primitive type");
-      // This should never be reached.
-      return Render_Mode::Triangles;
-    }
-  }
-
-  Attrib_Semantic to_attrib_semantic(std::string str, bool recurse = false)
-  {
-    // Check for an underscore to separate semantic from number
-    // ie: SAMPLER_2
-
-    Attrib_Semantic ret;
-
-    auto sep_find = std::find(str.begin(), str.end(), '_');
-    if(sep_find == str.end() || recurse)
-    {
-      // No separator, try to load the string as-is.
-      if(str == "POSITION") ret.kind = Attrib_Semantic::Position;
-      else if(str == "NORMAL") ret.kind = Attrib_Semantic::Normal;
-      else if(str == "TEXCOORD") ret.kind = Attrib_Semantic::Texcoord;
-      else if(str == "COLOR") ret.kind = Attrib_Semantic::Color;
-      else if(str == "JOINT") ret.kind = Attrib_Semantic::Joint;
-      else if(str == "WEIGHT") ret.kind = Attrib_Semantic::Weight;
-      else REDC_ASSERT_MSG(false, "Invalid attribute semantic");
-
-      // Don't set this if it wasn't specified initially
-      //ret.index = 0;
-
-      return ret;
-    }
-    else
-    {
-      auto offset = sep_find - str.begin();
-
-      // Recurse into this function just to parse the semantic string. This
-      // can't recurse infinitely and I only did it this way because the type of
-      // Attrib_Semantic.kind is an anonymous enum so we can't return it's value
-      // directly. I suppose we could with some sort of decltype or something
-      // but this is neater.
-      auto ret = to_attrib_semantic(str.substr(0, offset), true);
-      ret.index = std::stoi(str.substr(offset, str.size()));
-      return ret;
     }
   }
 
@@ -735,14 +1055,18 @@ namespace redc
     meshes.reserve(scene.meshes.size());
     mesh_names.reserve(scene.meshes.size());
 
+    // Make one representation for each mesh
+    auto mesh_reprs = make_mesh_reprs(scene.meshes.size());
+
+    std::size_t repr_i = 0;
     for(auto mesh_pair : scene.meshes)
     {
       mesh_names.push_back(mesh_pair.first);
 
       Mesh our_mesh;
 
-      // Make a representation for our mesh
-      our_mesh.repr = make_mesh_reprs(1)[0];
+      // Give our mesh one of the created representations.
+      our_mesh.repr = mesh_reprs[repr_i++];
 
       for(auto& in_prim : mesh_pair.second.primitives)
       {
@@ -772,6 +1096,11 @@ namespace redc
           // We know have an accessor bound to some attribute point.
           prim.attributes.emplace(semantic, access_ref);
         }
+
+        // Enable enough vertex attributes in the mesh repr to hold every
+        // attribute in the primitive. With this implementation we are assuming
+        // that they are contiguous and start at 0.
+        enable_vertex_attrib_arrays(our_mesh.repr, 0,in_prim.attributes.size());
 
         // Indices attribute
         if(!in_prim.indices.empty())
@@ -898,82 +1227,6 @@ namespace redc
     }
   }
 
-  Technique_Parameter_Type to_technique_parameter_type(int ty)
-  {
-    switch(ty)
-    {
-    case TINYGLTF_PARAMETER_TYPE_BYTE:
-      return Technique_Parameter_Type::Byte;
-    case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE:
-      return Technique_Parameter_Type::UByte;
-    case TINYGLTF_PARAMETER_TYPE_SHORT:
-      return Technique_Parameter_Type::Short;
-    case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
-      return Technique_Parameter_Type::UShort;
-    case TINYGLTF_PARAMETER_TYPE_INT:
-      return Technique_Parameter_Type::Int;
-    case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT:
-      return Technique_Parameter_Type::UInt;
-    case TINYGLTF_PARAMETER_TYPE_FLOAT:
-      return Technique_Parameter_Type::Float;
-    case TINYGLTF_PARAMETER_TYPE_FLOAT_VEC2:
-      return Technique_Parameter_Type::Vec2;
-    case TINYGLTF_PARAMETER_TYPE_FLOAT_VEC3:
-      return Technique_Parameter_Type::Vec3;
-    case TINYGLTF_PARAMETER_TYPE_FLOAT_VEC4:
-      return Technique_Parameter_Type::Vec4;
-    case TINYGLTF_PARAMETER_TYPE_INT_VEC2:
-      return Technique_Parameter_Type::IVec2;
-    case TINYGLTF_PARAMETER_TYPE_INT_VEC3:
-      return Technique_Parameter_Type::IVec3;
-    case TINYGLTF_PARAMETER_TYPE_INT_VEC4:
-      return Technique_Parameter_Type::IVec4;
-    case TINYGLTF_PARAMETER_TYPE_BOOL:
-      return Technique_Parameter_Type::Bool;
-    case TINYGLTF_PARAMETER_TYPE_BOOL_VEC2:
-      return Technique_Parameter_Type::BVec2;
-    case TINYGLTF_PARAMETER_TYPE_BOOL_VEC3:
-      return Technique_Parameter_Type::BVec3;
-    case TINYGLTF_PARAMETER_TYPE_BOOL_VEC4:
-      return Technique_Parameter_Type::BVec4;
-    case TINYGLTF_PARAMETER_TYPE_FLOAT_MAT2:
-      return Technique_Parameter_Type::Mat2;
-    case TINYGLTF_PARAMETER_TYPE_FLOAT_MAT3:
-      return Technique_Parameter_Type::Mat3;
-    case TINYGLTF_PARAMETER_TYPE_FLOAT_MAT4:
-      return Technique_Parameter_Type::Mat4;
-    case TINYGLTF_PARAMETER_TYPE_SAMPLER_2D:
-      return Technique_Parameter_Type::Sampler2D;
-    default:
-      REDC_ASSERT_MSG(false, "Invalid technique parameter type");
-      break;
-    }
-  }
-
-  Param_Semantic to_param_semantic(std::string str)
-  {
-    if(str == "LOCAL") return Param_Semantic::Local;
-    if(str == "MODEL") return Param_Semantic::Model;
-    if(str == "PROJECTION") return Param_Semantic::Projection;
-    if(str == "MODELVIEW") return Param_Semantic::Model_View;
-    if(str == "MODELVIEWPROJECTION")
-      return Param_Semantic::Model_View_Projection;
-    if(str == "MODELINVERSE") return Param_Semantic::Model_Inverse;
-    if(str == "VIEWINVERSE") return Param_Semantic::View_Inverse;
-    if(str == "PROJECTIONINVERSE") return Param_Semantic::Projection_Inverse;
-    if(str == "MODELVIEWINVERSE") return Param_Semantic::Model_View_Inverse;
-    if(str == "MODELVIEWPROJECTIONINVERSE")
-      return Param_Semantic::Model_View_Projection_Inverse;
-    if(str == "MODELINVERSETRANSPOSE")
-      return Param_Semantic::Model_Inverse_Transpose;
-    if(str == "MODELVIEWINVERSETRANSPOSE")
-      return Param_Semantic::Model_View_Inverse_Transpose;
-    if(str == "VIEWPORT") return Param_Semantic::Viewport;
-    if(str == "JOINTMATRIX") return Param_Semantic::Joint_Matrix;
-
-    REDC_ASSERT_MSG(false, "Invalid parameter semantic");
-  }
-
   void load_techniques(tinygltf::Scene const& scene,
                        std::vector<Technique>& techniques,
                        std::vector<std::string>& technique_names,
@@ -1000,7 +1253,7 @@ namespace redc
 
       Program const& program = programs[program_i];
 
-      std::unordered_map<std::string, Attribute_Bind> attributes;
+      std::unordered_map<std::string, Attrib_Bind> attributes;
       for(auto const& attrib_pair : in_technique.attributes)
       {
         // We already have the bind in the program struct, we just need to find
@@ -1014,7 +1267,7 @@ namespace redc
         attributes.emplace(attrib_pair.second, find_bind->second);
       }
 
-      std::unordered_map<std::string, Parameter_Bind> uniforms;
+      std::unordered_map<std::string, Param_Bind> uniforms;
       for(auto const& uniform_pair : in_technique.uniforms)
       {
         // Uniform identifier
@@ -1032,7 +1285,7 @@ namespace redc
       {
         tinygltf::TechniqueParameter const& in_param = param_pair.second;
 
-        Technique_Parameter param;
+        Param_Decl param;
 
         param.count = in_param.count;
 
@@ -1043,31 +1296,42 @@ namespace redc
           param.node = node_ref;
         }
 
-        param.type = to_technique_parameter_type(in_param.type);
+        param.type = to_param_type(in_param.type);
 
-        if(in_param.semantic.size())
+        // Is this parameter an attribute?
+        if(attributes.count(param_pair.first))
         {
-          // Is this an attribute parameter?
-          if(attributes.count(param_pair.first))
+          // Does it have a semantic?
+          if(in_param.semantic.size())
           {
-            // Try to make an attribute semantic
             param.semantic = to_attrib_semantic(in_param.semantic);
-
-            // We already know the attribute bind
-            param.bind = attributes[param_pair.first];
           }
-          else
+
+          // We already know the attribute bind
+          param.bind = attributes[param_pair.first];
+        }
+        else
+        {
+          // Does it have a semantic?
+          if(in_param.semantic.size())
           {
-            // Try to make a parameter semantic
             param.semantic = to_param_semantic(in_param.semantic);
-
-            // We already know the parameter bind
-            param.bind = uniforms[param_pair.first];
           }
+
+          // We already know the parameter bind
+          param.bind = uniforms[param_pair.first];
         }
 
-        param.value = load_parameter_value(in_param.value, texture_names,
-                                           "Technique");
+        if(in_param.value.string_value.size() == 0 &&
+           in_param.value.number_array.size() == 0)
+        {
+          param.default_value = boost::none;
+        }
+        else
+        {
+          param.default_value = to_param_value(in_param.value, param.type,
+                                               texture_names);
+        }
 
         technique.parameters.emplace(param_pair.first, std::move(param));
       }
@@ -1115,7 +1379,7 @@ namespace redc
 
     std::vector<std::string> material_names;
     load_materials(scene, ret.materials, material_names, ret.techniques,
-                   technique_names, texture_names, ret.programs);
+                   technique_names, texture_names);
 
     std::vector<std::string> mesh_names;
     load_meshes(scene, ret.meshes, mesh_names, accessor_names, material_names);
@@ -1123,5 +1387,384 @@ namespace redc
     // Load nodes
     load_nodes_given_names(scene, node_names, ret.nodes, mesh_names);
     return ret;
+  }
+
+  glm::mat4 local_transformation(Node const& node)
+  {
+      // Find the model of the current node and then go up a level
+      glm::mat4 this_model(1.0f);
+
+      // Replace the identity matrix above with the optional matrix in the node
+      if(node.matrix)
+      {
+        std::memcpy(&this_model[0], &node.matrix.value()[0], 16 * sizeof(float));
+      }
+
+      // Scale, rotate and then translate! I don't believe having both a matrix
+      // and scale/rotation/translation is allowed in the standard so we
+      // shouldn't worry about the order of these two values, just as long as
+      // these three are properly ordered.
+      if(node.scale)
+      {
+        auto& arr = node.scale.value();
+        this_model = glm::scale(this_model, glm::vec3(arr[0], arr[1], arr[2]));
+      }
+      if(node.rotation)
+      {
+        auto& arr = node.rotation.value();
+        glm::quat rot(arr[0], arr[1], arr[2], arr[3]);
+        this_model = mat4_cast(rot) * this_model;
+      }
+      if(node.translation)
+      {
+        auto& arr = node.translation.value();
+        this_model = glm::translate(this_model, glm::vec3(arr[0], arr[1], arr[2]));
+      }
+
+      return this_model;
+  }
+  glm::mat4 model_transformation(std::vector<Node> const& nodes, Node_Ref child)
+  {
+    boost::optional<Node_Ref> cur_node = child;
+    glm::mat4 cur_model(1.0f);
+
+    while(cur_node)
+    {
+      Node const& node = nodes[cur_node.value()];
+
+      cur_model = cur_model * local_transformation(node);
+      cur_node = node.parent;
+    }
+
+    return cur_model;
+  }
+
+  // TODO: This is a bad name
+  struct Render_Params
+  {
+    Mesh_Repr mesh_repr;
+    Primitive const* primitive;
+    glm::mat4 local;
+    glm::mat4 model;
+  };
+
+  glm::mat4 get_local(Param_Decl param, Asset const& asset,
+                      Render_Params const& cur_render)
+  {
+    // If the semantic mentions a particular node, use its model, otherwise use
+    // the model from the render params
+    if(param.node)
+      return local_transformation(asset.nodes[param.node.value()]);
+
+    return cur_render.local;
+  }
+  glm::mat4 get_model(Param_Decl param, Asset const& asset,
+                      Render_Params const& cur_render)
+  {
+    // If the semantic mentions a particular node, use its model, otherwise use
+    // the model from the render params
+    if(param.node)
+      return model_transformation(asset.nodes, param.node.value());
+
+    return cur_render.model;
+  }
+  glm::mat4 get_view(gfx::Camera const& cam)
+  {
+    return camera_view_matrix(cam);
+  }
+  glm::mat4 get_proj(gfx::Camera const& cam)
+  {
+    return camera_proj_matrix(cam);
+  }
+
+  // This should really be two functions one to retrieve / calculate the value
+  // of the semantic and one to set it but it's hard to do this efficiently
+  // because of the copying between matrices / arrays.
+  Param_Value set_semantic_value(Param_Decl param,
+                                 Asset const& asset,
+                                 Render_Params const& cur_render,
+                                 gfx::Camera const& cam)
+  {
+    // We must be dealing with semantic parameters
+    REDC_ASSERT(static_cast<bool>(param.semantic) == true);
+    REDC_ASSERT(param.semantic.value().which() == 0);
+    REDC_ASSERT(param.bind.which() == 0);
+
+    Param_Semantic semantic =
+      boost::get<Param_Semantic>(param.semantic.value());
+
+    Param_Bind bind = boost::get<Param_Bind>(param.bind);
+
+    switch(semantic)
+    {
+    case Param_Semantic::Local:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 model = get_local(param, asset, cur_render);
+      set_mat4_parameter(bind, glm::value_ptr(model));
+      break;
+    }
+    case Param_Semantic::Model:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 model = get_model(param, asset, cur_render);
+      set_mat4_parameter(bind, glm::value_ptr(model));
+      break;
+    }
+    case Param_Semantic::View:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 view = get_view(cam);
+      set_mat4_parameter(bind, glm::value_ptr(view));
+      break;
+    }
+    case Param_Semantic::Projection:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 proj = camera_proj_matrix(cam);
+      set_mat4_parameter(bind, glm::value_ptr(proj));
+      break;
+    }
+    case Param_Semantic::Model_View:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 model = get_model(param, asset, cur_render);
+      glm::mat4 view = get_view(cam);
+      glm::mat4 view_model = view * model;
+      set_mat4_parameter(bind, glm::value_ptr(view_model));
+      break;
+    }
+    case Param_Semantic::Model_View_Projection:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 model = get_model(param, asset, cur_render);
+      glm::mat4 view = get_view(cam);
+      glm::mat4 proj = get_proj(cam);
+      glm::mat4 mat = proj * view * model;
+      set_mat4_parameter(bind, glm::value_ptr(mat));
+      break;
+    }
+    case Param_Semantic::Model_Inverse:
+    {
+      glm::mat4 model = get_model(param, asset, cur_render);
+      glm::mat4 mat = glm::inverse(model);
+      set_mat4_parameter(bind, glm::value_ptr(mat));
+      break;
+    }
+    case Param_Semantic::View_Inverse:
+    {
+      glm::mat4 view = get_view(cam);
+      glm::mat4 mat = glm::inverse(view);
+      set_mat4_parameter(bind, glm::value_ptr(mat));
+      break;
+    }
+    case Param_Semantic::Projection_Inverse:
+    {
+      glm::mat4 proj = get_proj(cam);
+      glm::mat4 mat = glm::inverse(proj);
+      set_mat4_parameter(bind, glm::value_ptr(mat));
+      break;
+    }
+    case Param_Semantic::Model_View_Inverse:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 model = get_model(param, asset, cur_render);
+      glm::mat4 view = get_view(cam);
+      glm::mat4 view_model = glm::inverse(view * model);
+      set_mat4_parameter(bind, glm::value_ptr(view_model));
+      break;
+    }
+    case Param_Semantic::Model_View_Projection_Inverse:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat4);
+      glm::mat4 model = get_model(param, asset, cur_render);
+      glm::mat4 view = get_view(cam);
+      glm::mat4 proj = get_proj(cam);
+      glm::mat4 mat = glm::inverse(proj * view * model);
+      set_mat4_parameter(bind, glm::value_ptr(mat));
+      break;
+    }
+    case Param_Semantic::Model_Inverse_Transpose:
+    {
+      glm::mat4 model = get_model(param, asset, cur_render);
+      glm::mat4 mat = glm::transpose(glm::inverse(model));
+      set_mat4_parameter(bind, glm::value_ptr(mat));
+      break;
+    }
+    case Param_Semantic::Model_View_Inverse_Transpose:
+    {
+      REDC_ASSERT(param.type == Param_Type::Mat3);
+      glm::mat4 model = get_model(param, asset, cur_render);
+      glm::mat4 view = get_view(cam);
+      glm::mat3 mat = glm::mat3(glm::transpose(glm::inverse(view * model)));
+      set_mat3_parameter(bind, glm::value_ptr(mat));
+      break;
+    }
+    default:
+      REDC_ASSERT_MSG(false, "Rendering code doesn't support this param "
+                      "semantic (%)", static_cast<unsigned int>(semantic));
+      break;
+    }
+  }
+
+  void render_asset(Asset const& asset, gfx::Camera const& camera,
+                    Rendering_State& cur_rendering_state)
+  {
+    // Figure out all the models of every mesh.
+    // TODO: This can be cached!
+    std::vector<Render_Params> render_params;
+
+    std::size_t node_i = 0;
+    for(auto node : asset.nodes)
+    {
+      glm::mat4 model = model_transformation(asset.nodes, node_i);
+      glm::mat4 local_mat = local_transformation(asset.nodes[node_i]);
+
+      // If there is a mesh associated with that node we need to render it
+      for(std::size_t mesh_ref : node.meshes)
+      {
+        Mesh const& mesh = asset.meshes[mesh_ref];
+        for(Primitive const& primitive : asset.meshes[mesh_ref].primitives)
+        {
+          Render_Params render;
+          render.mesh_repr = mesh.repr;
+          render.primitive = &primitive;
+          render.model = model;
+          render.local = local_mat;
+          render_params.push_back(std::move(render));
+        }
+      }
+
+      ++node_i;
+    }
+
+    // Sort by technique first and material second
+    std::sort(render_params.begin(), render_params.end(),
+    [&](auto const& lhs, auto const& rhs)
+    {
+      Primitive const& lhprim = *lhs.primitive;
+      Primitive const& rhprim = *rhs.primitive;
+
+      Material const& lhmat = asset.materials[lhprim.mat_i];
+      Material const& rhmat = asset.materials[rhprim.mat_i];
+
+      // If the techniques are the same:
+      if(lhmat.technique_i == rhmat.technique_i)
+      {
+        // Sort by material.
+        return lhprim.mat_i < rhprim.mat_i;
+      }
+      // Otherwise sort by technique.
+      return lhmat.technique_i < rhmat.technique_i;
+    });
+
+    // Render each set of parameters!
+    for(auto render : render_params)
+    {
+      Primitive const& primitive = *render.primitive;
+
+      Material const& mat = asset.materials[primitive.mat_i];
+      Technique const& technique = asset.techniques[mat.technique_i];
+
+      // This should be very efficient because of the above sort.
+      if(cur_rendering_state.cur_material_i != primitive.mat_i)
+      {
+        // Load the material of the primitive.
+
+        // Set this state for later.
+        cur_rendering_state.cur_material_i = primitive.mat_i;
+
+        if(cur_rendering_state.cur_technique_i != mat.technique_i)
+        {
+          // Load the technique of the material.
+
+          // Set this state for later.
+          cur_rendering_state.cur_technique_i = mat.technique_i;
+
+          // Use the shader program.
+          use_program(asset.programs[technique.program_i].repr);
+
+          // Now set each parameter
+          for(auto param_pair : technique.parameters)
+          {
+            // We only care about parameters (uniforms). Attributes will be set
+            // later on.
+            if(param_pair.second.bind.which() != 0) continue;
+
+            // We don't know how to do count
+            REDC_ASSERT_MSG(param_pair.second.count == 1,
+                            "technique parameter '%' must have count == 1",
+                            param_pair.first);
+
+            Param_Decl const& param = param_pair.second;
+
+            Param_Bind bind = boost::get<Param_Bind>(param.bind);
+
+            // If there isn't a semantic but it has a default value it will be
+            // static so it won't need be set again as long as another technique
+            // hasn't been used.
+            if(!param.semantic && param.default_value)
+            {
+              // Set the value if it has one
+              set_parameter(bind, param.type, param.default_value.value(),
+                            asset.textures);
+            }
+          }
+        }
+
+        // Override technique parameters with values in the material
+        for(auto parameter_pair : mat.parameters)
+        {
+          set_parameter(parameter_pair.first, parameter_pair.second,
+                        asset.textures);
+        }
+      }
+
+
+      // For each semantic technique parameter
+      // Is it possible for these to override material specific values? And is
+      // that a bug?
+      for(auto param_pair : technique.parameters)
+      {
+        Param_Decl const& param = param_pair.second;
+
+        // We can only do this for parameters that have a semantic
+        if(param.bind.which() != 0) continue;
+        if(!param.semantic) continue;
+
+        // Retrieve / calculate and set semantic value.
+        set_semantic_value(param, asset, render, camera);
+      }
+
+      // Format the mesh vao for this set of primitives.
+      // TODO: Cache this
+
+      use_mesh(render.mesh_repr);
+
+      std::size_t min_elements = 0;
+      for(auto attribute : primitive.attributes)
+      {
+        Attrib_Semantic semantic = attribute.first;
+        Accessor const& accessor = asset.accessors[attribute.second];
+
+        Attrib_Bind bind = get_attrib_semantic_bind(technique, semantic);
+
+        use_array_accessor(bind, asset.buffers[accessor.buf_i], accessor);
+
+        min_elements = std::min(min_elements, accessor.count);
+      }
+      if(primitive.indices)
+      {
+        Accessor const& indices = asset.accessors[primitive.indices.value()];
+        use_element_array_accessor(asset.buffers[indices.buf_i], indices);
+
+        draw_elements(indices.count, indices.data_type, primitive.mode,
+                      indices.offset);
+      }
+      else
+      {
+        draw_arrays(min_elements, primitive.mode);
+      }
+    }
   }
 }
