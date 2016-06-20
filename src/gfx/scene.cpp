@@ -551,10 +551,14 @@ namespace redc
   {
     switch(val)
     {
+    case TINYGLTF_TEXTURE_FORMAT_ALPHA:
+      return Texture_Format::Alpha;
+    case TINYGLTF_TEXTURE_FORMAT_RGB:
+      return Texture_Format::Rgb;
     case TINYGLTF_TEXTURE_FORMAT_RGBA:
       return Texture_Format::Rgba;
     default:
-      REDC_ASSERT_MSG(false, "Invalid texture format");
+      REDC_ASSERT_MSG(false, "Invalid / unsupported texture format");
       // This should never be reached.
       return Texture_Format::Rgba;
     };
