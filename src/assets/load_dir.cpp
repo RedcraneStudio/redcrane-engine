@@ -67,8 +67,6 @@ namespace redc { namespace assets
     // find a way to signal this error, it's not necessarily a logic bug, more
     // of an installation bug. Actually, I've convinced myself to crash
     // regardless.
-    bool should_not_get_here = false;
-    REDC_ASSERT_MSG(should_not_get_here, "Bad installation; could not find "
-                    "assets directory");
+    REDC_UNREACHABLE_MSG("Bad installation; could not find assets directory");
   }
 } }
