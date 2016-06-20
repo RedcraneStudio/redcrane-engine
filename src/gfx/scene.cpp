@@ -977,6 +977,34 @@ namespace redc
       Texture_Format format = to_texture_format(in_tex.format);
       Data_Type   data_type = to_data_type(in_tex.type);
 
+      switch(image_find->second.component)
+      {
+      case 1:
+        if(format != Texture_Format::Alpha)
+        {
+          log_w("Had to ignore texture format because it has one component");
+          format = Texture_Format::Alpha;
+        }
+        break;
+      case 3:
+        if(format != Texture_Format::Rgb)
+        {
+          log_w("Had to ignore texture format because it has three components");
+          format = Texture_Format::Rgb;
+        }
+        break;
+      case 4:
+        if(format != Texture_Format::Rgba)
+        {
+          log_w("Had to ignore texture format because it has four components");
+          format = Texture_Format::Rgba;
+        }
+        break;
+      default:
+        REDC_ASSERT_MSG(false, "Unsupported amount of image components");
+        break;
+      }
+
       // Upload the image data
       upload_image(textures[i], image_find->second.image, target, format,
                    image_find->second.width, image_find->second.height,
