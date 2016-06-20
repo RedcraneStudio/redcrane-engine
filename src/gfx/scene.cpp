@@ -49,6 +49,7 @@ namespace redc
     glBindTexture((GLenum) target, tex.tex);
     glTexImage2D((GLenum) target, 0, (GLenum) format, width, height, 0,
                  (GLenum) format, (GLenum) type, &data[0]);
+    glGenerateMipmap((GLenum) target);
   }
 
   void set_sampler(Texture_Repr tex, Texture_Target target)
