@@ -801,12 +801,15 @@ namespace redc
   void load_buffers(tinygltf::Scene const& scene, std::vector<Buf>& bufs,
                     std::vector<std::string>& buf_view_names)
   {
-
     // Upload all buffer views as GPU buffers
-    bufs = make_buffers(scene.bufferViews.size());
-    buf_view_names.reserve(bufs.size());
+    auto new_buf_reprs = make_buffers(scene.bufferViews.size());
 
-    std::size_t i = 0;
+    // Starting index
+    std::size_t i = bufs.size();
+    bufs.insert(bufs.end(), new_buf_reprs.begin(), new_buf_reprs.end());
+
+    buf_view_names.reserve(buf_view_names.size() + scene.bufferViews.size());
+
     for(auto pair : scene.bufferViews)
     {
       auto& buf_view = pair.second;
@@ -835,6 +838,8 @@ namespace redc
                               std::vector<Node>& nodes,
                               std::vector<std::string> const& mesh_names)
   {
+    nodes.reserve(nodes.size() + node_names.size());
+
     // This maps names to indexes into the nodes array parameter.
     std::unordered_map<std::string, std::size_t> node_indices;
     for(std::string const& name : node_names)
@@ -931,8 +936,8 @@ namespace redc
                       std::vector<std::string>& accessor_names,
                       std::vector<std::string> const& buf_names)
   {
-    accessors.reserve(scene.accessors.size());
-    accessor_names.reserve(scene.accessors.size());
+    accessors.reserve(accessors.size() + scene.accessors.size());
+    accessor_names.reserve(accessor_names.size() + scene.accessors.size());
 
     std::size_t i = 0;
     for(auto pair : scene.accessors)
@@ -968,13 +973,18 @@ namespace redc
                      std::vector<Texture_Repr>& textures,
                      std::vector<std::string>& texture_names)
   {
-    textures = make_textures(scene.textures.size());
-    texture_names.reserve(textures.size());
+    auto new_texture_reprs = make_textures(scene.textures.size());
+
+    // Starting index
+    std::size_t i = textures.size();
+    textures.insert(textures.end(), new_texture_reprs.begin(),
+                    new_texture_reprs.end());
+
+    texture_names.reserve(texture_names.size() + scene.textures.size());
 
     // We need this because we may be dealing with non-power-of-two RGB textures.
     set_pixel_store_unpack_alignment(1);
 
-    std::size_t i = 0;
     for(auto tex_pair : scene.textures)
     {
       auto& in_tex = tex_pair.second;
@@ -1037,8 +1047,8 @@ namespace redc
                       std::vector<std::string> const& tech_names,
                       std::vector<std::string> const& texture_names)
   {
-    materials.reserve(scene.materials.size());
-    material_names.reserve(scene.materials.size());
+    materials.reserve(materials.size() + scene.materials.size());
+    material_names.reserve(material_names.size() + scene.materials.size());
 
     for(auto mat_pair : scene.materials)
     {
@@ -1092,8 +1102,8 @@ namespace redc
                    std::vector<std::string> const& accessor_names,
                    std::vector<std::string> const& mat_names)
   {
-    meshes.reserve(scene.meshes.size());
-    mesh_names.reserve(scene.meshes.size());
+    meshes.reserve(meshes.size() + scene.meshes.size());
+    mesh_names.reserve(mesh_names.size() + scene.meshes.size());
 
     // Make one representation for each mesh
     auto mesh_reprs = make_mesh_reprs(scene.meshes.size());
@@ -1161,8 +1171,8 @@ namespace redc
                     std::vector<Shader>& shaders,
                     std::vector<std::string>& shader_names)
   {
-    shaders.reserve(scene.shaders.size());
-    shader_names.reserve(scene.shaders.size());
+    shaders.reserve(shaders.size() + scene.shaders.size());
+    shader_names.reserve(shader_names.size() + scene.shaders.size());
 
     for(auto shader_pair : scene.shaders)
     {
@@ -1215,8 +1225,8 @@ namespace redc
                      std::vector<Shader> const& shaders,
                      std::vector<std::string> const& shader_names)
   {
-    programs.reserve(scene.programs.size());
-    program_names.reserve(scene.programs.size());
+    programs.reserve(programs.size() + scene.programs.size());
+    program_names.reserve(program_names.size() + scene.programs.size());
 
     for(auto const& program_pair : scene.programs)
     {
@@ -1275,8 +1285,8 @@ namespace redc
                        std::vector<std::string> const& texture_names,
                        std::vector<std::string> const& node_names)
   {
-    techniques.reserve(scene.techniques.size());
-    technique_names.reserve(scene.techniques.size());
+    techniques.reserve(techniques.size() + scene.techniques.size());
+    technique_names.reserve(technique_names.size() + scene.techniques.size());
 
     for(auto const& technique_pair : scene.techniques)
     {
