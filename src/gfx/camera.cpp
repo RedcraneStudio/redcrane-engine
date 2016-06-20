@@ -98,11 +98,9 @@ namespace redc
       }
       return glm::mat4(1.0);
     }
-    Camera make_isometric_camera(IDriver const& driver) noexcept
+    Camera make_isometric_camera(Vec<int> win_size) noexcept
     {
       auto cam = Camera{};
-
-      auto win_size = driver.window_extents();
 
       cam.projection_mode = Camera_Type::Perspective;
       cam.perspective = Perspective_Cam_Params{glm::radians(50.0f),
@@ -116,11 +114,9 @@ namespace redc
 
       return cam;
     }
-    Camera make_fps_camera(IDriver const& driver) noexcept
+    Camera make_fps_camera(Vec<int> win_size) noexcept
     {
       auto cam = Camera{};
-
-      auto win_size = driver.window_extents();
 
       cam.projection_mode = Camera_Type::Perspective;
       cam.perspective = Perspective_Cam_Params{glm::radians(68.0f),

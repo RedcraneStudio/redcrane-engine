@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 
   driver.use_shader(*def_shade);
 
-  auto cam = gfx::make_fps_camera(driver);
+  auto cam = gfx::make_fps_camera(driver.window_extents());
   cam.perspective.fov = glm::radians(90.0f);
   gfx::use_camera(driver, cam);
 

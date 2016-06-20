@@ -96,7 +96,7 @@ extern "C"
   {
     // For the moment, this is the only kind of camera we support
 
-    std::function <gfx::Camera(gfx::IDriver const&)> cam_func;
+    std::function <gfx::Camera(Vec<int> size)> cam_func;
 
     if(strcmp(tp, "fps") == 0)
     {
@@ -118,7 +118,9 @@ extern "C"
     CHECK_ID(id);
 
     auto &obj = at_id(scene->objs, id);
-    obj.obj = Cam_Object{cam_func(*scene->engine->client->driver)};
+
+    auto win_size = scene->engine->client->driver->window_extents();
+    obj.obj = Cam_Object{cam_func(win_size)};
 
     // We can be sure at this point the id is non-zero (because of CHECK_ID).
 

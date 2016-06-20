@@ -83,10 +83,10 @@ namespace redc
       return cam.look_at.look - cam.look_at.eye;
     }
 
-    struct IDriver;
-    Camera make_isometric_camera(IDriver const& driver) noexcept;
-    Camera make_fps_camera(IDriver const& driver) noexcept;
+    Camera make_isometric_camera(Vec<int> win_size) noexcept;
+    Camera make_fps_camera(Vec<int> win_size) noexcept;
 
+    struct IDriver;
     void use_camera(IDriver& driver, Camera const& cam) noexcept;
 
     /*!
