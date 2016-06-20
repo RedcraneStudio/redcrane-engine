@@ -45,6 +45,11 @@ namespace redc
     return texs;
   }
 
+  void set_pixel_store_unpack_alignment(int align)
+  {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, align);
+  }
+
   void upload_image(Texture_Repr tex, std::vector<uint8_t> const& data,
                     Texture_Target target, Texture_Format format,
                     std::size_t width, std::size_t height, Data_Type type)
@@ -965,6 +970,9 @@ namespace redc
   {
     textures = make_textures(scene.textures.size());
     texture_names.reserve(textures.size());
+
+    // We need this because we may be dealing with non-power-of-two RGB textures.
+    set_pixel_store_unpack_alignment(1);
 
     std::size_t i = 0;
     for(auto tex_pair : scene.textures)
