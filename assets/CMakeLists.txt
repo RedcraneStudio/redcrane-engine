@@ -21,6 +21,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
 
                     obj/monkey.obj
 
+                    obj/library.obj
+
                     scene/default.json structure/structures.json
 
                     shader/basic/fs.glsl shader/basic/vs.glsl
@@ -43,6 +45,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     tex/sand.png
 
                     tex/crosshair.png
+
+                    tex/Floor_Light.png
 
                     cfg.ini
 

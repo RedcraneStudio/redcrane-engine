@@ -30,7 +30,7 @@ function client:init()
     self.shaders.envmap = rc.shader.load_shader("envmap");
     self.shaders.hud = rc.shader.load_shader("hud");
 
-    self.map = rc:load_map("map")
+    self.map = rc:load_map("library")
 
     -- HUD elements?
 end

@@ -33,7 +33,7 @@ namespace redc
     // Transform
     btTransform trans;
     trans.setIdentity();
-    trans.setOrigin(btVector3(0.0f, 4.5f, 0.0f));
+    trans.setOrigin(btVector3(3.0f, 3.0f, 0.0f));
     ghost_.setWorldTransform(trans);
 
     // Shape

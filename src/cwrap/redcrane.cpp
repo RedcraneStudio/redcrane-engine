@@ -238,6 +238,8 @@ namespace redc
   void Scene_Event_Visitor::operator()(Map_Loaded_Event const& event) const
   {
     scene_->active_map = event.map;
+    scene_->lightmap = load_texture(*scene_->engine->client->driver,
+                                    "../assets/tex/Floor_Light.png");
   }
 
   void Scene::process_event(event_t const& event)

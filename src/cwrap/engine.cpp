@@ -106,8 +106,8 @@ extern "C"
     df_shade->set_var_tag(view_tag, "view");
     df_shade->set_var_tag(proj_tag, "proj");
 
-    df_shade->set_var_tag(diffuse_tag, "dif");
-    df_shade->set_color(diffuse_tag, colors::white);
+    df_shade->set_var_tag(dif_tex_tag, "diffuse");
+    df_shade->set_integer(dif_tex_tag, 0);
 
     // TODO: Put this in a lua script so we don't have to do this.
     df_shade->tag_var("light_pos");

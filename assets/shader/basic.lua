@@ -19,8 +19,7 @@ vs_uniform{"mat4", "view"}
 vs_uniform{"mat4", "model"}
 
 fs_uniform{"vec3", "light_pos"}
-fs_uniform{"vec4", "diffuse", "dif"}
-fs_uniform{"sampler2D", "texture", "tex"}
+fs_uniform{"sampler2D", "diffuse", "dif"}
 
 vs_code{[[
 void main()
@@ -39,13 +38,11 @@ void main()
 fs_code{[[
 void main()
 {
-  // diffuse_out = texture(tex, uv) * dif;
-  diffuse_out = dif;
-  // diffuse_out.a = 1.0;
+  diffuse_out = texture(dif, uv);
 
-  float light_intensity = dot(normalize(world_normal),
-                              normalize(light_pos - vec3(world_pos)));
-  float ambient_intensity = .01;
-  diffuse_out.rgb *= max(light_intensity, ambient_intensity);
+  //float light_intensity = dot(normalize(world_normal),
+  //                            normalize(light_pos - vec3(world_pos)));
+  //float ambient_intensity = .01;
+  //diffuse_out.rgb *= max(light_intensity, ambient_intensity);
 }
 ]]}

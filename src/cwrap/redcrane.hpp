@@ -226,6 +226,7 @@ namespace redc
     // Should this be a peer lock? Not that it actually be! Maps are completely
     // referenced in the engine?
     observer_ptr<Map> active_map;
+    std::unique_ptr<Texture> lightmap;
 
     std::unique_ptr<Texture> crosshair;
     std::unique_ptr<Mesh> ch_mesh;

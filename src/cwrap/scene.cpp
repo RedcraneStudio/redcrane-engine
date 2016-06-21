@@ -34,7 +34,7 @@ extern "C"
     // TODO: Fix filename
     sc->get()->crosshair = gfx::load_texture(*engine->client->driver,
                                              "../assets/tex/crosshair.png");
-    engine->client->driver->bind_texture(*sc->get()->crosshair, 0);
+    engine->client->driver->bind_texture(*sc->get()->crosshair, 1);
 
     {
       // Set up the mesh shader
@@ -81,7 +81,7 @@ extern "C"
                                                 -1.0f, 1.0f));
 
       sc->get()->ch_shader->set_var_tag(gfx::tags::dif_tex_tag, "tex");
-      sc->get()->ch_shader->set_integer(gfx::tags::dif_tex_tag, 0);
+      sc->get()->ch_shader->set_integer(gfx::tags::dif_tex_tag, 1);
     }
     engine->client->scenes.push_back(sc->peer());
     return sc;
@@ -317,6 +317,8 @@ extern "C"
                                          scene->active_camera).obj);
 
     gfx::use_camera(*scene->engine->client->driver, active_camera.cam);
+
+    scene->engine->client->driver->bind_texture(*scene->lightmap, 0);
 
     default_shader->set_mat4(model_tag, glm::mat4(1.0f));
     gfx::render_chunk(scene->active_map->render->chunk);
