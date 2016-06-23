@@ -24,13 +24,16 @@ namespace redc
 
     tinygltf::TinyGLTFLoader loader;
 
-    if(!loader.LoadASCIIFromFile(&scene, &err, name))
+    if(!loader.LoadASCIIFromFile(&scene, &err, name,
+                                 tinygltf::NO_REQUIRE))
     {
+      // There was a failure loading
       log_e("Error in '%': %", name, err);
       return boost::none;
     }
-    else
+    else if(err.size() > 0)
     {
+      // There was information, but no failure.
       log_i("Information loading '%': %", name, err);
     }
 
