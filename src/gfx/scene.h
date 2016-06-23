@@ -376,9 +376,24 @@ namespace redc
 
     std::vector<Mesh> meshes;
     std::vector<Node> nodes;
+
+    std::vector<std::string> buf_names;
+    std::vector<std::string> texture_names;
+
+    std::vector<std::string> accessor_names;
+
+    std::vector<std::string> shader_names;
+    std::vector<std::string> program_names;
+    std::vector<std::string> technique_names;
+
+    std::vector<std::string> material_names;
+
+    std::vector<std::string> mesh_names;
+    std::vector<std::string> node_names;
   };
 
   Asset load_asset(tinygltf::Scene const& scene);
+  void append_to_asset(Asset& asset, tinygltf::Scene const& scene);
 
   struct Rendering_State
   {

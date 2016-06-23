@@ -466,9 +466,11 @@ namespace redc
                                 std::string str,
                                 Args&&... msg_args)
   {
-    auto find_res = std::find(strs.begin(), strs.end(), str);
-    REDC_ASSERT_MSG(find_res != strs.end(), std::forward<Args>(msg_args)...);
-    return find_res - strs.begin();
+    // Search in reverse, so that newer things with identical names will be
+    // chosen first.
+    auto find_res = std::find(strs.rbegin(), strs.rend(), str);
+    REDC_ASSERT_MSG(find_res != strs.rend(), std::forward<Args>(msg_args)...);
+    return strs.size() - 1 - (find_res - strs.rbegin());
   }
 
   // = Conversion functions (from tinygltfloader to our enums).
@@ -835,15 +837,22 @@ namespace redc
 
   void load_nodes_given_names(tinygltf::Scene const& scene,
                               std::vector<std::string> const& node_names,
+			      std::size_t node_offset,
                               std::vector<Node>& nodes,
                               std::vector<std::string> const& mesh_names)
   {
-    nodes.reserve(nodes.size() + node_names.size());
+    nodes.reserve(nodes.size() + node_names.size() - node_offset);
 
     // This maps names to indexes into the nodes array parameter.
     std::unordered_map<std::string, std::size_t> node_indices;
-    for(std::string const& name : node_names)
+
+    // Start at a given offset in the node names vector
+    auto name_iter = node_names.begin() + node_offset;
+    auto name_iter_end = node_names.end();
+    for(; name_iter != name_iter_end; ++name_iter)
     {
+      std::string const& name = *name_iter;
+
       auto node_find = scene.nodes.find(name);
       REDC_ASSERT(node_find != scene.nodes.end());
       auto const& in_node = node_find->second;
@@ -880,11 +889,9 @@ namespace redc
       // Add any references to meshes
       for(auto req_mesh : in_node.meshes)
       {
-        auto mesh_find = std::find(mesh_names.begin(), mesh_names.end(),
-                                   req_mesh);
-        REDC_ASSERT_MSG(mesh_find != mesh_names.end(),
-                        "Node references invalid mesh '%'", req_mesh);
-        node.meshes.push_back(mesh_find - mesh_names.begin());
+	auto mesh_index = find_string_index(mesh_names, req_mesh,
+		 			    "Node references invalid mesh");
+	node.meshes.push_back(mesh_index);
       }
 
       // Add this node to the main vector of nodes
@@ -1059,8 +1066,10 @@ namespace redc
       Material mat;
 
       // Look up based on the name.
-      mat.technique_i = find_string_index(tech_names, in_mat.technique,
-                        "Material references invalid semantic");
+      mat.technique_i =
+        find_string_index(tech_names, in_mat.technique,
+                          "Material references invalid technique '%'",
+                          in_mat.technique);
 
       auto& technique = techs[mat.technique_i];
 
@@ -1390,53 +1399,52 @@ namespace redc
     }
   }
 
-  void load_node_names(tinygltf::Scene const& scene,
-                       std::vector<std::string>& node_names)
+  std::size_t load_node_names(tinygltf::Scene const& scene,
+                              std::vector<std::string>& node_names)
   {
+    std::size_t initial_offset = node_names.size();
     for(auto node_pair : scene.nodes)
     {
       node_names.push_back(node_pair.first);
     }
+    return initial_offset;
   }
 
   Asset load_asset(tinygltf::Scene const& scene)
   {
     Asset ret;
+    append_to_asset(ret, scene);
+    return ret;
+  }
+  void append_to_asset(Asset& ret, tinygltf::Scene const& scene)
+  {
+    load_buffers(scene, ret.buffers, ret.buf_names);
 
-    std::vector<std::string> buf_view_names;
-    load_buffers(scene, ret.buffers, buf_view_names);
+    load_accessors(scene, ret.accessors, ret.accessor_names, ret.buf_names);
 
-    std::vector<std::string> accessor_names;
-    load_accessors(scene, ret.accessors, accessor_names, buf_view_names);
-
-    std::vector<std::string> texture_names;
-    load_textures(scene, ret.textures, texture_names);
+    load_textures(scene, ret.textures, ret.texture_names);
 
     // Load shaders and programs
 
-    std::vector<std::string> shader_names;
-    load_shaders(scene, ret.shaders, shader_names);
+    load_shaders(scene, ret.shaders, ret.shader_names);
 
-    std::vector<std::string> program_names;
-    load_programs(scene, ret.programs, program_names, ret.shaders,shader_names);
+    load_programs(scene, ret.programs, ret.program_names, ret.shaders,
+		  ret.shader_names);
 
-    std::vector<std::string> node_names;
-    load_node_names(scene, node_names);
+    std::size_t node_off = load_node_names(scene, ret.node_names);
 
-    std::vector<std::string> technique_names;
-    load_techniques(scene, ret.techniques, technique_names, ret.programs,
-                    program_names, texture_names, node_names);
+    load_techniques(scene, ret.techniques, ret.technique_names, ret.programs,
+                    ret.program_names, ret.texture_names, ret.node_names);
 
-    std::vector<std::string> material_names;
-    load_materials(scene, ret.materials, material_names, ret.techniques,
-                   technique_names, texture_names);
+    load_materials(scene, ret.materials, ret.material_names, ret.techniques,
+                   ret.technique_names, ret.texture_names);
 
-    std::vector<std::string> mesh_names;
-    load_meshes(scene, ret.meshes, mesh_names, accessor_names, material_names);
+    load_meshes(scene, ret.meshes, ret.mesh_names, ret.accessor_names,
+		ret.material_names);
 
     // Load nodes
-    load_nodes_given_names(scene, node_names, ret.nodes, mesh_names);
-    return ret;
+    load_nodes_given_names(scene, ret.node_names, node_off, ret.nodes,
+			   ret.mesh_names);
   }
 
   glm::mat4 local_transformation(Node const& node)
