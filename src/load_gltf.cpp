@@ -60,8 +60,6 @@ int main(int argc, char** argv)
 
   redc::gfx::Camera cam = redc::gfx::make_fps_camera({1000,1000});
 
-  cam.fp.pos.z = 10.0f;
-
   glEnable(GL_DEPTH_TEST);
 
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
