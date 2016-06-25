@@ -211,6 +211,10 @@ namespace redc
   // already been set.
   void use_array_accessor(Attrib_Bind bind, Buf buf, Accessor const& acc)
   {
+    // Usually this means the attribute is not actually being used in the shader
+    // and can be safely ignored.
+    if(bind.loc == -1) return;
+
     // We have some data
     glBindBuffer(GL_ARRAY_BUFFER, buf.buf);
 
