@@ -23,6 +23,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
 
                     obj/library.obj
 
+                    gltf/cel.gltf gltf/cel_solid.vs gltf/cel_solid.fs
+
                     scene/default.json structure/structures.json
 
                     shader/basic/fs.glsl shader/basic/vs.glsl
