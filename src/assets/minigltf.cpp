@@ -17,10 +17,9 @@
 
 namespace redc
 {
-  boost::optional<tinygltf::Scene> load_gltf_file(std::string name)
+  bool load_gltf_file(Scene& scene, std::string const& name)
   {
     std::string err;
-    tinygltf::Scene scene;
 
     tinygltf::TinyGLTFLoader loader;
 
@@ -29,7 +28,7 @@ namespace redc
     {
       // There was a failure loading
       log_e("Error in '%': %", name, err);
-      return boost::none;
+      return false;
     }
     else if(err.size() > 0)
     {
@@ -37,6 +36,18 @@ namespace redc
       log_i("Information loading '%': %", name, err);
     }
 
-    return std::move(scene);
+    return true;
+  }
+  boost::optional<Scene> load_gltf_file(std::string const& name)
+  {
+    boost::optional<Scene> scene = Scene{};
+    if(load_gltf_file(*scene.get_ptr(), name))
+    {
+      return scene;
+    }
+    else
+    {
+      return boost::none;
+    }
   }
 }

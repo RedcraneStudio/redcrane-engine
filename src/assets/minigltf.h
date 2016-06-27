@@ -13,5 +13,9 @@ namespace redc
 {
   namespace fs = boost::filesystem;
 
-  boost::optional<tinygltf::Scene> load_gltf_file(std::string name);
+  //! An asset in CPU memory, contains information verbatim from gltf file.
+  using Scene = tinygltf::Scene;
+
+  bool load_gltf_file(Scene& scene, std::string const& name);
+  boost::optional<Scene> load_gltf_file(std::string const& name);
 }
