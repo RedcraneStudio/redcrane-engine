@@ -274,8 +274,7 @@ namespace redc
     // Optional node to take transformation from
     boost::optional<Node_Ref> node;
 
-    // Should be 1 unless we are dealing with an array. I don't think this can
-    // be more than one if we are dealing with an attribute.
+    // Must be one for attributes
     int count;
 
     // Value and type of the parameter. I chose not to put a Parameter here and
