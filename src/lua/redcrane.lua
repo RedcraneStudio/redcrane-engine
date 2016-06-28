@@ -30,6 +30,10 @@ function rc:step()
     return ffi.C.redc_step_engine(self.engine)
 end
 
+function rc:render()
+    return ffi.C.redc_render_engine(self.engine)
+end
+
 function rc:running()
     return ffi.C.redc_running(self.engine)
 end
@@ -44,6 +48,24 @@ end
 
 function rc:load_map(filename)
     return ffi.C.redc_map_load(self.engine, filename)
+end
+function rc:load_hud(filename)
+    return ffi.C.redc_hud_load(self.engine, filename)
+end
+function rc:load_skin(filename)
+    return ffi.C.redc_skin_load(self.engine, filename)
+end
+
+function rc:load_game_set(set)
+    if set.map then
+        rc:load_map(set.map)
+    end
+    if set.hud then
+        rc:load_hud(set.hud)
+    end
+    if set.skin then
+        rc:load_skin(set.skin)
+    end
 end
 
 -- Logging functions
