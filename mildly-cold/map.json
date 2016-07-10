@@ -1,0 +1,57 @@
+{
+    "name": "Library",
+    "asset": "Library.gltf",
+    "players": 1,
+    "spawn": {
+        "positions": [
+            [0.0, 1.0, 0.0]
+        ],
+        "choice": "random"
+    },
+    "collision_mesh": {
+        "position": "accessor_355",
+        "indices": "accessor_230"
+    },
+    "physics": {
+        "gravity": [0.0f, -9.81, 0.0f]
+    },
+    "entities": {
+        "battery": {
+            "asset": "battery.gltf",
+            "phystype": "rigid",
+            "events": [
+                {
+                    "type": "collision",
+                    "with": "entity",
+                    "etype": "player",
+                    "action": [
+                        {
+                            "type": "increment_property",
+                            "entity": "other",
+                            "prop": "battery_count"
+                        }
+                    ]
+                }
+            ]
+        },
+        "fusebox": {
+            "asset": "fusebox.gltf",
+            "phystype": "static",
+            "events": [
+                {
+                    "type": "collision",
+                    "with": "entity",
+                    "etype": "grapplegun",
+                    "action": [
+                        {
+                            "type": "script",
+                            "source": "function"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "instances": {
+    }
+}

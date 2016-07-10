@@ -1,0 +1,26 @@
+{
+    "Battery_Count": {
+        "type": "value",
+        "relative": {
+            "horizontal": "left",
+            "vertical": "bottom"
+        },
+        "index": 0
+    },
+    "Power": {
+        "type": "meter",
+        "relative": {
+            "horizontal": "left",
+            "vertical": "bottom"
+        },
+        "index": 1
+    },
+    "Health": {
+        "type": "meter",
+        "relative": {
+            "horizontal": "left",
+            "vertical": "bottom"
+        },
+        "index": 2
+    }
+}

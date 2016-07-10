@@ -1,0 +1,14 @@
+{
+    "meta": {
+        "inherit": "base-renderable",
+    }
+    "Charge": {
+        "dtype": "float",
+        "min": 0.0,
+        "max": 0.0,
+        "listener": "fusebox-charge-listener"
+    }
+    "Activation": {
+        "dtype": "script"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "Battery": {
+        "dtype": "entity",
+        "nullable": "true"
+    }
+}

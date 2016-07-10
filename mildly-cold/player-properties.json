@@ -1,0 +1,11 @@
+{
+    "Battery_Count": {
+        "dtype": "int",
+        "min": 0
+    },
+    "Health": {
+        "dtype": "int",
+        "min": 0,
+        "max": 100
+    }
+}
