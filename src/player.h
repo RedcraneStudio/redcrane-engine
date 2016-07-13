@@ -25,6 +25,17 @@ namespace redc
     Grounded, Jumping, Flying
   };
 
+  // The player is made up of shoes, half a sphere, a cylinder and another
+  // half-sphere. The sum of the last three members should be equal to the
+  // first.
+  struct Player_Dimensions
+  {
+    float total_height;
+    float radius;
+    float shoe_size;
+    float capsule_height;
+  };
+
   struct Player_Controller : public btActionInterface
   {
     Player_Controller();
@@ -43,14 +54,22 @@ namespace redc
     void apply_delta_yaw(double dv);
     void apply_delta_pitch(double dv);
 
+    bool is_crouched() const;
+
+    Player_Dimensions get_player_dimensions() const;
+    float get_player_speed() const;
+    float get_player_mass() const;
+
     glm::vec3 get_cam_pos() const;
 
     Player_State state = Player_State::Grounded;
   private:
     bool inited_;
     btPairCachingGhostObject ghost_;
-    btCapsuleShape shape_;
     btGhostPairCallback ghost_cb_;
+
+    btCapsuleShape shape_;
+    btCapsuleShape crouch_shape_;
 
     Input* input_ref_;
 

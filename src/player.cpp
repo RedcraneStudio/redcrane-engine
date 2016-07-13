@@ -2,22 +2,41 @@
 
 #include "common/log.h"
 
-// Average male dimensions
-#define PLAYER_HEIGHT 1.73f
+// All of this is in meters
+// My own height, slightly smaller radius
+#define PLAYER_HEIGHT 1.80f
 #define PLAYER_RADIUS 0.40f
 
-#define PLAYER_CAPSULE_HEIGHT (PLAYER_HEIGHT - 2 * PLAYER_RADIUS)
-#define PLAYER_CAPSULE_RADIUS PLAYER_RADIUS
+// Height of things the player can step over easily, this is the size of the ray
+// and is part of the player's total height.
+#define PLAYER_SHOE_SIZE 0.15f
+
+#define PLAYER_CAPSULE_HEIGHT \
+  (PLAYER_HEIGHT - 2 * PLAYER_RADIUS - PLAYER_SHOE_SIZE)
+
+// Yer average Slavs' Squating
+#define CROUCHED_HEIGHT 1.1f
+#define CROUCHED_CAPSULE_HEIGHT \
+  (CROUCHED_HEIGHT - 2 * PLAYER_RADIUS - PLAYER_SHOE_SIZE)
+
+// Make sure these values aren't stupid
+static_assert(PLAYER_CAPSULE_HEIGHT > 0.0f,
+              "Standing player must have height");
+static_assert(CROUCHED_CAPSULE_HEIGHT > 0.0f,
+              "Crouched player must have height");
+
+#define PLAYER_SPEED 2.0f
+#define CROUCHED_SPEED 0.5f
 
 // 78 kg mass person
 #define PLAYER_MASS 78.0f
 
 namespace redc
 {
-  Player_Controller::Player_Controller() : inited_(false), ghost_(),
-                                           shape_(PLAYER_CAPSULE_RADIUS,
-                                                  PLAYER_CAPSULE_HEIGHT),
-                                           jump_velocity_()
+  Player_Controller::Player_Controller()
+    : inited_(false), ghost_(), shape_(PLAYER_RADIUS, PLAYER_CAPSULE_HEIGHT),
+      crouch_shape_(PLAYER_RADIUS, CROUCHED_CAPSULE_HEIGHT),
+      jump_velocity_()
   {
     // Initialize velocity and impulse to zero
     jump_velocity_.setZero();
@@ -96,14 +115,16 @@ namespace redc
       // something we should consider the player on the ground, that means we no
       // longer have to apply gravity, for example.
 
-      // How far should the ray extend past the bottom of the ghost object.
-      constexpr float shoe_size = 0.1f;
+      // Start at the bottom of the player's capsule and continue till the of
+      // the player's "shoes."
+
+      const Player_Dimensions dim = get_player_dimensions();
 
       auto start_pos = pos;
-      start_pos.setY(pos.getY() - PLAYER_HEIGHT / 2.0f);
+      start_pos.setY(pos.getY() - dim.capsule_height / 2.0f - PLAYER_RADIUS);
 
       auto end_pos = pos;
-      end_pos.setY(start_pos.getY() - shoe_size);
+      end_pos.setY(start_pos.getY() - PLAYER_SHOE_SIZE);
 
       // Redundancy whhyyyyy
       btCollisionWorld::ClosestRayResultCallback ground_ray(start_pos, end_pos);
@@ -174,6 +195,16 @@ namespace redc
         local_dpos.setX(+1.0f);
       }
 
+      // Crouch is down and we are not currently crouching.
+      if(!input_ref_->crouch && is_crouched())
+      {
+        ghost_.setCollisionShape(&shape_);
+      }
+      else if(input_ref_->crouch && !is_crouched())
+      {
+        ghost_.setCollisionShape(&crouch_shape_);
+      }
+
       if(input_ref_->jump && state == Player_State::Grounded)
       {
         // If we are on the ground, apply an impulse to the player upward (ie
@@ -219,7 +250,7 @@ namespace redc
         movement.setY(-partial_dot / active_normal.getY());
 
         // Normalize and scale
-        movement.normalize() *= .1f;
+        movement.normalize() *= get_player_speed() * dt;
 
         // Cast a ray from the character's position to the position plus the
         // movement vector. This is obviously where the player is trying to go.
@@ -333,8 +364,10 @@ namespace redc
     // Do this by calling the broadphase's setAabb with the moved AABB, this
     // will update the broadphase paircache and the ghostobject's internal
     // paircache at the same time. /BW
+
     btVector3 minAabb, maxAabb;
-    shape_.getAabb(ghost_.getWorldTransform(), minAabb, maxAabb);
+    ghost_.getCollisionShape()->getAabb(ghost_.getWorldTransform(),
+                                        minAabb, maxAabb);
     world->getBroadphase()->setAabb(ghost_.getBroadphaseHandle(),
                                     minAabb, maxAabb, world->getDispatcher());
 
@@ -441,18 +474,51 @@ namespace redc
     pitch_ *= btQuaternion(0.0f, -pitch, 0.0f);
   }
 
+  bool Player_Controller::is_crouched() const
+  {
+    return ghost_.getCollisionShape() == &crouch_shape_;
+  }
+  Player_Dimensions Player_Controller::get_player_dimensions() const
+  {
+    Player_Dimensions ret;
+
+    ret.total_height = is_crouched() ? CROUCHED_HEIGHT : PLAYER_HEIGHT;
+    ret.radius = PLAYER_RADIUS;
+    ret.shoe_size = PLAYER_SHOE_SIZE;
+    ret.capsule_height =
+      is_crouched() ? CROUCHED_CAPSULE_HEIGHT : PLAYER_CAPSULE_HEIGHT;
+
+    return ret;
+  }
+  // These two functions could be constexpr, but I don't want that part of the
+  // interface.
+  float Player_Controller::get_player_speed() const
+  {
+    if(is_crouched()) return CROUCHED_SPEED;
+    else return PLAYER_SPEED;
+  }
+  float Player_Controller::get_player_mass() const
+  {
+    return PLAYER_MASS;
+  }
+
   glm::vec3 Player_Controller::get_cam_pos() const
   {
     btTransform trans;
     this->getWorldTransform(trans);
-    auto origin = trans.getOrigin();
 
-    // The average person is 7.5 head sizes
-    constexpr auto head_size = PLAYER_HEIGHT / 7.5f;
+    const btVector3 origin = trans.getOrigin();
 
-    // We are at the center of the body, ie 7.5 / 2 or 3.75 heads from the
-    // ground, go up 3.50 heads so that we end up in the middle of the topmost
-    // head, which is obviously just the players head! (3.75 + 3.50 = 7.25)
-    return {origin.x(), origin.y() + 3.50f * head_size, origin.z()};
+    // Be at the player's height.
+    const Player_Dimensions dim = get_player_dimensions();
+
+    // Find the y-value of the floor beneath the player, given the center point
+    // of the capsule.
+    const float floor_y = origin.getY() -
+      (dim.capsule_height / 2.0f + dim.radius + dim.shoe_size);
+
+    // Put the camera at the top of the player's head
+
+    return {origin.x(), floor_y + dim.total_height, origin.z()};
   }
 }
