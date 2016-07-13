@@ -52,6 +52,7 @@ namespace redc
     ret |= check_button(event, cfg.strafe_right,     input.strafe_right);
 
     ret |= check_button(event, cfg.jump,             input.jump);
+    ret |= check_button(event, cfg.crouch,           input.crouch);
 
     ret |= check_button(event, cfg.primary_attack,   input.primary_attack);
     ret |= check_button(event, cfg.secondary_attack, input.secondary_attack);
@@ -78,6 +79,7 @@ namespace redc
     SET_KEY(strafe_right, SDL_SCANCODE_D);
 
     SET_KEY(jump, SDL_SCANCODE_SPACE);
+    SET_KEY(crouch, SDL_SCANCODE_LCTRL);
 
     // Three-button mouse
     SET_MBUTTON(primary_attack, SDL_BUTTON_LEFT);

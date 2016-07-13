@@ -17,12 +17,13 @@ namespace redc
     bool strafe_right;
 
     bool jump;
+    bool crouch;
 
     bool primary_attack;
     bool secondary_attack;
     bool tertiary_attack;
 
-    MSGPACK_DEFINE(forward, backward, strafe_left, strafe_right, jump,
+    MSGPACK_DEFINE(forward, backward, strafe_left, strafe_right, jump, crouch,
                    primary_attack, secondary_attack, tertiary_attack);
   };
 
@@ -49,6 +50,7 @@ namespace redc
     Button strafe_right;
 
     Button jump;
+    Button crouch;
 
     Button primary_attack;
     Button secondary_attack;
