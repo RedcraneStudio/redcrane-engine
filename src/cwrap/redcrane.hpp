@@ -40,7 +40,7 @@
 #include "../player.h"
 #include "../server.h"
 #include "../event.h"
-#include "../reactor.h"
+#include "../common/reactor.h"
 
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H

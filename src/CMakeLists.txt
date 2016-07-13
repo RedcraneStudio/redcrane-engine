@@ -94,7 +94,6 @@ add_executable(redc main.cpp minilua.cpp sdl_helper.cpp player.cpp
                     cwrap/engine.cpp cwrap/mesh.cpp cwrap/scene.cpp
                     cwrap/shader.cpp cwrap/redcrane.cpp cwrap/map.cpp
                     cwrap/server.cpp cwrap/texture.cpp server.cpp map.cpp
-                    reactor.cpp
                     ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_config_sandbox_BYTECODE}
                     ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_sandbox_BYTECODE}
                     ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_run_engine_BYTECODE}
