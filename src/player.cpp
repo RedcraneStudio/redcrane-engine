@@ -4,8 +4,8 @@
 
 // All of this is in meters
 // My own height, slightly smaller radius
-#define PLAYER_HEIGHT 1.80f
-#define PLAYER_RADIUS 0.40f
+#define PLAYER_HEIGHT 1.63f
+#define PLAYER_RADIUS 0.24f
 
 // Height of things the player can step over easily, this is the size of the ray
 // and is part of the player's total height.
@@ -25,7 +25,7 @@ static_assert(PLAYER_CAPSULE_HEIGHT > 0.0f,
 static_assert(CROUCHED_CAPSULE_HEIGHT > 0.0f,
               "Crouched player must have height");
 
-#define PLAYER_SPEED 2.0f
+#define PLAYER_SPEED 1.0f
 #define CROUCHED_SPEED 0.5f
 
 // 78 kg mass person
