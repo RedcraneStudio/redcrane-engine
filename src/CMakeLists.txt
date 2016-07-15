@@ -37,6 +37,8 @@ add_subdirectory(terrain)
 add_subdirectory(collisionlib)
 add_subdirectory(gen)
 
+add_subdirectory(effects)
+
 find_package(Bullet REQUIRED)
 
 function(lua_compile_bytecode srcfile outfile)
@@ -114,7 +116,7 @@ target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
                                        ${BULLET_INCLUDE_DIRS})
 
 target_link_libraries(redc PUBLIC commonlib netlib gfxlib uselib fpslib
-                                  inputlib
+                                  inputlib effectslib
                                   ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
                                   ${Boost_FILESYSTEM_LIBRARY}

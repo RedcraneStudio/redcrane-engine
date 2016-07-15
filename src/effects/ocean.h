@@ -19,7 +19,7 @@ namespace redc { namespace effects
 
   struct Ocean_Effect : public gfx::Effect
   {
-    void init(gfx::IDriver& driver, po::variables_map const& vm) noexcept;
+    void init(gfx::IDriver& driver) noexcept;
     void render(gfx::IDriver& driver, gfx::Camera const& cam) noexcept;
 
     void set_ocean_gen_parameters(Ocean_Gen const& gen) noexcept;
@@ -40,13 +40,6 @@ namespace redc { namespace effects
     bool needs_gen_params_update_ = false;
     Ocean_Gen gen_params_;
 
-    int projector_loc_ = 0;
-    int time_loc_ = 0;
-
-    int cam_pos_loc_ = 0;
-    int light_dir_loc_ = 0;
-
     std::chrono::high_resolution_clock::time_point start_;
   };
 } }
-

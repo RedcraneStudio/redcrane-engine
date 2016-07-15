@@ -21,6 +21,8 @@ namespace redc
 
       constexpr const char* dif_tex_tag = "dif_tex";
       constexpr const char* bump_tex_tag = "bump_tex";
+
+      constexpr const char* envmap_tag = "envmap";
     }
     struct Shader
     {

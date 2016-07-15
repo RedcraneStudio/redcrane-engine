@@ -6,16 +6,15 @@
 #include "../use/texture.h"
 namespace redc { namespace effects
 {
-  void Envmap_Effect::init(gfx::IDriver& driver,
-                           po::variables_map const&) noexcept
+  void Envmap_Effect::init(gfx::IDriver& driver) noexcept
   {
     // Load environment map
-    envmap_ = gfx::load_cubemap(driver, "tex/envmap/front.png",
-                                "tex/envmap/back.png",
-                                "tex/envmap/right.png",
-                                "tex/envmap/left.png",
-                                "tex/envmap/up.png",
-                                "tex/envmap/down.png");
+    envmap_ = gfx::load_cubemap(driver, "../assets/tex/envmap/front.png",
+                                "../assets/tex/envmap/back.png",
+                                "../assets/tex/envmap/right.png",
+                                "../assets/tex/envmap/left.png",
+                                "../assets/tex/envmap/up.png",
+                                "../assets/tex/envmap/down.png");
 
     std::vector<float> cube_data =
     {
@@ -74,12 +73,15 @@ namespace redc { namespace effects
                        &cube_data[0]);
 
     shader_ = driver.make_shader_repr();
-    shader_->load_vertex_part("shader/envmap/vs.glsl");
-    shader_->load_fragment_part("shader/envmap/fs.glsl");
+    load_vertex_file(*shader_, "../assets/shader/envmap/vs.glsl");
+    load_fragment_file(*shader_, "../assets/shader/envmap/fs.glsl");
+    shader_->link();
 
-    view_loc_ = shader_->get_location("view");
-    proj_loc_ = shader_->get_location("proj");
-    shader_->set_integer(shader_->get_location("envmap"), 0);
+    shader_->set_var_tag(gfx::tags::view_tag, "view");
+    shader_->set_var_tag(gfx::tags::proj_tag, "proj");
+
+    shader_->set_var_tag(gfx::tags::envmap_tag, "envmap");
+    shader_->set_integer(gfx::tags::envmap_tag, 0);
 
     elements_ = cube_data.size() / 3;
   }
@@ -95,8 +97,8 @@ namespace redc { namespace effects
     glm::mat4 env_camera_mat = camera_view_matrix(cam);
     // Zero out the translation
     env_camera_mat[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    shader_->set_matrix(view_loc_, env_camera_mat);
-    shader_->set_matrix(proj_loc_, camera_proj_matrix(cam));
+    shader_->set_mat4(gfx::tags::view_tag, env_camera_mat);
+    shader_->set_mat4(gfx::tags::proj_tag, camera_proj_matrix(cam));
 
     driver.write_depth(false);
     driver.depth_test(false);
