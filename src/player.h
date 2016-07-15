@@ -60,6 +60,7 @@ namespace redc
     float get_player_speed() const;
     float get_player_mass() const;
 
+    glm::vec3 get_player_pos() const;
     glm::vec3 get_cam_pos() const;
 
     Player_State state = Player_State::Grounded;

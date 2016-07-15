@@ -502,7 +502,7 @@ namespace redc
     return PLAYER_MASS;
   }
 
-  glm::vec3 Player_Controller::get_cam_pos() const
+  glm::vec3 Player_Controller::get_player_pos() const
   {
     btTransform trans;
     this->getWorldTransform(trans);
@@ -517,8 +517,14 @@ namespace redc
     const float floor_y = origin.getY() -
       (dim.capsule_height / 2.0f + dim.radius + dim.shoe_size);
 
-    // Put the camera at the top of the player's head
+    // Return the point the player is standing on
+    return {origin.getX(), floor_y, origin.getZ()};
+  }
+  glm::vec3 Player_Controller::get_cam_pos() const
+  {
+    const glm::vec3 player_pos = get_player_pos();
+    const Player_Dimensions dim = get_player_dimensions();
 
-    return {origin.x(), floor_y + dim.total_height, origin.z()};
+    return {player_pos.x, player_pos.y + dim.total_height, player_pos.z};
   }
 }
