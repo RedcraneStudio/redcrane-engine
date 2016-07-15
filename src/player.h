@@ -9,6 +9,8 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include "SDL.h"
 #include "input/input.h"
+#include "common/reactor.h"
+#include "common/timer.hpp"
 namespace redc
 {
   // Convert the movement keys from Input into internal position for Bullet and
@@ -44,7 +46,20 @@ namespace redc
     float mass;
     float speed;
 
+    // Amount of time/s between steps
+    float step_rate;
+
     bool is_crouched;
+  };
+
+  struct Player_Event
+  {
+    enum
+    {
+      Footstep,
+      Jump,
+      Crouch
+    } type;
   };
 
   struct Player_Controller : public btActionInterface
@@ -95,6 +110,10 @@ namespace redc
 
     btQuaternion pitch_;
     btVector3 gun_target_;
+
+    Timer<> walk_timer_;
+
+    Queue_Event_Source<Player_Event> events_;
   };
 
   struct Player

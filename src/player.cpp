@@ -28,6 +28,9 @@ static_assert(CROUCHED_CAPSULE_HEIGHT > 0.0f,
 #define PLAYER_SPEED 1.0f
 #define CROUCHED_SPEED 0.5f
 
+#define PLAYER_STEP_RATE 0.5f;
+#define CROUCHED_STEP_RATE 1.0f;
+
 // 78 kg mass person
 #define PLAYER_MASS 78.0f
 
@@ -80,6 +83,8 @@ namespace redc
     player_props_.mass = PLAYER_MASS;
     player_props_.speed = PLAYER_SPEED;
 
+    player_props_.step_rate = PLAYER_STEP_RATE;
+
     player_props_.is_crouched = false;
   }
   void Player_Controller::set_crouch_props()
@@ -92,6 +97,8 @@ namespace redc
 
     player_props_.mass = PLAYER_MASS;
     player_props_.speed = CROUCHED_SPEED;
+
+    player_props_.step_rate = CROUCHED_STEP_RATE;
 
     player_props_.is_crouched = true;
   }
@@ -203,6 +210,14 @@ namespace redc
     // ===
 
     {
+
+      // If the player isn't grounded, we should not consider walking
+      if(state != Player_State::Grounded)
+      {
+        // Reset the walk timer
+        walk_timer_.reset();
+      }
+
       btVector3 local_dpos;
       local_dpos.setZero();
 
@@ -281,6 +296,17 @@ namespace redc
 
         // Normalize and scale
         movement.normalize() *= props.speed * dt;
+
+        auto walk_time = walk_timer_.has_been<std::chrono::milliseconds>();
+        auto walk_s = walk_time.count() / 1000.0f;
+        if(walk_s > props.step_rate)
+        {
+          Player_Event event;
+          event.type = Player_Event::Footstep;
+          events_.push_outgoing_event(event);
+
+          walk_timer_.reset();
+        }
         // Cast a ray from the character's position to the position plus the
         // movement vector. This is obviously where the player is trying to go.
         auto end_pt = pos + movement.normalized() * props.radius * 4.5f;
