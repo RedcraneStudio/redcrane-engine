@@ -5,6 +5,7 @@
 #include "shader.h"
 #include <istream>
 #include <fstream>
+#include "../common/log.h"
 namespace redc { namespace gfx
 {
   void Shader::set_color(tag_t tag, Color const& c)
@@ -34,6 +35,10 @@ namespace redc { namespace gfx
   {
     // Open the file
     auto file_st = std::ifstream(filename);
+    if(!file_st.good())
+    {
+      log_e("Failed to open: '%'", filename);
+    }
     // Load the contents
     auto source_str = load_stream(file_st);
 
