@@ -56,7 +56,7 @@ namespace redc
 
     // Initialize window
 
-    auto flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+    int flags = SDL_WINDOW_OPENGL;
     if(fullscreen) flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
     SDL_Init_Lock ret;
