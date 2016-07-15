@@ -26,14 +26,25 @@ namespace redc
   };
 
   // The player is made up of shoes, half a sphere, a cylinder and another
-  // half-sphere. The sum of the last three members should be equal to the
-  // first.
-  struct Player_Dimensions
+  // half-sphere. The sum of capsule_height, 2 * radius and shoe_size should be
+  // equal to total_height.
+  //
+  // The fact that some of these properties may change and may not change is
+  // probably important, I mean a change in mass won't be honored, so what's the
+  // point in putting it here? Should we separate const properties from
+  // non-const properties?
+  struct Player_Properties
   {
     float total_height;
+    float capsule_height;
+
     float radius;
     float shoe_size;
-    float capsule_height;
+
+    float mass;
+    float speed;
+
+    bool is_crouched;
   };
 
   struct Player_Controller : public btActionInterface
@@ -54,14 +65,14 @@ namespace redc
     void apply_delta_yaw(double dv);
     void apply_delta_pitch(double dv);
 
-    bool is_crouched() const;
-
-    Player_Dimensions get_player_dimensions() const;
-    float get_player_speed() const;
-    float get_player_mass() const;
+    Player_Properties const& get_player_properties() const
+    { return player_props_; }
 
     glm::vec3 get_player_pos() const;
     glm::vec3 get_cam_pos() const;
+
+    inline bool poll_event(Player_Event& event)
+    { return events_.poll_event(event); }
 
     Player_State state = Player_State::Grounded;
   private:
@@ -71,6 +82,10 @@ namespace redc
 
     btCapsuleShape shape_;
     btCapsuleShape crouch_shape_;
+
+    void set_normal_props();
+    void set_crouch_props();
+    Player_Properties player_props_;
 
     Input* input_ref_;
 

@@ -57,6 +57,7 @@ namespace redc
 
     // Shape
     ghost_.setCollisionShape(&shape_);
+    set_normal_props();
 
     // Flags
     ghost_.setCollisionFlags(ghost_.getCollisionFlags() |
@@ -66,6 +67,33 @@ namespace redc
 
     // Set the pitch to an identity rotation.
     pitch_.setEuler(0.0f, 0.0f, 0.0f);
+  }
+
+  void Player_Controller::set_normal_props()
+  {
+    player_props_.total_height = PLAYER_HEIGHT;
+    player_props_.capsule_height = PLAYER_CAPSULE_HEIGHT;
+
+    player_props_.radius = PLAYER_RADIUS;
+    player_props_.shoe_size = PLAYER_SHOE_SIZE;
+
+    player_props_.mass = PLAYER_MASS;
+    player_props_.speed = PLAYER_SPEED;
+
+    player_props_.is_crouched = false;
+  }
+  void Player_Controller::set_crouch_props()
+  {
+    player_props_.total_height = CROUCHED_HEIGHT;
+    player_props_.capsule_height = CROUCHED_CAPSULE_HEIGHT;
+
+    player_props_.radius = PLAYER_RADIUS;
+    player_props_.shoe_size = PLAYER_SHOE_SIZE;
+
+    player_props_.mass = PLAYER_MASS;
+    player_props_.speed = CROUCHED_SPEED;
+
+    player_props_.is_crouched = true;
   }
 
   // They are expected to add the action to the dynamics world and then this
@@ -107,6 +135,8 @@ namespace redc
       ghost_.setWorldTransform(xform);
     };
 
+    Player_Properties const& props = player_props_;
+
     // ===
     // Ray tracing floor-collision handling
     // ===
@@ -118,13 +148,11 @@ namespace redc
       // Start at the bottom of the player's capsule and continue till the of
       // the player's "shoes."
 
-      const Player_Dimensions dim = get_player_dimensions();
-
       auto start_pos = pos;
-      start_pos.setY(pos.getY() - dim.capsule_height / 2.0f - PLAYER_RADIUS);
+      start_pos.setY(pos.getY() - props.capsule_height / 2.0f - props.radius);
 
       auto end_pos = pos;
-      end_pos.setY(start_pos.getY() - PLAYER_SHOE_SIZE);
+      end_pos.setY(start_pos.getY() - props.shoe_size);
 
       // Redundancy whhyyyyy
       btCollisionWorld::ClosestRayResultCallback ground_ray(start_pos, end_pos);
@@ -196,13 +224,15 @@ namespace redc
       }
 
       // Crouch is down and we are not currently crouching.
-      if(!input_ref_->crouch && is_crouched())
+      if(!input_ref_->crouch && props.is_crouched)
       {
         ghost_.setCollisionShape(&shape_);
+        set_normal_props();
       }
-      else if(input_ref_->crouch && !is_crouched())
+      else if(input_ref_->crouch && !props.is_crouched)
       {
         ghost_.setCollisionShape(&crouch_shape_);
+        set_crouch_props();
       }
 
       if(input_ref_->jump && state == Player_State::Grounded)
@@ -250,11 +280,10 @@ namespace redc
         movement.setY(-partial_dot / active_normal.getY());
 
         // Normalize and scale
-        movement.normalize() *= get_player_speed() * dt;
-
+        movement.normalize() *= props.speed * dt;
         // Cast a ray from the character's position to the position plus the
         // movement vector. This is obviously where the player is trying to go.
-        auto end_pt = pos + movement.normalized() * PLAYER_RADIUS * 4.5f;
+        auto end_pt = pos + movement.normalized() * props.radius * 4.5f;
         btCollisionWorld::ClosestRayResultCallback move_ray(pos, end_pt);
         world->rayTest(pos, end_pt, move_ray);
 
@@ -300,7 +329,8 @@ namespace redc
         auto forward = btMatrix3x3(ray_rot) * btVector3(0.0f, 0.0f, -1.0f);
 
         // Do a raycast from the player's head along the forward vector
-        auto head_pos = pos + btVector3(0.0f, PLAYER_HEIGHT / 2, 0.0f);
+        // TODO: Inspect this use of total height, it looks suspicious
+        auto head_pos = pos + btVector3(0.0f, props.total_height / 2, 0.0f);
         auto ray_end = head_pos + forward.normalized() * 1000.0f;
 
         btCollisionWorld::ClosestRayResultCallback gun_ray(head_pos, ray_end);
@@ -474,34 +504,6 @@ namespace redc
     pitch_ *= btQuaternion(0.0f, -pitch, 0.0f);
   }
 
-  bool Player_Controller::is_crouched() const
-  {
-    return ghost_.getCollisionShape() == &crouch_shape_;
-  }
-  Player_Dimensions Player_Controller::get_player_dimensions() const
-  {
-    Player_Dimensions ret;
-
-    ret.total_height = is_crouched() ? CROUCHED_HEIGHT : PLAYER_HEIGHT;
-    ret.radius = PLAYER_RADIUS;
-    ret.shoe_size = PLAYER_SHOE_SIZE;
-    ret.capsule_height =
-      is_crouched() ? CROUCHED_CAPSULE_HEIGHT : PLAYER_CAPSULE_HEIGHT;
-
-    return ret;
-  }
-  // These two functions could be constexpr, but I don't want that part of the
-  // interface.
-  float Player_Controller::get_player_speed() const
-  {
-    if(is_crouched()) return CROUCHED_SPEED;
-    else return PLAYER_SPEED;
-  }
-  float Player_Controller::get_player_mass() const
-  {
-    return PLAYER_MASS;
-  }
-
   glm::vec3 Player_Controller::get_player_pos() const
   {
     btTransform trans;
@@ -509,13 +511,11 @@ namespace redc
 
     const btVector3 origin = trans.getOrigin();
 
-    // Be at the player's height.
-    const Player_Dimensions dim = get_player_dimensions();
-
     // Find the y-value of the floor beneath the player, given the center point
     // of the capsule.
-    const float floor_y = origin.getY() -
-      (dim.capsule_height / 2.0f + dim.radius + dim.shoe_size);
+    const float floor_y = origin.getY() - (player_props_.capsule_height / 2.0f +
+                                           player_props_.radius +
+                                           player_props_.shoe_size);
 
     // Return the point the player is standing on
     return {origin.getX(), floor_y, origin.getZ()};
@@ -523,8 +523,8 @@ namespace redc
   glm::vec3 Player_Controller::get_cam_pos() const
   {
     const glm::vec3 player_pos = get_player_pos();
-    const Player_Dimensions dim = get_player_dimensions();
 
-    return {player_pos.x, player_pos.y + dim.total_height, player_pos.z};
+    return {player_pos.x, player_pos.y + player_props_.total_height,
+            player_pos.z};
   }
 }
