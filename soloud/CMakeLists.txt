@@ -1,0 +1,117 @@
+set(SOLOUD_SOURCES
+  src/audiosource/modplug/soloud_modplug.cpp
+  src/audiosource/monotone/soloud_monotone.cpp
+  src/audiosource/sfxr/soloud_sfxr.cpp
+  src/audiosource/speech/darray.cpp
+  src/audiosource/speech/klatt.cpp
+  src/audiosource/speech/resonator.cpp
+  src/audiosource/speech/soloud_speech.cpp
+  src/audiosource/speech/tts.cpp
+  src/audiosource/tedsid/sid.cpp
+  src/audiosource/tedsid/soloud_tedsid.cpp
+  src/audiosource/tedsid/ted.cpp
+  src/audiosource/vic/soloud_vic.cpp
+  src/audiosource/wav/soloud_wav.cpp
+  src/audiosource/wav/soloud_wavstream.cpp
+  src/audiosource/wav/stb_vorbis.c
+  src/backend/null/soloud_null.cpp
+  src/core/soloud.cpp
+  src/core/soloud_audiosource.cpp
+  src/core/soloud_bus.cpp
+  src/core/soloud_core_3d.cpp
+  src/core/soloud_core_basicops.cpp
+  src/core/soloud_core_faderops.cpp
+  src/core/soloud_core_filterops.cpp
+  src/core/soloud_core_getters.cpp
+  src/core/soloud_core_setters.cpp
+  src/core/soloud_core_voicegroup.cpp
+  src/core/soloud_core_voiceops.cpp
+  src/core/soloud_fader.cpp
+  src/core/soloud_fft.cpp
+  src/core/soloud_fft_lut.cpp
+  src/core/soloud_file.cpp
+  src/core/soloud_filter.cpp
+  src/core/soloud_thread.cpp
+  src/filter/soloud_bassboostfilter.cpp
+  src/filter/soloud_biquadresonantfilter.cpp
+  src/filter/soloud_dcremovalfilter.cpp
+  src/filter/soloud_echofilter.cpp
+  src/filter/soloud_fftfilter.cpp
+  src/filter/soloud_flangerfilter.cpp
+  src/filter/soloud_lofifilter.cpp
+)
+
+# Enable debugging if necessary
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+  add_definitions(-DDEBUG)
+endif()
+
+# Configure backends
+# TODO: Change the other backends to be like ALSA as we add support. That is,
+# use the target_* variant functions after adding the target.
+if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+
+  # Look for ALSA
+  find_package(ALSA)
+  if(${ALSA_FOUND})
+    list(APPEND SOLOUD_SOURCES "src/backend/alsa/soloud_alsa.cpp")
+  endif()
+
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+  # Add CoreAudio
+  add_definitions(-DWITH_COREAUDIO)
+  list(APPEND SOLOUD_SOURCES "src/backend/coreaudio/soloud_coreaudio.cpp")
+
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
+  add_definitions(-DWITH_WINMM)
+  list(APPEND SOLOUD_SOURCES "src/backend/winmm/soloud_winmm.cpp")
+  add_definitions(-DWITH_WASAPI)
+  list(APPEND SOLOUD_SOURCES "src/backend/wasapi/soloud_wasapi.cpp")
+endif()
+
+# Always enable the null audio device
+add_definitions(-DWITH_NULL)
+
+add_library(SoloudStatic STATIC ${SOLOUD_SOURCES})
+
+# Add threading
+target_link_libraries(SoloudStatic PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(SoloudStatic PUBLIC include)
+
+# Link to alsa if necessary
+if(${ALSA_FOUND})
+  target_compile_options(SoloudStatic PUBLIC -DWITH_ALSA)
+  target_link_libraries(SoloudStatic PUBLIC ${ALSA_LIBRARIES})
+  target_include_directories(SoloudStatic PUBLIC ${ALSA_INCLUDE_DIRS})
+endif()
+
+# Include directories
+target_include_directories(SoloudStatic PRIVATE src/filter src/tools
+  src/audiosource
+  src/core src/backend
+  src/c_api
+  src/tools/resamplerlab
+  src/tools/lutgen
+  src/tools/codegen
+  src/tools/tedsid2dump
+  src/audiosource/modplug
+  src/audiosource/tedsid
+  src/audiosource/monotone
+  src/audiosource/wav
+  src/audiosource/speech
+  src/audiosource/vic
+  src/audiosource/sfxr
+  src/backend/opensles
+  src/backend/winmm
+  src/backend/xaudio2
+  src/backend/openal
+  src/backend/portaudio
+  src/backend/alsa
+  src/backend/sdl2_static
+  src/backend/wasapi
+  src/backend/sdl_static
+  src/backend/oss
+  src/backend/coreaudio
+  src/backend/null
+  src/backend/sdl)

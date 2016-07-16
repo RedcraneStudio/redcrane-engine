@@ -4,8 +4,6 @@
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-find_package(Threads REQUIRED)
-
 find_package(Msgpack REQUIRED)
 include_directories(${Msgpack_INCLUDE_DIR})
 
@@ -116,7 +114,7 @@ target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
                                        ${BULLET_INCLUDE_DIRS})
 
 target_link_libraries(redc PUBLIC commonlib netlib gfxlib uselib fpslib
-                                  inputlib effectslib
+                                  inputlib effectslib SoloudStatic
                                   ${Boost_SYSTEM_LIBRARY}
                                   ${Boost_PROGRAM_OPTIONS_LIBRARY}
                                   ${Boost_FILESYSTEM_LIBRARY}

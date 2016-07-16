@@ -27,6 +27,9 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 
 include(data_target)
 
+find_package(Threads REQUIRED)
+
+add_subdirectory(soloud)
 add_subdirectory(gl)
 add_subdirectory(opensimplex)
 add_subdirectory(mods)
