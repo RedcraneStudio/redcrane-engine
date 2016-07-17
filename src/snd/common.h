@@ -7,26 +7,16 @@
 #include "pcm_data.h"
 namespace redc { namespace snd
 {
-  void initialize_pa() noexcept;
-  void terminate_pa() noexcept;
-
   struct Stream_Impl;
   struct Stream
   {
-    Stream() noexcept;
+    Stream();
+    ~Stream();
 
-    Stream(Stream const& s) noexcept = delete;
-    Stream& operator=(Stream const& s) noexcept = delete;
+    std::unique_ptr<Stream_Impl> impl;
 
-    Stream(Stream&& s) noexcept;
-    Stream& operator=(Stream&& s) noexcept;
-
-    ~Stream() noexcept;
-
-    Stream_Impl* impl;
-
-    void use_pcm(PCM_Data&) noexcept;
-    void start() noexcept;
-    void stop(bool force = false) noexcept;
+    void use_pcm(PCM_Data&);
+    void start();
+    void stop(bool force = false);
   };
 } }

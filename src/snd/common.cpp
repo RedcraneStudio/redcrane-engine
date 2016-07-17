@@ -8,85 +8,75 @@
 #include "common.h"
 #include "../common/log.h"
 
-#include "pulse/simple.h"
-#include "pulse/error.h"
+#include "SDL.h"
 namespace redc { namespace snd
 {
-  void initialize_pa() noexcept {}
-  void terminate_pa() noexcept {}
-
   struct Stream_Impl
   {
-    pa_simple* stream;
+    SDL_AudioDeviceID device_id;
 
     PCM_Data* pcm_data;
     bool done;
   };
 
-  Stream::Stream() noexcept : impl(new Stream_Impl())
+  Stream::Stream() : impl(std::make_unique<Stream_Impl>())
   {
-    pa_sample_spec ss;
-
-    ss.rate = 44100;
-    ss.channels = 2;
-    ss.format = PA_SAMPLE_S16LE;
-
-    int err = 0;
-    impl->stream = pa_simple_new(NULL, "He came with the dust...",
-                                 PA_STREAM_PLAYBACK,
-                                 NULL, "Like Wind Blows Fire", &ss,
-                                 NULL, NULL, &err);
-    if(err)
+    if(SDL_InitSubSystem(SDL_INIT_AUDIO))
     {
-      log_e("... And was gone with the wind! %", pa_strerror(err));
+      log_e("Failed to initialize audio subsystem: %", SDL_GetError());
+      impl.release();
+      return;
+    }
+    else
+    {
+      const char* audio_driver = SDL_GetCurrentAudioDriver();
+      if(audio_driver)
+      {
+        log_i("Using audio driver: %", audio_driver);
+      }
+    }
+
+    SDL_AudioSpec in_format;
+    in_format.freq = 44100;
+    in_format.format = AUDIO_S16LSB;
+    in_format.channels = 2;
+    in_format.samples = 4096;
+    in_format.callback = NULL;
+
+    impl->device_id = SDL_OpenAudioDevice(NULL, 0, &in_format, NULL, 0);
+    if(impl->device_id == 0)
+    {
+      log_e("Failed to initialize audio device: %", SDL_GetError());
+      impl.release();
+    }
+
+    SDL_PauseAudioDevice(impl->device_id, 0);
+  }
+
+  Stream::~Stream()
+  {
+    if(impl)
+    {
+      SDL_CloseAudioDevice(impl->device_id);
     }
   }
 
-  Stream::Stream(Stream&& s) noexcept : impl(s.impl)
+  void Stream::use_pcm(PCM_Data& data)
   {
-    s.impl = nullptr;
-  }
-  Stream& Stream::operator=(Stream&& s) noexcept
-  {
-    this->impl = s.impl;
-    s.impl = nullptr;
-
-    return *this;
-  }
-
-  Stream::~Stream() noexcept
-  {
-    if(impl->stream)
-    {
-      pa_simple_free(impl->stream);
-    }
-
-    delete impl;
-  }
-
-  void Stream::use_pcm(PCM_Data& data) noexcept
-  {
+    if(!impl) return;
     impl->pcm_data = &data;
   }
-  void Stream::start() noexcept
+  void Stream::start()
   {
-    if(!impl->pcm_data)
+    if(!impl || !impl->pcm_data)
     {
       log_e("No PCM data!");
       return;
     }
 
-    // Get the bytes
-    int err = 0;
-
-    pa_simple_write(impl->stream, &impl->pcm_data->samples[0],
-                    impl->pcm_data->samples.size() * sizeof(Sample), &err);
-    if(err) log_e("When writing: %", pa_strerror(err));
-
-    err = 0;
-
-    pa_simple_drain(impl->stream, NULL);
-    if(err) log_e("When draining: %", pa_strerror(err));
+    // Queue all of the audio
+    SDL_QueueAudio(impl->device_id, &impl->pcm_data->samples[0].left,
+                   sizeof(Sample) * impl->pcm_data->samples.size());
   }
-  void Stream::stop(bool) noexcept {}
+  void Stream::stop(bool) {}
 } }
