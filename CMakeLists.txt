@@ -28,6 +28,7 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 include(data_target)
 
 find_package(Threads REQUIRED)
+find_package(SDL2 REQUIRED)
 
 add_subdirectory(soloud)
 add_subdirectory(gl)

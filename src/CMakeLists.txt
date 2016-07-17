@@ -18,7 +18,6 @@ add_subdirectory(net)
 
 find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
-find_package(SDL2 REQUIRED)
 add_subdirectory(gfx)
 add_subdirectory(input)
 

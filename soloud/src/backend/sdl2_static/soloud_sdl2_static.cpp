@@ -37,11 +37,7 @@ namespace SoLoud
 
 #else
 
-#if defined(_MSC_VER)
 #include "SDL.h"
-#else
-#include "SDL2/SDL.h"
-#endif
 #include <math.h>
 
 
@@ -61,7 +57,7 @@ namespace SoLoud
 		else // assume s16 if not float
 		{
 			int samples = len / (gActiveAudioSpec.channels * sizeof(short));
-			soloud->mix_s16(buf, samples);
+			soloud->mixSigned16(buf, samples);
 		}
 	}
 
