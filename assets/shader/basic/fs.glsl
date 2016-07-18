@@ -26,19 +26,13 @@ float cel(float fin)
 
 void main()
 {
-  diffuse_out = texture(diffuse, uv);
-
-  diffuse_out.x = cel(diffuse_out.x);
-  diffuse_out.y = cel(diffuse_out.y);
-  diffuse_out.z = cel(diffuse_out.z);
-
-  //diffuse_out = dif;
-  // diffuse_out.a = 1.0;
-
-  /*
   float light_intensity = dot(normalize(world_normal),
                               normalize(light_pos - vec3(world_pos)));
   float ambient_intensity = .01;
+  diffuse_out = vec4(1.0f, 1.0f, 1.0f, 1.0f);
   diffuse_out.rgb *= max(light_intensity, ambient_intensity);
-  */
+
+  //diffuse_out.r = cel(diffuse_out.r);
+  //diffuse_out.g = cel(diffuse_out.g);
+  //diffuse_out.b = cel(diffuse_out.b);
 }
