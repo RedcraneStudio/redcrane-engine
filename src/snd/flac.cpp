@@ -23,9 +23,18 @@ namespace redc { namespace snd
     {
       if(pcm_data->bits_per_sample == 16)
       {
+        // Clip
+        int64_t left = buffer[0][i];
+        if(left > 32767) left = 32767;
+        if(-32767 > left) left = -32767;
+
+        int64_t right = buffer[1][i];
+        if(right > 32767) right = 32767;
+        if(-32767 > right) right = -32767;
+
         pcm_data->samples.push_back(Sample{
-          static_cast<int16_t>(buffer[0][i]),
-          static_cast<int16_t>(buffer[1][i])});
+          static_cast<int16_t>(left),
+          static_cast<int16_t>(right)});
       }
     }
 
