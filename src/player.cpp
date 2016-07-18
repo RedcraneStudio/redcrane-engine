@@ -194,8 +194,22 @@ namespace redc
         if(state == Player_State::Jumping) state = Player_State::Grounded;
 
         last_normal_ = ground_ray.m_hitNormalWorld;
-      }
 
+        // Find the height at which the player should be
+        // Reverse the transformation and snap the player to the top of whatever
+        // platform we just stepped on.
+        target_height_ = ground_ray.m_hitPointWorld.getY() + props.shoe_size +
+          props.radius + props.capsule_height / 2.0f;
+
+        // Move the player to that height gradually, if necessary
+        float delta = target_height_ - pos.getY();
+
+        // Don't bother more than a cm
+        if(.01f < std::fabs(delta))
+        {
+          pos.setY(pos.getY() + delta);
+        }
+      }
       // No ground?
       else
       {

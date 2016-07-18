@@ -111,6 +111,8 @@ namespace redc
     btQuaternion pitch_;
     btVector3 gun_target_;
 
+    float target_height_;
+
     Timer<> walk_timer_;
 
     Queue_Event_Source<Player_Event> events_;
