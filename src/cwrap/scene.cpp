@@ -275,6 +275,19 @@ extern "C"
     // The controller has access to input, step the simulation
     engine->server->bt_world->stepSimulation(time_since(engine->last_frame), 10);
     engine->last_frame = std::chrono::high_resolution_clock::now();
+
+    Player_Event player_event;
+    while(scene->active_player->controller.poll_event(player_event))
+    {
+      switch(player_event.type)
+      {
+      case Player_Event::Footstep:
+        engine->audio->play(engine->client->step_sounds[scene->step_i++ % 5]);
+        break;
+      default:
+        break;
+      }
+    }
   }
 
   void redc_scene_render(void *sc)

@@ -59,6 +59,11 @@ extern "C"
     eng->config = cfg;
     eng->share_path = assets::share_path();
 
+    eng->audio = std::make_unique<SoLoud::Soloud>();
+    eng->audio->init();
+    // Play at full volume.
+    eng->audio->setPostClipScaler(1.0f);
+
     eng->mesh_cache =
             std::make_unique<gfx::Mesh_Cache>(eng->share_path / "obj",
                                               eng->share_path / "obj_cache");
@@ -120,6 +125,12 @@ extern "C"
     // Keep the shader alive for the lifetime of the client.
     rce->client->default_shader = std::move(df_shade);
 
+    rce->client->step_sounds[0].load("../assets/snd/walk_variation_0.wav");
+    rce->client->step_sounds[1].load("../assets/snd/walk_variation_1.wav");
+    rce->client->step_sounds[2].load("../assets/snd/walk_variation_2.wav");
+    rce->client->step_sounds[3].load("../assets/snd/walk_variation_3.wav");
+    rce->client->step_sounds[4].load("../assets/snd/walk_variation_4.wav");
+
     log_i("Initializing client subsystem ... Successful");
   }
   void redc_init_server(void* eng)
@@ -132,6 +143,7 @@ extern "C"
   void redc_uninit_engine(void* eng)
   {
     auto rce = (Engine*) eng;
+    rce->audio->deinit();
     delete rce;
   }
 

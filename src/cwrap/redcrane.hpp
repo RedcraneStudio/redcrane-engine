@@ -42,6 +42,10 @@
 #include "../event.h"
 #include "../common/reactor.h"
 
+#include "soloud.h"
+#include "soloud_wav.h"
+#include "soloud_wavstream.h"
+
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H
 extern "C"
@@ -77,6 +81,8 @@ namespace redc
 
     std::unique_ptr<gfx::Mesh_Cache> mesh_cache;
 
+    std::unique_ptr<SoLoud::Soloud> audio;
+
     std::unique_ptr<Client> client;
     std::unique_ptr<Server> server;
 
@@ -107,6 +113,8 @@ namespace redc
     redc::SDL_Init_Lock sdl_raii;
 
     Input_Config input_cfg;
+
+    std::array<SoLoud::Wav, 5> step_sounds;
 
     // Make sure we put this at the top so it is uninitialized relatively after
     // we have to deallocate all the meshes, textures, etc.
@@ -231,6 +239,8 @@ namespace redc
     std::unique_ptr<Texture> crosshair;
     std::unique_ptr<Mesh> ch_mesh;
     std::unique_ptr<gfx::Shader> ch_shader;
+
+    int step_i = 0;
 
     Input cur_input;
 

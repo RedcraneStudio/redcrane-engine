@@ -23,6 +23,12 @@ add_data(assets ALL "share/${PROJECT_NAME}"
 
                     obj/library.obj
 
+                    snd/walk_variation_0.wav
+                    snd/walk_variation_1.wav
+                    snd/walk_variation_2.wav
+                    snd/walk_variation_3.wav
+                    snd/walk_variation_4.wav
+
                     gltf/cel.gltf gltf/cel_solid.vs gltf/cel_solid.fs
 
                     scene/default.json structure/structures.json
