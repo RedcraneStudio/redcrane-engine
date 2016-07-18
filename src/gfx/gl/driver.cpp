@@ -27,6 +27,7 @@ namespace redc
     {
       Driver::Driver(Vec<int> size) noexcept : IDriver(size)
       {
+        glViewport(0, 0, size.x, size.y);
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
                             GL_ZERO);
