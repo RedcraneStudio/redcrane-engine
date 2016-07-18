@@ -841,7 +841,7 @@ namespace redc
 
   void load_nodes_given_names(tinygltf::Scene const& scene,
                               std::vector<std::string> const& node_names,
-			      std::size_t node_offset,
+                              std::size_t node_offset,
                               std::vector<Node>& nodes,
                               std::vector<std::string> const& mesh_names)
   {
