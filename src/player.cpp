@@ -28,8 +28,8 @@ static_assert(CROUCHED_CAPSULE_HEIGHT > 0.0f,
 #define PLAYER_SPEED 1.0f
 #define CROUCHED_SPEED 0.5f
 
-#define PLAYER_STEP_RATE 0.5f;
-#define CROUCHED_STEP_RATE 1.0f;
+#define PLAYER_STEP_RATE 0.65f;
+#define CROUCHED_STEP_RATE 1.15f;
 
 // 78 kg mass person
 #define PLAYER_MASS 78.0f
