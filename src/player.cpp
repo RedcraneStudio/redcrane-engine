@@ -307,6 +307,7 @@ namespace redc
 
           walk_timer_.reset();
         }
+#if 0
         // Cast a ray from the character's position to the position plus the
         // movement vector. This is obviously where the player is trying to go.
         auto end_pt = pos + movement.normalized() * props.radius * 4.5f;
@@ -328,6 +329,7 @@ namespace redc
           pos += perpendicular;
         }
         else
+#endif
         {
           // The ray didn't find anything, so just move forward
           pos += movement;
