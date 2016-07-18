@@ -33,7 +33,7 @@ namespace redc
   };
 
   // A VBO
-  struct Buf
+  struct Buf_Repr
   {
     GLuint buf;
   };
@@ -65,7 +65,7 @@ namespace redc
 #elif defined(REDC_USE_DIRECTX)
   struct Attrib_Bind {};
   struct Param_Bind {};
-  struct Buf {};
+  struct Buf_Repr {};
   struct Texture_Repr {};
   struct Mesh_Repr {};
   struct Shader_Repr {};
@@ -362,7 +362,7 @@ namespace redc
   {
     ~Asset();
 
-    std::vector<Buf> buffers;
+    std::vector<Buf_Repr> buffers;
     std::vector<Texture_Repr> textures;
 
     std::vector<Accessor> accessors;

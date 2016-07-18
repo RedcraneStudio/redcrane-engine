@@ -13,9 +13,9 @@ namespace redc
 {
 
 #ifdef REDC_USE_OPENGL
-  std::vector<Buf> make_buffers(std::size_t num)
+  std::vector<Buf_Repr> make_buffers(std::size_t num)
   {
-    std::vector<Buf> bufs;
+    std::vector<Buf_Repr> bufs;
     if(num > 0)
     {
       bufs.resize(num);
@@ -27,7 +27,7 @@ namespace redc
     return bufs;
   }
 
-  void upload_data(Buf buf, std::vector<uint8_t> const& data, std::size_t off,
+  void upload_data(Buf_Repr buf, std::vector<uint8_t> const& data, std::size_t off,
                    std::size_t length, Buffer_Target target)
   {
     glBindBuffer((GLenum) target, buf.buf);
@@ -178,7 +178,7 @@ namespace redc
     glDeleteProgram(program.program);
   }
 
-  void destroy_bufs(std::size_t num, Buf* bufs)
+  void destroy_bufs(std::size_t num, Buf_Repr* bufs)
   {
     if(num >= 1)
     {
@@ -209,7 +209,7 @@ namespace redc
   // Use this for rendering. It would be nice to pass in some OpenGL state
   // structure so we don't have to redundantly set this information if it has
   // already been set.
-  void use_array_accessor(Attrib_Bind bind, Buf buf, Accessor const& acc)
+  void use_array_accessor(Attrib_Bind bind, Buf_Repr buf, Accessor const& acc)
   {
     // Usually this means the attribute is not actually being used in the shader
     // and can be safely ignored.
@@ -227,7 +227,7 @@ namespace redc
                           (GLenum) acc.data_type, GL_FALSE,
                           acc.stride, (void*) acc.offset);
   }
-  void use_element_array_accessor(Buf buf, Accessor const&)
+  void use_element_array_accessor(Buf_Repr buf, Accessor const&)
   {
     // Use this as our element array
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.buf);
@@ -804,7 +804,7 @@ namespace redc
 
   // = Load functions
 
-  void load_buffers(tinygltf::Scene const& scene, std::vector<Buf>& bufs,
+  void load_buffers(tinygltf::Scene const& scene, std::vector<Buf_Repr>& bufs,
                     std::vector<std::string>& buf_view_names)
   {
     // Upload all buffer views as GPU buffers
