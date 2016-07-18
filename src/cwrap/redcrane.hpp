@@ -17,6 +17,8 @@
 #include "../common/id_map.hpp"
 #include "../common/peer_ptr.hpp"
 
+#include "../effects/envmap.h"
+
 #include "../use/mesh_cache.h"
 #include "../use/texture.h"
 
@@ -239,6 +241,8 @@ namespace redc
     std::unique_ptr<Texture> crosshair;
     std::unique_ptr<Mesh> ch_mesh;
     std::unique_ptr<gfx::Shader> ch_shader;
+
+    effects::Envmap_Effect envmap;
 
     int step_i = 0;
 

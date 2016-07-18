@@ -28,6 +28,8 @@ extern "C"
     auto sc = new Peer_Ptr<Scene>(new Scene);
     sc->get()->engine = engine;
 
+    sc->get()->envmap.init(*engine->client->driver);
+
     // Add a crosshair to the camera, this is only used though if there is a
     // camera following the player which is why we can go ahead and add it now,
     // no problem.
@@ -318,20 +320,23 @@ extern "C"
     // Clear the screen
     scene->engine->client->driver->clear();
 
-    using namespace gfx::tags;
-
-    // Render the current / active map with the default shader
-    auto& default_shader = scene->engine->client->default_shader;
-    scene->engine->client->driver->use_shader(*default_shader);
-
     // Load the active camera now, since we just activated the proper shader
     auto active_camera =
             boost::get<Cam_Object>(at_id(scene->objs,
                                          scene->active_camera).obj);
 
+    // Render the environment map
+    scene->envmap.render(*scene->engine->client->driver, active_camera.cam);
+
+    // Render the current / active map with the default shader
+    auto& default_shader = scene->engine->client->default_shader;
+    scene->engine->client->driver->use_shader(*default_shader);
+
     gfx::use_camera(*scene->engine->client->driver, active_camera.cam);
 
     scene->engine->client->driver->bind_texture(*scene->lightmap, 0);
+
+    using namespace gfx::tags;
 
     default_shader->set_mat4(model_tag, glm::mat4(1.0f));
     gfx::render_chunk(scene->active_map->render->chunk);
