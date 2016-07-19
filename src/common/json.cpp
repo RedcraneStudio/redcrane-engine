@@ -10,6 +10,9 @@
 
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/error/en.h"
+
+#define REDC_TEMP_JSON_BUFFER_SIZE 4096
+
 namespace redc
 {
   struct File_Wrapper
@@ -24,32 +27,33 @@ namespace redc
     std::FILE* fd;
   };
 
-  rapidjson::Document load_json(std::string const& fn)
+  bool load_json(rapidjson::Document& doc, std::string const& fn)
   {
-    auto file = File_Wrapper{fn.c_str(), "r"};
+    File_Wrapper file(fn.c_str(), "r");
     if(!file.fd)
     {
-      throw Bad_File{fn};
+      log_e("Could not open file: %", fn);
+      return false;
     }
 
-    constexpr int BUFFER_SIZE = 50;
-    char buffer[BUFFER_SIZE];
-    auto file_stream = rapidjson::FileReadStream{file.fd, buffer, BUFFER_SIZE};
+    char buffer[REDC_TEMP_JSON_BUFFER_SIZE];
+    rapidjson::FileReadStream file_stream(file.fd, buffer,
+      REDC_TEMP_JSON_BUFFER_SIZE);
 
-    auto doc = rapidjson::Document{};
     doc.ParseStream(file_stream);
 
     if(doc.HasParseError())
     {
-      throw Bad_Asset{fn, doc.GetErrorOffset(),
-                      rapidjson::GetParseError_En(doc.GetParseError())};
+      log_e("Error parsing %:%\n%", fn, doc.GetErrorOffset(),
+            rapidjson::GetParseError_En(doc.GetParseError()));
+      return false;
     }
 
-    return doc;
+    return true;
   }
 
   bool has_json_members(rapidjson::Value const& val,
-                        std::vector<std::string> const& mems) noexcept
+                        std::vector<std::string> const& mems)
   {
     for(auto str : mems)
     {
@@ -59,7 +63,7 @@ namespace redc
   }
 
   void if_has_member(rapidjson::Value const& val, std::string const& mem,
-                     std::function<void (rapidjson::Value const&)> fn) noexcept
+                     std::function<void (rapidjson::Value const&)> fn)
   {
     if(val.HasMember(mem.c_str()))
     {
