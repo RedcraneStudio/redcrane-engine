@@ -26,12 +26,32 @@ namespace redc
     }
     return bufs;
   }
-
-  void upload_data(Buf_Repr buf, std::vector<uint8_t> const& data, std::size_t off,
-                   std::size_t length, Buffer_Target target)
+  Buf_Repr make_buffer()
   {
-    glBindBuffer((GLenum) target, buf.buf);
-    glBufferData((GLenum) target, length, &data[0] + off, GL_STATIC_DRAW);
+    Buf_Repr repr;
+    glGenBuffers(1, &repr.buf);
+    return repr;
+  }
+
+  void upload_data(Buf_Repr buf, Buffer_Target target, uint8_t* data,
+                   std::size_t length)
+  {
+    GLenum gltarget = GL_ARRAY_BUFFER;
+    switch(target)
+    {
+    case Buffer_Target::Array:
+      gltarget = GL_ARRAY_BUFFER;
+      break;
+    case Buffer_Target::Element_Array:
+      gltarget = GL_ELEMENT_ARRAY_BUFFER;
+      break;
+    default:
+      REDC_UNREACHABLE_MSG("This buffer should not be uploaded to the GPU");
+      return;
+    }
+
+    glBindBuffer(gltarget, buf.buf);
+    glBufferData(gltarget, length, data, GL_STATIC_DRAW);
   }
 
   std::vector<Texture_Repr> make_textures(std::size_t num)
@@ -514,9 +534,7 @@ namespace redc
     case TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER:
       return Buffer_Target::Element_Array;
     default:
-      REDC_UNREACHABLE_MSG("Unknown buffer target");
-      // This should never be reached.
-      return Buffer_Target::Array;
+      return Buffer_Target::CPU;
     }
   }
 
@@ -798,44 +816,69 @@ namespace redc
     {
       destroy_meshes(1, &mesh.repr);
     }
-    destroy_bufs(buffers.size(), &buffers[0]);
+    for(auto& buffer : buffers)
+    {
+      if(buffer.repr)
+      {
+        destroy_bufs(1, &buffer.repr.get());
+      }
+    }
     destroy_textures(textures.size(), &textures[0]);
   }
 
   // = Load functions
 
-  void load_buffers(tinygltf::Scene const& scene, std::vector<Buf_Repr>& bufs,
+  void load_buffers(tinygltf::Scene const& scene, std::vector<Buffer>& bufs,
                     std::vector<std::string>& buf_view_names)
   {
-    // Upload all buffer views as GPU buffers
-    auto new_buf_reprs = make_buffers(scene.bufferViews.size());
-
-    // Starting index
-    std::size_t i = bufs.size();
-    bufs.insert(bufs.end(), new_buf_reprs.begin(), new_buf_reprs.end());
-
+    // Add room for new buffers
+    bufs.reserve(bufs.size() + scene.bufferViews.size());
     buf_view_names.reserve(buf_view_names.size() + scene.bufferViews.size());
+
+    // We sort of compress the concept of buffers and buffer views.
 
     for(auto pair : scene.bufferViews)
     {
-      auto& buf_view = pair.second;
+      tinygltf::BufferView const& buf_view = pair.second;
 
       // Push the name for later cross-referencing, the index of the name in
       // this vector is the same index of the buffer in the scene.
       buf_view_names.push_back(pair.first);
 
-      // Look up the buffer source
-      auto buf = scene.buffers.find(buf_view.buffer);
-      REDC_ASSERT(buf != scene.buffers.end());
+      // Form our own buffer
+      Buffer our_buf;
+      // Figure our target - this will affect how we store the data later.
+      our_buf.target = to_buffer_target(buf_view.target);
 
-      // Find buffer target
-      Buffer_Target buf_target = to_buffer_target(buf_view.target);
+      // Look up the buffer this view references
+      auto their_buf_iter = scene.buffers.find(buf_view.buffer);
+      REDC_ASSERT(their_buf_iter != scene.buffers.end());
 
-      // Upload data to a gpu buffer.
-      upload_data(bufs[i], buf->second.data, buf_view.byteOffset,
-                  buf_view.byteLength, buf_target);
+      tinygltf::Buffer const& their_buf = their_buf_iter->second;
 
-      ++i;
+      // Copy data - we do this no matter the target. If it's a GPU target
+      // though we could save memory by forgetting about it.
+      our_buf.data.resize(their_buf.data.size());
+      std::memcpy(&our_buf.data[0], &their_buf.data[buf_view.byteOffset],
+                  buf_view.byteLength);
+
+      // Make a repr if the target requires.
+      if(our_buf.target == Buffer_Target::Array ||
+         our_buf.target == Buffer_Target::Element_Array)
+      {
+        Buf_Repr repr = make_buffer();
+        // Upload our data to our GPU buffer now. No need to use the offset
+        // because we already did when copying over to Buffer::data.
+        upload_data(repr,our_buf.target, &our_buf.data[0], our_buf.data.size());
+
+        our_buf.repr = repr;
+      }
+      else
+      {
+        our_buf.repr = boost::none;
+      }
+
+      bufs.push_back(our_buf);
     }
   }
 
@@ -893,9 +936,9 @@ namespace redc
       // Add any references to meshes
       for(auto req_mesh : in_node.meshes)
       {
-	auto mesh_index = find_string_index(mesh_names, req_mesh,
-		 			    "Node references invalid mesh");
-	node.meshes.push_back(mesh_index);
+        auto mesh_index = find_string_index(mesh_names, req_mesh,
+                                            "Node references invalid mesh");
+        node.meshes.push_back(mesh_index);
       }
 
       // Add this node to the main vector of nodes
@@ -1433,7 +1476,7 @@ namespace redc
     load_shaders(scene, ret.shaders, ret.shader_names);
 
     load_programs(scene, ret.programs, ret.program_names, ret.shaders,
-		  ret.shader_names);
+                  ret.shader_names);
 
     std::size_t node_off = load_node_names(scene, ret.node_names);
 
@@ -1444,11 +1487,11 @@ namespace redc
                    ret.technique_names, ret.texture_names);
 
     load_meshes(scene, ret.meshes, ret.mesh_names, ret.accessor_names,
-		ret.material_names);
+                ret.material_names);
 
     // Load nodes
     load_nodes_given_names(scene, ret.node_names, node_off, ret.nodes,
-			   ret.mesh_names);
+                           ret.mesh_names);
   }
 
   glm::mat4 local_transformation(Node const& node)
@@ -1811,14 +1854,22 @@ namespace redc
 
         Attrib_Bind bind = get_attrib_semantic_bind(technique, semantic);
 
-        use_array_accessor(bind, asset.buffers[accessor.buf_i], accessor);
+        Buffer const& buf = asset.buffers[accessor.buf_i];
+        REDC_ASSERT_MSG(buf.repr != boost::none,
+                        "Buffer expected to be uploaded to the GPU");
+        use_array_accessor(bind, buf.repr.get(), accessor);
 
         min_elements = std::min(min_elements, accessor.count);
       }
       if(primitive.indices)
       {
         Accessor const& indices = asset.accessors[primitive.indices.value()];
-        use_element_array_accessor(asset.buffers[indices.buf_i], indices);
+
+        Buffer const& buf = asset.buffers[indices.buf_i];
+        REDC_ASSERT_MSG(buf.repr != boost::none,
+                        "Buffer expected to be uploaded to the GPU");
+
+        use_element_array_accessor(buf.repr.get(), indices);
 
         draw_elements(indices.count, indices.data_type, primitive.mode,
                       indices.offset);

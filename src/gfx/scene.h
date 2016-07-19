@@ -80,11 +80,6 @@ namespace redc
     Float = GL_FLOAT, Double = GL_DOUBLE
   };
 
-  enum class Buffer_Target : GLenum
-  {
-    Array = GL_ARRAY_BUFFER, Element_Array = GL_ELEMENT_ARRAY_BUFFER
-  };
-
   enum class Texture_Format : GLenum
   {
     Alpha = GL_ALPHA, Rgb = GL_RGB, Rgba = GL_RGBA
@@ -112,11 +107,6 @@ namespace redc
     Byte, UByte, Short, UShort, Int, UInt, Float, Double
   };
 
-  enum class Buffer_Target
-  {
-    Array, Element_Array
-  }
-
   enum class Texture_Format
   {
     Alpha, Rgb, Rgba
@@ -138,6 +128,21 @@ namespace redc
   };
 
 #endif
+
+  enum class Buffer_Target
+  {
+    CPU, Array, Element_Array
+  };
+
+  struct Buffer
+  {
+    // Target type
+    Buffer_Target target;
+    // Cached (if GPU target) or actual data (if CPU buf target)
+    std::vector<uint8_t> data;
+    // Buffer representation
+    boost::optional<Buf_Repr> repr;
+  };
 
   // The most significant nibble is type (1 = vector, 2 = matrix) and the other
   // nibble is the amount. Will be used to quickly distinquish between vector
@@ -362,7 +367,7 @@ namespace redc
   {
     ~Asset();
 
-    std::vector<Buf_Repr> buffers;
+    std::vector<Buffer> buffers;
     std::vector<Texture_Repr> textures;
 
     std::vector<Accessor> accessors;
