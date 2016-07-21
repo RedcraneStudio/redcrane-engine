@@ -254,7 +254,11 @@ namespace redc
 
   struct Asset
   {
+    Asset() = default;
     ~Asset();
+
+    Asset(Asset&&) = default;
+    Asset& operator=(Asset&&) = default;
 
     std::vector<Buffer> buffers;
     std::vector<Texture_Repr> textures;

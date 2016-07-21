@@ -1461,7 +1461,7 @@ namespace redc
   {
     Asset ret;
     append_to_asset(ret, scene);
-    return ret;
+    return std::move(ret);
   }
   void append_to_asset(Asset& ret, tinygltf::Scene const& scene)
   {
