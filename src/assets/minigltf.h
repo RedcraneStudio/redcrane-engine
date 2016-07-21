@@ -16,4 +16,8 @@ namespace redc
   bool load_gltf_file(tinygltf::Scene& scene, std::string const& filename);
   boost::optional<tinygltf::Scene> load_gltf_file(std::string const& name);
 
+  bool resolve_gltf_accessor_data(tinygltf::Scene const& scene,
+                                  std::string const& accessor,
+                                  std::vector<uint8_t>& data,
+                                  tinygltf::Accessor& access_out);
 }

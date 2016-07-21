@@ -50,4 +50,62 @@ namespace redc
       return boost::none;
     }
   }
+
+  bool resolve_gltf_accessor_data(tinygltf::Scene const& scene,
+                                  std::string const& accessor,
+                                  std::vector<uint8_t>& data,
+                                  tinygltf::Accessor& access_out)
+  {
+    // Find the accessor
+    auto access_find = scene.accessors.find(accessor);
+
+    if(access_find == scene.accessors.end())
+    {
+      // Failed to find accessor
+      return false;
+    }
+
+    // Accessor found
+    tinygltf::Accessor const& access = access_find->second;
+
+    // Now find the bufferView
+    auto buf_view_find =
+      scene.bufferViews.find(access.bufferView);
+
+    if(buf_view_find == scene.bufferViews.end())
+    {
+      // Failed to find buffer view
+      return false;
+    }
+
+    // Buffer view found
+    tinygltf::BufferView const& buf_view = buf_view_find->second;
+
+    // Now find the buffer
+    auto buf_find = scene.buffers.find(buf_view.buffer);
+
+    if(buf_find == scene.buffers.end())
+    {
+      // Failed to find buffer
+      return false;
+    }
+
+    // Buffer found
+    tinygltf::Buffer buf = buf_find->second;
+
+    // Find the offset and length (only consider the buffer view, because we are
+    // returning the accessor so the client code can do the rest.
+    std::size_t offset = buf_view.byteOffset;
+    std::size_t length = buf_view.byteLength;
+
+    // Now copy the data
+    data.resize(length);
+    std::copy(&buf.data[offset], &buf.data[offset] + length, data.begin());
+
+    // And the accessor
+    access_out = access;
+
+    // Success!
+    return true;
+  }
 }
