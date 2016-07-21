@@ -6,7 +6,7 @@
 #include <memory>
 #include "../common/vec.h"
 #include "texture.h"
-#include "mesh.h"
+#include "imesh.h"
 #include "shader.h"
 namespace redc
 {
@@ -33,8 +33,8 @@ namespace redc
       virtual void use_shader(Shader&) noexcept = 0;
       virtual Shader* active_shader() const noexcept = 0;
 
-      virtual std::unique_ptr<Mesh> make_mesh_repr() noexcept = 0;
-      virtual void bind_mesh(Mesh& mesh) noexcept = 0;
+      virtual std::unique_ptr<IMesh> make_mesh_repr() noexcept = 0;
+      virtual void bind_mesh(IMesh& mesh) noexcept = 0;
 
       virtual std::unique_ptr<Texture> make_texture_repr() noexcept = 0;
       virtual void bind_texture(Texture& tex, unsigned int loc) noexcept = 0;

@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 
-#include "gfx/mesh.h"
+#include "gfx/imesh.h"
 #include "gfx/support/load_wavefront.h"
 
 #include <sstream>

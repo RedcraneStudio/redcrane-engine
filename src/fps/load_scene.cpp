@@ -19,7 +19,7 @@
 #include "../collisionlib/triangle_conversion.h"
 namespace redc { namespace fps
 {
-  Scene load_scene(std::string fn, std::unique_ptr<redc::Mesh> msh) noexcept
+  Scene load_scene(std::string fn, std::unique_ptr<redc::IMesh> msh) noexcept
   {
     using namespace redc;
 
@@ -94,10 +94,10 @@ namespace redc { namespace fps
 
     int accum_vertex_off = 0, accum_element_off = 0;
 
-    Maybe_Owned<Mesh> mesh = std::move(msh);
+    Maybe_Owned<IMesh> mesh = std::move(msh);
     for(std::size_t i = 0; i < metas.size(); ++i)
     {
-      auto mesh_for_chunk = Maybe_Owned<Mesh>{};
+      auto mesh_for_chunk = Maybe_Owned<IMesh>{};
       if(i == 0)
       {
         mesh_for_chunk = std::move(mesh);

@@ -239,7 +239,7 @@ namespace redc
     std::unique_ptr<Texture> lightmap;
 
     std::unique_ptr<Texture> crosshair;
-    std::unique_ptr<Mesh> ch_mesh;
+    std::unique_ptr<IMesh> ch_mesh;
     std::unique_ptr<gfx::Shader> ch_shader;
 
     effects::Envmap_Effect envmap;

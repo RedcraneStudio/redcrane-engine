@@ -186,7 +186,7 @@ namespace redc { namespace terrain
                            std::size_t level, std::size_t vertices) noexcept
   {
     // Create a mesh and give the root node ownership.
-    auto mesh = Maybe_Owned<Mesh>{idriver.make_mesh_repr()};
+    auto mesh = Maybe_Owned<IMesh>{idriver.make_mesh_repr()};
 
     // Figure out the final size of the mesh.
     auto final_verts =detail::mesh_vertices(level, tree.get_depth(), vertices);

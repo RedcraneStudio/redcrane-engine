@@ -43,7 +43,7 @@ namespace redc { namespace gfx
 
     std::unique_ptr<Texture> white_texture_;
 
-    std::unique_ptr<Mesh> mesh_;
+    std::unique_ptr<IMesh> mesh_;
 
     unsigned int pos_buf_;
     unsigned int tex_buf_;
@@ -69,9 +69,9 @@ namespace redc { namespace gfx
 
     std::vector<Shape> to_draw_;
 
-    void set_rect_(Mesh& rect, Volume<int> vol) noexcept;
+    void set_rect_(IMesh& rect, Volume<int> vol) noexcept;
 
-    void set_rect_(Mesh& rect, Volume<int> vol,
+    void set_rect_(IMesh& rect, Volume<int> vol,
                    Volume<int> tex_v, Vec<int> tex_max) const noexcept;
   };
 } }

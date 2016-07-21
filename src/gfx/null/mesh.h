@@ -3,11 +3,11 @@
  * All rights reserved.
  */
 #pragma once
-#include "../mesh.h"
+#include "../imesh.h"
 #include "../../common/id_gen.hpp"
 namespace redc { namespace gfx { namespace null
 {
-  struct Null_Mesh : public Mesh
+  struct Null_Mesh : public IMesh
   {
     void make_buffers(unsigned int, buf_t*) {};
     void allocate_buffer(buf_t, Buffer_Type, unsigned int,

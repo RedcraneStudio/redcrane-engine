@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "mesh.h"
+#include "imesh.h"
 #include "../common/maybe_owned.hpp"
 #include <boost/optional.hpp>
 namespace redc { namespace gfx
@@ -15,7 +15,7 @@ namespace redc { namespace gfx
 
     Primitive_Type type = Primitive_Type::Triangle;
 
-    Maybe_Owned<Mesh> mesh;
+    Maybe_Owned<IMesh> mesh;
 
     boost::optional<int> base_vertex;
   };

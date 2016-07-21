@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #pragma once
-#include "../mesh.h"
+#include "../imesh.h"
 #include "glad/glad.h"
 #include "../idriver.h"
 namespace redc { namespace gfx { namespace gl

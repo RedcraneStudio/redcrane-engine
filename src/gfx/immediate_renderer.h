@@ -24,11 +24,11 @@ namespace redc { namespace gfx
   private:
     IDriver* d_;
 
-    Mesh::buf_t pos_buf_;
+    IMesh::buf_t pos_buf_;
     std::size_t pos_pos_;
     std::unique_ptr<Shader> shader_;
 
-    std::unique_ptr<Mesh> mesh_;
+    std::unique_ptr<IMesh> mesh_;
 
     Color cur_dif_;
 

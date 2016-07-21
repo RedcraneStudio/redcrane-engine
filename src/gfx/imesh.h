@@ -36,9 +36,9 @@ namespace redc
   /*!
    * \brief A simple collection of buffers for vertex attributes.
    */
-  struct Mesh
+  struct IMesh
   {
-    virtual ~Mesh() noexcept {}
+    virtual ~IMesh() noexcept {}
 
     using buf_t = unsigned int;
 
@@ -98,7 +98,7 @@ namespace redc
   };
 
   template <class T>
-  bool mesh_has_room(Mesh& m, Mesh::buf_t buffer, unsigned int offset,
+  bool mesh_has_room(IMesh& m, IMesh::buf_t buffer, unsigned int offset,
                      unsigned int elements) noexcept
   {
     return m.get_buffer_size(buffer) - offset >= elements * sizeof(T);

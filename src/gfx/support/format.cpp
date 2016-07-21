@@ -5,7 +5,7 @@
 #include "format.h"
 namespace redc { namespace gfx
 {
-  void format_standard_mesh_buffers(Mesh& m) noexcept
+  void format_standard_mesh_buffers(IMesh& m) noexcept
   {
     m.format_buffer(m.get_buffer(0), 0, 3, Buffer_Format::Float, 0, 0);
     m.enable_vertex_attrib(0);

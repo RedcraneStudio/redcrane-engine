@@ -62,13 +62,13 @@ namespace redc
         return cur_shader_;
       }
 
-      std::unique_ptr<Mesh> Driver::make_mesh_repr() noexcept
+      std::unique_ptr<IMesh> Driver::make_mesh_repr() noexcept
       {
         // Make it and forget about it, we'll just use a dynamic cast for
         // simplicity.
         return std::make_unique<GL_Mesh>(*this);
       }
-      void Driver::bind_mesh(Mesh& mesh) noexcept
+      void Driver::bind_mesh(IMesh& mesh) noexcept
       {
         // This kind of design can be more cache friendly. But the good thing
         // is when we are efficiently storing mesh data in a single mesh we

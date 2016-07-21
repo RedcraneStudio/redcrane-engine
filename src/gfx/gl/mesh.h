@@ -5,11 +5,11 @@
 #pragma once
 #include "glad/glad.h"
 #include <array>
-#include "../mesh.h"
+#include "../imesh.h"
 #include "driver.h"
 namespace redc { namespace gfx { namespace gl
 {
-  struct GL_Mesh : public Mesh
+  struct GL_Mesh : public IMesh
   {
     GL_Mesh(Driver& driver) noexcept;
     virtual ~GL_Mesh() noexcept;

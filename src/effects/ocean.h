@@ -31,7 +31,7 @@ namespace redc { namespace effects
   private:
     std::size_t elements_;
 
-    std::unique_ptr<Mesh> grid_mesh_;
+    std::unique_ptr<IMesh> grid_mesh_;
     std::unique_ptr<gfx::Shader> shader_;
 
     void update_ocean_gen_params() noexcept;

@@ -3,8 +3,8 @@
  * All rights reserved.
  */
 #pragma once
-#include "../mesh.h"
+#include "../imesh.h"
 namespace redc { namespace gfx
 {
-  void format_standard_mesh_buffers(Mesh& mesh) noexcept;
+  void format_standard_mesh_buffers(IMesh& mesh) noexcept;
 } }

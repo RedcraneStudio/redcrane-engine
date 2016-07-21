@@ -20,7 +20,7 @@ namespace redc { namespace gfx { namespace null
     return cur_shader_;
   }
 
-  std::unique_ptr<Mesh> Driver::make_mesh_repr() noexcept
+  std::unique_ptr<IMesh> Driver::make_mesh_repr() noexcept
   {
     return std::make_unique<Null_Mesh>();
   }

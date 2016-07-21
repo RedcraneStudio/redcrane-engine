@@ -28,5 +28,5 @@ namespace redc { namespace fps
     std::vector<Object> objects;
   };
 
-  Scene load_scene(std::string fn, std::unique_ptr<Mesh> msh) noexcept;
+  Scene load_scene(std::string fn, std::unique_ptr<IMesh> msh) noexcept;
 } }

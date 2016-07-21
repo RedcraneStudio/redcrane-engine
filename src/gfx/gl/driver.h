@@ -24,8 +24,8 @@ namespace redc
     void use_shader(Shader&) noexcept override;
     Shader* active_shader() const noexcept override;
 
-    std::unique_ptr<Mesh> make_mesh_repr() noexcept override;
-    void bind_mesh(Mesh& mesh) noexcept override;
+    std::unique_ptr<IMesh> make_mesh_repr() noexcept override;
+    void bind_mesh(IMesh& mesh) noexcept override;
 
     std::unique_ptr<Texture> make_texture_repr() noexcept override;
     void bind_texture(Texture& tex, unsigned int loc) noexcept override;
@@ -50,6 +50,6 @@ namespace redc
   private:
 
     Shader* cur_shader_;
-    Mesh* cur_mesh_;
+    IMesh* cur_mesh_;
   };
 }

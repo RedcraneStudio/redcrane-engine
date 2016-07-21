@@ -13,7 +13,7 @@
 #include "../gen/terrain.h"
 
 #include "../gfx/idriver.h"
-#include "../gfx/mesh.h"
+#include "../gfx/imesh.h"
 #include "../gfx/mesh_chunk.h"
 namespace redc { namespace terrain
 {

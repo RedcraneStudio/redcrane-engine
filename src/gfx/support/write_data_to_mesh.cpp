@@ -7,7 +7,7 @@ namespace redc { namespace gfx
 {
   // TODO: Remove these implementations!
   void allocate_mesh_buffers(Indexed_Mesh_Data const& data,
-                             Mesh& mesh, Upload_Hint up,
+                             IMesh& mesh, Upload_Hint up,
                              Usage_Hint us) noexcept
   {
     mesh.allocate_buffer(data.vertices.size() * sizeof(Vertex::position),
@@ -18,7 +18,7 @@ namespace redc { namespace gfx
     mesh.allocate_element_array(data.elements.size(), us, up);
   }
   void allocate_mesh_buffers(Ordered_Mesh_Data const& data,
-                             Mesh& mesh, Upload_Hint up,
+                             IMesh& mesh, Upload_Hint up,
                              Usage_Hint us) noexcept
   {
     mesh.allocate_buffer(data.vertices.size() * sizeof(Vertex::position),
@@ -28,7 +28,7 @@ namespace redc { namespace gfx
     mesh.allocate_buffer(data.vertices.size() * sizeof(Vertex::uv),
                          us, up);
   }
-  void format_mesh_buffers(Mesh& m) noexcept
+  void format_mesh_buffers(IMesh& m) noexcept
   {
     m.format_buffer(m.get_buffer(0), 0, 3, Buffer_Format::Float, 0, 0);
     m.enable_vertex_attrib(0);
@@ -43,7 +43,7 @@ namespace redc { namespace gfx
   template <class T>
   void write_vertex_member_to_mesh(Vertex const* begin, unsigned int length,
                                    T Vertex::* member,
-                                   Mesh& m,
+                                   IMesh& m,
                                    unsigned int buffer,
                                    unsigned int byte_offset) noexcept
   {
@@ -66,7 +66,7 @@ namespace redc { namespace gfx
 
   void write_vertices_to_mesh(std::vector<Vertex> const& vertices,
                               Mesh_Chunk& chunk,
-                              Maybe_Owned<Mesh> mesh,
+                              Maybe_Owned<IMesh> mesh,
                               unsigned int elemnt_offset) noexcept
   {
     if(!mesh) return;
@@ -100,7 +100,7 @@ namespace redc { namespace gfx
   }
   void write_element_array_to_mesh(std::vector<unsigned int> const& data,
                                    Mesh_Chunk& c,
-                                   Maybe_Owned<Mesh> mesh,
+                                   Maybe_Owned<IMesh> mesh,
                                    unsigned int buffer,
                                    unsigned int element_offset,
                                    int base_vertex) noexcept
@@ -127,7 +127,7 @@ namespace redc { namespace gfx
   }
 
   Mesh_Chunk write_data_to_mesh(Indexed_Mesh_Data const& data,
-                                Maybe_Owned<Mesh> mesh,
+                                Maybe_Owned<IMesh> mesh,
                                 unsigned int vertice_element_offset,
                                 unsigned int element_array_offset) noexcept
   {
@@ -150,7 +150,7 @@ namespace redc { namespace gfx
     return ret;
   }
   Mesh_Chunk write_data_to_mesh(Ordered_Mesh_Data const& data,
-                                Maybe_Owned<Mesh> mesh,
+                                Maybe_Owned<IMesh> mesh,
                                 unsigned int vert_off) noexcept
   {
     Mesh_Chunk ret;

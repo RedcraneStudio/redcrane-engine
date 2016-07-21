@@ -31,7 +31,7 @@ namespace redc { namespace strat
   }
 
   std::vector<Structure>
-  load_structures(std::string filename, Maybe_Owned<Mesh> mesh,
+  load_structures(std::string filename, Maybe_Owned<IMesh> mesh,
                   gfx::IDriver& driver,
                   std::vector<Indexed_Mesh_Data>* imd) noexcept
   {

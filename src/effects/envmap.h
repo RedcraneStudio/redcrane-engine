@@ -12,7 +12,7 @@ namespace redc { namespace effects
     void render(gfx::IDriver& driver, gfx::Camera const& cam) noexcept;
   private:
     std::size_t elements_ = 0;
-    std::unique_ptr<Mesh> mesh_;
+    std::unique_ptr<IMesh> mesh_;
     std::unique_ptr<Texture> envmap_;
     std::unique_ptr<gfx::Shader> shader_;
   };
