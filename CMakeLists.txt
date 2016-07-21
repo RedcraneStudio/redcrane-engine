@@ -36,6 +36,7 @@ add_subdirectory(opensimplex)
 add_subdirectory(mods)
 add_subdirectory(assets)
 add_subdirectory(survival)
+add_subdirectory(mildly-cold)
 add_subdirectory(src)
 add_subdirectory(tests)
 

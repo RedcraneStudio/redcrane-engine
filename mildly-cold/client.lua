@@ -5,16 +5,22 @@
 local rc = redcrane
 
 local decl = {
-    map = "Library",
+    map = "Library-map",
     properties = "properties",
     skin = "default_skin"
 }
 
-rc:load_game_set(decl)
+scene = rc.scene.make_scene()
+player = scene:add_player()
+
+map = rc:load_map(decl.map)
+
+rc:log_i("Done initializing")
 
 while rc:running() do
     rc:step()
-    rc:render()
+    scene:step()
+    scene:render()
     rc:swap_window()
 end
 

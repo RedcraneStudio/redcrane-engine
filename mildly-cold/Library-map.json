@@ -1,6 +1,6 @@
 {
     "name": "Library",
-    "asset": "Library.gltf",
+    "asset": "../../Library/Library.gltf",
     "players": 1,
     "spawn": {
         "positions": [
@@ -9,10 +9,10 @@
         "choice": "random"
     },
     "collision_mesh": {
-        "position": "accessor_355",
-        "indices": "accessor_230"
+        "vertices": "Collision_Vertices",
+        "indices": "Collision_Indices"
     },
     "physics": {
-        "gravity": [0.0f, -9.81f, 0.0f]
+        "gravity": [0.0, -9.81, 0.0]
     }
 }
