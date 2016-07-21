@@ -3,55 +3,75 @@
  * All rights reserved.
  */
 #pragma once
+#include <string>
 #include <memory>
+
+#include "common/observer_ptr.hpp"
+
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+
+#include "gfx/scene.h"
+
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-#include "common/observer_ptr.hpp"
-#include "gfx/mesh_chunk.h"
-#include "gfx/mesh_data.h"
 namespace redc
 {
   struct Rendering_Component
   {
-    gfx::Mesh_Chunk chunk;
+    virtual ~Rendering_Component() {}
+
+    Asset asset;
   };
 
-  // This physics component should really be more general, but for now it will
-  // work fine. Best later to put btRigidBody in the base component and the
-  // shape in the derived class.
-  struct Server;
   struct Map;
   struct Physics_Component
   {
-    Physics_Component(Server& server) : server_(&server) {}
-    ~Physics_Component();
+    virtual ~Physics_Component() {}
 
     observer_ptr<Map> map;
 
-    std::unique_ptr<btTriangleIndexVertexArray> vertices;
-    std::unique_ptr<btBvhTriangleMeshShape> shape;
     std::unique_ptr<btRigidBody> body;
+  };
 
-  private:
-    Server* server_;
+  struct Spawns_Decl
+  {
+    enum
+    {
+      Random,
+    } choice;
+    std::vector<glm::vec3> positions;
+  };
+
+  struct Physics_Decl
+  {
+    glm::vec3 gravity;
   };
 
   struct Map
   {
-    // Construct the mesh
-    Map() : mesh(std::make_unique<Indexed_Mesh_Data>()) {}
-    Map(Indexed_Mesh_Data&& data)
-      : mesh(std::make_unique<Indexed_Mesh_Data>(std::move(data))) {}
+    std::string name;
 
-    // This needs to be constructed on the heap so we can reference it by
-    // pointer elsewhere (notably the btTriangleIndexVertexArray).
-    // Also, as a side effect we get an implicit move constructor and no copy
-    // constructor.
-    std::unique_ptr<Indexed_Mesh_Data> mesh;
+    tinygltf::Scene scene;
+    short players;
 
-    Maybe_Owned<Rendering_Component> render;
-    Maybe_Owned<Physics_Component> physics;
+    Spawns_Decl spawns;
+
+    // When we are dealing with a glTF, these are names of accessors.
+    std::string collision_vertices_source;
+    std::string collision_indices_source;
+
+    Physics_Decl physics;
+
+    // Initialized later, if necessary.
+    std::unique_ptr<Rendering_Component> render;
+    std::unique_ptr<Physics_Component> collision;
+
   };
+
+  bool load_spawns(Spawns_Decl& spawns, rapidjson::Value const& val,
+                   std::string* err);
+  bool load_map_json(Map& map, rapidjson::Value const& doc, std::string* err);
 
 }

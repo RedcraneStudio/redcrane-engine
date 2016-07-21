@@ -12,6 +12,10 @@
 #include "../gfx/support/allocate.h"
 #include "../gfx/support/write_data_to_mesh.h"
 
+#include "../common/json.h"
+
+#include "../assets/minigltf.h"
+
 namespace redc
 {
   struct Model_Visitor : boost::static_visitor<glm::mat4>
@@ -60,28 +64,21 @@ namespace redc
     }
     void operator()(Map_Loaded_Event const& event) const
     {
-      REDC_ASSERT_MSG(event.map != nullptr, "Map not provided to client");
+      REDC_ASSERT_MSG(event.map != nullptr, "Invalid map provided to client");
 
-      auto& map = event.map;
+      // Compile the map glTF scene into a renderable asset
+      event.map->render = std::make_unique<Rendering_Component>();
 
-      // Load the map into a mesh chunk
-      auto mesh_repr = client_->driver->make_mesh_repr();
-      gfx::allocate_standard_mesh_buffers(map->mesh->vertices.size(),
-                                          map->mesh->elements.size(),
-                                          *mesh_repr,
-                                          Usage_Hint::Draw,
-                                          Upload_Hint::Static);
-      gfx::format_standard_mesh_buffers(*mesh_repr);
+      // Load the cel techniques first
+      tinygltf::Scene cel_scene;
+      bool gltf_load_succeeded = load_gltf_file(cel_scene,
+                                                "../assets/gltf/cel.gltf");
+      REDC_ASSERT_MSG(gltf_load_succeeded,
+        "glTF techniques could not be found; broken installation");
+      event.map->render->asset = load_asset(cel_scene);
 
-      // Make a rendering component
-      auto rendering_component = std::make_unique<Rendering_Component>();
-
-      // Set the chunk
-      rendering_component->chunk = gfx::write_data_to_mesh(
-          *map->mesh, std::move(mesh_repr), 0, 0);
-
-      // Give the rendering component to the map
-      map->render = std::move(rendering_component);
+      // Then the map
+      append_to_asset(event.map->render->asset, event.map->scene);
     }
   private:
     Client* client_;
@@ -109,42 +106,141 @@ namespace redc
   private:
     Server* server_;
   };
+
+  struct Map_Collision : public Physics_Component
+  {
+    // This is a map-specific shape, so it goes here. Use it to construct the
+    // rigid body found in our base class.
+    std::unique_ptr<btTriangleIndexVertexArray> vertices;
+    std::unique_ptr<btBvhTriangleMeshShape> shape;
+
+    Map_Collision(Server& server) : server_(&server) {}
+    ~Map_Collision();
+
+    std::vector<uint8_t>* vertex_data;
+    std::vector<uint8_t>* index_data;
+
+  private:
+    Server* server_;
+  };
+
+  Map_Collision::~Map_Collision()
+  {
+    // Remove the map body from the world when we are destructed.
+    server_->bt_world->removeRigidBody(this->body.get());
+
+    delete vertex_data;
+    delete index_data;
+  }
+
   void Server_Event_Visitor::operator()(Map_Loaded_Event const& event) const
   {
-    REDC_ASSERT_MSG(event.map != nullptr, "New map not provided to server");
+    REDC_ASSERT_MSG(event.map != nullptr, "Invalid map provided to server");
 
     auto& map = event.map;
 
-    // By passing the physics component the server we can be sure when the
-    // map is destructed it is removed from the world as a collision object.
-    // TODO: This construct / destruct and remove of the rigid body should
-    // either be more localized right here, or abstracted in a different way.
-    // See map.h Physics_Component note about that.
-    auto physics = make_maybe_owned<Physics_Component>(*server_);
+    // Use the accessors from the glTF scene.
+    std::vector<uint8_t>* verts_data = new std::vector<uint8_t>();
+    tinygltf::Accessor verts_access;
+
+    std::vector<uint8_t>* indices_data = new std::vector<uint8_t>();
+    tinygltf::Accessor indices_access;
+
+    if(!resolve_gltf_accessor_data(map->scene, map->collision_vertices_source,
+                                   *verts_data, verts_access) ||
+       !resolve_gltf_accessor_data(map->scene, map->collision_indices_source,
+                                   *indices_data, indices_access))
+    {
+      log_w("Failed to load collision mesh - map collision will be turned off");
+      return;
+    }
+
+    // Some assertions (but they shouldn't crash the program)
+    if(verts_access.type != TINYGLTF_TYPE_VEC3 &&
+       verts_access.type != TINYGLTF_TYPE_VEC4)
+    {
+      log_w("Collision vertex data must be given as VEC3s or VEC4s");
+      return;
+    }
+    if(indices_access.type != TINYGLTF_TYPE_SCALAR)
+    {
+      log_w("Collision index data must be given as SCALARs");
+      return;
+    }
+
+    // Sensible default of the size of a short.
+    std::size_t index_size = 2;
+
+    // I hope the bullet knows what we mean when it comes to signedness.
+    PHY_ScalarType index_type = PHY_INTEGER;
+
+    // Find the size of each index
+    switch(indices_access.componentType)
+    {
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+    case TINYGLTF_COMPONENT_TYPE_BYTE:
+      index_size = 1;
+      index_type = PHY_UCHAR;
+      break;
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+    case TINYGLTF_COMPONENT_TYPE_SHORT:
+      index_size = 2;
+      index_type = PHY_SHORT;
+      break;
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+    case TINYGLTF_COMPONENT_TYPE_INT:
+      index_size = 4;
+      index_type = PHY_INTEGER;
+      break;
+    default:
+      log_w("Invalid data type of collision index data");
+      return;
+    }
+
+    std::size_t vert_size = sizeof(float);
+    PHY_ScalarType vert_type = PHY_FLOAT;
+    switch(verts_access.componentType)
+    {
+    case TINYGLTF_COMPONENT_TYPE_FLOAT:
+      vert_size = sizeof(float);
+      vert_type = PHY_FLOAT;
+      break;
+    case TINYGLTF_COMPONENT_TYPE_DOUBLE:
+      vert_size = sizeof(double);
+      vert_type = PHY_DOUBLE;
+      break;
+    }
+
+    auto collision = std::make_unique<Map_Collision>(*server_);
+
+    collision->vertex_data = verts_data;
+    collision->index_data = indices_data;
 
     btIndexedMesh indexed_mesh;
-    indexed_mesh.m_numTriangles = map->mesh->elements.size() / 3;
-    indexed_mesh.m_triangleIndexBase = (unsigned char*) &map->mesh->elements[0];
-    indexed_mesh.m_triangleIndexStride = 3 * sizeof(unsigned int);
-    indexed_mesh.m_numVertices = map->mesh->elements.size();
-    indexed_mesh.m_vertexBase = (unsigned char*) &map->mesh->vertices[0];
-    indexed_mesh.m_vertexStride = sizeof(Vertex);
-    indexed_mesh.m_vertexType = PHY_FLOAT;
 
-    physics->vertices = std::make_unique<btTriangleIndexVertexArray>();
-    physics->vertices->addIndexedMesh(indexed_mesh, PHY_INTEGER);
+    indexed_mesh.m_numVertices = indices_access.count;
+    indexed_mesh.m_triangleIndexBase = &(*indices_data)[indices_access.byteOffset];
+    indexed_mesh.m_triangleIndexStride = index_size * 3;
 
-    physics->shape = std::make_unique<btBvhTriangleMeshShape>(
-        physics->vertices.get(), false, true);
+    indexed_mesh.m_numTriangles = indices_access.count / 3;
+    indexed_mesh.m_vertexBase = &(*verts_data)[verts_access.byteOffset];
+    indexed_mesh.m_vertexStride = vert_size * 3;
+    indexed_mesh.m_vertexType = vert_type;
+
+    collision->vertices = std::make_unique<btTriangleIndexVertexArray>();
+    collision->vertices->addIndexedMesh(indexed_mesh, index_type);
+
+    collision->shape = std::make_unique<btBvhTriangleMeshShape>(
+        collision->vertices.get(), false, true);
 
     btRigidBody::btRigidBodyConstructionInfo map_rb_info
-            {0, nullptr, physics->shape.get()};
+            {0, nullptr, collision->shape.get()};
 
-    physics->body = std::make_unique<btRigidBody>(map_rb_info);
+    collision->body = std::make_unique<btRigidBody>(map_rb_info);
 
-    server_->bt_world->addRigidBody(physics->body.get());
+    server_->bt_world->addRigidBody(collision->body.get());
 
-    event.map->physics = std::move(physics);
+    event.map->collision = std::move(collision);
   }
   void Server::process_event(event_t const& event)
   {
@@ -181,24 +277,41 @@ namespace redc
   {
     return players[id-1];
   }
-
   void Server::load_map(std::string const& filename)
   {
-    log_i("Loading map: '%'", filename);
+    log_i("Loading map '%'...", filename);
 
-    // Right now this is a filename that points to a model
-    auto mesh_data = engine_->mesh_cache->load(filename);
+    // Load json file
+    rapidjson::Document mapdoc;
+    if(!load_json(mapdoc, filename + ".json"))
+    {
+      log_e("Failed to load map file: %.json", filename);
+      return;
+    }
 
-    // Construct the map
-    auto map = std::make_unique<Map>(std::move(mesh_data));
+    // Allocate on the heap so the address doesn't change, it might be
+    // referenced in the physics or render component.
+    auto map = std::make_unique<Map>();
+
+    std::string err;
+    if(load_map_json(*map, mapdoc, &err))
+    {
+      log_i("Successfully loaded map '%'", filename);
+    }
+    else
+    {
+      log_e("Failed to load map '%': %", filename, err);
+    }
+
+    // Record the pointer to the map
     auto map_observer = observer_ptr<Map>{map.get()};
 
-    // Keep the map around
+    // Keep the map around in the server
     maps.push_back(std::move(map));
 
     // Queue the new map event. This should inform the client and a Server
     // routine that the map has been loaded. The client will probably upload
-    // the data to GPU memory and the server will show bullet the data so we
+    // the data to GPU memory and the server will give bullet the data so we
     // have collision.
     engine_->push_outgoing_event(Map_Loaded_Event{map_observer});
 

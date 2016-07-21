@@ -338,8 +338,11 @@ extern "C"
 
     using namespace gfx::tags;
 
-    default_shader->set_mat4(model_tag, glm::mat4(1.0f));
-    gfx::render_chunk(scene->active_map->render->chunk);
+    // Making the function think OpenGL state *hasn't* changed is a dangerous
+    // assumption we can't make.
+    Rendering_State render_state;
+    render_asset(scene->active_map->render->asset, active_camera.cam,
+                 render_state);
 
     // i is the loop counter, id is our current id.
     // Loop however many times as we have ids.

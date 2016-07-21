@@ -233,8 +233,12 @@ namespace redc
     Timer<> frame_timer;
 #endif
 
-    // Should this be a peer lock? Not that it actually be! Maps are completely
-    // referenced in the engine?
+    // Use for the rendering the map, and ideally everything, so that it works
+    // properly.
+    //Rendering_State render_state;
+
+    // Maps are completely referenced in the engine, so we don't need peer locks
+    // here.
     observer_ptr<Map> active_map;
     std::unique_ptr<Texture> lightmap;
 
