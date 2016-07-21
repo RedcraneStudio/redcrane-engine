@@ -17,7 +17,7 @@
 
 namespace redc
 {
-  bool load_gltf_file(Scene& scene, std::string const& name)
+  bool load_gltf_file(tinygltf::Scene& scene, std::string const& name)
   {
     std::string err;
 
@@ -38,9 +38,9 @@ namespace redc
 
     return true;
   }
-  boost::optional<Scene> load_gltf_file(std::string const& name)
+  boost::optional<tinygltf::Scene> load_gltf_file(std::string const& name)
   {
-    boost::optional<Scene> scene = Scene{};
+    boost::optional<tinygltf::Scene> scene = tinygltf::Scene{};
     if(load_gltf_file(*scene.get_ptr(), name))
     {
       return scene;
