@@ -1183,7 +1183,8 @@ namespace redc
         // Find the referenced material
         prim.mat_i =
           find_string_index(mat_names, in_prim.material,
-                            "Primitive references invalid material name");
+                            "Primitive of mesh '%' references invalid material"
+                            " name '%'", mesh_pair.first, in_prim.material);
 
         // Add references to any accessors and their semantics.
         for(auto accessor_pair : in_prim.attributes)
