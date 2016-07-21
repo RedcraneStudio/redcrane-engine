@@ -4,6 +4,8 @@
  */
 #include "texture.h"
 #include <cstring>
+
+#include "../../common/debugging.h"
 namespace redc { namespace gfx { namespace gl
 {
   void GL_Texture::uninit() noexcept
@@ -15,8 +17,8 @@ namespace redc { namespace gfx { namespace gl
     uninit();
   }
   void GL_Texture::allocate_(Vec<int> const& extents,
-                             Image_Format form,
-                             Image_Type type) noexcept
+                             Texture_Format form,
+                             Texture_Target target) noexcept
   {
     uninit();
     glGenTextures(1, &tex_id);
@@ -24,101 +26,92 @@ namespace redc { namespace gfx { namespace gl
     // TODO: Figure something out, this is unexpected.
     glActiveTexture(GL_TEXTURE0);
 
-    if(type == Image_Type::Tex_2D)
+    glBindTexture((GLenum) target, tex_id);
+
+    // Remember the last three fields of glTexImage2D aren't significant in our
+    // case because we have no data to copy over, we are just allocating room.
+
+    if(target == Texture_Target::Tex_2D)
     {
-      texture_type = GL_TEXTURE_2D;
+      glTexImage2D(texture_type, 0, (GLenum) form, extents.x, extents.y,
+                   0, GL_RGBA, GL_FLOAT, NULL);
     }
-    else
+    else if(target == Texture_Target::Cube_Map)
     {
-      texture_type = GL_TEXTURE_CUBE_MAP;
-    }
-
-    glBindTexture(texture_type, tex_id);
-
-    // Only do the allocation if we are not a cube map
-    if(type == Image_Type::Tex_2D)
-    {
-      if(form == Image_Format::Rgba)
-      {
-        // Remember the last three fields aren't significant.
-        glTexImage2D(texture_type, 0, GL_RGBA, extents.x, extents.y,
-                     0, GL_RGBA, GL_FLOAT, NULL);
-      }
-      else if(form == Image_Format::Depth)
-      {
-        // Remember the last three fields aren't significant.
-        glTexImage2D(texture_type, 0, GL_DEPTH_COMPONENT, extents.x, extents.y,
-                     0, GL_RGBA, GL_FLOAT, NULL);
-      }
-    }
-    else if(type == Image_Type::Cube_Map)
-    {
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, (GLenum) form, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, (GLenum) form, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, (GLenum) form, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, (GLenum) form, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, (GLenum) form, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, (GLenum) form, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
     }
 
-    if(type == Image_Type::Tex_2D)
+    if(target == Texture_Target::Tex_2D)
     {
-      glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER,
+      glTexParameteri((GLenum) target, GL_TEXTURE_MIN_FILTER,
                       GL_NEAREST_MIPMAP_NEAREST);
-      glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri((GLenum) target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-      // These are actually set to their respective values by default anyway, but
-      // this is more clear.
-      glTexParameteri(texture_type, GL_TEXTURE_BASE_LEVEL, 0);
-      glTexParameteri(texture_type, GL_TEXTURE_MAX_LEVEL, 5);
+      // These are actually set to their respective values by default anyway,
+      // but this is more clear.
+      glTexParameteri((GLenum) target, GL_TEXTURE_BASE_LEVEL, 0);
+      glTexParameteri((GLenum) target, GL_TEXTURE_MAX_LEVEL, 5);
 
-      glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_REPEAT);
+      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_R, GL_REPEAT);
     }
-    else if(type == Image_Type::Cube_Map)
+    else if(target == Texture_Target::Cube_Map)
     {
-      glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri((GLenum) target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri((GLenum) target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-      glTexParameteri(texture_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-      glTexParameteri(texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
     // Save the format for later.
     format_ = form;
-    type_ = type;
+    type_ = target;
   }
-  void GL_Texture::blit_tex2d_data(Volume<int> const& vol, Data_Type type,
+  void GL_Texture::blit_tex2d_data(Volume<int> const& vol, Data_Type data_type,
                                    void const* in_data) noexcept
   {
-    if(type_ != Image_Type::Tex_2D) return;
+    if(type_ != Texture_Target::Tex_2D)
+    {
+      log_d("Trying to blit 2D data to non-2d texture");
+      return;
+    }
 
     // Bail out if the volume isn't valid, we want to avoid the
     // GL_INVALID_OPERATION if we can.
-    if(vol.width == 0 || vol.height == 0) return;
+    if(vol.width == 0 || vol.height == 0)
+    {
+      log_d("Ignoring zero volume blit attempt");
+      return;
+    }
 
     std::size_t type_size;
-    GLenum data_type;
 
-    switch(type)
+    switch(data_type)
     {
-      case Data_Type::Float:
-        type_size = sizeof(float);
-        data_type = GL_FLOAT;
-        break;
-      case Data_Type::Unsigned_Byte:
-        type_size = sizeof(uint8_t);
-        data_type = GL_UNSIGNED_BYTE;
-        break;
+    case Data_Type::Float:
+      type_size = sizeof(float);
+      break;
+    case Data_Type::UByte:
+      type_size = sizeof(uint8_t);
+      break;
+    default:
+      REDC_UNREACHABLE_MSG("Unsupported data type for texture data");
+      return;
     }
 
     // Row size in bytes
@@ -127,13 +120,17 @@ namespace redc { namespace gfx { namespace gl
 
     switch(format_)
     {
-      case Image_Format::Rgba:
+      case Texture_Format::Rgba:
         row_size = type_size * 4 * vol.width;
         data_format = GL_RGBA;
         break;
-      case Image_Format::Depth:
+      case Texture_Format::Rgb:
+        row_size = type_size * 3 * vol.width;
+        data_format = GL_RGB;
+        break;
+      case Texture_Format::Alpha:
         row_size = type_size * vol.width;
-        data_format = GL_DEPTH_COMPONENT;
+        data_format = GL_ALPHA;
         break;
     }
 
@@ -159,39 +156,26 @@ namespace redc { namespace gfx { namespace gl
     glBindTexture(GL_TEXTURE_2D, tex_id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, vol.pos.x,
                     allocated_extents().y - vol.pos.y - vol.height,
-                    vol.width, vol.height, data_format, data_type, &out_data[0]);
+                    vol.width, vol.height, data_format, (GLenum) data_type,
+                    &out_data[0]);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     delete[] out_data;
   }
 
   void GL_Texture::blit_cube_data(Cube_Map_Texture const& side,
-                                  Volume<int> const& vol, Data_Type type,
+                                  Volume<int> const& vol, Data_Type data_type,
                                   void const* in_data) noexcept
   {
-    if(type_ != Image_Type::Cube_Map) return;
-    if(vol.width == 0 || vol.height == 0) return;
-
-    GLenum data_type;
-    switch(type)
+    if(type_ != Texture_Target::Cube_Map)
     {
-      case Data_Type::Float:
-        data_type = GL_FLOAT;
-        break;
-      case Data_Type::Unsigned_Byte:
-        data_type = GL_UNSIGNED_BYTE;
-        break;
+      log_d("Trying to blit cube map to a texture that is not a cube map");
+      return;
     }
-
-    GLenum data_format;
-    switch(format_)
+    if(vol.width == 0 || vol.height == 0)
     {
-      case Image_Format::Rgba:
-        data_format = GL_RGBA;
-        break;
-      case Image_Format::Depth:
-        data_format = GL_DEPTH_COMPONENT;
-        break;
+      log_d("Ignoring zero volume blit attempt");
+      return;
     }
 
     // No need to flip data for cube maps.
@@ -224,7 +208,8 @@ namespace redc { namespace gfx { namespace gl
 
     glTexSubImage2D(cubemap_side, 0, vol.pos.x,
                     allocated_extents().y - vol.pos.y - vol.height,
-                    vol.width, vol.height, data_format, data_type, in_data);
+                    vol.width, vol.height, (GLenum) format_, (GLenum) data_type,
+                    in_data);
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
   }
 

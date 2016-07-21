@@ -12,8 +12,8 @@ namespace redc { namespace gfx { namespace gl
   private:
     void uninit() noexcept;
 
-    virtual void allocate_(Vec<int> const&, Image_Format,
-                           Image_Type type) noexcept override;
+    virtual void allocate_(Vec<int> const&, Texture_Format,
+                           Texture_Target type) noexcept override;
 
   public:
     ~GL_Texture() noexcept;
@@ -26,8 +26,8 @@ namespace redc { namespace gfx { namespace gl
     GLuint tex_id;
     GLenum texture_type;
 
-    Image_Format format_;
-    Image_Type type_;
+    Texture_Format format_;
+    Texture_Target type_;
 
     void bind(unsigned int loc) const noexcept;
   };

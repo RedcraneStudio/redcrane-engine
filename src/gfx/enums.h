@@ -26,7 +26,7 @@ namespace redc
   };
   enum class Texture_Target : GLenum
   {
-    Tex_2D = GL_TEXTURE_2D
+    Tex_2D = GL_TEXTURE_2D, Cube_Map = GL_TEXTURE_CUBE_MAP
   };
 
   enum class Render_Mode : GLenum
@@ -52,7 +52,7 @@ namespace redc
   };
   enum class Texture_Target
   {
-    Tex_2D
+    Tex_2D, Cube_Map
   };
 
   enum class Render_Mode

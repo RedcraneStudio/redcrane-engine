@@ -125,14 +125,14 @@ namespace redc
     static_assert(sizeof(Color) == sizeof(unsigned char) * 4,
                   "Color structs must be stored contigously");
 
-    t.allocate(img.extents, Image_Format::Rgba, Image_Type::Tex_2D);
+    t.allocate(img.extents, Texture_Format::Rgba, Texture_Target::Tex_2D);
 
     t.blit_tex2d_data(vol_from_extents(img.extents),
-                      Data_Type::Unsigned_Byte, &img.data[0]);
+                      Data_Type::UByte, &img.data[0]);
   }
   void allocate_cube_map(Texture& t, Image const& img) noexcept
   {
-    t.allocate(img.extents, Image_Format::Rgba, Image_Type::Cube_Map);
+    t.allocate(img.extents, Texture_Format::Rgba, Texture_Target::Cube_Map);
   }
   void blit_cube_map_face(Texture& t, Cube_Map_Texture const& side,
                           Image const& img) noexcept
@@ -140,7 +140,7 @@ namespace redc
     static_assert(sizeof(Color) == sizeof(unsigned char) * 4,
                   "Color structs must be stored contigously");
 
-    t.blit_cube_data(side, vol_from_extents(img.extents), Data_Type::Unsigned_Byte,
+    t.blit_cube_data(side, vol_from_extents(img.extents), Data_Type::UByte,
                      &img.data[0]);
   }
 }
