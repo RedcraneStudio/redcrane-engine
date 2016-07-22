@@ -34,6 +34,8 @@ static_assert(CROUCHED_CAPSULE_HEIGHT > 0.0f,
 // 78 kg mass person
 #define PLAYER_MASS 78.0f
 
+#define PLAYER_CROUCH_HEIGHT_DELTA ((PLAYER_HEIGHT - CROUCHED_HEIGHT) / 2.0f)
+
 namespace redc
 {
   Player_Controller::Player_Controller()
@@ -252,14 +254,55 @@ namespace redc
         local_dpos.setX(+1.0f);
       }
 
-      // Crouch is down and we are not currently crouching.
+      // We are currently crouched and the crouch button is up
       if(!input_ref_->crouch && props.is_crouched)
       {
-        ghost_.setCollisionShape(&shape_);
-        set_normal_props();
+        // Start the ray at the player's position. This will cover the edge case
+        // where the player is really close to the ceiling above it.
+
+        // The top of the ray is the top of the volume that the
+        // now-upright player will fill.
+        btVector3 to = pos;
+
+        // First go from the center of the crouched capsule to where the center
+        // of the standing capsule will be, then go up to the top of the
+        // standing capsule.
+        to.setY(to.getY() + PLAYER_CROUCH_HEIGHT_DELTA + PLAYER_HEIGHT / 2.0f);
+
+        // Go back to normal, but first make sure nothing will be in our way.
+        btCollisionWorld::ClosestRayResultCallback ray_cb(pos, to);
+        world->rayTest(pos, to, ray_cb);
+
+        if(!ray_cb.hasHit())
+        {
+          // Looks good to uncrouch
+
+          // First move the player up
+          pos.setY(pos.getY() + PLAYER_CROUCH_HEIGHT_DELTA);
+          // Then set the shape and properties.
+          ghost_.setCollisionShape(&shape_);
+          set_normal_props();
+
+          // Update position for good measure
+          update_ghost_transform_();
+        }
+        else
+        {
+          // We can't uncrouch
+        }
       }
       else if(input_ref_->crouch && !props.is_crouched)
       {
+        // If the player is on the ground, their capsule should be moved down,
+        // but only if that's an option. We could put a ray trace here to be
+        // sure, but it hasn't been a problem in testing, the penetration test
+        // properly recovers
+        if(state == Player_State::Grounded)
+        {
+          pos.setY(pos.getY() - PLAYER_CROUCH_HEIGHT_DELTA);
+          update_ghost_transform_();
+        }
+
         ghost_.setCollisionShape(&crouch_shape_);
         set_crouch_props();
       }
