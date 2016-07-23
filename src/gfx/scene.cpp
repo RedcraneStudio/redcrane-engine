@@ -1002,7 +1002,8 @@ namespace redc
       for(auto req_mesh : in_node.meshes)
       {
         auto mesh_index = find_string_index(mesh_names, req_mesh,
-                                            "Node references invalid mesh");
+                                            "Node references invalid mesh '%'",
+                                            req_mesh);
         node.meshes.push_back(mesh_index);
       }
 
