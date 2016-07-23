@@ -257,6 +257,27 @@ namespace redc
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.buf);
   }
 
+  Attrib_Bind bad_attrib_bind()
+  {
+    Attrib_Bind bind;
+    bind.loc = -1;
+    return bind;
+  }
+  bool is_good_attrib_bind(Attrib_Bind bind)
+  {
+    return bind.loc >= 0;
+  }
+  Param_Bind bad_param_bind()
+  {
+    Param_Bind bind;
+    bind.loc = -1;
+    return bind;
+  }
+  bool is_good_param_bind(Param_Bind bind)
+  {
+    return bind.loc >= 0;
+  }
+
   // = Uniform functions!
 
   // == Int functions
@@ -446,7 +467,7 @@ namespace redc
   template <class Bind_T, unsigned int Which_N, class Semantic_T>
   Bind_T get_semantic_bind(
     std::unordered_map<std::string, Param_Decl> const& parameters,
-    Semantic_T attrib_semantic)
+    Semantic_T attrib_semantic, Bind_T default_bind)
   {
     auto param_find = std::find_if(parameters.begin(),
                                    parameters.end(),
@@ -462,13 +483,13 @@ namespace redc
       return param_semantic == attrib_semantic;
     });
 
-    // We should have found a parameter
-    REDC_ASSERT(param_find != parameters.end());
-
-    // It should be an attribute bind
-    REDC_ASSERT_MSG(param_find->second.bind.which() == Which_N,
-                    "Parameter '%' must be referencing an attribute",
-                    param_find->first);
+    if(param_find == parameters.end() ||
+       param_find->second.bind.which() != Which_N)
+    {
+      // If we didn't find it, or if it was the wrong type, return the default /
+      // bad one
+      return default_bind;
+    }
 
     // Now get the bind
     return boost::get<Bind_T>(param_find->second.bind);
@@ -478,14 +499,16 @@ namespace redc
                                        Attrib_Semantic attrib_semantic)
   {
     return get_semantic_bind<Attrib_Bind, 1>(tech.parameters,
-                                             attrib_semantic);
+                                             attrib_semantic,
+                                             bad_attrib_bind());
   }
 
   Param_Bind get_param_semantic_bind(Technique const& tech,
                                      Param_Semantic param_semantic)
   {
     return get_semantic_bind<Param_Bind, 0>(tech.parameters,
-                                                param_semantic);
+                                            param_semantic,
+                                            bad_param_bind());
 
   }
 
@@ -806,6 +829,40 @@ namespace redc
       REDC_UNREACHABLE_MSG("Invalid technique parameter type");
       break;
     }
+  }
+
+  // = Enum -> String functions
+  std::string to_string(Attrib_Semantic attrib)
+  {
+    std::string ret;
+    switch(attrib.kind)
+    {
+    case Attrib_Semantic::Position:
+      ret = "POSITION";
+      break;
+    case Attrib_Semantic::Normal:
+      ret = "NORMAL";
+      break;
+    case Attrib_Semantic::Texcoord:
+      ret = "TEXCOORD";
+      break;
+    case Attrib_Semantic::Color:
+      ret = "COLOR";
+      break;
+    case Attrib_Semantic::Joint:
+      ret = "JOINT";
+      break;
+    case Attrib_Semantic::Weight:
+      ret = "WEIGHT";
+      break;
+    }
+
+    if(attrib.index)
+    {
+      ret += "_";
+      ret += std::to_string(attrib.index.value());
+    }
+    return ret;
   }
 
   // = Destruction
@@ -1861,7 +1918,19 @@ namespace redc
         Attrib_Semantic semantic = attribute.first;
         Accessor const& accessor = asset.accessors[attribute.second];
 
+        // May return a bad attribute
         Attrib_Bind bind = get_attrib_semantic_bind(technique, semantic);
+
+        // If the bind was not found, forget about it.
+        if(!is_good_attrib_bind(bind))
+        {
+          // We can't log because it will totally spam the console or filesystem
+          // if the user has debug logging on. Leave this commented until we
+          // find a way to only log it once.
+
+          //log_d("Could not find bind for semantic '%'", to_string(semantic));
+          continue;
+        }
 
         Buffer const& buf = asset.buffers[accessor.buf_i];
         REDC_ASSERT_MSG(buf.repr != boost::none,
