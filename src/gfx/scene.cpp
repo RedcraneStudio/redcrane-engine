@@ -140,10 +140,11 @@ namespace redc
       GLint length = 0;
       glGetShaderiv(shader.repr.shader, GL_INFO_LOG_LENGTH, &length);
 
-      GLsizei actual_length = 0;
       info_log->resize(length);
-      glGetShaderInfoLog(shader.repr.shader, length, &actual_length,
-                         &(*info_log)[0]);
+      if(length > 0)
+      {
+        glGetShaderInfoLog(shader.repr.shader, length, NULL, &(*info_log)[0]);
+      }
     }
 
     // Return compile status
@@ -163,11 +164,14 @@ namespace redc
     // Get info log
     if(link_log)
     {
-      GLint length;
+      GLint length = 0;
       glGetProgramiv(program.program, GL_INFO_LOG_LENGTH, &length);
 
       link_log->resize(length);
-      glGetProgramInfoLog(program.program, length, NULL, &(*link_log)[0]);
+      if(length > 0)
+      {
+        glGetProgramInfoLog(program.program, length, NULL, &(*link_log)[0]);
+      }
     }
 
     // Return compile status
