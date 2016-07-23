@@ -36,7 +36,6 @@ extern "C"
     // TODO: Fix filename
     sc->get()->crosshair = gfx::load_texture(*engine->client->driver,
                                              "../assets/tex/crosshair.png");
-    engine->client->driver->bind_texture(*sc->get()->crosshair, 1);
 
     {
       // Set up the mesh shader
@@ -83,7 +82,7 @@ extern "C"
                                                 -1.0f, 1.0f));
 
       sc->get()->ch_shader->set_var_tag(gfx::tags::dif_tex_tag, "tex");
-      sc->get()->ch_shader->set_integer(gfx::tags::dif_tex_tag, 1);
+      sc->get()->ch_shader->set_integer(gfx::tags::dif_tex_tag, 0);
     }
     engine->client->scenes.push_back(sc->peer());
     return sc;
@@ -411,6 +410,7 @@ extern "C"
     scene->engine->client->driver->write_depth(false);
     scene->engine->client->driver->depth_test(false);
     scene->engine->client->driver->use_shader(*scene->ch_shader);
+    scene->engine->client->driver->bind_texture(*scene->crosshair, 0);
     scene->ch_mesh->draw_arrays(0, 6);
     scene->engine->client->driver->blending(false);
     scene->engine->client->driver->write_depth(true);
