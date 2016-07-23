@@ -334,8 +334,6 @@ extern "C"
 
     gfx::use_camera(*scene->engine->client->driver, active_camera.cam);
 
-    scene->engine->client->driver->bind_texture(*scene->lightmap, 0);
-
     using namespace gfx::tags;
 
     // Making the function think OpenGL state *hasn't* changed is a dangerous
