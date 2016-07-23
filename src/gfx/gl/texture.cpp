@@ -33,7 +33,7 @@ namespace redc { namespace gfx { namespace gl
 
     if(target == Texture_Target::Tex_2D)
     {
-      glTexImage2D(texture_type, 0, (GLenum) form, extents.x, extents.y,
+      glTexImage2D((GLenum) target, 0, (GLenum) form, extents.x, extents.y,
                    0, GL_RGBA, GL_FLOAT, NULL);
     }
     else if(target == Texture_Target::Cube_Map)
@@ -80,12 +80,12 @@ namespace redc { namespace gfx { namespace gl
 
     // Save the format for later.
     format_ = form;
-    type_ = target;
+    target_ = target;
   }
   void GL_Texture::blit_tex2d_data(Volume<int> const& vol, Data_Type data_type,
                                    void const* in_data) noexcept
   {
-    if(type_ != Texture_Target::Tex_2D)
+    if(target_ != Texture_Target::Tex_2D)
     {
       log_d("Trying to blit 2D data to non-2d texture");
       return;
@@ -167,7 +167,7 @@ namespace redc { namespace gfx { namespace gl
                                   Volume<int> const& vol, Data_Type data_type,
                                   void const* in_data) noexcept
   {
-    if(type_ != Texture_Target::Cube_Map)
+    if(target_ != Texture_Target::Cube_Map)
     {
       log_d("Trying to blit cube map to a texture that is not a cube map");
       return;
@@ -216,6 +216,6 @@ namespace redc { namespace gfx { namespace gl
   void GL_Texture::bind(unsigned int loc) const noexcept
   {
     glActiveTexture(GL_TEXTURE0 + loc);
-    glBindTexture(texture_type, tex_id);
+    glBindTexture((GLenum) target_, tex_id);
   }
 } } }

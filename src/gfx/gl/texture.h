@@ -24,10 +24,9 @@ namespace redc { namespace gfx { namespace gl
                         Data_Type, void const* data) noexcept override;
 
     GLuint tex_id;
-    GLenum texture_type;
 
     Texture_Format format_;
-    Texture_Target type_;
+    Texture_Target target_;
 
     void bind(unsigned int loc) const noexcept;
   };
