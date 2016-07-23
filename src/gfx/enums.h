@@ -22,7 +22,8 @@ namespace redc
 
   enum class Texture_Format : GLenum
   {
-    Alpha = GL_ALPHA, Rgb = GL_RGB, Rgba = GL_RGBA
+    Alpha = GL_ALPHA, Rgb = GL_RGB, Rgba = GL_RGBA, Srgb = GL_SRGB,
+    Srgb_Alpha = GL_SRGB_ALPHA
   };
   enum class Texture_Target : GLenum
   {
@@ -48,7 +49,7 @@ namespace redc
 
   enum class Texture_Format
   {
-    Alpha, Rgb, Rgba
+    Alpha, Rgb, Rgba, Srgb, Srgb_Alpha
   };
   enum class Texture_Target
   {

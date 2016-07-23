@@ -590,6 +590,10 @@ namespace redc
       return Texture_Format::Rgb;
     case TINYGLTF_TEXTURE_FORMAT_RGBA:
       return Texture_Format::Rgba;
+    case TINYGLTF_TEXTURE_FORMAT_SRGB:
+      return Texture_Format::Srgb;
+    case TINYGLTF_TEXTURE_FORMAT_SRGB_ALPHA:
+      return Texture_Format::Srgb_Alpha;
     default:
       REDC_UNREACHABLE_MSG("Invalid / unsupported texture format");
       // This should never be reached.
