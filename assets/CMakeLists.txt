@@ -30,6 +30,7 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     snd/walk_variation_4.wav
 
                     gltf/cel.gltf gltf/cel_solid.vs gltf/cel_solid.fs
+                    gltf/cel_texture.vs gltf/cel_texture.fs
 
                     scene/default.json structure/structures.json
 
