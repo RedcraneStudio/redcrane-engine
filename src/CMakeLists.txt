@@ -13,9 +13,6 @@ find_package(GLM REQUIRED)
 add_subdirectory(common)
 add_subdirectory(io)
 
-find_package(ENet REQUIRED)
-add_subdirectory(net)
-
 find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
 add_subdirectory(gfx)

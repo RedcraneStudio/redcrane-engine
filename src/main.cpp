@@ -22,8 +22,6 @@
 #include "gfx/camera.h"
 #include "fps/camera_controller.h"
 #include "use/texture.h"
-#include "net/client.h"
-#include "net/server_protocol.h"
 
 #include "assets/load_dir.h"
 
