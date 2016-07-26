@@ -890,12 +890,14 @@ static bool ParseExtras(ExtraMap *extras, std::string *err,
   picojson::object::const_iterator it = o.find("extras");
   if (it != o.end()) {
     *extras = it->second.get<picojson::object>();
+	return true;
   }
   else if (required) {
     if(err) {
       (*err) += "extras property not found or not an object";
     }
   }
+  return false;
 }
 
 static bool ParseBooleanProperty(bool *ret, std::string *err,
