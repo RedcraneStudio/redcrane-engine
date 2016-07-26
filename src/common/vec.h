@@ -7,6 +7,8 @@
 #include <ostream>
 #include <cmath>
 
+#include "pi.h"
+
 #include <msgpack.hpp>
 namespace redc
 {
@@ -170,17 +172,17 @@ namespace redc
 
     Vec<float> ret{};
 
-    if(-M_PI / 4 < angle && angle < M_PI / 4)
+    if(-REDC_PI / 4 < angle && angle < REDC_PI / 4)
     {
       ret.x = 1.0f;
       ret.y = 0.0f;
     }
-    else if(M_PI / 4 < angle && angle < M_PI * 3 / 4)
+    else if(REDC_PI / 4 < angle && angle < REDC_PI * 3 / 4)
     {
       ret.x = 0.0f;
       ret.y = 1.0f;
     }
-    else if(-M_PI * 3 / 4 < angle && angle < -M_PI / 4)
+    else if(-REDC_PI * 3 / 4 < angle && angle < -REDC_PI / 4)
     {
       ret.x = 0.0f;
       ret.y = -1.0f;

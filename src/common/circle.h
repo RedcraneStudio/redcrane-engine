@@ -4,6 +4,7 @@
  */
 #include "vec.h"
 #include <cmath>
+#include "pi.h"
 namespace redc
 {
   template <class T>
@@ -40,7 +41,7 @@ namespace redc
     {
       auto dir = normalize(dif);
       auto angle = std::atan2(dir.y, dir.x);
-      if(angle < 0) angle = (2 * M_PI) + angle;
+      if(angle < 0) angle = (2 * REDC_PI) + angle;
 
       if(circle.end_radians < circle.start_radians)
       {
