@@ -45,8 +45,8 @@ int main(int argc, char** argv)
   auto def_shade = driver.make_shader_repr();
 
   auto cel_shade_path = share_path / "shader" / "cel";
-  load_vertex_file(*def_shade, (cel_shade_path / "vs.glsl").native());
-  load_fragment_file(*def_shade, (cel_shade_path / "fs.glsl").native());
+  load_vertex_file(*def_shade, (cel_shade_path / "vs.glsl").string());
+  load_fragment_file(*def_shade, (cel_shade_path / "fs.glsl").string());
 
   def_shade->link();
 

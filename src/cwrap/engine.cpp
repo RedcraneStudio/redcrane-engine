@@ -101,8 +101,8 @@ extern "C"
 
     // TODO: Load shaders like we load mesh. Right now is bad
     auto basic_shade_path = rce->share_path / "shader" / "basic";
-    load_vertex_file(*df_shade, (basic_shade_path / "vs.glsl").native());
-    load_fragment_file(*df_shade, (basic_shade_path / "fs.glsl").native());
+    load_vertex_file(*df_shade, (basic_shade_path / "vs.glsl").string());
+    load_fragment_file(*df_shade, (basic_shade_path / "fs.glsl").string());
 
     df_shade->link();
 
@@ -169,7 +169,7 @@ extern "C"
   {
     // Will this ever change mid-execution?
     auto rce = (Engine*) eng;
-    return rce->share_path.native().c_str();
+    return rce->share_path.string().c_str();
   }
   void redc_window_swap(void* eng)
   {

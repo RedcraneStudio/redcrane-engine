@@ -47,7 +47,7 @@ namespace redc { namespace assets
       auto cfg_path = pathname / path("cfg.ini");
 
       std::string d_msg =
-              format_str("Checking in '%' for config: ", pathname.native());
+              format_str("Checking in '%' for config: ", pathname.string());
 
       if(exists(cfg_path))
       {

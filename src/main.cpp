@@ -583,7 +583,7 @@ int main(int argc, char* argv[])
   auto cfg_path = fs::path(vm["config-file"].as<std::string>());
   if(!fs::exists(cfg_path))
   {
-    log_e("Config % doesn't exist", cfg_path.native());
+    log_e("Config % doesn't exist", cfg_path.string());
     return EXIT_FAILURE;
   }
 

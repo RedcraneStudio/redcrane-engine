@@ -63,7 +63,7 @@ namespace redc { namespace assets
 
     // If our source file doesn't exist it's a bug!
     REDC_ASSERT_MSG(exists(source_path), "Source / asset file % doesn't exist",
-                    source_path.native());
+                    source_path.string());
 
     // If the cache file exists and is newer than the source load it and
     // delegate to our implementation
@@ -73,7 +73,7 @@ namespace redc { namespace assets
       auto flags = std::ios_base::in;
       if(cache_fd_.load_bin) flags |= std::ios_base::binary;
 
-      auto stream = std::ifstream(cache_path.native(), flags);
+      std::ifstream stream(cache_path.string(), flags);
       return load_from_cache_stream(stream);
     }
 
@@ -81,7 +81,7 @@ namespace redc { namespace assets
     // Load the source
     auto flags = std::ios_base::in;
     if(source_fd_.load_bin) flags |= std::ios_base::binary;
-    auto stream = std::ifstream(source_path.native(), flags);
+    std::ifstream stream(source_path.string(), flags);
     auto t = load_from_source_stream(stream);
 
     // Tell the implementation that they should write to the cache now
@@ -92,7 +92,7 @@ namespace redc { namespace assets
       // Open in binary mode?
       auto flags = std::ios_base::out;
       if(cache_fd_.load_bin) flags |= std::ios_base::binary;
-      auto cache_stream = std::ofstream(cache_path.native(), flags);
+      std::ofstream cache_stream(cache_path.string(), flags);
       write_cache(t, cache_stream);
     }
     return t;

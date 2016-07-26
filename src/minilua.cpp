@@ -65,7 +65,7 @@ namespace redc { namespace lua
     RET_ON_ERR(err);
 
     // Load our mod config
-    err = luaL_loadfile(L, cfg_path.native().c_str());
+    err = luaL_loadfile(L, cfg_path.string().c_str());
     RET_ON_ERR(err);
 
     // Use a sandbox for the mod config
