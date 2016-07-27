@@ -35,9 +35,7 @@ TEST_CASE("Circle-point detection works", "[struct Circle]")
 
 TEST_CASE("Arc-point detection works", "[struct Arc]")
 {
-  using namespace redc;
-
-  Arc<float> arc;
+  redc::Arc<float> arc;
   arc.center = {0.0f, 0.0f};
   arc.radius = 50.0f;
 

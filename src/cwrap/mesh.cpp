@@ -23,9 +23,11 @@ extern "C"
     auto rce = (Engine *) engine;
     REDC_ASSERT_HAS_CLIENT(rce);
 
-    auto mesh = gfx::load_mesh(*rce->client->driver,
-                               *rce->mesh_cache,
-                               {std::string{str}, false});
+    gfx::Mesh_Load_Params load_params;
+    load_params.filename = std::string{str};
+    load_params.retain_mesh = false;
+    gfx::Mesh_Result mesh = gfx::load_mesh(*rce->client->driver,
+                                           *rce->mesh_cache, load_params);
 
     // Lua is one peer
     auto peer = new Peer_Ptr<gfx::Mesh_Chunk>(new gfx::Mesh_Chunk);

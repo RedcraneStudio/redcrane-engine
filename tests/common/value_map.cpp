@@ -112,27 +112,27 @@ TEST_CASE("value map sampling works", "[value_map]")
     Value_Map<float> map;
     map.allocate({100,100});
 
-    float expected = 8.2456;
+    float expected = 8.2456f;
     map.at({65,65}) = expected;
 
     // Can we do an equality comparison here?
     REQUIRE(sample(map, {{65,65},1,1}) == Approx(expected));
 
-    map.at({5,6}) = 5.5;
-    map.at({5,7}) = 6.5;
-    map.at({6,6}) = 6.5;
-    map.at({6,7}) = 7.5;
+    map.at({5,6}) = 5.5f;
+    map.at({5,7}) = 6.5f;
+    map.at({6,6}) = 6.5f;
+    map.at({6,7}) = 7.5f;
     REQUIRE(sample(map, {{5,6}, 2, 2}) == Approx(6.5));
 
-    map.at({20,50}) = 51.23;
+    map.at({20,50}) = 51.23f;
     map.at({20,51}) = 50.124;
-    map.at({20,52}) = 2.941;
-    map.at({21,50}) = 1.789;
-    map.at({21,51}) = 5.66;
-    map.at({21,52}) = 9.995;
-    map.at({22,50}) = 241.5;
-    map.at({22,51}) = 3.34;
-    map.at({22,52}) = 4.85;
+    map.at({20,52}) = 2.941f;
+    map.at({21,50}) = 1.789f;
+    map.at({21,51}) = 5.66f;
+    map.at({21,52}) = 9.995f;
+    map.at({22,50}) = 241.5f;
+    map.at({22,51}) = 3.34f;
+    map.at({22,52}) = 4.85f;
     REQUIRE(sample(map, {{20, 50}, 3, 3}) == Approx(41.26989));
   }
 }

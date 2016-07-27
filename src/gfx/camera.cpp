@@ -2,11 +2,15 @@
  * Copyright (C) 2015 Luke San Antonio
  * All rights reserved.
  */
+#undef near
+#undef far
 #include "camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "idriver.h"
 #include "support/unproject.h"
+#undef near
+#undef far
 namespace redc
 {
   namespace gfx

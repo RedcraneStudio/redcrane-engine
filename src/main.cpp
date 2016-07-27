@@ -31,6 +31,19 @@
 
 #include "sdl_helper.h"
 
+// This fixes some undefined reference errors that libuv seems to have,
+// unfortunately, this only solves the problem for the redc executable. Linking
+// any other will likely fail. TODO: Find a way out of this.
+#if defined(_MSC_VER)
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "psapi.lib")
+#pragma comment(lib, "IPHLPAPI.lib")
+#pragma comment(lib, "Userenv.lib")
+#endif
+
+// Temporary disable SDL_main - TODO: link SDLmain in, instead of this hack
+#undef main
+
 namespace po = boost::program_options;
 
 enum class Server_Mode : int
@@ -105,6 +118,7 @@ po::options_description command_options_desc() noexcept
 }
 int start_connect(po::variables_map const& vm)
 {
+#if 0
   using namespace redc;
 
   auto start_time = std::chrono::high_resolution_clock::now();
@@ -272,9 +286,12 @@ int start_connect(po::variables_map const& vm)
   }
 
   return ret_code;
+#endif
+  return EXIT_SUCCESS;
 }
 int start_dedicated(po::variables_map const& vm)
 {
+#if 0
   using namespace redc;
 
   log_w("Dedicated mode not yet implemented");
@@ -298,7 +315,7 @@ int start_dedicated(po::variables_map const& vm)
       net::step_server(server, event);
     }
   }
-
+#endif
   return EXIT_SUCCESS;
 }
 int start_local(po::variables_map const& vm)
@@ -515,9 +532,8 @@ int start_local(po::variables_map const& vm)
 
     SDL_GL_SwapWindow(sdl_window);
   }
-
-  return EXIT_SUCCESS;
 #endif
+  return EXIT_SUCCESS;
 }
 
 int main(int argc, char* argv[])

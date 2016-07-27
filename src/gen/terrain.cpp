@@ -14,7 +14,7 @@
 
 namespace redc { namespace gen
 {
-  Noise_Raii::Noise_Raii(int64_t seed, osn_context** ptr) noexcept
+  Noise_Raii::Noise_Raii(uint64_t seed, osn_context** ptr) noexcept
   {
     // Pointer to an empty pointer given, allocate it and point our parameter
     // to it.

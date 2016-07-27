@@ -17,7 +17,7 @@ namespace redc { namespace gen
 {
   struct Noise_Raii
   {
-    Noise_Raii(int64_t seed, osn_context** ptr) noexcept;
+    Noise_Raii(uint64_t seed, osn_context** ptr) noexcept;
     ~Noise_Raii() noexcept;
 
     bool allocated() const noexcept { return allocated_; }
@@ -52,13 +52,13 @@ namespace redc { namespace gen
     virtual void gen(Grid_Map&) noexcept = 0;
 
     // Should be set before the call to gen.
-    int64_t seed;
+    uint64_t seed;
   };
 
   struct Terrain_Params
   {
     // Initialize the seed of each algorithm with this seed.
-    int64_t seed;
+    uint64_t seed;
 
     std::unique_ptr<Terrain_Algorithm> landmass_gen;
 

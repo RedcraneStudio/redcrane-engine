@@ -1652,10 +1652,10 @@ namespace redc
   // This should really be two functions one to retrieve / calculate the value
   // of the semantic and one to set it but it's hard to do this efficiently
   // because of the copying between matrices / arrays.
-  Param_Value set_semantic_value(Param_Decl param,
-                                 Asset const& asset,
-                                 Render_Params const& cur_render,
-                                 gfx::Camera const& cam)
+  void set_semantic_value(Param_Decl param,
+                          Asset const& asset,
+                          Render_Params const& cur_render,
+                          gfx::Camera const& cam)
   {
     // We must be dealing with semantic parameters
     REDC_ASSERT(static_cast<bool>(param.semantic) == true);

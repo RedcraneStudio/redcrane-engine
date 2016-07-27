@@ -5,6 +5,11 @@
 #pragma once
 #include "../common/vec.h"
 #include <glm/glm.hpp>
+
+// TODO: Find the one place this is required and figure out someway to make it
+// pretty.
+#undef near
+#undef far
 namespace redc
 {
   namespace gfx
@@ -16,12 +21,20 @@ namespace redc
 
     struct Perspective_Cam_Params
     {
-      float fov, aspect, near, far;
+      float fov;
+      float aspect;
+      float near;
+      float far;
     };
 
     struct Ortho_Cam_Params
     {
-      float left, right, bottom, top, near, far;
+      float left;
+      float right;
+      float bottom;
+      float top;
+      float near;
+      float far;
     };
 
     enum class Camera_Definition

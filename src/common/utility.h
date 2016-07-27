@@ -92,7 +92,7 @@ namespace redc
   {
     using type = R;
   };
-
+#if 0
   namespace detail
   {
     template <typename first, typename... others>
@@ -105,6 +105,7 @@ namespace redc
   template <bool... vals>
   struct all_of
     : std::integral_constant<bool, detail::all_of(vals...) > {};
+#endif
   namespace detail
   {
     template <bool is_const, typename Dest, typename Source,

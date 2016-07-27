@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include <array>
 #include <atomic>
 namespace redc
 {
@@ -168,7 +169,7 @@ namespace redc
     detail::Peer_Ptr_Data* data_;
 
     template <class U>
-    friend class Peer_Ptr;
+    friend struct Peer_Ptr;
   };
 
   template <class T>
@@ -329,7 +330,7 @@ namespace redc
     detail::Peer_Ptr_Data* data_;
 
     template <class U>
-    friend class Peer_Ptr;
+    friend struct Peer_Ptr;
   };
 
   template <class T>

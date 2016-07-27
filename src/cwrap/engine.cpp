@@ -184,7 +184,7 @@ extern "C"
   {
     auto rce = (Engine*) eng;
 
-    auto is_null = [](auto const& peer)
+    auto is_null = [](Peer_Ptr<void> const& peer)
     {
       return peer.get() == nullptr;
     };

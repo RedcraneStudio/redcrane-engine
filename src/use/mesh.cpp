@@ -50,7 +50,11 @@ namespace redc { namespace gfx
 
   Mesh_Chunk load_chunk(IDriver& driver, Mesh_Cache& mc, std::string const& f)
   {
-    auto res = load_mesh(driver, mc, {f, false});
+    Mesh_Load_Params params;
+    params.filename = f;
+    params.retain_mesh = false;
+
+    Mesh_Result res = load_mesh(driver, mc, params);
     return copy_mesh_chunk_move_mesh(res.chunk);
   }
 } }

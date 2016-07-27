@@ -56,10 +56,12 @@ namespace redc { namespace assets
     REDC_ASSERT_MSG(!filename.empty(), "Cannot load file with no name");
 
     // Find the two places this file may be
-    auto cache_path = cache_fd_.dir / fs::path(filename + "." + cache_fd_.ext);
+    fs::path cache_path =
+      cache_fd_.dir / fs::path(filename + "." + cache_fd_.ext);
 
     // The source file too
-    auto source_path = source_fd_.dir / fs::path(filename+"."+source_fd_.ext);
+    fs::path source_path =
+      source_fd_.dir / fs::path(filename+"."+source_fd_.ext);
 
     // If our source file doesn't exist it's a bug!
     REDC_ASSERT_MSG(exists(source_path), "Source / asset file % doesn't exist",
@@ -70,7 +72,7 @@ namespace redc { namespace assets
     if(exists(cache_path) &&
        last_write_time(source_path) < last_write_time(cache_path))
     {
-      auto flags = std::ios_base::in;
+      std::ios_base::openmode flags = std::ios_base::in;
       if(cache_fd_.load_bin) flags |= std::ios_base::binary;
 
       std::ifstream stream(cache_path.string(), flags);
@@ -79,8 +81,8 @@ namespace redc { namespace assets
 
     // Otherwise we need to load the source and rewrite to the cache
     // Load the source
-    auto flags = std::ios_base::in;
-    if(source_fd_.load_bin) flags |= std::ios_base::binary;
+    std::ios_base::openmode flags = std::ios_base::in;
+    if(source_fd_.load_bin) flags = flags | std::ios_base::binary;
     std::ifstream stream(source_path.string(), flags);
     auto t = load_from_source_stream(stream);
 
@@ -90,7 +92,7 @@ namespace redc { namespace assets
       fs::create_directories(cache_path.parent_path());
 
       // Open in binary mode?
-      auto flags = std::ios_base::out;
+      std::ios_base::openmode flags = std::ios_base::out;
       if(cache_fd_.load_bin) flags |= std::ios_base::binary;
       std::ofstream cache_stream(cache_path.string(), flags);
       write_cache(t, cache_stream);

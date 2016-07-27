@@ -185,8 +185,14 @@ extern "C"
 
     auto mesh = lock_resource<gfx::Mesh_Chunk>(ms);
 
-    at_id(scene->objs, id) =
-      {Mesh_Object{std::move(mesh), {}, {}, glm::mat4(1.0f)}, nullptr};
+    Mesh_Object mesh_obj;
+    mesh_obj.chunk = std::move(mesh);
+    mesh_obj.model = glm::mat4(1.0f);
+
+    Object obj;
+    obj.obj = mesh_obj;
+
+    at_id(scene->objs, id) = std::move(obj);
 
     return id;
   }

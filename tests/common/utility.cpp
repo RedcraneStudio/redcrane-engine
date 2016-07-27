@@ -8,7 +8,7 @@
 
 TEST_CASE("Vector cast works", "[utility]")
 {
-  std::vector<float> floats = { 5.135, 6.123, 7.23 };
+  std::vector<float> floats = { 5.135f, 6.123f, 7.23f };
 
   // Test using implicit conversion.
   std::vector<int> ints = redc::vector_cast<int>(floats);

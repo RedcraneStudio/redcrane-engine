@@ -72,7 +72,10 @@ int main(int argc, char** argv)
 
   driver.face_culling(true);
 
-  auto monkey = gfx::load_mesh(driver, {"obj/monkey.obj"}).chunk;
+  gfx::Mesh_Load_Params monkey_params;
+  monkey_params.filename = "obj/monkey.obj";
+  monkey_params.retain_mesh = false;
+  gfx::Mesh_Chunk monkey = gfx::load_mesh(driver, monkey_params).chunk;
 
   auto begin = std::chrono::high_resolution_clock::now();
 

@@ -14,7 +14,7 @@ namespace redc { namespace gen
     std::uniform_int_distribution<int> width_dist(0, map.extents.x);
     std::uniform_int_distribution<int> height_dist(0, map.extents.y);
 
-    std::mt19937 prng{this->seed};
+    std::mt19937 prng{static_cast<unsigned int>(this->seed)};
 
     for(int lake_i = 0; lake_i < this->max_lakes; ++lake_i)
     {
