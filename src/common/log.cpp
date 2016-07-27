@@ -8,6 +8,22 @@
 #include <cstring>
 #include <uv.h>
 #include "thread_local.h"
+
+// For O_WRONLY, O_APPEND, S_IRUSR, S_IWUSR, etc
+#include <fcntl.h>
+#include <sys/stat.h>
+
+#if defined(__unix__) || defined(__apple__)
+#define REDC_LOG_FILE_MODE (S_IRUSR | S_IWUSR)
+#else
+// These are only deprecated in Unix so no problem using them by default.
+// However, we have to use these macros on Windows
+#if !defined(_win32)
+#pragma message("Using log file mode that is deprecated on Unix in a non-windows environment.")
+#endif
+#define REDC_LOG_FILE_MODE (S_IREAD | S_IWRITE)
+#endif
+
 namespace redc
 {
   Scoped_Log_Init::Scoped_Log_Init() noexcept
@@ -67,9 +83,9 @@ namespace redc
     init_log();
 
     uv_fs_t fs_req;
-    auto err = uv_fs_open(loop_, &fs_req, fn.c_str(),
-                          O_WRONLY | O_APPEND | O_CREAT,
-                          S_IRUSR | S_IWUSR, NULL);
+    int err = uv_fs_open(loop_, &fs_req, fn.c_str(),
+                         O_WRONLY | O_APPEND | O_CREAT,
+                         REDC_LOG_FILE_MODE, NULL);
     // I still don't really get the usage of uv_fs_open in synchroneous mode.
     // It seems like the return value is the result in fs_res but also an error
     // code if it's negative.
