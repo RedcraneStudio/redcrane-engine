@@ -5,7 +5,8 @@ This file documents the old code that has been removed and would require
 refactoring if it were to be used again, but may be useful in the future.
 
 == Removed July 27th, 2016
-The commit that removed this code will be put here.
+Use the date above to find commit: 0a7ac7c, or find it by name "Remove old /
+dead code." (History might have been changed, yielding a different hash).
 
 === boatlib
 * Defines data structures that describ boat attachments.
