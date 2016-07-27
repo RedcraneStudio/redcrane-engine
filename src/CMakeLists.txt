@@ -11,7 +11,6 @@ find_package(LibPNG REQUIRED)
 find_package(LibUV REQUIRED)
 find_package(GLM REQUIRED)
 add_subdirectory(common)
-add_subdirectory(io)
 
 find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
@@ -19,17 +18,10 @@ add_subdirectory(gfx)
 add_subdirectory(input)
 
 find_package(LuaJIT REQUIRED)
-find_package(Freetype REQUIRED)
 
 add_subdirectory(fps)
 add_subdirectory(use)
 add_subdirectory(assets)
-
-# These are just here for testing, not that they need to be tested if they
-# aren't used.
-add_subdirectory(terrain)
-add_subdirectory(collisionlib)
-add_subdirectory(gen)
 
 add_subdirectory(effects)
 

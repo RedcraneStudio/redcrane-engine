@@ -1,0 +1,97 @@
+= Old Code Listing
+Luke San Antonio Bialecki <lukesanantonio@gmail.com>
+
+This file documents the old code that has been removed and would require
+refactoring if it were to be used again, but may be useful in the future.
+
+== Removed July 27th, 2016
+The commit that removed this code will be put here.
+
+=== boatlib
+* Defines data structures that describ boat attachments.
+* Includes code to load mesh chunks and render a boat based on its attachments.
+* It would have probably been better if I had separated the rendering code from
+  the data structures themselves in some way.
+
+=== collisionlib
+* Defines functions to solve for motion and angular motion based on force and
+  torque.
+* Includes an implementation of Sweep-and-prune for 3D AABBS.
+* Includes code to convert Indexed_Mesh_Data to a vector of triangles that can
+  then be used to test intersection.
+* The intersection test first converts the triangles to a space where the player
+  is a unit sphere.
+* Barycentric coordinates are used to get the intersection point on a triangle,
+  once the penetration / collision is confirmed.
+
+=== gen
+* Procedurally generates terrain on a map grid using simple noise.
+* Options like amplitude, frequency and the number of octaves are configurable.
+* The Radial_Algorithm takes noise and makes a mass of land surrounded by water.
+* The Tree_Gen changes land cells to forest / tree cells.
+
+=== io
+* Implements communication with a child process.
+* Message-passing like object called Pipe_IO which uses two objects to send data
+  to each other.
+* Both implementations use the External_IO interface.
+* Also includes a C-like interface that child process IO uses in its
+  implementation.
+
+=== luaint
+* Includes a small wrapper around the Lua API (vanilla, may not work with
+  LuaJIT).
+* Includes a Lua interface (which may be broken) around map gen and modifying
+  the map grid.
+
+=== net
+* Implements a networked io implementation of External_IO (from io).
+* Implements a client and server protocol for connecting and agreeing on server
+  rules / options, but doesn't implement the communication once the client is
+  ready to play (nothing like entity interpolation or lag compensation is
+  implemented, etc).
+* Not sure if the server-side protocol implementation is as well-tested as the
+  client side.
+
+=== sail
+* Includes code specific to the sailboat game.
+* Includes code to parse command line options that were used to specify boat
+  attachments.
+* Includes code to start a client and a server but I don't believe that code
+  worked.
+
+=== snd
+* Includes code to play music, but no support to pause it.
+* Uses SDL_Audio as a backend.
+* Includes code to load a FLAC (synchronously) as PCM_Data.
+
+=== steamlib
+* Includes a RAII-style initialization struct for initializing the Steam API,
+  although we don't have an ID so it was never used or tested or anything.
+
+=== strat
+* Includes code specific to the strategy game.
+* Includes code to spread events over time.
+* Includes code to maintain a set of structures that were placed on the map.
+* Includes code to build walls between two points, by using a bunch of tall wood
+  posts.
+
+=== terrain
+* Generates a Quadtree of terrain data where each new level is a a more detailed
+  mesh taking up 1/4 of the area of its parent.
+* Based on
+  link:http://www.vertexasylum.com/downloads/cdlod/cdlod_latest.pdf[Continuous
+  Distance-Dependent Level of Detail for Rendering Heightmaps]. The
+  transitioning between levels is not implemented.
+
+=== ui
+* Implements many elements of a user interface.
+* Includes code to load the user interface from a JSON file, vaguely based on
+  the XML UI files from Android. That is, to get things where you want them, you
+  have to use layouts that take their children and arrange them in a
+  well-defined way.
+* The code is not really very configurable, and probably doesn't work with our
+  current method of taking and handling user input (check out input/
+  subdirectory).
+* Includes code to render text labels with Freetype and takes advantage of a
+  glyph cache.
