@@ -8,7 +8,8 @@
   #define REDC_DEBUGGING_ENABLED
 #endif
 
-#ifdef REDC_DEBUGGING_ENABLED
+// We can't do the noreturn thing unless the compiler supports C++11
+#if defined(REDC_DEBUGGING_ENABLED) && __cplusplus >= 201103L
 #define REDC_ASSERT_NORETURN [[noreturn]]
 #else
 #define REDC_ASSERT_NORETURN
