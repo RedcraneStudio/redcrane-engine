@@ -3,7 +3,7 @@ Luke San Antonio - Bialecki <lukesanantonio@gmail.com>
 
 Listed in order of importance probably.
 
-* Load in glTF maps instead of obj models
+* Implement deferred shading
 * Finish entity interface and implement it
 * Move existing code to use mesh_caches and start to use texture caches.
 ** Make sure the interface allows for reloading of assets on the fly for LOD
