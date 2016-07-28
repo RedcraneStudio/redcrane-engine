@@ -1,0 +1,323 @@
+= Engine documentation
+:toc:
+:toclevels: 4
+Luke San Antonio Bialecki <lukesanantonio@gmail.com>
+
+== Code listing by directory
+=== src/
+Game-specific code, at the moment this includes:
+
+. Player controller
+. Main function, Lua initialization, etc
+. Lua helper functions
+. SDL helper functions
+. Main files for test executables.
+
+//
+
+event.h and event_spread.cpp:: Implements event propagation for the old strategy
+game.
+
+main_cel.cpp:: Tests cel shading with a rendered border around Suzanne.
+
+load_gltf.cpp:: Loads multiple glTF files and renders them.
+
+main_fps.cpp:: Start of an FPS game.
+
+main_sail.cpp:: Main file for the sailboat game.
+
+redcrane_decl.h:: C API declarations
+
+[[assets]]
+==== src/assets
+* Includes an abstract file cache that is used to cache .obj mesh data but can
+  be used for other things. It isn't meant to store any generated data, only
+  data loaded in from the filesystem. It transparently saves and loads the file
+  in a different format that is presumably more efficient and engine- or
+  platform-specific.
+* Includes code to find the asset directory. It isn't used universally which is
+  why asset loading is sometimes a pain (make sure to run redc from the src/
+  directory!).
+
+[NOTE]
+====
+TODO: Make asset loading more robust
+====
+
+* Includes small wrapper around tinygltfloader that uses our error handling
+  (log, crash or ignore).
+
+==== src/common
+* Includes a lot of code that might be used anywhere. It might even be useful in
+  other projects.
+
+==== src/cwrap
+* Implementation of the C API
+* Not actually a library of its own, all files are just linked into redc
+  directory. This was done because unused symbols in static libs are not linked
+  into the final executable, so it was causing problems when LuaJIT was trying
+  to load those symbols from the executable at runtime.
+
+==== src/effects
+* Packages an isolated (sorta self-sufficient I guess) rendering *thing*.
+  Currently an environment map seems to best fit this category, but ocean
+  rendering is also there.
+** Basically if it needs its own shader and has some specific way that it must
+   be rendered, it can be packaged as an effect.
+
+[NOTE]
+====
+TODO: Figure out if deferred rendering changes these invariants and what we can
+do about it.
+====
+
+* The Ocean effect uses the implementation of
+  link:http://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/[Real-time
+  water rendering using a projected grid] that is implemented in
+  <<gfxsupportlib>>.
+
+[NOTE]
+====
+TODO: Remove Ocean code if we aren't going to use it.
+====
+
+==== src/fps
+* Includes helper code to manage a first person camera
+* Currently includes code to load a scene from JSON (it was used a long time ago
+  but isn't being compiled at the moment).
+
+[NOTE]
+====
+TODO: Remove scene loading code.
+====
+
+==== src/gfx
+* Includes a probably leaky abstraction of OpenGL (Mesh, Textures, Shaders,
+  etc).
+* Includes data structures to represent all kinds of mesh representations
+.. Indexed mesh data where vertices are packed
+.. Indexed mesh data where vertices are not packed
+.. Ordered mesh data where vertices are packed / not packed, etc
+* Includes code to compile a tinygltf::Scene to an Asset that can be rendered.
+** This code is abstracted a little better and could probably be ported to
+   DirectX, as only a few functions in scene.cpp would need to be reimplemented
+   with the same interface (which does not assume any OpenGL-specific types),
+   however there will be other issues with abstracting the glTF format for
+   DirectX.
+
+[[gfxsupportlib]]
+===== src/gfx/gfxsupportlib
+* Includes code to load and convert between mesh representations.
+* Includes functions to help initialize and populate a mesh.
+* Includes an implementation of
+  link:http://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/[projected
+  grid water].
+* Includes an implementation of a software / in-memory texture and other
+  wrappers around a real texture, such as a "texture composite."
+* Includes code to load textures from PNGs.
+
+==== src/input
+* Includes data structures to represent sampled keyboard input.
+* Includes code to sample the input from the user.
+* Includes means to rebind keys.
+
+==== src/lua
+* Includes Lua code used in engine initialization code.
+* Includes Lua code that parses the config file and loads defaults if necessary.
+* Includes Lua code that constructs the sandbox.
+* Generally, Lua code in this folder do *not* run with a sandbox.
+
+==== src/tasks
+
+[NOTE]
+====
+TODO: Remove this subdirectory because it was used in the sailboat game.
+====
+
+==== src/use
+* Helper functions, mostly around the graphics abstraction.
+* Function to load a .obj directly to a Mesh_Chunk.
+* Function to load a .png directly to a Texture
+* Implementation of a mesh cache using the Fs_Cache from <<assets>>.
+
+== Architecture
+
+. Executable written in C++ (see main.cpp)
+
+. Initialize logger
+.. Parse command line arguments
+.. Initialize LuaJIT
+.. Initialize ffi.C with redc_* functions using redcrane_decl.h
+
+. Load Lua config
+.. Switch into that directory so that all paths are relative to the so-called
+*Mod* root, where a Mod is a bundle of Lua scripts. This term will probably mean
+more when Lua can do more.
+.. Run Lua config file and get a table back
+.. Determines (using command line arguments) whether we should run in dedicated
+server mode, connect mode (with a provided IP and port) and local server mode
+(which is default). This is mostly a relic from old multiplayer code, but I
+would like to keep the separation between client and server in mind.
+
+. Initialize the engine using the config (see load_engine_lua in
+src/minilua.cpp).
+
+. Run the engine loop depending on the server-mode (check out the options table
+in lua/init_engine.lua; specifically: client_entry and server_entry).
+.. Pointer is passed to Lua and a sandbox is made containing safe Lua functions
+   and engine functions (using the c interface loaded in a previous step).
+.. The lua/redcrane.lua wrapper automatically passes the engine (located on the
+   heap) to the redc_* C functions.
+.. The wrapper also manages lifetimes of returned objects using ffi.gc, etc.
+
+. See mildly-cold/client.lua for game-specific initialization code (loading the
+map) and the game loop.
+
+. Map loading creates physics and rendering component (see src/map.h).
+.. The Map is a json file with information about spawns, gravity, etc.
+   The map asset is expected to be a glTF file (which itself is JSON). The
+   collision mesh is loaded from a CPU bufferView that is not rendered. The name
+   of the accessors for positions and indices are given in the map json.
+.. The different components are loaded separately using events spawned by the
+   Server. The active scene waits for a new map loaded event to compile the
+   tinygltf::Scene to an Asset.
+.. The server itself waits for this event and attaches the collision data to the
+   bullet physics world (see Server_Event_Listener in cwrap/redcrane.cpp).
+
+NOTE: Events are boost::variants and the visitor pattern is used to handle them,
+mostly. I do usually like a simple union when it's possible, but in this case I
+want to be able to use non-POD types, etc. This needs some thought, etc.
+
+NOTE: Having a listener for the server when the server is the thing spawning the
+events is a little dubious. It would be perfectly sensible to combine the
+physics and scene loading code because both are the job of the server.
+
+. A new player is made (see Server::req_player in cwrap/redcrane.cpp)
+.. The player is actually requested. The idea is to pretend there may be some
+   latency in the Server's ability to make a player. This is to prepare for a
+   networked or asynchronous implementation. A new player controller is
+   initialized here (see player.h and player.cpp).
+.. Once the player is made, an event is posted about the new player, with an ID.
+.. The Scene at the moment takes a new player event to mean it should be the new
+   active player.
+
+NOTE: The Server right now handles physics and player management, whereby the
+Scene references the player and keeps the active map compiled as an Asset for
+quick rendering. Of course, neither the Server or Client (see
+cwrap/redcrane.hpp) are ready to be networked.
+
+. The Scene locks the camera to the active player (when applicable) (see
+  redc_scene_step in cwrap/scene.cpp).
+
+. Lua manages the game loop
+.. Input is polled every step.
+.. The camera is locked to the player.
+.. Physics step is run (bullet calls into the player controller because of the
+   btActionInterface).
+.. The scene is rendered in redc_scene_render in cwrap/scene.cpp.
+.. The environment is rendered.
+.. The map is rendered (loaded previously, the scene also has the concept of an
+   "active" map and will only hold on to one).
+.. Every "mesh object" associated with the scene is rendered.
+.. The crosshair is rendered.
+
+== Important structures
+
+See cwrap/redcrane.hpp!
+
+=== Engine
+Holds general stuff that doesn't fit in either Client or Server and needs to be
+accessible.
+
+Includes the config (from lua init), the share / asset path, the audio driver, a
+mesh cache, timers for frame time calculation, and the client and server
+themselves (once they are initialized).
+
+[NOTE]
+====
+TODO: Putting the mesh cache here is a bit strange. I believe it was put there because
+the server needed to load the map from a .obj, and it naturally would benefit
+from a mesh cache. Investigate as to how it could be moved into the Client
+struct.
+
+The audio driver could also probably be put in the client.
+====
+
+=== Client
+Includes things related to rendering, input, and maintains a list of scenes.
+
+It also includes a vector of peers for mesh pointers that should be
+uninitialized before the OpenGL is uninitialized.
+
+[NOTE]
+====
+TODO: The default shader is not really important anymore, so we can probably
+remove that.
+====
+
+=== Server
+Includes physics, map and player related stuff. These all are things that might
+have to be networked in the future.
+
+[NOTE]
+====
+TODO: How can we abstract the physics in such a way that would allow it to be
+networked or implemented asynchronously.
+====
+
+=== Scene
+
+Includes a list of objects, implemented as a variant of mesh or camera objects.
+An object can be referenced with an ID. Cameras can be switched by calling
+redc_scene_set_active_camera with another ID.
+
+Every scene technically loads its own crosshair, but since there has only ever
+been one scene this hasn't been a problem. The proper solution would be to make
+a good user interface library that can easily render a image / crosshair to the
+center of the screen.
+
+[NOTE]
+====
+The camera switching functionality is probably broken due to the way
+redc_scene_step modifies the active camera when there is an active player.
+====
+
+=== Map
+
+Stores all the information from the JSON (see map.cpp for the implementation of
+the loading code and mildly-code/Library-map.json for an example of a map).
+
+The map includes a render component and a physics component. Which are populated
+by the Client_Event_Visitor and the Scene_Event_Visitor respectively. It's
+important to note that the Scene_Event_Visitor does *not* initialize the map
+render component, because that would be weird if there were multiple scenes.
+
+[NOTE]
+====
+Currently the gravity value and spawns are not being properly used. (Gravity is
+set by default to 9.81 m/s^2).
+====
+
+=== Player_Controller
+Stores player state (walking, jumping, grappling, etc).
+
+Uses bullet to do some raytraces to determine if the player is on the ground.
+
+=== Peer_Ptr<T>
+This is a smart-pointer template. When a single peer of any number of peers is
+destructed, the data is destructed with it. The idea is that if the engine holds
+one peer and the lua code holds another, the resource will only live as long as
+it needs to, but not too long. If the engine needs to uninitialize, the data
+will go with it. If the Lua GC decides it isn't needed, the data can also go.
+But to leave the data around after the engine has been uninitialized until the
+lua gc decides to destruct the data can be hairy.
+
+You'll see this a lot in redcrane.hpp in Engine, which maintains a list of
+random peers for any function to use. The whole thing is documented in more
+detail in common/peer_ptr.hpp.
+
+== General Ideas / TODOs
+
+. Have unique filenames among directories. This way, we can't confuse
+  cwrap/scene.cpp and gfx/scene.cpp which are both very important but distinct
+  files.
