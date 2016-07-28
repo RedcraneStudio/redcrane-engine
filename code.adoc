@@ -235,10 +235,10 @@ themselves (once they are initialized).
 
 [NOTE]
 ====
-TODO: Putting the mesh cache here is a bit strange. I believe it was put there because
-the server needed to load the map from a .obj, and it naturally would benefit
-from a mesh cache. Investigate as to how it could be moved into the Client
-struct.
+Putting the mesh cache here is a bit strange. I believe it was put there
+because the server needed to load the map from a .obj, and it naturally would
+benefit from a mesh cache. Investigate as to how it could be moved into the
+Client struct.
 
 The audio driver could also probably be put in the client.
 ====
@@ -249,21 +249,15 @@ Includes things related to rendering, input, and maintains a list of scenes.
 It also includes a vector of peers for mesh pointers that should be
 uninitialized before the OpenGL is uninitialized.
 
-[NOTE]
-====
-TODO: The default shader is not really important anymore, so we can probably
+NOTE: The default shader is not really important anymore, so we can probably
 remove that.
-====
 
 === Server
 Includes physics, map and player related stuff. These all are things that might
 have to be networked in the future.
 
-[NOTE]
-====
-TODO: How can we abstract the physics in such a way that would allow it to be
+NOTE: How can we abstract the physics in such a way that would allow it to be
 networked or implemented asynchronously.
-====
 
 === Scene
 
@@ -276,11 +270,8 @@ been one scene this hasn't been a problem. The proper solution would be to make
 a good user interface library that can easily render a image / crosshair to the
 center of the screen.
 
-[NOTE]
-====
-The camera switching functionality is probably broken due to the way
+NOTE: The camera switching functionality is probably broken due to the way
 redc_scene_step modifies the active camera when there is an active player.
-====
 
 === Map
 
@@ -292,11 +283,8 @@ by the Client_Event_Visitor and the Scene_Event_Visitor respectively. It's
 important to note that the Scene_Event_Visitor does *not* initialize the map
 render component, because that would be weird if there were multiple scenes.
 
-[NOTE]
-====
-Currently the gravity value and spawns are not being properly used. (Gravity is
-set by default to 9.81 m/s^2).
-====
+NOTE: Currently the gravity value and spawns are not being properly used.
+(Gravity is set by default to 9.81 m/s^2).
 
 === Player_Controller
 Stores player state (walking, jumping, grappling, etc).
