@@ -292,10 +292,20 @@ namespace redc
   Asset load_asset(tinygltf::Scene const& scene);
   void append_to_asset(Asset& asset, tinygltf::Scene const& scene);
 
+  struct Param_Override
+  {
+    Param_Override(std::string const& name) : name(name) {}
+
+    std::string name;
+    Param_Value value;
+  };
+
   struct Rendering_State
   {
     Technique_Ref cur_technique_i = -1;
     Material_Ref cur_material_i = -1;
+
+    std::vector<Param_Override> overrides;
   };
 
   void render_asset(Asset const& asset, gfx::Camera const& camera,

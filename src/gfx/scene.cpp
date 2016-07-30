@@ -1855,32 +1855,33 @@ namespace redc
 
           // Use the shader program.
           use_program(asset.programs[technique.program_i].repr);
+        }
 
-          // Now set each parameter
-          for(auto param_pair : technique.parameters)
+        // We have to set parameters each time because the technique may have
+        // default values that are overrided on a per-material basis.
+        for(auto param_pair : technique.parameters)
+        {
+          // We only care about parameters (uniforms). Attributes will be set
+          // later on.
+          if(param_pair.second.bind.which() != 0) continue;
+
+          // We don't know how to do count
+          REDC_ASSERT_MSG(param_pair.second.count == 1,
+                          "technique parameter '%' must have count == 1",
+                          param_pair.first);
+
+          Param_Decl const& param = param_pair.second;
+
+          Param_Bind bind = boost::get<Param_Bind>(param.bind);
+
+          // If there isn't a semantic but it has a default value it will be
+          // static so it won't need be set again as long as another technique
+          // hasn't been used.
+          if(!param.semantic && param.default_value)
           {
-            // We only care about parameters (uniforms). Attributes will be set
-            // later on.
-            if(param_pair.second.bind.which() != 0) continue;
-
-            // We don't know how to do count
-            REDC_ASSERT_MSG(param_pair.second.count == 1,
-                            "technique parameter '%' must have count == 1",
-                            param_pair.first);
-
-            Param_Decl const& param = param_pair.second;
-
-            Param_Bind bind = boost::get<Param_Bind>(param.bind);
-
-            // If there isn't a semantic but it has a default value it will be
-            // static so it won't need be set again as long as another technique
-            // hasn't been used.
-            if(!param.semantic && param.default_value)
-            {
-              // Set the value if it has one
-              set_parameter(bind, param.type, param.default_value.value(),
-                            asset.textures);
-            }
+            // Set the value if it has one
+            set_parameter(bind, param.type, param.default_value.value(),
+                          asset.textures);
           }
         }
 
@@ -1889,6 +1890,26 @@ namespace redc
         {
           set_parameter(parameter_pair.first, parameter_pair.second,
                         asset.textures);
+        }
+
+        // Override material parameters with ones in the render state overrides.
+        for(Param_Override param_override : cur_rendering_state.overrides)
+        {
+          auto decl_find = technique.parameters.find(param_override.name);
+
+          // If it's bad don't worry about it.
+          if(decl_find == technique.parameters.end()) continue;
+
+          Param_Decl const& decl = decl_find->second;
+
+          // Otherwise make sure it's a uniform (vs an attribute).
+          if(decl.bind.which() != 0) continue;
+
+          // Now get the bind
+          Param_Bind bind = boost::get<Param_Bind>(decl.bind);
+
+          // And set it
+          set_parameter(bind, decl.type, param_override.value, asset.textures);
         }
       }
 
