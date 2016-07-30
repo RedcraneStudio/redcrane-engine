@@ -5,6 +5,9 @@
 #ifndef REDC_GFX_TYPES_H
 #define REDC_GFX_TYPES_H
 
+#include <cstddef>
+#include "enums.h"
+
 #if defined(REDC_USE_OPENGL)
 #include "glad/glad.h"
 #endif
@@ -63,6 +66,32 @@ namespace redc
   struct Shader_Repr {};
   struct Program_Repr {};
 #endif
+
+  struct Shader
+  {
+    Shader_Repr repr;
+    Shader_Type type;
+  };
+
+  using Buf_Ref = std::size_t;
+  struct Accessor
+  {
+    // Index into the assets buffers.
+    Buf_Ref buf_i;
+
+    // Number of attributes
+    std::size_t count;
+
+    // In bytes
+    std::size_t offset;
+    std::size_t stride;
+
+    // Type of each element e.g. float
+    Data_Type data_type;
+    // What kind of attribute e.g. 4-component vector.
+    Attrib_Type attrib_type;
+  };
+
 }
 
 #endif // Header Guard

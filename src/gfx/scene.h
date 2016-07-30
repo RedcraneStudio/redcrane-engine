@@ -18,11 +18,6 @@
 
 namespace redc
 {
-  enum class Buffer_Target
-  {
-    CPU, Array, Element_Array
-  };
-
   struct Buffer
   {
     // Target type
@@ -31,34 +26,6 @@ namespace redc
     std::vector<uint8_t> data;
     // Buffer representation
     boost::optional<Buf_Repr> repr;
-  };
-
-  // The most significant nibble is type (1 = vector, 2 = matrix) and the other
-  // nibble is the amount. Will be used to quickly distinquish between vector
-  // and matrix types.
-  enum class Attrib_Type : unsigned char
-  {
-    Scalar = 0x11, Vec2 = 0x12, Vec3 = 0x13, Vec4 = 0x14, Mat2 = 0x22,
-    Mat3 = 0x23, Mat4 = 0x24
-  };
-
-  using Buf_Ref = std::size_t;
-  struct Accessor
-  {
-    // Index into the assets buffers.
-    Buf_Ref buf_i;
-
-    // Number of attributes
-    std::size_t count;
-
-    // In bytes
-    std::size_t offset;
-    std::size_t stride;
-
-    // Type of each element e.g. float
-    Data_Type data_type;
-    // What kind of attribute e.g. 4-component vector.
-    Attrib_Type attrib_type;
   };
 
   // Type of parameter value
@@ -142,12 +109,6 @@ namespace redc
   // added if at all.
 
   struct Asset;
-
-  struct Shader
-  {
-    Shader_Repr repr;
-    Shader_Type type;
-  };
 
   struct Program
   {

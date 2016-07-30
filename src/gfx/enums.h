@@ -12,6 +12,11 @@
 
 namespace redc
 {
+  enum class Buffer_Target
+  {
+    CPU, Array, Element_Array
+  };
+
 #if defined(REDC_USE_OPENGL)
   enum class Data_Type : GLenum
   {
@@ -68,6 +73,17 @@ namespace redc
   };
 
 #endif
+
+  // The most significant nibble is type (1 = vector, 2 = matrix) and the other
+  // nibble is the amount. Will be used to quickly distinquish between vector
+  // and matrix types.
+  enum class Attrib_Type : unsigned char
+  {
+    Scalar = 0x11, Vec2 = 0x12, Vec3 = 0x13, Vec4 = 0x14, Mat2 = 0x22,
+    Mat3 = 0x23, Mat4 = 0x24
+  };
+
+
 }
 
 #endif // Header guard
