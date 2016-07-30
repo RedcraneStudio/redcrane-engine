@@ -4,6 +4,7 @@
  */
 #include "sdl_helper.h"
 #include "common/log.h"
+#include "common/debugging.h"
 namespace redc
 {
   SDL_Init_Lock::SDL_Init_Lock(SDL_Init_Lock&& l) : window(l.window),
@@ -99,6 +100,25 @@ namespace redc
     glGetIntegerv(GL_MAJOR_VERSION, &opengl_maj);
     glGetIntegerv(GL_MINOR_VERSION, &opengl_min);
     log_i("OpenGL core profile %.%", opengl_maj, opengl_min);
+
+    GLint front_type = 0;
+    glGetFramebufferAttachmentParameteriv(
+      GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT,
+      GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING, &front_type
+    );
+    std::string framebuf_string("Unknown type");
+    switch(front_type)
+    {
+    case GL_LINEAR:
+      framebuf_string = "RGB";
+      break;
+    case GL_SRGB:
+      framebuf_string = "sRGB";
+      break;
+    default:
+      REDC_UNREACHABLE_MSG("Invalid framebuffer type");
+    }
+    log_d("Using % framebuffer", framebuf_string);
 
     return ret;
   }
