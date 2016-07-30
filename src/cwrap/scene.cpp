@@ -341,6 +341,8 @@ extern "C"
 
     using namespace gfx::tags;
 
+    scene->engine->client->driver->face_culling(true);
+
     // Making the function think OpenGL state *hasn't* changed is a dangerous
     // assumption we can't make.
     Rendering_State render_state;
