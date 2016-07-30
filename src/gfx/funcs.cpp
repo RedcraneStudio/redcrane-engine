@@ -1,0 +1,312 @@
+/*
+ * Copyright (C) 2015 Luke San Antonio
+ * All rights reserved.
+ */
+#include "funcs.h"
+#include "../common/debugging.h"
+namespace redc
+{
+#ifdef REDC_USE_OPENGL
+  std::vector<Buf_Repr> make_buffers(std::size_t num)
+  {
+    std::vector<Buf_Repr> bufs;
+    if(num > 0)
+    {
+      bufs.resize(num);
+
+      // We reference the buf member of the first element, assuming they are
+      // tightly packed, etc.
+      glGenBuffers(num, &bufs[0].buf);
+    }
+    return bufs;
+  }
+  Buf_Repr make_buffer()
+  {
+    Buf_Repr repr;
+    glGenBuffers(1, &repr.buf);
+    return repr;
+  }
+
+  void upload_data(Buf_Repr buf, Buffer_Target target, uint8_t* data,
+                   std::size_t length)
+  {
+    GLenum gltarget = GL_ARRAY_BUFFER;
+    switch(target)
+    {
+    case Buffer_Target::Array:
+      gltarget = GL_ARRAY_BUFFER;
+      break;
+    case Buffer_Target::Element_Array:
+      gltarget = GL_ELEMENT_ARRAY_BUFFER;
+      break;
+    default:
+      REDC_UNREACHABLE_MSG("This buffer should not be uploaded to the GPU");
+      return;
+    }
+
+    glBindBuffer(gltarget, buf.buf);
+    glBufferData(gltarget, length, data, GL_STATIC_DRAW);
+  }
+
+  std::vector<Texture_Repr> make_textures(std::size_t num)
+  {
+    std::vector<Texture_Repr> texs;
+    if(num > 0)
+    {
+      texs.resize(num);
+      glGenTextures(num, &texs[0].tex);
+    }
+    return texs;
+  }
+
+  void set_pixel_store_unpack_alignment(int align)
+  {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, align);
+  }
+
+  void upload_image(Texture_Repr tex, std::vector<uint8_t> const& data,
+                    Texture_Target target, Texture_Format dformat,
+                    Texture_Format iformat, std::size_t width,
+                    std::size_t height, Data_Type type)
+  {
+    glBindTexture((GLenum) target, tex.tex);
+    glTexImage2D((GLenum) target, 0, (GLenum) iformat, width, height, 0,
+                 (GLenum) dformat, (GLenum) type, &data[0]);
+    glGenerateMipmap((GLenum) target);
+  }
+
+  void set_sampler(Texture_Repr tex, Texture_Target target,
+                   tinygltf::Sampler const& sampler)
+  {
+#ifdef REDC_USE_OPENGL_4_5
+
+    // Use direct state access when possible.
+
+    glTextureParameterf(tex.tex, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
+    glTextureParameterf(tex.tex, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
+    glTextureParameterf(tex.tex, GL_TEXTURE_WRAP_S, sampler.wrapS);
+    glTextureParameterf(tex.tex, GL_TEXTURE_WRAP_T, sampler.wrapT);
+#else
+    glBindTexture((GLenum) target, tex.tex);
+
+    glTexParameterf((GLenum) target, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
+    glTexParameterf((GLenum) target, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
+
+    glTexParameterf((GLenum) target, GL_TEXTURE_WRAP_S, sampler.wrapS);
+    glTexParameterf((GLenum) target, GL_TEXTURE_WRAP_T, sampler.wrapT);
+#endif
+  }
+
+  std::vector<Mesh_Repr> make_mesh_reprs(std::size_t num)
+  {
+    std::vector<Mesh_Repr> meshs;
+    if(num > 0)
+    {
+      meshs.resize(num);
+      glGenVertexArrays(num, &meshs[0].vao);
+    }
+    return meshs;
+  }
+
+  Shader make_shader(Shader_Type type)
+  {
+    Shader ret;
+    ret.type = type;
+    ret.repr = {glCreateShader((GLenum) type)};
+    return ret;
+  }
+
+  Program_Repr make_program()
+  {
+    Program_Repr ret;
+    ret.program = glCreateProgram();
+    return ret;
+  }
+
+  void use_program(Program_Repr repr)
+  {
+    glUseProgram(repr.program);
+  }
+
+  void upload_shader_source(Shader shade, char const * source,
+                            int source_length)
+  {
+    glShaderSource(shade.repr.shader, 1, &source, &source_length);
+  }
+  bool compile_shader(Shader shader, std::vector<char>* info_log)
+  {
+    // Compile
+    glCompileShader(shader.repr.shader);
+
+    // Get info log
+    if(info_log)
+    {
+      GLint length = 0;
+      glGetShaderiv(shader.repr.shader, GL_INFO_LOG_LENGTH, &length);
+
+      info_log->resize(length);
+      if(length > 0)
+      {
+        glGetShaderInfoLog(shader.repr.shader, length, NULL, &(*info_log)[0]);
+      }
+    }
+
+    // Return compile status
+    GLint val;
+    glGetShaderiv(shader.repr.shader, GL_COMPILE_STATUS, &val);
+    return val == GL_TRUE;
+  }
+  void attach_shader(Program_Repr program, Shader_Repr shader)
+  {
+    glAttachShader(program.program, shader.shader);
+  }
+  bool link_program(Program_Repr program, std::vector<char>* link_log)
+  {
+    // Link
+    glLinkProgram(program.program);
+
+    // Get info log
+    if(link_log)
+    {
+      GLint length = 0;
+      glGetProgramiv(program.program, GL_INFO_LOG_LENGTH, &length);
+
+      link_log->resize(length);
+      if(length > 0)
+      {
+        glGetProgramInfoLog(program.program, length, NULL, &(*link_log)[0]);
+      }
+    }
+
+    // Return compile status
+    GLint val;
+    glGetProgramiv(program.program, GL_LINK_STATUS, &val);
+    return val == GL_TRUE;
+  }
+
+  Attrib_Bind get_attrib_bind(Program_Repr program, std::string const& name)
+  {
+    Attrib_Bind ret;
+    ret.loc = glGetAttribLocation(program.program, name.c_str());
+    return ret;
+  }
+  Param_Bind get_param_bind(Program_Repr program, std::string const& name)
+  {
+    Param_Bind bind;
+    bind.loc = glGetUniformLocation(program.program, name.c_str());
+    return bind;
+  }
+
+  void destroy_shader(Shader_Repr shader)
+  {
+    glDeleteShader(shader.shader);
+  }
+  void destroy_program(Program_Repr program)
+  {
+    glDeleteProgram(program.program);
+  }
+
+  void destroy_bufs(std::size_t num, Buf_Repr* bufs)
+  {
+    if(num >= 1)
+    {
+      glDeleteBuffers(num, &bufs->buf);
+    }
+  }
+  void destroy_textures(std::size_t num, Texture_Repr* textures)
+  {
+    if(num >= 1)
+    {
+      glDeleteTextures(num, &textures->tex);
+    }
+  }
+  void destroy_meshes(std::size_t num, Mesh_Repr* reprs)
+  {
+    if(num >= 1)
+    {
+      glDeleteVertexArrays(num, &reprs->vao);
+    }
+  }
+
+  void use_mesh(Mesh_Repr mesh)
+  {
+    glBindVertexArray(mesh.vao);
+  }
+
+
+  // Use this for rendering. It would be nice to pass in some OpenGL state
+  // structure so we don't have to redundantly set this information if it has
+  // already been set.
+  void use_array_accessor(Attrib_Bind bind, Buf_Repr buf, Accessor const& acc)
+  {
+    // Usually this means the attribute is not actually being used in the shader
+    // and can be safely ignored.
+    if(bind.loc == -1) return;
+
+    // We have some data
+    glBindBuffer(GL_ARRAY_BUFFER, buf.buf);
+
+    // We can't be dealing with matrices of any kind
+    REDC_ASSERT((int) acc.attrib_type & 0x10);
+
+    // Bind the buffer to a given attribute, at this point we know exactly
+    // what part of the buffer needs to be referenced.
+    glVertexAttribPointer(bind.loc, (GLint) acc.attrib_type & 0x0f,
+                          (GLenum) acc.data_type, GL_FALSE,
+                          acc.stride, (void*) acc.offset);
+  }
+  void use_element_array_accessor(Buf_Repr buf, Accessor const&)
+  {
+    // Use this as our element array
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.buf);
+  }
+
+  Attrib_Bind bad_attrib_bind()
+  {
+    Attrib_Bind bind;
+    bind.loc = -1;
+    return bind;
+  }
+  bool is_good_attrib_bind(Attrib_Bind bind)
+  {
+    return bind.loc >= 0;
+  }
+  Param_Bind bad_param_bind()
+  {
+    Param_Bind bind;
+    bind.loc = -1;
+    return bind;
+  }
+  bool is_good_param_bind(Param_Bind bind)
+  {
+    return bind.loc >= 0;
+  }
+  void enable_vertex_attrib_arrays(Mesh_Repr mesh, unsigned int start,
+                                   unsigned int end)
+  {
+#ifdef REDC_USE_OPENGL_4_5
+    for(; start != end; ++start)
+    {
+      glEnableVertexArrayAttrib(mesh.vao, start);
+    }
+#else
+    use_mesh(mesh);
+    for(; start != end; ++start)
+    {
+      glEnableVertexAttribArray(start);
+    }
+#endif
+  }
+
+  void draw_elements(std::size_t count, Data_Type type, Render_Mode mode,
+                     std::size_t offset)
+  {
+    glDrawElements((GLenum) mode, count, (GLenum) type, (GLvoid*) offset);
+  }
+  void draw_arrays(std::size_t count, Render_Mode mode)
+  {
+    glDrawArrays((GLenum) mode, 0, count);
+  }
+
+#endif
+}

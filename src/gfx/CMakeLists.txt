@@ -13,7 +13,7 @@ set(RED_CRANE_GFX_NULL_SOURCES null/driver.cpp null/mesh.cpp)
 
 add_library(gfxlib STATIC ${RED_CRANE_GFX_GL_SOURCES} camera.cpp shader.cpp
                           imesh.cpp texture.cpp mesh_chunk.cpp mesh_data.cpp
-                          immediate_renderer.cpp scene.cpp)
+                          immediate_renderer.cpp scene.cpp funcs.cpp)
 
 # Link to our extension loader (glad).
 target_link_libraries(gfxlib engine_gl commonlib ${GLFW_LIBRARY}
