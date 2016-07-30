@@ -80,17 +80,26 @@ namespace redc
     glGenerateMipmap((GLenum) target);
   }
 
-  void set_sampler(Texture_Repr tex, Texture_Target target)
+  void set_sampler(Texture_Repr tex, Texture_Target target,
+                   tinygltf::Sampler const& sampler)
   {
-    // Can we avoid rebinding?
+#ifdef USE_OPENGL_4_5
+
+    // Use direct state access when possible.
+
+    glTextureParameterf(tex.tex, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
+    glTextureParameterf(tex.tex, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
+    glTextureParameterf(tex.tex, GL_TEXTURE_WRAP_S, sampler.wrapS);
+    glTextureParameterf(tex.tex, GL_TEXTURE_WRAP_T, sampler.wrapT);
+#else
     glBindTexture((GLenum) target, tex.tex);
-    glTextureParameterf((GLenum) target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameterf((GLenum) target, GL_TEXTURE_MIN_FILTER,
-                        GL_NEAREST_MIPMAP_LINEAR);
 
-    glTextureParameterf((GLenum) target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameterf((GLenum) target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf((GLenum) target, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
+    glTexParameterf((GLenum) target, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
 
+    glTexParameterf((GLenum) target, GL_TEXTURE_WRAP_S, sampler.wrapS);
+    glTexParameterf((GLenum) target, GL_TEXTURE_WRAP_T, sampler.wrapT);
+#endif
   }
 
   std::vector<Mesh_Repr> make_mesh_reprs(std::size_t num)
@@ -1152,9 +1161,12 @@ namespace redc
                    image_find->second.width, image_find->second.height,
                    data_type);
 
-      // tinygltfloader doesn't load in samplers so we'll just guess and
-      // generate mipmaps anyway.
-      set_sampler(textures[i], target);
+      // Find the sampler
+      auto sampler_find = scene.samplers.find(in_tex.sampler);
+      REDC_ASSERT(sampler_find != scene.samplers.end());
+
+      // Set the sampling properties.
+      set_sampler(textures[i], target, sampler_find->second);
 
       ++i;
     }
