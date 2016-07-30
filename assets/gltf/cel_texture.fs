@@ -4,7 +4,6 @@
  */
 #version 330
 
-in vec3 normal_world;
 in vec2 uv;
 
 out vec4 color;
