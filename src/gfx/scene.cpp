@@ -71,12 +71,13 @@ namespace redc
   }
 
   void upload_image(Texture_Repr tex, std::vector<uint8_t> const& data,
-                    Texture_Target target, Texture_Format format,
-                    std::size_t width, std::size_t height, Data_Type type)
+                    Texture_Target target, Texture_Format dformat,
+                    Texture_Format iformat, std::size_t width,
+                    std::size_t height, Data_Type type)
   {
     glBindTexture((GLenum) target, tex.tex);
-    glTexImage2D((GLenum) target, 0, (GLenum) format, width, height, 0,
-                 (GLenum) format, (GLenum) type, &data[0]);
+    glTexImage2D((GLenum) target, 0, (GLenum) iformat, width, height, 0,
+                 (GLenum) dformat, (GLenum) type, &data[0]);
     glGenerateMipmap((GLenum) target);
   }
 
@@ -1124,32 +1125,41 @@ namespace redc
       REDC_ASSERT(image_find != scene.images.end());
 
       // Load as enums
-      Texture_Target target = to_texture_target(in_tex.target);
-      Texture_Format format = to_texture_format(in_tex.format);
-      Data_Type   data_type = to_data_type(in_tex.type);
+      Texture_Target  target = to_texture_target(in_tex.target);
+      Texture_Format dformat = to_texture_format(in_tex.format);
+      Texture_Format iformat = to_texture_format(in_tex.internalFormat);
+      Data_Type    data_type = to_data_type(in_tex.type);
 
       switch(image_find->second.component)
       {
       case 1:
-        if(format != Texture_Format::Alpha)
+        if(dformat != Texture_Format::Alpha)
         {
           log_w("Ignoring texture format because image has one component");
-          format = Texture_Format::Alpha;
+          dformat = Texture_Format::Alpha;
         }
         break;
       case 3:
-        if(format != Texture_Format::Rgb)
-        {
+        if(dformat != Texture_Format::Rgb && dformat != Texture_Format::Srgb)
           log_w("Ignoring texture format because image has three components");
-          format = Texture_Format::Rgb;
-        }
+
+        // Don't lose the fact that we are using srgb
+        if(dformat == Texture_Format::Srgb_Alpha)
+          dformat = Texture_Format::Srgb;
+        else
+          dformat = Texture_Format::Rgb;
+
         break;
       case 4:
-        if(format != Texture_Format::Rgba)
-        {
+        if(dformat != Texture_Format::Rgba &&
+           dformat != Texture_Format::Srgb_Alpha)
           log_w("Ignoring texture format because image has four components");
-          format = Texture_Format::Rgba;
-        }
+
+        if(dformat == Texture_Format::Srgb)
+          dformat = Texture_Format::Srgb_Alpha;
+        else
+          dformat = Texture_Format::Rgba;
+
         break;
       default:
         REDC_UNREACHABLE_MSG("Unsupported number of image components");
@@ -1157,8 +1167,8 @@ namespace redc
       }
 
       // Upload the image data
-      upload_image(textures[i], image_find->second.image, target, format,
-                   image_find->second.width, image_find->second.height,
+      upload_image(textures[i], image_find->second.image, target, dformat,
+                   iformat, image_find->second.width, image_find->second.height,
                    data_type);
 
       // Find the sampler
