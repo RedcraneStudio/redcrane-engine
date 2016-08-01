@@ -120,18 +120,30 @@ namespace redc { namespace gfx { namespace gl
 
     switch(format_)
     {
-      case Texture_Format::Rgba:
-        row_size = type_size * 4 * vol.width;
-        data_format = GL_RGBA;
-        break;
-      case Texture_Format::Rgb:
-        row_size = type_size * 3 * vol.width;
-        data_format = GL_RGB;
-        break;
-      case Texture_Format::Alpha:
-        row_size = type_size * vol.width;
-        data_format = GL_ALPHA;
-        break;
+    case Texture_Format::Rgba:
+      row_size = type_size * 4 * vol.width;
+      data_format = GL_RGBA;
+      break;
+    case Texture_Format::Rgb:
+      row_size = type_size * 3 * vol.width;
+      data_format = GL_RGB;
+      break;
+    case Texture_Format::Alpha:
+      row_size = type_size * vol.width;
+      data_format = GL_ALPHA;
+      break;
+    case Texture_Format::Depth:
+      row_size = type_size * vol.width;
+      data_format = GL_DEPTH_COMPONENT32F;
+      break;
+    case Texture_Format::Depth_Stencil:
+      row_size = type_size * vol.width;
+      data_format = GL_DEPTH32F_STENCIL8;
+      break;
+    case Texture_Format::Stencil:
+      row_size = type_size * vol.width;
+      data_format = GL_STENCIL_INDEX8;
+      break;
     }
 
     // Allocate our data
