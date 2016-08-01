@@ -305,5 +305,76 @@ namespace redc
     glDrawArrays((GLenum) mode, 0, count);
   }
 
+  void set_parameter(Param_Bind bind, Parameter const& param,
+                     std::vector<Texture_Repr> const& textures)
+  {
+    switch(param.type)
+    {
+    case Param_Type::Byte:
+    case Param_Type::UByte:
+    case Param_Type::Short:
+    case Param_Type::UShort:
+      REDC_UNREACHABLE_MSG("Byte and Short parameter types not supported");
+      // I suppose we could just set them as integers.
+      break;
+    case Param_Type::Int:
+      set_int_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::IVec2:
+      set_ivec2_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::IVec3:
+      set_ivec3_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::IVec4:
+      set_ivec4_parameter(bind, &param.value.ints[0]);
+      break;
+    case Param_Type::UInt:
+      set_uint_parameter(bind, &param.value.uint);
+      break;
+    case Param_Type::Bool:
+      set_bool_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::BVec2:
+      set_bvec2_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::BVec3:
+      set_bvec3_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::BVec4:
+      set_bvec4_parameter(bind, &param.value.bools[0]);
+      break;
+    case Param_Type::Float:
+      set_float_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Vec2:
+      set_vec2_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Vec3:
+      set_vec3_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Vec4:
+      set_vec4_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Mat2:
+      set_mat2_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Mat3:
+      set_mat3_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Mat4:
+      set_mat4_parameter(bind, &param.value.floats[0]);
+      break;
+    case Param_Type::Sampler2D:
+      // Remember: The value in uint is a reference, however, we are using the
+      // index to represent texture unit. We need a cast because samplers must
+      // be set with the signed uniform function
+      set_int_parameter(bind, (int*) &param.value.uint);
+      // Now activate that texture unit
+      glActiveTexture(GL_TEXTURE0 + param.value.uint);
+      glBindTexture(GL_TEXTURE_2D, textures[param.value.uint].tex);
+      break;
+    }
+  }
 #endif
 }

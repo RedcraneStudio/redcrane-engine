@@ -59,6 +59,19 @@ namespace redc
                      std::size_t offset);
   void draw_arrays(std::size_t count, Render_Mode mode);
 
+  void set_parameter(Param_Bind bind, Parameter const& param,
+                     std::vector<Texture_Repr> const& textures);
+
+  inline void set_parameter(Param_Bind bind, Param_Type type,
+                            Param_Value const& val,
+                            std::vector<Texture_Repr> const& textures)
+  {
+    Parameter param;
+    param.type = type;
+    param.value = val;
+    set_parameter(bind, param, textures);
+  }
+
 #ifdef REDC_USE_OPENGL
   // = Uniform functions!
 

@@ -6,6 +6,8 @@
 #define REDC_GFX_TYPES_H
 
 #include <cstddef>
+#include <array>
+
 #include "enums.h"
 
 #if defined(REDC_USE_OPENGL)
@@ -90,6 +92,41 @@ namespace redc
     Data_Type data_type;
     // What kind of attribute e.g. 4-component vector.
     Attrib_Type attrib_type;
+  };
+
+  // Type of parameter value
+  enum class Param_Type
+  {
+    Byte, UByte, Short, UShort, Int, UInt, Float, Vec2, Vec3, Vec4, IVec2,
+    IVec3, IVec4, Bool, BVec2, BVec3, BVec4, Mat2, Mat3, Mat4, Sampler2D
+  };
+
+  // Represents a uniform value
+  union Param_Value
+  {
+    // Signed and unsigned byte
+    int8_t byte;
+    uint8_t ubyte;
+
+    // Signed and unsigned short.
+    short shrt;
+    unsigned short ushrt;
+
+    // Unsigned int and sampler **index**
+    unsigned int uint;
+
+    // Float, vectors, and matrices
+    std::array<float, 16> floats;
+    // signed integer and ivec
+    std::array<int, 4> ints;
+    // bool and bvec
+    std::array<bool, 4> bools;
+  };
+
+  struct Parameter
+  {
+    Param_Type type;
+    Param_Value value;
   };
 
 }
