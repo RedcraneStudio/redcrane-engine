@@ -14,7 +14,7 @@ namespace redc
   void upload_data(Buf_Repr buf, Buffer_Target target, uint8_t* data,
                    std::size_t length);
 
-  std::vector<Texture_Repr> make_textures(std::size_t num);
+  void make_textures(std::size_t num, Texture_Repr* reprs);
 
   void set_pixel_store_unpack_alignment(int align);
   void upload_image(Texture_Repr tex, std::vector<uint8_t> const& data,

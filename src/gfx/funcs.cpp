@@ -48,15 +48,12 @@ namespace redc
     glBufferData(gltarget, length, data, GL_STATIC_DRAW);
   }
 
-  std::vector<Texture_Repr> make_textures(std::size_t num)
+  void make_textures(std::size_t num, Texture_Repr* repr)
   {
-    std::vector<Texture_Repr> texs;
     if(num > 0)
     {
-      texs.resize(num);
-      glGenTextures(num, &texs[0].tex);
+      glGenTextures(num, &repr->tex);
     }
-    return texs;
   }
 
   void set_pixel_store_unpack_alignment(int align)

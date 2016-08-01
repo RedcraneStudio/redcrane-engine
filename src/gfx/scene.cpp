@@ -727,7 +727,9 @@ namespace redc
                      std::vector<Texture_Repr>& textures,
                      std::vector<std::string>& texture_names)
   {
-    auto new_texture_reprs = make_textures(scene.textures.size());
+    std::vector<Texture_Repr> new_texture_reprs;
+    new_texture_reprs.resize(scene.textures.size());
+    make_textures(new_texture_reprs.size(), &new_texture_reprs[0]);
 
     // Starting index
     std::size_t i = textures.size();
