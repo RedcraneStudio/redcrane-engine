@@ -10,28 +10,9 @@
 #include <vector>
 #include <tuple>
 #include "primitive_type.h"
+#include "enums.h"
 namespace redc
 {
-  enum class Usage_Hint
-  {
-    Draw, Read, Copy
-  };
-  enum class Upload_Hint
-  {
-    Static, Dynamic, Stream
-  };
-
-  enum class Buffer_Format
-  {
-    Float,
-    Unsigned_Int,
-    Short
-  };
-
-  enum class Buffer_Type
-  {
-    Array, Element_Array
-  };
 
   /*!
    * \brief A simple collection of buffers for vertex attributes.
@@ -43,7 +24,7 @@ namespace redc
     using buf_t = unsigned int;
 
     virtual void make_buffers(unsigned int num_bufs, buf_t* bufs) = 0;
-    virtual void allocate_buffer(buf_t, Buffer_Type, unsigned int size,
+    virtual void allocate_buffer(buf_t, Buffer_Target, unsigned int size,
                                  void const* const data,
                                  Usage_Hint, Upload_Hint) = 0;
 
@@ -68,7 +49,7 @@ namespace redc
 
     virtual void format_buffer(buf_t, unsigned int attrib,
                                unsigned short size, // must be 1 2 3 or 4
-                               Buffer_Format format,
+                               Data_Type format,
                                unsigned int stride,
                                unsigned int offset) noexcept = 0;
 

@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include <algorithm>
 #include "common.h"
+#include "../../common/debugging.h"
 namespace redc { namespace gfx { namespace gl
 {
   GL_Mesh::GL_Mesh(Driver& driver) noexcept : driver_(&driver)
@@ -20,18 +21,22 @@ namespace redc { namespace gfx { namespace gl
   {
     glGenBuffers(num_bufs, bufs);
   }
-  void GL_Mesh::allocate_buffer(buf_t buf, Buffer_Type t, unsigned int size,
+  void GL_Mesh::allocate_buffer(buf_t buf, Buffer_Target t, unsigned int size,
                                 void const* const data,
                                 Usage_Hint us, Upload_Hint up)
   {
     GLenum buf_ty;
     switch(t)
     {
-    case Buffer_Type::Array:
+    case Buffer_Target::Array:
       buf_ty = GL_ARRAY_BUFFER;
       break;
-    case Buffer_Type::Element_Array:
+    case Buffer_Target::Element_Array:
       buf_ty = GL_ELEMENT_ARRAY_BUFFER;
+      break;
+    default:
+      REDC_UNREACHABLE_MSG("Trying to allocate unknown buffer type");
+      return;
     }
     glBindBuffer(buf_ty, buf);
     glBufferData(buf_ty, size, data, get_gl_hint(up, us));
@@ -95,14 +100,14 @@ namespace redc { namespace gfx { namespace gl
   }
 
   void GL_Mesh::format_buffer(buf_t buf, unsigned int attrib,
-                              unsigned short size, Buffer_Format format,
+                              unsigned short size, Data_Type format,
                               unsigned int stride, unsigned int offs) noexcept
   {
     driver_->bind_mesh(*this);
 
     glBindBuffer(GL_ARRAY_BUFFER, buf);
 
-    glVertexAttribPointer(attrib, size, get_gl_buffer_format(format),
+    glVertexAttribPointer(attrib, size, (GLenum) format,
                           GL_FALSE, stride, reinterpret_cast<void*>(offs));
   }
   void GL_Mesh::set_primitive_type(Primitive_Type prim) noexcept

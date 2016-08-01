@@ -24,7 +24,7 @@ namespace redc { namespace effects
       grid_mesh_->allocate_buffer(sizeof(float) * 2 * water_grid.size(),
                                  redc::Usage_Hint::Draw,
                                  redc::Upload_Hint::Static);
-    grid_mesh_->format_buffer(uv_buf, 0, 2, Buffer_Format::Float, 0, 0);
+    grid_mesh_->format_buffer(uv_buf, 0, 2, Data_Type::Float, 0, 0);
     grid_mesh_->enable_vertex_attrib(0);
     grid_mesh_->buffer_data(uv_buf, 0, sizeof(float) * 2 * water_grid.size(),
                            &water_grid[0]);

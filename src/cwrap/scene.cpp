@@ -57,12 +57,12 @@ extern "C"
                                                            Upload_Hint::Static);
       sc->get()->ch_mesh->buffer_data(buf, 0, sz, &crosshair_data[0]);
       // 2D Positions
-      sc->get()->ch_mesh->format_buffer(buf, 0, 2, Buffer_Format::Float,
+      sc->get()->ch_mesh->format_buffer(buf, 0, 2, Data_Type::Float,
                                                4 * sizeof(float), 0);
       sc->get()->ch_mesh->enable_vertex_attrib(0);
 
       // UV coordinates
-      sc->get()->ch_mesh->format_buffer(buf, 1, 2, Buffer_Format::Float,
+      sc->get()->ch_mesh->format_buffer(buf, 1, 2, Data_Type::Float,
                                                4 * sizeof(float),
                                                2 * sizeof(float));
       sc->get()->ch_mesh->enable_vertex_attrib(1);

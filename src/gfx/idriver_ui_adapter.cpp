@@ -36,17 +36,17 @@ namespace redc { namespace gfx
     // allocate four kilobytes and hope for the best.
     pos_buf_ = mesh_->allocate_buffer(4096, Usage_Hint::Draw,
                                       Upload_Hint::Stream);
-    mesh_->format_buffer(pos_buf_, 0, 2, Buffer_Format::Float, 0, 0);
+    mesh_->format_buffer(pos_buf_, 0, 2, Data_Type::Float, 0, 0);
     mesh_->enable_vertex_attrib(0);
 
     tex_buf_ = mesh_->allocate_buffer(4096, Usage_Hint::Draw,
                                       Upload_Hint::Stream);
-    mesh_->format_buffer(tex_buf_, 1, 2, Buffer_Format::Float, 0, 0);
+    mesh_->format_buffer(tex_buf_, 1, 2, Data_Type::Float, 0, 0);
     mesh_->enable_vertex_attrib(1);
 
     col_buf_ = mesh_->allocate_buffer(4096, Usage_Hint::Draw,
                                       Upload_Hint::Stream);
-    mesh_->format_buffer(col_buf_, 2, 4, Buffer_Format::Float, 0, 0);
+    mesh_->format_buffer(col_buf_, 2, 4, Data_Type::Float, 0, 0);
     mesh_->enable_vertex_attrib(2);
   }
 

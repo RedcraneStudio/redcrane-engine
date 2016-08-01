@@ -31,7 +31,7 @@ namespace redc { namespace gfx
     buf_size_ = 50000;
     pos_buf_ = mesh_->allocate_buffer(buf_size_, Usage_Hint::Draw,
                                       Upload_Hint::Stream);
-    mesh_->format_buffer(pos_buf_, 0, 3, Buffer_Format::Float, 0, 0);
+    mesh_->format_buffer(pos_buf_, 0, 3, Data_Type::Float, 0, 0);
     mesh_->enable_vertex_attrib(0);
 
     mesh_->set_primitive_type(Primitive_Type::Line);

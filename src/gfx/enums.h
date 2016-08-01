@@ -17,6 +17,15 @@ namespace redc
     CPU, Array, Element_Array
   };
 
+  enum class Usage_Hint : GLenum
+  {
+    Draw, Read, Copy
+  };
+  enum class Upload_Hint : GLenum
+  {
+    Static, Dynamic, Stream
+  };
+
 #if defined(REDC_USE_OPENGL)
   enum class Data_Type : GLenum
   {

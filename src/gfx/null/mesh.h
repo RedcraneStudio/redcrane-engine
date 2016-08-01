@@ -30,7 +30,7 @@ namespace redc { namespace gfx { namespace null
                      void const* const) noexcept override {}
 
     void format_buffer(buf_t, unsigned int, unsigned short,
-                       Buffer_Format, unsigned int,
+                       Data_Type, unsigned int,
                        unsigned int) noexcept override {}
 
     void enable_vertex_attrib(unsigned int) noexcept override {}

@@ -65,7 +65,7 @@ namespace redc { namespace effects
     auto data_buf =
       mesh_->allocate_buffer(cube_data.size() * sizeof(float),
                              Usage_Hint::Draw, Upload_Hint::Static);
-    mesh_->format_buffer(data_buf, 0, 3, Buffer_Format::Float, 0,
+    mesh_->format_buffer(data_buf, 0, 3, Data_Type::Float, 0,
                                0);
     mesh_->enable_vertex_attrib(0);
     mesh_->set_primitive_type(Primitive_Type::Triangle);

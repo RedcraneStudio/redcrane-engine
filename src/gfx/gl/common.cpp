@@ -47,21 +47,6 @@ namespace redc { namespace gfx { namespace gl
     return 0;
   }
 
-  GLenum get_gl_buffer_format(Buffer_Format format) noexcept
-  {
-    switch(format)
-    {
-      case Buffer_Format::Float:
-        return GL_FLOAT;
-      case Buffer_Format::Unsigned_Int:
-        return GL_UNSIGNED_INT;
-      case Buffer_Format::Short:
-        return GL_SHORT;
-    }
-
-    // We should never get here.
-    return 0;
-  }
   GLenum get_gl_pixel_format(Framebuffer) noexcept
   {
     return GL_DEPTH_COMPONENT;

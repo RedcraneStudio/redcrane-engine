@@ -16,7 +16,7 @@ namespace redc { namespace gfx { namespace gl
 
     // Try to use this interface, it's more like the OpenGL interface.
     void make_buffers(unsigned int num_bufs, buf_t* bufs) override;
-    void allocate_buffer(buf_t, Buffer_Type t, unsigned int size,
+    void allocate_buffer(buf_t, Buffer_Target t, unsigned int size,
                          void const* const data, Usage_Hint,
                          Upload_Hint) override;
 
@@ -34,7 +34,7 @@ namespace redc { namespace gfx { namespace gl
     void format_buffer(buf_t,
                        unsigned int attrib,
                        unsigned short size, // must be 1 2 3 or 4
-                       Buffer_Format format,
+                       Data_Type format,
                        unsigned int stride,
                        unsigned int offset) noexcept override;
     void enable_vertex_attrib(unsigned int attrib) noexcept override;
