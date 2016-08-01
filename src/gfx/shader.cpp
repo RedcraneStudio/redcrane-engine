@@ -6,6 +6,7 @@
 #include <istream>
 #include <fstream>
 #include "../common/log.h"
+#include "funcs.h"
 namespace redc { namespace gfx
 {
   void Shader::set_color(tag_t tag, Color const& c)
@@ -16,6 +17,10 @@ namespace redc { namespace gfx
     v.b = c.b / (float) 0xff;
     v.a = c.a / (float) 0xff;
     set_vec4(tag, v);
+  }
+  Param_Bind Shader::get_tag_bind(tag_t)
+  {
+    return bad_param_bind();
   }
   std::string load_stream(std::istream& stream)
   {

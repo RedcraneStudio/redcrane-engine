@@ -7,6 +7,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "../common/color.h"
+#include "types.h"
 namespace redc
 {
   namespace gfx
@@ -49,6 +50,8 @@ namespace redc
       // Creates a tag with the same name of a given variable.
       inline void tag_var(std::string tag)
       { set_var_tag(tag, tag); }
+
+      virtual Param_Bind get_tag_bind(tag_t);
 
       virtual void set_mat4(tag_t, glm::mat4 const&) {}
 

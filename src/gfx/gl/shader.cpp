@@ -175,6 +175,12 @@ namespace redc { namespace gfx { namespace gl
     if(tags.count(tag)) tags.at(tag) = loc;
     else tags.insert({tag, loc});
   }
+  Param_Bind GL_Shader::get_tag_bind(tag_t tag)
+  {
+    Param_Bind ret;
+    ret.loc = get_location_from_tag(tag);
+    return ret;
+  }
 
   // Functions to set uniforms given a tag
 
