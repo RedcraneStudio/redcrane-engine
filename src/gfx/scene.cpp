@@ -393,6 +393,7 @@ namespace redc
   {
     if(str == "LOCAL") return Param_Semantic::Local;
     if(str == "MODEL") return Param_Semantic::Model;
+    if(str == "VIEW") return Param_Semantic::View;
     if(str == "PROJECTION") return Param_Semantic::Projection;
     if(str == "MODELVIEW") return Param_Semantic::Model_View;
     if(str == "MODELVIEWPROJECTION")
@@ -410,7 +411,7 @@ namespace redc
     if(str == "VIEWPORT") return Param_Semantic::Viewport;
     if(str == "JOINTMATRIX") return Param_Semantic::Joint_Matrix;
 
-    REDC_UNREACHABLE_MSG("Invalid parameter semantic");
+    REDC_UNREACHABLE_MSG("Invalid parameter semantic '%'", str);
   }
 
   Param_Type to_param_type(int ty)
