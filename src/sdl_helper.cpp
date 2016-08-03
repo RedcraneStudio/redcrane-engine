@@ -74,15 +74,14 @@ namespace redc
 
     // Initialize OpenGL context
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-                        SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS,
-                        SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 
     ret.gl_context = SDL_GL_CreateContext(ret.window);
+    if(ret.gl_context == NULL)
+    {
+      log_e("Failed to create OpenGL context: %", SDL_GetError());
+    }
+
     SDL_GL_MakeCurrent(ret.window, ret.gl_context);
 
     // Set vsync setting
