@@ -71,6 +71,15 @@ namespace redc
                  (GLenum) dformat, (GLenum) type, &data[0]);
     glGenerateMipmap((GLenum) target);
   }
+  void allocate_texture(Texture_Repr tex, Texture_Target target,
+                        Texture_Format iformat, std::size_t width,
+                        std::size_t height)
+  {
+    // Allocate storage for a texture
+    glBindTexture((GLenum) target, tex.tex);
+    glTexImage2D((GLenum) target, 0, (GLenum) iformat, width, height, 0, GL_RGB,
+                 GL_FLOAT, NULL);
+  }
 
   void set_sampler(Texture_Repr tex, Texture_Target target,
                    tinygltf::Sampler const& sampler)

@@ -21,6 +21,10 @@ namespace redc
                     Texture_Target target, Texture_Format dformat,
                     Texture_Format iformat, std::size_t width,
                     std::size_t height, Data_Type type);
+  void allocate_texture(Texture_Repr tex, Texture_Target target,
+                        Texture_Format iformat, std::size_t width,
+                        std::size_t height);
+
   void set_sampler(Texture_Repr tex, Texture_Target target,
                    tinygltf::Sampler const& sampler);
 
