@@ -88,18 +88,18 @@ namespace redc
 
     // Use direct state access when possible.
 
-    glTextureParameterf(tex.tex, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
-    glTextureParameterf(tex.tex, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
-    glTextureParameterf(tex.tex, GL_TEXTURE_WRAP_S, sampler.wrapS);
-    glTextureParameterf(tex.tex, GL_TEXTURE_WRAP_T, sampler.wrapT);
+    glTextureParameteri(tex.tex, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
+    glTextureParameteri(tex.tex, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
+    glTextureParameteri(tex.tex, GL_TEXTURE_WRAP_S, sampler.wrapS);
+    glTextureParameteri(tex.tex, GL_TEXTURE_WRAP_T, sampler.wrapT);
 #else
     glBindTexture((GLenum) target, tex.tex);
 
-    glTexParameterf((GLenum) target, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
-    glTexParameterf((GLenum) target, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
+    glTexParameteri((GLenum) target, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
+    glTexParameteri((GLenum) target, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
 
-    glTexParameterf((GLenum) target, GL_TEXTURE_WRAP_S, sampler.wrapS);
-    glTexParameterf((GLenum) target, GL_TEXTURE_WRAP_T, sampler.wrapT);
+    glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_S, sampler.wrapS);
+    glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_T, sampler.wrapT);
 #endif
   }
 
