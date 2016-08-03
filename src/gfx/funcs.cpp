@@ -103,6 +103,17 @@ namespace redc
 #endif
   }
 
+  void set_mipmap_level(Texture_Repr tex, Texture_Target target,
+                        unsigned int level)
+  {
+#ifdef REDC_USE_OPENGL_4_5
+    glTextureParameteri(tex, GL_TEXTURE_MAX_LEVEL, level);
+#else
+    glBindTexture((GLenum) target, tex.tex);
+    glTexParameteri((GLenum) target, GL_TEXTURE_MAX_LEVEL, level);
+#endif
+  }
+
   std::vector<Mesh_Repr> make_mesh_reprs(std::size_t num)
   {
     std::vector<Mesh_Repr> meshs;

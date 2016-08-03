@@ -27,6 +27,8 @@ namespace redc
 
   void set_sampler(Texture_Repr tex, Texture_Target target,
                    tinygltf::Sampler const& sampler);
+  void set_mipmap_level(Texture_Repr tex, Texture_Target target,
+                        unsigned int level);
 
   std::vector<Mesh_Repr> make_mesh_reprs(std::size_t num);
 
