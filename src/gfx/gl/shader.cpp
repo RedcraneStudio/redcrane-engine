@@ -192,6 +192,14 @@ namespace redc { namespace gfx { namespace gl
     USE_THIS_SHADER();
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
   }
+  void GL_Shader::set_mat3(tag_t tag, glm::mat3 const& mat)
+  {
+    auto loc = get_location_from_tag(tag);
+    LOC_BAIL(loc);
+
+    USE_THIS_SHADER();
+    glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+  }
 
   void GL_Shader::set_integer(tag_t tag, int i)
   {

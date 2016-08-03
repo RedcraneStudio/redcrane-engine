@@ -54,6 +54,7 @@ namespace redc
       virtual Param_Bind get_tag_bind(tag_t);
 
       virtual void set_mat4(tag_t, glm::mat4 const&) {}
+      virtual void set_mat3(tag_t, glm::mat3 const&) {}
 
       virtual void set_integer(tag_t, int) {}
 

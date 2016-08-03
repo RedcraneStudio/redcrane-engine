@@ -27,6 +27,7 @@ namespace redc { namespace gfx { namespace gl
     void set_var_tag(tag_t tag, std::string var_name) override;
 
     void set_mat4(tag_t, glm::mat4 const&) override;
+    void set_mat3(tag_t, glm::mat3 const&) override;
 
     void set_integer(tag_t, int) override;
 
