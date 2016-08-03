@@ -96,7 +96,7 @@ namespace redc
       void Driver::set_clear_color(Color const& c) noexcept
       {
         glClearColor(c.r / (float) 0xff, c.g / (float) 0xff,
-                     c.b / (float) 0xff, 1.0);
+                     c.b / (float) 0xff, c.a / (float) 0xff);
       }
       void Driver::set_clear_depth(float f) noexcept
       {
