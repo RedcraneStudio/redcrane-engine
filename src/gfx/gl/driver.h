@@ -21,11 +21,11 @@ namespace redc
     ~Driver() noexcept;
 
     std::unique_ptr<Shader> make_shader_repr() noexcept override;
-    void use_shader(Shader&) noexcept override;
+    void use_shader(Shader&, bool = false) noexcept override;
     Shader* active_shader() const noexcept override;
 
     std::unique_ptr<IMesh> make_mesh_repr() noexcept override;
-    void bind_mesh(IMesh& mesh) noexcept override;
+    void bind_mesh(IMesh& mesh, bool = false) noexcept override;
 
     std::unique_ptr<Texture> make_texture_repr() noexcept override;
     void bind_texture(Texture& tex, unsigned int loc) noexcept override;

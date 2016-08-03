@@ -30,11 +30,11 @@ namespace redc
       virtual ~IDriver() noexcept {}
 
       virtual std::unique_ptr<Shader> make_shader_repr() noexcept = 0;
-      virtual void use_shader(Shader&) noexcept = 0;
+      virtual void use_shader(Shader&, bool force = false) noexcept = 0;
       virtual Shader* active_shader() const noexcept = 0;
 
       virtual std::unique_ptr<IMesh> make_mesh_repr() noexcept = 0;
-      virtual void bind_mesh(IMesh& mesh) noexcept = 0;
+      virtual void bind_mesh(IMesh& mesh, bool force = false) noexcept = 0;
 
       virtual std::unique_ptr<Texture> make_texture_repr() noexcept = 0;
       virtual void bind_texture(Texture& tex, unsigned int loc) noexcept = 0;

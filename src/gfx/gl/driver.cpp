@@ -46,9 +46,9 @@ namespace redc
       {
         return std::make_unique<GL_Shader>(*this);
       }
-      void Driver::use_shader(Shader& s) noexcept
+      void Driver::use_shader(Shader& s, bool force) noexcept
       {
-        if(&s == cur_shader_) return;
+        if(&s == cur_shader_ && !force) return;
 
         auto shader_ptr = CAST_PTR<GL_Shader*>(&s);
         REDC_ASSERT_MSG(shader_ptr, "Shader not made with this driver;"
@@ -68,17 +68,9 @@ namespace redc
         // simplicity.
         return std::make_unique<GL_Mesh>(*this);
       }
-      void Driver::bind_mesh(IMesh& mesh) noexcept
+      void Driver::bind_mesh(IMesh& mesh, bool force) noexcept
       {
-        // This kind of design can be more cache friendly. But the good thing
-        // is when we are efficiently storing mesh data in a single mesh we
-        // don't even have to dereference the pointer we just do a comparison.
-        // In other words, this will not thrash the cache *too* often, despite
-        // the fact that it would indeed be more efficient to instead literally
-        // keep a list of integers representing each vao to switch to in that
-        // order. I don't know, I guess this isn't the most efficient, but will
-        // get faster as we optimize our mesh use so it's not bad!
-        if(&mesh == cur_mesh_) return;
+        if(&mesh == cur_mesh_ && !force) return;
 
         auto gl_mesh = CAST_PTR<GL_Mesh*>(&mesh);
         REDC_ASSERT_MSG(gl_mesh, "Mesh not made with this driver; something is"
