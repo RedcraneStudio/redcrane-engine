@@ -94,7 +94,7 @@ extern "C"
 
     rce->client->driver = std::make_unique<gfx::gl::Driver>(Vec<int>{x,y});
 
-    rce->client->driver->set_clear_color(colors::white);
+    rce->client->driver->set_clear_color(colors::clear_black);
 
     // Load default shader, etc.
     auto df_shade = rce->client->driver->make_shader_repr();
