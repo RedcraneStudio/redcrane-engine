@@ -38,7 +38,10 @@ namespace redc
   {
     Alpha = GL_ALPHA, Rgb = GL_RGB, Rgba = GL_RGBA, Srgb = GL_SRGB,
     Srgb_Alpha = GL_SRGB_ALPHA, Depth = GL_DEPTH_COMPONENT,
-    Depth_Stencil = GL_DEPTH_STENCIL, Stencil = GL_STENCIL_INDEX
+    Depth_Stencil = GL_DEPTH_STENCIL, Stencil = GL_STENCIL_INDEX,
+
+    R8 = GL_R8,
+    Rgba32F = GL_RGBA32F
   };
   enum class Texture_Target : GLenum
   {
@@ -64,7 +67,8 @@ namespace redc
 
   enum class Texture_Format
   {
-    Alpha, Rgb, Rgba, Srgb, Srgb_Alpha, Depth, Depth_Stencil, Stencil
+    Alpha, Rgb, Rgba, Srgb, Srgb_Alpha, Depth, Depth_Stencil, Stencil, R8,
+    Rgba32F
   };
   enum class Texture_Target
   {
