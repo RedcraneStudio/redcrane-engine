@@ -43,6 +43,8 @@ namespace redc
     void face_culling(bool enable) noexcept override;
     void cull_side(Cull_Side side) noexcept override;
 
+    void set_blend_policy(Blend_Policy) override;
+
     float read_pixel(Framebuffer, Vec<int> pt) noexcept override;
 
     void check_error() noexcept override;

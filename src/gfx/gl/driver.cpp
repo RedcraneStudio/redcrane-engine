@@ -28,9 +28,7 @@ namespace redc
       Driver::Driver(Vec<int> size) noexcept : IDriver(size)
       {
         glViewport(0, 0, size.x, size.y);
-        glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
-                            GL_ZERO);
+        set_blend_policy(Blend_Policy::Transparency);
 
         glEnable(GL_FRAMEBUFFER_SRGB);
         glDepthFunc(GL_LEQUAL);
@@ -149,6 +147,22 @@ namespace redc
           break;
         }
       }
+      void Driver::set_blend_policy(Blend_Policy policy)
+      {
+        switch(policy)
+        {
+        case Blend_Policy::Transparency:
+          glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+          glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
+                              GL_ZERO);
+          break;
+        case Blend_Policy::Additive:
+          glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+          glBlendFunc(GL_ONE, GL_ONE);
+          break;
+        }
+      }
+
       float Driver::read_pixel(Framebuffer fb, Vec<int> pt) noexcept
       {
         auto f = get_gl_pixel_format(fb);

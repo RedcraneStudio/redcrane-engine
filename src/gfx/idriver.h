@@ -24,6 +24,11 @@ namespace redc
       Front, Back
     };
 
+    enum class Blend_Policy
+    {
+      Transparency, Additive,
+    };
+
     struct IDriver
     {
       IDriver(Vec<int> size) noexcept : extents_(size) {}
@@ -51,6 +56,8 @@ namespace redc
       virtual void blending(bool enable) noexcept = 0;
       virtual void face_culling(bool enable) noexcept = 0;
       virtual void cull_side(Cull_Side side) noexcept = 0;
+
+      virtual void set_blend_policy(Blend_Policy) = 0;
 
       // For now we are only going to abstract a single point in the
       // framebuffer. In addition, it'll get a bit complicated should we want
