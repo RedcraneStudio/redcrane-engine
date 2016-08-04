@@ -59,6 +59,17 @@ namespace redc
     GLuint program;
   };
 
+  // Framebuffer
+  struct Framebuffer_Repr
+  {
+    GLuint fbo;
+  };
+
+  struct Renderbuffer_Repr
+  {
+    GLuint rb;
+  };
+
 #elif defined(REDC_USE_DIRECTX)
   struct Attrib_Bind {};
   struct Param_Bind {};
@@ -67,12 +78,28 @@ namespace redc
   struct Mesh_Repr {};
   struct Shader_Repr {};
   struct Program_Repr {};
+  struct Framebuffer_Repr {};
+  struct Renderbuffer_Repr {};
 #endif
 
   struct Shader
   {
     Shader_Repr repr;
     Shader_Type type;
+  };
+
+  struct Draw_Buffer
+  {
+    Draw_Buffer_Type type;
+    // Value for when type is Color
+    uint32_t i;
+  };
+
+  struct Attachment
+  {
+    Attachment_Type type;
+    // Value for when type is color
+    uint32_t i;
   };
 
   using Buf_Ref = std::size_t;

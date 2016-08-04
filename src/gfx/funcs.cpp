@@ -396,5 +396,155 @@ namespace redc
       break;
     }
   }
+
+  Texture_Format get_attachment_internal_format(Attachment attachment)
+  {
+    GLuint internal_format;
+    switch(attachment.type)
+    {
+    case Attachment_Type::Color:
+      return Texture_Format::Rgba32F;
+    case Attachment_Type::Depth:
+      return Texture_Format::Depth;
+    case Attachment_Type::Depth_Stencil:
+      return Texture_Format::Depth_Stencil;
+    case Attachment_Type::Stencil:
+      return Texture_Format::Stencil;
+    }
+  }
+
+  Draw_Buffer to_draw_buffer(Attachment attachment)
+  {
+    Draw_Buffer ret;
+    switch(attachment.type)
+    {
+    case Attachment_Type::Color:
+      ret.type = Draw_Buffer_Type::Color;
+      ret.i = attachment.i;
+      break;
+    default:
+      ret.type = Draw_Buffer_Type::None;
+      break;
+    }
+    return ret;
+  }
+
+  void make_framebuffers(std::size_t num, Framebuffer_Repr* reprs)
+  {
+    if(num == 0) return;
+    glGenFramebuffers(num, &reprs[0].fbo);
+  }
+  void destroy_framebuffers(std::size_t num, Framebuffer_Repr* reprs)
+  {
+    if(num == 0) return;
+    glDeleteFramebuffers(num, &reprs[0].fbo);
+  }
+
+  void bind_framebuffer(Fbo_Binding binding, Framebuffer_Repr fbo)
+  {
+    glBindFramebuffer((GLenum) binding, fbo.fbo);
+  }
+
+  void unbind_framebuffer()
+  {
+    glBindFramebuffer((GLenum) Fbo_Binding::Draw, 0);
+  }
+
+  GLenum to_gl_attachment(Attachment const& attachment)
+  {
+    // Convert the attachment to OpenGL terms.
+    if(attachment.type == Attachment_Type::Color)
+      return ((GLenum) attachment.type) + attachment.i;
+    else
+      return (GLenum) attachment.type;
+  }
+
+  void framebuffer_attach_texture(Fbo_Binding binding, Attachment attachment,
+                                  Texture_Target textarget, Texture_Repr tex,
+                                  int level)
+  {
+    glFramebufferTexture2D((GLenum) binding,
+                           (GLenum) to_gl_attachment(attachment),
+                           (GLenum) textarget,
+                           tex.tex, level);
+  }
+  Fbo_Status check_framebuffer_status(Fbo_Binding target)
+  {
+    return (Fbo_Status) glCheckFramebufferStatus((GLenum) target);
+  }
+  std::string fbo_status_string(Fbo_Status status)
+  {
+    switch(status)
+    {
+    case Fbo_Status::Complete:
+      return "No error";
+    case Fbo_Status::Undefined:
+      return "Framebuffer undefined";
+    case Fbo_Status::Unsupported:
+      return "Framebuffer unsupported";
+    case Fbo_Status::Incomplete_Attachment:
+      return "Framebuffer incomplete attachment";
+    case Fbo_Status::Incomplete_Missing_Attachment:
+      return "Framebuffer missing attachment";
+    case Fbo_Status::Incomplete_Draw_Buffer:
+      return "Framebuffer incomplete draw buffer";
+    case Fbo_Status::Incomplete_Read_Buffer:
+      return "Framebuffer incomplete read buffer";
+    default:
+      return "Unknown error";
+    }
+  }
+
+  void make_renderbuffers(std::size_t num, Renderbuffer_Repr* repr)
+  {
+    if(num == 0) return;
+    glGenRenderbuffers(num, &repr->rb);
+  }
+  void destroy_renderbuffers(std::size_t num, Renderbuffer_Repr* repr)
+  {
+    if(num == 0) return;
+    glDeleteRenderbuffers(num, &repr->rb);
+  }
+  void bind_renderbuffer(Renderbuffer_Repr repr)
+  {
+    glBindRenderbuffer(GL_RENDERBUFFER, repr.rb);
+  }
+  void renderbuffer_storage(Attachment attachment, std::size_t width,
+                            std::size_t height)
+  {
+
+    glRenderbufferStorage(GL_RENDERBUFFER,
+                          (GLenum) get_attachment_internal_format(attachment),
+                          width, height);
+  }
+
+  void framebuffer_attach_renderbuffer(Fbo_Binding binding,
+                                       Attachment attachment,
+                                       Renderbuffer_Repr rb)
+  {
+    glFramebufferRenderbuffer((GLenum) binding, to_gl_attachment(attachment),
+                              GL_RENDERBUFFER, rb.rb);
+  }
+
+  void set_draw_buffers(std::size_t num, Draw_Buffer* bufs)
+  {
+    if(num == 0) return;
+
+    std::vector<GLenum> glbufs;
+    for(std::size_t i = 0; i < num; ++i)
+    {
+      if(bufs[i].type == Draw_Buffer_Type::Color)
+      {
+        glbufs.push_back(((GLenum) bufs[i].type) + bufs[i].i);
+      }
+      else
+      {
+        glbufs.push_back((GLenum) bufs[i].type);
+      }
+    }
+
+    glDrawBuffers(num, &glbufs[0]);
+  }
+
 #endif
 }

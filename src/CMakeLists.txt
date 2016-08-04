@@ -131,3 +131,13 @@ target_link_libraries(test_cel PUBLIC commonlib gfxlib uselib fpslib
 add_executable(load_gltf load_gltf.cpp sdl_helper.cpp)
 target_link_libraries(load_gltf assetslib commonlib gfxlib ${SDL2_LIBRARIES})
 target_include_directories(load_gltf PUBLIC ${SDL2_INCLUDE_DIRS})
+
+add_executable(test_deferred main_deferred.cpp sdl_helper.cpp)
+target_link_libraries(test_deferred
+  assetslib
+  commonlib
+  gfxlib
+  effectslib
+  ${SDL2_LIBRARIES})
+
+target_include_directories(test_deferred PUBLIC ${SDL2_INCLUDE_DIRS})

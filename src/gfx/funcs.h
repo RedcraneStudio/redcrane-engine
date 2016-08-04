@@ -78,6 +78,30 @@ namespace redc
     set_parameter(bind, param, textures);
   }
 
+  Texture_Format get_attachment_internal_format(Attachment attachment);
+  Draw_Buffer to_draw_buffer(Attachment attachment);
+
+  void make_framebuffers(std::size_t num, Framebuffer_Repr* reprs);
+  void destroy_framebuffers(std::size_t num, Framebuffer_Repr* reprs);
+  void bind_framebuffer(Fbo_Binding binding, Framebuffer_Repr fbo);
+  void unbind_framebuffer();
+  void framebuffer_attach_texture(Fbo_Binding binding, Attachment attachment,
+                                  Texture_Target textarget, Texture_Repr tex,
+                                  int level = 0);
+  Fbo_Status check_framebuffer_status(Fbo_Binding target);
+  std::string fbo_status_string(Fbo_Status status);
+  void make_renderbuffers(std::size_t num, Renderbuffer_Repr* repr);
+  void destroy_renderbuffers(std::size_t num, Renderbuffer_Repr* repr);
+  void bind_renderbuffer(Renderbuffer_Repr repr);
+
+  void renderbuffer_storage(Attachment attachment, std::size_t width,
+                            std::size_t height);
+  void framebuffer_attach_renderbuffer(Fbo_Binding binding,
+                                       Attachment attachment,
+                                       Renderbuffer_Repr rb);
+
+  void set_draw_buffers(std::size_t num, Draw_Buffer* bufs);
+
 #ifdef REDC_USE_OPENGL
   // = Uniform functions!
 

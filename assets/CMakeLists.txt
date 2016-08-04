@@ -32,6 +32,10 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     gltf/cel.gltf gltf/cel_solid.vs gltf/cel_solid.fs
                     gltf/cel_texture.vs gltf/cel_texture.fs
 
+                    gltf/deferred.gltf gltf/deferred.vs gltf/deferred.fs
+
+                    shader/deferred_fb_write.vs shader/deferred_fb_write.fs
+
                     scene/default.json structure/structures.json
 
                     shader/basic/fs.glsl shader/basic/vs.glsl

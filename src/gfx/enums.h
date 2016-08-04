@@ -59,7 +59,42 @@ namespace redc
   {
     Vertex = GL_VERTEX_SHADER, Fragment = GL_FRAGMENT_SHADER
   };
+
+  enum class Draw_Buffer_Type
+  {
+    None = GL_NONE,
+    Back_Left = GL_BACK_LEFT,
+    Back_Right = GL_BACK_RIGHT,
+    Front_Left = GL_FRONT_LEFT,
+    Front_Right = GL_FRONT_RIGHT,
+    Color = GL_COLOR_ATTACHMENT0
+  };
+
+  enum class Attachment_Type
+  {
+    Color = GL_COLOR_ATTACHMENT0, Depth = GL_DEPTH_ATTACHMENT,
+    Stencil = GL_STENCIL_ATTACHMENT, Depth_Stencil = GL_DEPTH_STENCIL_ATTACHMENT
+  };
+
+  enum class Fbo_Binding
+  {
+    Draw = GL_DRAW_FRAMEBUFFER, Read = GL_READ_FRAMEBUFFER
+  };
+
+  enum class Fbo_Status
+  {
+    Complete = GL_FRAMEBUFFER_COMPLETE,
+    Undefined = GL_FRAMEBUFFER_UNDEFINED,
+    Unsupported = GL_FRAMEBUFFER_UNSUPPORTED,
+    Incomplete_Attachment = GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT,
+    Incomplete_Missing_Attachment =GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT,
+    Incomplete_Draw_Buffer = GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER,
+    Incomplete_Read_Buffer = GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER,
+    Other
+  };
+
 #else
+
   enum class Data_Type
   {
     Byte, UByte, Short, UShort, Int, UInt, Float, Double
@@ -84,6 +119,26 @@ namespace redc
   enum class Shader_Type
   {
     Vertex, Fragment
+  };
+
+  enum class Draw_Buffer_Type
+  {
+    None, Back_Left, Back_Right, Front_Left, Front_Right, Color
+  };
+  enum class Attachment_Type
+  {
+    Color, Depth, Stencil, Depth_Stencil
+  };
+
+  enum class Fbo_Binding
+  {
+    Draw, Read
+  };
+  enum class Fbo_Status
+  {
+    Complete, Undefined, Unsupported, Incomplete_Attachment,
+    Incomplete_Missing_Attachment, Incomplete_Draw_Buffer,
+    Incomplete_Read_Buffer, Other
   };
 
 #endif
