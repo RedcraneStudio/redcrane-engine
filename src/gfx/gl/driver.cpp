@@ -33,6 +33,7 @@ namespace redc
                             GL_ZERO);
 
         glEnable(GL_FRAMEBUFFER_SRGB);
+        glDepthFunc(GL_LEQUAL);
 
         depth_test(true);
         write_depth(true);
