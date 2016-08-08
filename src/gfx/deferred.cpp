@@ -156,6 +156,8 @@ namespace redc { namespace gfx
   {
     bind_framebuffer(Fbo_Binding::Draw, fbo_);
     set_draw_buffers(draw_buffers_.size(), &draw_buffers_[0]);
+    driver_->set_blend_policy(gfx::Blend_Policy::Transparency);
+    driver_->blending(false);
   }
   void Deferred_Shading::finish()
   {
