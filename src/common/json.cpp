@@ -61,13 +61,4 @@ namespace redc
     }
     return true;
   }
-
-  void if_has_member(rapidjson::Value const& val, std::string const& mem,
-                     std::function<void (rapidjson::Value const&)> fn)
-  {
-    if(val.HasMember(mem.c_str()))
-    {
-      fn(val[mem.c_str()]);
-    }
-  }
 }

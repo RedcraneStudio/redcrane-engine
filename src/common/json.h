@@ -15,6 +15,14 @@ namespace redc
   bool has_json_members(rapidjson::Value const&,
                         std::vector<std::string> const&);
 
-  void if_has_member(rapidjson::Value const&, std::string const&,
-                     std::function<void (rapidjson::Value const&)>);
+  template <class... Args>
+  void if_has_member(rapidjson::Value const& val, std::string const& mem,
+                     std::function<void (rapidjson::Value const&, Args&&...)> fn,
+                     Args&&... args)
+  {
+    if(val.HasMember(mem.c_str()))
+    {
+      fn(val[mem.c_str()], std::forward<Args>(args)...);
+    }
+  }
 }
