@@ -72,7 +72,7 @@ namespace redc
       // Load the cel techniques first
       tinygltf::Scene cel_scene;
       bool gltf_load_succeeded = load_gltf_file(cel_scene,
-                                                "../assets/gltf/cel.gltf");
+                                                "../assets/gltf/library-pre.gltf");
       REDC_ASSERT_MSG(gltf_load_succeeded,
         "glTF techniques could not be found; broken installation");
       event.map->render->asset = load_asset(cel_scene);

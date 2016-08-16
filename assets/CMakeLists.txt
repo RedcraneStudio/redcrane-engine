@@ -34,6 +34,8 @@ add_data(assets ALL "share/${PROJECT_NAME}"
 
                     gltf/deferred.gltf gltf/deferred.vs gltf/deferred.fs
 
+                    gltf/library-pre.gltf
+
                     shader/deferred_fb_write.vs shader/deferred_fb_write.fs
 
                     scene/default.json structure/structures.json
