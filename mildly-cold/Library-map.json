@@ -1,6 +1,6 @@
 {
     "name": "Library",
-    "asset": "../../Library/Library.gltf",
+    "asset": "../../Library-converted/out.gltf",
     "players": 1,
     "spawn": {
         "positions": [
