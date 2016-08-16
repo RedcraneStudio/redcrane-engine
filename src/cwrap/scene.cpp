@@ -344,10 +344,12 @@ extern "C"
     scene->engine->client->driver->face_culling(true);
 
     // Making the function think OpenGL state *hasn't* changed is a dangerous
-    // assumption we can't make.
-    Rendering_State render_state;
+    // assumption we can't make. So clear most of the state.
+    scene->render_state.cur_technique_i = -1;
+    scene->render_state.cur_material_i = -1;
+    scene->render_state.driver = scene->engine->client->driver.get();
     render_asset(scene->active_map->render->asset, active_camera.cam,
-                 render_state);
+                 scene->render_state);
 
     // i is the loop counter, id is our current id.
     // Loop however many times as we have ids.

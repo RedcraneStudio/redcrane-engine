@@ -235,7 +235,7 @@ namespace redc
 
     // Use for the rendering the map, and ideally everything, so that it works
     // properly.
-    //Rendering_State render_state;
+    Rendering_State render_state;
 
     // Maps are completely referenced in the engine, so we don't need peer locks
     // here.
