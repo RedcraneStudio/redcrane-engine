@@ -8,7 +8,7 @@
 namespace redc { namespace gfx
 {
   Deferred_Shading::Deferred_Shading(IDriver& driver)
-    : driver_(&driver), fbo_inited_(false) {}
+    : driver_(&driver), active_(false), fbo_inited_(false) {}
 
   Deferred_Shading::~Deferred_Shading()
   {
@@ -158,6 +158,8 @@ namespace redc { namespace gfx
     set_draw_buffers(draw_buffers_.size(), &draw_buffers_[0]);
     driver_->set_blend_policy(gfx::Blend_Policy::Transparency);
     driver_->blending(false);
+
+    active_ = true;
   }
   void Deferred_Shading::finish()
   {
@@ -167,10 +169,16 @@ namespace redc { namespace gfx
     Draw_Buffer buf;
     buf.type = Draw_Buffer_Type::Back_Left;
     set_draw_buffers(1, &buf);
+
+    active_ = false;
   }
   void Deferred_Shading::render(gfx::Camera const& cam,
-                                std::vector<Light> const& lights) const
+                                std::vector<Light> const& lights)
   {
+    if(is_active())
+    {
+      finish();
+    }
 
     driver_->use_shader(*shade_, true);
 

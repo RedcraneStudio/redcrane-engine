@@ -36,12 +36,18 @@ namespace redc { namespace gfx
     void init(Vec<int> fb_size, Output_Interface const& interface);
     void uninit();
 
+    // Returns true between calls to use() and finish(). After finish() and
+    // before use(), is_active() is false.
+    bool is_active() const { return active_; }
+
     void use();
     void finish();
-    void render(gfx::Camera const& cam, std::vector<Light> const& lights) const;
+    void render(gfx::Camera const& cam, std::vector<Light> const& lights);
 
   private:
     IDriver* driver_;
+
+    bool active_;
 
     std::unique_ptr<gfx::Shader> shade_;
     std::unique_ptr<IMesh> quad_;
