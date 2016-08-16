@@ -1426,6 +1426,7 @@ namespace redc
 
         // We have to set parameters each time because the technique may have
         // default values that are overrided on a per-material basis.
+        int texture_slot = 0;
         for(auto param_pair : technique.parameters)
         {
           // We only care about parameters (uniforms). Attributes will be set
@@ -1448,7 +1449,7 @@ namespace redc
           {
             // Set the value if it has one
             set_parameter(bind, param.type, param.default_value.value(),
-                          asset.textures);
+                          texture_slot, asset.textures);
           }
         }
 
@@ -1456,7 +1457,7 @@ namespace redc
         for(auto parameter_pair : mat.parameters)
         {
           set_parameter(parameter_pair.first, parameter_pair.second,
-                        asset.textures);
+                        texture_slot, asset.textures);
         }
 
         // Override material parameters with ones in the render state overrides.
@@ -1476,7 +1477,8 @@ namespace redc
           Param_Bind bind = boost::get<Param_Bind>(decl.bind);
 
           // And set it
-          set_parameter(bind, decl.type, param_override.value, asset.textures);
+          set_parameter(bind, decl.type, param_override.value,
+                        texture_slot, asset.textures);
         }
       }
 

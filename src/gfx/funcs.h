@@ -65,17 +65,17 @@ namespace redc
                      std::size_t offset);
   void draw_arrays(std::size_t count, Render_Mode mode);
 
-  void set_parameter(Param_Bind bind, Parameter const& param,
+  void set_parameter(Param_Bind bind, Parameter const& param, int& texture_slot,
                      std::vector<Texture_Repr> const& textures);
 
   inline void set_parameter(Param_Bind bind, Param_Type type,
-                            Param_Value const& val,
+                            Param_Value const& val, int& texture_slot,
                             std::vector<Texture_Repr> const& textures)
   {
     Parameter param;
     param.type = type;
     param.value = val;
-    set_parameter(bind, param, textures);
+    set_parameter(bind, param, texture_slot, textures);
   }
 
   Texture_Format get_attachment_internal_format(Attachment attachment);

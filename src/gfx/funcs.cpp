@@ -326,6 +326,7 @@ namespace redc
   }
 
   void set_parameter(Param_Bind bind, Parameter const& param,
+                     int& texture_slot,
                      std::vector<Texture_Repr> const& textures)
   {
     switch(param.type)
@@ -389,10 +390,13 @@ namespace redc
       // Remember: The value in uint is a reference, however, we are using the
       // index to represent texture unit. We need a cast because samplers must
       // be set with the signed uniform function
-      set_int_parameter(bind, (int*) &param.value.uint);
+      set_int_parameter(bind, &texture_slot);
       // Now activate that texture unit
-      glActiveTexture(GL_TEXTURE0 + param.value.uint);
+      glActiveTexture(GL_TEXTURE0 + texture_slot);
       glBindTexture(GL_TEXTURE_2D, textures[param.value.uint].tex);
+
+      // Increment texture slot because we just used the current one
+      ++texture_slot;
       break;
     }
   }

@@ -188,9 +188,10 @@ namespace redc { namespace gfx
     // therefore the fragment shader. Everything has to stay in the same order.
     // In this case that order is position, normal, color
 
-    set_parameter(pos_bind, Param_Type::Sampler2D, params_[0], texs_);
-    set_parameter(norm_bind, Param_Type::Sampler2D, params_[1], texs_);
-    set_parameter(color_bind, Param_Type::Sampler2D, params_[2], texs_);
+    int texture_slot = 0;
+    set_parameter(pos_bind, Param_Type::Sampler2D, params_[0], texture_slot, texs_);
+    set_parameter(norm_bind, Param_Type::Sampler2D, params_[1], texture_slot, texs_);
+    set_parameter(color_bind, Param_Type::Sampler2D, params_[2], texture_slot, texs_);
 
     driver_->face_culling(false);
 
