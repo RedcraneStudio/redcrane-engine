@@ -141,3 +141,12 @@ target_link_libraries(test_deferred
   ${SDL2_LIBRARIES})
 
 target_include_directories(test_deferred PUBLIC ${SDL2_INCLUDE_DIRS})
+
+#add_executable(sword_select main_sword.cpp)
+#target_link_libraries(sword_select
+#  assetslib
+#  commonlib
+#  gfxlib
+#  ${SDL2_LIBRARIES})
+
+#target_include_directories(sword_select PUBLIC ${SDL2_INCLUDE_DIRS})
