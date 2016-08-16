@@ -986,6 +986,17 @@ namespace redc
 
       Technique technique;
 
+      auto is_deferred_find = in_technique.extras.find("is_deferred");
+      if(is_deferred_find != in_technique.extras.end() &&
+        is_deferred_find->second.is<bool>())
+      {
+        technique.is_deferred = is_deferred_find->second.get<bool>();
+      }
+      else
+      {
+        technique.is_deferred = false;
+      }
+
       // Find program of this technique
       auto program_i = find_string_index(program_names, in_technique.program,
                        "Technique references invalid program");
@@ -1394,10 +1405,32 @@ namespace redc
         return lhprim.mat_i < rhprim.mat_i;
       }
       // Otherwise sort by technique.
-      return lhmat.technique_i < rhmat.technique_i;
+
+      // Forward rendering goes first
+      Technique const& lhtec = asset.techniques[lhmat.technique_i];
+      Technique const& rhtec = asset.techniques[rhmat.technique_i];
+
+      // If the left hand side uses deferred rendering and the right hand side
+      // uses forward rendering, the left side should go first.
+      if(lhtec.is_deferred && !rhtec.is_deferred)
+      {
+        return true;
+      }
+      else if(!lhtec.is_deferred && rhtec.is_deferred)
+      {
+        // And vice versa
+        return false;
+      }
+      else
+      {
+        // Just sort by technique, since both either use forward or deferred.
+        return lhmat.technique_i < rhmat.technique_i;
+      }
+
     });
 
     // Render each set of parameters!
+    bool ran_deferred = false;
     for(auto render : render_params)
     {
       Primitive const& primitive = *render.primitive;
@@ -1416,6 +1449,61 @@ namespace redc
         if(cur_rendering_state.cur_technique_i != mat.technique_i)
         {
           // Load the technique of the material.
+
+          if(technique.is_deferred)
+          {
+            if(!cur_rendering_state.deferred)
+            {
+              cur_rendering_state.deferred =
+                std::make_unique<gfx::Deferred_Shading>(
+                  *cur_rendering_state.driver
+                  );
+
+              gfx::Output_Interface oi;
+
+              Attachment pos;
+              pos.type = Attachment_Type::Color;
+              pos.i = 0;
+
+              Attachment normal;
+              normal.type = Attachment_Type::Color;
+              normal.i = 1;
+
+              Attachment color;
+              color.type = Attachment_Type::Color;
+              color.i = 2;
+
+              Attachment depth;
+              depth.type = Attachment_Type::Depth_Stencil;
+              depth.i = 0;
+
+              oi.attachments.push_back(pos);
+              oi.attachments.push_back(normal);
+              oi.attachments.push_back(color);
+              oi.attachments.push_back(depth);
+
+              gfx::IDriver& driver = *cur_rendering_state.driver;
+              cur_rendering_state.deferred->init(driver.window_extents(), oi);
+            }
+
+            if(!cur_rendering_state.deferred->is_active())
+            {
+              cur_rendering_state.deferred->use();
+            }
+          }
+          else
+          {
+            // We need to do forward rendering
+            if(cur_rendering_state.deferred &&
+               cur_rendering_state.deferred->is_active())
+            {
+              // Disable and render
+              cur_rendering_state.deferred->finish();
+              ran_deferred = true;
+            }
+
+            // Continue doing forward rendering.
+          }
 
           // Set this state for later.
           cur_rendering_state.cur_technique_i = mat.technique_i;
@@ -1548,5 +1636,14 @@ namespace redc
         draw_arrays(min_elements, primitive.mode);
       }
     }
+
+    gfx::Light light;
+    light.pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    light.power = 1.0f;
+    light.diffuse_color = glm::vec3(1.0f, 1.0f, 1.0f);
+    light.specular_color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    cur_rendering_state.deferred->render(camera, std::vector<gfx::Light>{light});
+
   }
 }

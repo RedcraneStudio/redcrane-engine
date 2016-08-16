@@ -7,6 +7,9 @@
 #include "../common/maybe_owned.hpp"
 #include "camera.h"
 
+#include "idriver.h"
+#include "deferred.h"
+
 #include <vector>
 #include <unordered_map>
 #include <boost/variant.hpp>
@@ -118,6 +121,8 @@ namespace redc
 
     // This includes name, type and bind information.
     std::unordered_map<std::string, Param_Decl> parameters;
+
+    bool is_deferred;
   };
 
   using Technique_Ref = std::size_t;
@@ -232,6 +237,9 @@ namespace redc
     Material_Ref cur_material_i = -1;
 
     std::vector<Param_Override> overrides;
+
+    gfx::IDriver* driver;
+    std::unique_ptr<gfx::Deferred_Shading> deferred;
   };
 
   void render_asset(Asset const& asset, gfx::Camera const& camera,
