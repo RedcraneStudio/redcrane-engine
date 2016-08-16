@@ -31,7 +31,7 @@ namespace redc
         set_blend_policy(Blend_Policy::Transparency);
 
         glEnable(GL_FRAMEBUFFER_SRGB);
-        glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GL_LESS);
 
         depth_test(true);
         write_depth(true);
