@@ -39,7 +39,7 @@ void main()
   // write *that* texture to GL_BACK_LEFT. At this point we can do gamma
   // correction.
 
-  if(position.w <= 0.0f) discard;
+  if(position.w <= 0.0f || 1.0f <= position.w) discard;
 
   // Convert the light position to camera space
   vec3 light_pos = vec3(u_view * vec4(u_light_pos, 1.0f));
@@ -59,6 +59,9 @@ void main()
     vec4(u_light_specular_color * specular, 1.0f);
 
   o_dst.rgb *= u_light_power;
+
+  // Use the right depth so we get depth testing
+  gl_FragDepth = position.w;
 
   // TODO: More post-processing
 }
