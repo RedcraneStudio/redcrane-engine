@@ -100,10 +100,10 @@ TODO: Remove scene loading code.
 .. Ordered mesh data where vertices are packed / not packed, etc
 * Includes code to compile a tinygltf::Scene to an Asset that can be rendered.
 ** This code is abstracted a little better and could probably be ported to
-   DirectX, as only a few functions in scene.cpp would need to be reimplemented
-   with the same interface (which does not assume any OpenGL-specific types),
-   however there will be other issues with abstracting the glTF format for
-   DirectX.
+   DirectX. Any use of the graphics API is abstracted behind the functions in
+   gfx/funcs.h (which does not use any OpenGL-specific types directly), however
+   there will be other issues with using the glTF format with DirectX (most
+   obviously the use of shaders.
 
 [[gfxsupportlib]]
 ===== src/gfx/gfxsupportlib
@@ -289,7 +289,8 @@ NOTE: Currently the gravity value and spawns are not being properly used.
 === Player_Controller
 Stores player state (walking, jumping, grappling, etc).
 
-Uses bullet to do some raytraces to determine if the player is on the ground.
+Uses the bullet physics library to do some raytraces to determine if the player
+is on the ground.
 
 === Peer_Ptr<T>
 This is a smart-pointer template. When a single peer of any number of peers is
