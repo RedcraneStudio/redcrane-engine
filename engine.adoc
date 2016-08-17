@@ -385,6 +385,8 @@ inline void test()
   iterators which I *do* think improves readability.
 * Try to use the IDriver graphics abstraction when possible, I'm in the midst of
   combining the two and putting the glTF code in terms of the driver.
+* Avoid noexcept on new functions. Remove it when refactoring functions that
+  use it.
 * Use a header guard for new files with this form `REDC_DIR0_DIR1_FILENAME_H`.
   Old files will just stick to the pragma until I go about switching them at
   some point.
