@@ -335,3 +335,57 @@ Have the calling code optimize for fewer state changes.
 . Have unique filenames among directories. This way, we can't confuse
   cwrap/scene.cpp and gfx/scene.cpp which are both very important but distinct
   files.
+
+== Code Conventions
+
+* Use 2 *spaces* for indentation. No tabs ever!
+* Keep code under 80 columns, use spaces to align when necessary.
+* Use `This_Kind_Of_Style` for class names, `CAPITAL_SNAKE_CASE` for constants, and
+  `regular_snake_case` for everything else.
+* Opening braces and end braces go on a new line.
+
+Here is some example code:
+
+[source,C++]
+----
+int game()
+{
+  // This is not actual engine code, just made to show a lot of constructs.
+  bool is_running = true;
+  while(is_running)
+  {
+    if(key_is_pressed(KEY_ESCAPE))
+    {
+      Player_State state = get_player_state()
+      switch(get_player_state())
+      {
+      case Player_State::Running:
+        break;
+      case Player_State::Jumping:
+      {
+        // Usually I try to make these comments a full sentence, end them with a
+        period, and add a space after the '//'.
+        break;
+      }
+      case Player_State::Grappling:
+        break;
+      }
+    }
+  }
+  return EXIT_FAILURE;
+}
+
+// This is fine if it works:
+inline void test()
+{ return game() == EXIT_SUCCESS; }
+----
+
+=== Other conventions
+* Try not to use `auto` too much, I used it for everything in the past but I've
+  found code is more readable if it's used sparingly. I still use it for
+  iterators which I *do* think improves readability.
+* Try to use the IDriver graphics abstraction when possible, I'm in the midst of
+  combining the two and putting the glTF code in terms of the driver.
+* Use a header guard for new files with this form `REDC_DIR0_DIR1_FILENAME_H`.
+  Old files will just stick to the pragma until I go about switching them at
+  some point.
