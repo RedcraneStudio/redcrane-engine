@@ -29,6 +29,7 @@ namespace redc
       Transparency, Additive,
     };
 
+    //! Runtime abstraction for OpenGL (and possibly other APIs soon).
     struct IDriver
     {
       IDriver(Vec<int> size) noexcept : extents_(size) {}

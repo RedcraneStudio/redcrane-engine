@@ -9,6 +9,9 @@
 #include "gltf/tiny_gltf_loader.h"
 namespace redc
 {
+
+  // Static abstraction of OpenGL
+
   std::vector<Buf_Repr> make_buffers(std::size_t num);
   Buf_Repr make_buffer();
   void upload_data(Buf_Repr buf, Buffer_Target target, uint8_t* data,
