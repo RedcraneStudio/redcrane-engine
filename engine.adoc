@@ -308,7 +308,14 @@ detail in common/peer_ptr.hpp.
 
 Listed in order of importance probably.
 
-. Implement deferred shading
+. Implement necessary functionality for glTF code in the Driver and make the
+switch.
+.. Separate buffers from meshes.
+.. Keep state, somewhat akin to Rendering_State, in the Driver implementation.
+... Try to avoid setting state and then resetting it to what we *assume* was the
+original state. If the state hasn't changed no OpenGL calls have to be made.
+Have the calling code optimize for fewer state changes.
+.. Implement better mesh caches above the driver interface that supports LOD.
 
 . Finish entity interface and implement it
 
