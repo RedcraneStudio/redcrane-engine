@@ -343,6 +343,7 @@ Have the calling code optimize for fewer state changes.
 * Use `This_Kind_Of_Style` for class names, `CAPITAL_SNAKE_CASE` for constants, and
   `regular_snake_case` for everything else.
 * Opening braces and end braces go on a new line.
+* End private class members with an underscore_.
 
 Here is some example code:
 
