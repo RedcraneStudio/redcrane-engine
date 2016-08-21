@@ -1637,13 +1637,16 @@ namespace redc
       }
     }
 
-    gfx::Light light;
-    light.pos = glm::vec3(0.0f, 0.0f, 0.0f);
-    light.power = 1.0f;
-    light.diffuse_color = glm::vec3(1.0f, 1.0f, 1.0f);
-    light.specular_color = glm::vec3(1.0f, 1.0f, 1.0f);
+    if(ran_deferred)
+    {
+      gfx::Light light;
+      light.pos = glm::vec3(0.0f, 0.0f, 0.0f);
+      light.power = 1.0f;
+      light.diffuse_color = glm::vec3(1.0f, 1.0f, 1.0f);
+      light.specular_color = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    cur_rendering_state.deferred->render(camera, std::vector<gfx::Light>{light});
+      cur_rendering_state.deferred->render(camera, std::vector<gfx::Light>{light});
+    }
 
   }
 }
