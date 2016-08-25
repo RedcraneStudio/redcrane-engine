@@ -25,7 +25,7 @@
 #include "../gfx/idriver.h"
 #include "../gfx/camera.h"
 #include "../gfx/mesh_chunk.h"
-#include "../gfx/texture.h"
+#include "../gfx/itexture.h"
 
 #include "../common/cache.h"
 
@@ -131,7 +131,7 @@ namespace redc
 
     // The default shader scenes should use when an object doesn't have a
     // specific shader.
-    std::unique_ptr<gfx::Shader> default_shader;
+    std::unique_ptr<gfx::IShader> default_shader;
 
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it
     // We should reserve some amount of memory for each scene so that we can
@@ -175,8 +175,8 @@ namespace redc
     // TODO: To make this work with the map, make an aliasing constructor like
     // shared_ptr has for the peer_lock / peer_ptr.
     Peer_Lock<gfx::Mesh_Chunk> chunk;
-    Peer_Lock<Texture> texture;
-    Peer_Lock<gfx::Shader> shader;
+    Peer_Lock<gfx::ITexture> texture;
+    Peer_Lock<gfx::IShader> shader;
     glm::mat4 model;
   };
 
@@ -235,15 +235,16 @@ namespace redc
 
     // Use for the rendering the map, and ideally everything, so that it works
     // properly.
-    Rendering_State render_state;
+    gfx::Rendering_State render_state;
 
     // Maps are completely referenced in the engine, so we don't need peer locks
     // here.
     observer_ptr<Map> active_map;
 
-    std::unique_ptr<Texture> crosshair;
-    std::unique_ptr<IMesh> ch_mesh;
-    std::unique_ptr<gfx::Shader> ch_shader;
+    std::unique_ptr<gfx::ITexture> crosshair;
+    std::unique_ptr<gfx::IBuffer> ch_buf;
+    std::unique_ptr<gfx::IMesh> ch_mesh;
+    std::unique_ptr<gfx::IShader> ch_shader;
 
     effects::Envmap_Effect envmap;
 

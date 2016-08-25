@@ -9,79 +9,71 @@
 #include <array>
 #include <vector>
 #include <tuple>
-#include "primitive_type.h"
-#include "enums.h"
-namespace redc
+#include "common.h"
+#include "ihandle.h"
+namespace redc { namespace gfx
 {
+  struct Attribute
+  {
+    Attribute();
+    unsigned short size;
+    Data_Type format;
+  };
+
+  inline bool operator==(Attribute const& at1, Attribute const& at2)
+  {
+    return at1.size == at2.size && at1.format == at2.format;
+  }
+  inline bool operator!=(Attribute const& at1, Attribute const& at2)
+  {
+    return !(at1 == at2);
+  }
+
+  struct VS_Interface
+  {
+    std::vector<Attribute> attributes;
+  };
 
   /*!
-   * \brief A simple collection of buffers for vertex attributes.
+   * \brief A mesh knows how to draw itself.
    */
-  struct IMesh
+  struct IMesh : public IHandle
   {
-    virtual ~IMesh() noexcept {}
+    virtual ~IMesh() {}
 
-    using buf_t = unsigned int;
-
-    virtual void make_buffers(unsigned int num_bufs, buf_t* bufs) = 0;
-    virtual void allocate_buffer(buf_t, Buffer_Target, unsigned int size,
-                                 void const* const data,
-                                 Usage_Hint, Upload_Hint) = 0;
-
-    virtual buf_t allocate_buffer(std::size_t sz, Usage_Hint, Upload_Hint) = 0;
-    virtual void reallocate_buffer(buf_t, std::size_t size, Usage_Hint,
-                                   Upload_Hint) = 0;
-
-    virtual buf_t allocate_element_array(unsigned int elements,
-                                         Usage_Hint, Upload_Hint) = 0;
-
-    // These functions accept a buffer paramater which could have been created
-    // as a regular buffer or an element array.
-    virtual void unallocate_buffer(buf_t) noexcept = 0;
-
-    // Offset is in bytes!
-    virtual void buffer_data(buf_t, unsigned int off, unsigned int size,
-                             void const* const data) noexcept = 0;
-
-    unsigned int get_num_allocated_buffers() noexcept;
-    buf_t get_buffer(unsigned int index) noexcept;
-    unsigned int get_buffer_size(buf_t) noexcept;
-
-    virtual void format_buffer(buf_t, unsigned int attrib,
-                               unsigned short size, // must be 1 2 3 or 4
+    // type parameter must be Scalar, Vec2, Vec3, or Vec4
+    virtual void format_buffer(IBuffer& buf,
+                               Attrib_Bind loc,
+                               Attrib_Type type,
                                Data_Type format,
-                               unsigned int stride,
-                               unsigned int offset) noexcept = 0;
+                               std::size_t stride,
+                               std::size_t offset) = 0;
 
-    virtual void enable_vertex_attrib(unsigned int attrib) noexcept = 0;
+    virtual void enable_attrib_bind(Attrib_Bind attrib) = 0;
+    virtual void disable_attrib_bind(Attrib_Bind attrib) = 0;
 
-    virtual void set_primitive_type(Primitive_Type) noexcept = 0;
+    virtual void set_primitive_type(Primitive_Type) = 0;
+    virtual Primitive_Type get_primitive_type() = 0;
 
     /*
      * \brief Use the given buffer as an element array when rendering with
      * draw_elements.
      */
-    virtual void use_elements(buf_t) noexcept = 0;
+    virtual void use_element_buffer(IBuffer& buf, Data_Type type) = 0;
 
-    virtual void draw_arrays(unsigned int start, unsigned int c) noexcept = 0;
-    // St is given in elements, not bytes.
-    virtual void draw_elements(unsigned int st, unsigned int c) noexcept = 0;
+    virtual void draw_arrays(unsigned int start, unsigned int c) = 0;
+    /*!
+     * \param st Start index; given in elements, not bytes.
+     */
+    virtual void draw_elements(unsigned int st, unsigned int c) = 0;
     virtual void draw_elements_base_vertex(unsigned int st, unsigned int c,
-                                           unsigned int bv) noexcept = 0;
+                                           unsigned int bv) = 0;
 
-  protected:
-    void push_buffer_(buf_t buf, unsigned int bytes) noexcept;
-    void erase_buffer_(buf_t buf) noexcept;
-    void set_buffer_size_(buf_t buf, unsigned int bytes) noexcept;
+    // Compares the one passed in with the internal one kept up to date by the
+    // super class.
+    bool is_compatible(VS_Interface const& vs);
   private:
-    // Index: Buf + Size
-    std::vector<std::tuple<buf_t, unsigned int> > bufs_;
+    void set_attribute(std::size_t offset, unsigned short size, Data_Type format);
+    VS_Interface vs_;
   };
-
-  template <class T>
-  bool mesh_has_room(IMesh& m, IMesh::buf_t buffer, unsigned int offset,
-                     unsigned int elements) noexcept
-  {
-    return m.get_buffer_size(buffer) - offset >= elements * sizeof(T);
-  }
-}
+} }

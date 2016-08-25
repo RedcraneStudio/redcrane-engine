@@ -6,7 +6,7 @@
 #include "../../common/vec.h"
 #include "../../common/value_map.h"
 #include "../mesh_data.h"
-#include "../texture.h"
+#include "../itexture.h"
 #include "../camera.h"
 #include "../../common/plane.h"
 

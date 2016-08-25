@@ -4,30 +4,46 @@
  */
 #pragma once
 #include "glad/glad.h"
-#include "../texture.h"
+#include "../itexture.h"
+#include "driver.h"
 namespace redc { namespace gfx { namespace gl
 {
-  struct GL_Texture : public Texture
+  struct GL_Texture : public ITexture
   {
+    GL_Texture(Driver& driver);
+    ~GL_Texture();
+
+    void reinitialize() override;
+
+    void blit_tex2d_data(Volume<std::size_t> const&, Texture_Format, Data_Type,
+                         void const*) override;
+
+    void blit_cube_data(Cube_Map_Texture const& side,
+                        Volume<std::size_t> const& v,
+                        Texture_Format, Data_Type, void const* data) override;
+
+    void set_mag_filter(Texture_Filter filter) override;
+    void set_min_filter(Texture_Filter filter) override;
+    void set_wrap_s(Texture_Wrap wrap) override;
+    void set_wrap_t(Texture_Wrap wrap) override;
+    void set_wrap_r(Texture_Wrap wrap) override;
+    void set_mipmap_level(unsigned int level) override;
+
+    GLuint tex;
+    GLenum gl_target;
+
+    Texture_Format format;
+
+    void bind(GLenum target);
   private:
-    void uninit() noexcept;
+    Driver* driver_;
 
-    virtual void allocate_(Vec<int> const&, Texture_Format,
-                           Texture_Target type) noexcept override;
+    void allocate_tex_();
+    void unallocate_tex_();
 
-  public:
-    ~GL_Texture() noexcept;
-    void blit_tex2d_data(Volume<int> const&, Data_Type,
-                         void const*) noexcept override;
+    virtual void allocate_(Vec<std::size_t> const&, Texture_Format,
+                           Texture_Target type) override;
 
-    void blit_cube_data(Cube_Map_Texture const& side, Volume<int> const& v,
-                        Data_Type, void const* data) noexcept override;
-
-    GLuint tex_id;
-
-    Texture_Format format_;
-    Texture_Target target_;
-
-    void bind(unsigned int loc) const noexcept;
+    void set_wrap_(GLenum coord,  Texture_Wrap wrap);
   };
 } } }

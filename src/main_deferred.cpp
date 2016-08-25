@@ -59,20 +59,20 @@ int main(int argc, char** argv)
 
   gfx::Output_Interface fb_out;
 
-  Attachment pos;
-  pos.type = Attachment_Type::Color;
+  gfx::Attachment pos;
+  pos.type = gfx::Attachment_Type::Color;
   pos.i = 0;
 
-  Attachment normal;
-  normal.type = Attachment_Type::Color;
+  gfx::Attachment normal;
+  normal.type = gfx::Attachment_Type::Color;
   normal.i = 1;
 
-  Attachment color;
-  color.type = Attachment_Type::Color;
+  gfx::Attachment color;
+  color.type = gfx::Attachment_Type::Color;
   color.i = 2;
 
-  Attachment depth;
-  depth.type = Attachment_Type::Depth_Stencil;
+  gfx::Attachment depth;
+  depth.type = gfx::Attachment_Type::Depth_Stencil;
   depth.i = 0;
 
   fb_out.attachments.push_back(pos);
@@ -99,8 +99,8 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
-  Asset asset = load_asset(deferred_gltf);
-  append_to_asset(asset, other_scene);
+  gfx::Asset asset = gfx::load_asset(driver, deferred_gltf);
+  gfx::append_to_asset(driver, asset, other_scene);
 
   auto cam = gfx::make_fps_camera(driver.window_extents());
   cam.perspective.fov = glm::radians(75.0f);
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     deferred.use();
 
     driver.clear();
-    Rendering_State state;
+    gfx::Rendering_State state;
     render_asset(asset, cam, state);
 
     deferred.finish();

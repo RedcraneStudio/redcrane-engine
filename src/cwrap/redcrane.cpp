@@ -8,9 +8,9 @@
 
 #include "redcrane.hpp"
 
-#include "../gfx/support/format.h"
-#include "../gfx/support/allocate.h"
-#include "../gfx/support/write_data_to_mesh.h"
+#include "../gfx/extra/format.h"
+#include "../gfx/extra/allocate.h"
+#include "../gfx/extra/write_data_to_mesh.h"
 
 #include "../common/json.h"
 
@@ -59,7 +59,7 @@ namespace redc
   {
     Client_Event_Visitor(Client& client) : client_(&client) {}
 
-    void operator()(New_Player_Event const& event) const
+    void operator()(New_Player_Event const&) const
     {
     }
     void operator()(Map_Loaded_Event const& event) const
@@ -75,10 +75,11 @@ namespace redc
                                                 "../assets/gltf/library-pre.gltf");
       REDC_ASSERT_MSG(gltf_load_succeeded,
         "glTF techniques could not be found; broken installation");
-      event.map->render->asset = load_asset(cel_scene);
+      event.map->render->asset = load_asset(*client_->driver, cel_scene);
 
       // Then the map
-      append_to_asset(event.map->render->asset, event.map->scene);
+      append_to_asset(*client_->driver, event.map->render->asset,
+                      event.map->scene);
     }
   private:
     Client* client_;
@@ -101,7 +102,7 @@ namespace redc
   {
     Server_Event_Visitor(Server& server) : server_(&server) {}
 
-    void operator()(New_Player_Event const& event) const {}
+    void operator()(New_Player_Event const&) const {}
     void operator()(Map_Loaded_Event const& event) const;
   private:
     Server* server_;

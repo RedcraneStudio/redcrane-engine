@@ -74,7 +74,7 @@ do about it.
 * The Ocean effect uses the implementation of
   link:http://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/[Real-time
   water rendering using a projected grid] that is implemented in
-  <<gfxsupportlib>>.
+  <<gfxextralib>>.
 
 [NOTE]
 ====
@@ -103,8 +103,8 @@ TODO: Remove scene loading code.
    functions. I'm trying to move in a direction towards the runtime abstraction
    which using the IDriver and friends.
 
-[[gfxsupportlib]]
-===== src/gfx/gfxsupportlib
+[[gfxextralib]]
+===== src/gfx/gfxextralib
 * Includes code to load and convert between mesh representations.
 * Includes functions to help initialize and populate a mesh.
 * Includes an implementation of

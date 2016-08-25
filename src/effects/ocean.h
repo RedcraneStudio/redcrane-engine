@@ -4,6 +4,7 @@
  */
 #pragma once
 #include <chrono>
+#include "../gfx/imesh.h"
 #include "../use/effect.h"
 #include "../common/plane.h"
 namespace redc { namespace effects
@@ -31,8 +32,9 @@ namespace redc { namespace effects
   private:
     std::size_t elements_;
 
-    std::unique_ptr<IMesh> grid_mesh_;
-    std::unique_ptr<gfx::Shader> shader_;
+    std::unique_ptr<gfx::IBuffer> uv_buf_;
+    std::unique_ptr<gfx::IMesh> grid_mesh_;
+    std::unique_ptr<gfx::IShader> shader_;
 
     void update_ocean_gen_params() noexcept;
 

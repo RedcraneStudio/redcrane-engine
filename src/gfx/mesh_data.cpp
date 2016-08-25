@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "mesh_data.h"
-namespace redc
+namespace redc { namespace gfx
 {
   bool operator==(Vert_Ref const& lhs, Vert_Ref const& rhs) noexcept
   {
@@ -41,4 +41,4 @@ namespace redc
 
     return ret;
   }
-}
+} }

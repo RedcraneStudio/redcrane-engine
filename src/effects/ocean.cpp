@@ -4,10 +4,8 @@
  */
 #include "ocean.h"
 #include "../use/texture.h"
-
-#include "../gfx/support/proj_grid.h"
-
-#include "../gfx/shader.h"
+#include "../gfx/extra/proj_grid.h"
+#include "../gfx/ishader.h"
 
 namespace redc { namespace effects
 {
@@ -20,15 +18,17 @@ namespace redc { namespace effects
     elements_ = water_grid.size();
 
     grid_mesh_ = driver.make_mesh_repr();
-    auto uv_buf =
-      grid_mesh_->allocate_buffer(sizeof(float) * 2 * water_grid.size(),
-                                 redc::Usage_Hint::Draw,
-                                 redc::Upload_Hint::Static);
-    grid_mesh_->format_buffer(uv_buf, 0, 2, Data_Type::Float, 0, 0);
-    grid_mesh_->enable_vertex_attrib(0);
-    grid_mesh_->buffer_data(uv_buf, 0, sizeof(float) * 2 * water_grid.size(),
-                           &water_grid[0]);
-    grid_mesh_->set_primitive_type(Primitive_Type::Triangle);
+    uv_buf_ = driver.make_buffer_repr();
+    uv_buf_->allocate(gfx::Buffer_Target::Array,
+                      sizeof(float) * 2 * water_grid.size(), &water_grid[0],
+                      gfx::Usage_Hint::Draw, gfx::Upload_Hint::Static);
+
+    gfx::Attrib_Bind bind = 0;
+    grid_mesh_->format_buffer(*uv_buf_, bind, gfx::Attrib_Type::Vec2,
+                              gfx::Data_Type::Float, 0, 0);
+    grid_mesh_->enable_attrib_bind(bind);
+
+    grid_mesh_->set_primitive_type(gfx::Primitive_Type::Triangles);
 
     // Initialize the shader
     shader_ = driver.make_shader_repr();

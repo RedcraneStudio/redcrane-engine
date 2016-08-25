@@ -4,8 +4,7 @@
  */
 #ifndef REDC_GFX_FUNCS_H
 #define REDC_GFX_FUNCS_H
-#include "types.h"
-#include "enums.h"
+#include "common.h"
 #include "gltf/tiny_gltf_loader.h"
 namespace redc
 {
@@ -64,9 +63,9 @@ namespace redc
 
   void enable_vertex_attrib_arrays(Mesh_Repr mesh, unsigned int start,
                                    unsigned int end);
-  void draw_elements(std::size_t count, Data_Type type, Render_Mode mode,
+  void draw_elements(std::size_t count, Data_Type type, Primitive_Type mode,
                      std::size_t offset);
-  void draw_arrays(std::size_t count, Render_Mode mode);
+  void draw_arrays(std::size_t count, Primitive_Type mode);
 
   void set_parameter(Param_Bind bind, Parameter const& param, int& texture_slot,
                      std::vector<Texture_Repr> const& textures);

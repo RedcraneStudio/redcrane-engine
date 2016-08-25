@@ -22,7 +22,7 @@ namespace redc
   {
     virtual ~Rendering_Component() {}
 
-    Asset asset;
+    gfx::Asset asset;
   };
 
   struct Map;

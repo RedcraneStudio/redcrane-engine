@@ -22,7 +22,7 @@ extern "C"
     auto texture = load_texture(*rce->client->driver, std::string{str});
 
     // Lua needs one peer
-    auto peer = new Peer_Ptr<Texture>(std::move(texture));
+    auto peer = new Peer_Ptr<gfx::ITexture>(std::move(texture));
 
     // The engine needs the other
     rce->client->peers.push_back(peer->peer());
@@ -31,7 +31,7 @@ extern "C"
   }
   void redc_unload_texture(void* tex)
   {
-    auto peer = (Peer_Ptr<Texture>*) tex;
+    auto peer = (Peer_Ptr<gfx::ITexture>*) tex;
     delete peer;
   }
 }

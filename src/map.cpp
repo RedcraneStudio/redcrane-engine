@@ -7,7 +7,7 @@
 #include "assets/minigltf.h"
 
 // For js => vec3 code
-#include "gfx/support/json.h"
+#include "gfx/extra/json.h"
 
 // For format(...)
 #include "common/translate.h"

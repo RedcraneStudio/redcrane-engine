@@ -101,7 +101,7 @@ add_dependencies(redc ffi_decl_header)
 target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
                                        ${BULLET_INCLUDE_DIRS})
                                        target_link_libraries(redc PUBLIC
-                                       commonlib gfxlib gfxsupportlib uselib
+                                       commonlib gfxlib gfxextralib uselib
                                        fpslib inputlib effectslib SoloudStatic
                                        ${Boost_SYSTEM_LIBRARY}
                                        ${Boost_PROGRAM_OPTIONS_LIBRARY}

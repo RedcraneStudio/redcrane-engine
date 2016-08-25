@@ -3,18 +3,18 @@
  * All rights reserved.
  */
 #include "deferred.h"
-#include "funcs.h"
 #include "../common/log.h"
+#include "common.h"
 namespace redc { namespace gfx
 {
   Deferred_Shading::Deferred_Shading(IDriver& driver)
-    : driver_(&driver), active_(false), fbo_inited_(false) {}
+    : driver_(&driver), active_(false) {}
 
   Deferred_Shading::~Deferred_Shading()
   {
     uninit();
   }
-  void Deferred_Shading::init(Vec<int> fb_size,
+  void Deferred_Shading::init(Vec<std::size_t> fb_size,
                               Output_Interface const& interface)
   {
     // Load the shader
@@ -52,124 +52,105 @@ namespace redc { namespace gfx
       +1.0f, -1.0f
     };
 
+    quad_buf_ = driver_->make_buffer_repr();
+    quad_buf_->allocate(Buffer_Target::Array, sizeof(quad_data), quad_data,
+                        Usage_Hint::Draw, Upload_Hint::Static);
+
     quad_ = driver_->make_mesh_repr();
-    IMesh::buf_t data_buf;
-    quad_->make_buffers(1, &data_buf);
-    quad_->allocate_buffer(data_buf, Buffer_Target::Array, sizeof(quad_data),
-                           quad_data, Usage_Hint::Draw, Upload_Hint::Static);
-    quad_->format_buffer(data_buf, 0, 2, Data_Type::Float, 0, 0);
-    quad_->enable_vertex_attrib(0);
-    quad_->set_primitive_type(Primitive_Type::Triangle);
+    quad_->format_buffer(*quad_buf_, 0, Attrib_Type::Vec2, Data_Type::Float, 0, 0);
+    quad_->enable_attrib_bind(0);
+    quad_->set_primitive_type(Primitive_Type::Triangles);
 
     // TODO: Be smart and try to keep the framebuffer
     uninit();
 
-    make_framebuffers(1, &fbo_);
-    fbo_inited_ = true;
+    fbo_ = driver_->make_framebuffer_repr();
 
-    bind_framebuffer(Fbo_Binding::Draw, fbo_);
+    driver_->bind_framebuffer(*fbo_, Fbo_Binding::Draw);
 
     for(std::size_t i = 0; i < interface.attachments.size(); ++i)
     {
       Attachment attachment = interface.attachments[i];
 
+      Texture_Format iformat = get_attachment_internal_format(attachment);
+
       // Make a new texture or render buffer
       if(attachment.type == Attachment_Type::Color)
       {
         // Use a texture
-        Texture_Repr tex;
-        make_textures(1, &tex);
+        std::unique_ptr<ITexture> tex = driver_->make_texture_repr();
 
         Texture_Target target = Texture_Target::Tex_2D;
 
-        Texture_Format iformat = get_attachment_internal_format(attachment);
-        allocate_texture(tex, target, iformat, fb_size.x, fb_size.y);
+        tex->allocate(fb_size, iformat, target);
 
-        tinygltf::Sampler sampler;
-        sampler.magFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
-        sampler.minFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
-        sampler.wrapS = TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE;
-        sampler.wrapT = TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE;
-        set_sampler(tex, target, sampler);
+        tex->set_mag_filter(Texture_Filter::Linear);
+        tex->set_min_filter(Texture_Filter::Linear);
+        tex->set_wrap_s(Texture_Wrap::Clamp_To_Edge);
+        tex->set_wrap_t(Texture_Wrap::Clamp_To_Edge);
 
         // Disable mipmapping
-        set_mipmap_level(tex, target, 0);
+        tex->set_mipmap_level(1);
 
-        framebuffer_attach_texture(Fbo_Binding::Draw, attachment, target, tex);
+        fbo_->attach(attachment, *tex);
 
         // This is a color attachment with a given index, so we need to use it
         // when it comes time to render.
         draw_buffers_.push_back(to_draw_buffer(attachment));
 
         // Add the texture
-        texs_.push_back(tex);
-        // Add this as a sampler parameter for the shader that composites the
-        // textures to a fullscreen quad.
-        Param_Value tex_val;
-        tex_val.uint = i;
-        params_.push_back(tex_val);
+        texs_.push_back(std::move(tex));
       }
       else
       {
         // Non color, use a renderbuffer
-        Renderbuffer_Repr rb;
-        make_renderbuffers(1, &rb);
+        std::unique_ptr<IRenderbuffer> rb = driver_->make_renderbuffer_repr();
+        rb->define_storage(iformat, fb_size);
 
-        bind_renderbuffer(rb);
-        renderbuffer_storage(attachment, fb_size.x, fb_size.y);
+        fbo_->attach(attachment, *rb);
 
-        framebuffer_attach_renderbuffer(Fbo_Binding::Draw, attachment, rb);
-
-        rbs_.push_back(rb);
+        rbs_.push_back(std::move(rb));
       }
     }
 
-    Fbo_Status status = check_framebuffer_status(Fbo_Binding::Draw);
+    Fbo_Status status = fbo_->status();
     if(status != Fbo_Status::Complete)
     {
       // Unbind then delete
       log_e("Failed to complete framebuffer for deferred rendering: %",
             fbo_status_string(status));
-      uninit();
-    }
-    else
-    {
-      // Just unbind the framebuffer
-      unbind_framebuffer();
+      fbo_.reset(nullptr);
     }
   }
   void Deferred_Shading::uninit()
   {
     finish();
 
-    destroy_framebuffers(fbo_inited_ ? 1 : 0, &fbo_);
-    fbo_inited_ = false;
+    fbo_.reset(nullptr);
 
-    destroy_textures(texs_.size(), &texs_[0]);
     texs_.clear();
-
-    destroy_renderbuffers(rbs_.size(), &rbs_[0]);
     rbs_.clear();
   }
 
   void Deferred_Shading::use()
   {
-    bind_framebuffer(Fbo_Binding::Draw, fbo_);
-    set_draw_buffers(draw_buffers_.size(), &draw_buffers_[0]);
+    // TODO: Combine these two functions, I think.
+    driver_->bind_framebuffer(*fbo_, Fbo_Binding::Draw);
+    driver_->use_framebuffer_draw_buffers(
+      draw_buffers_.size(), &draw_buffers_[0]
+    );
+
+    // Clear color and depth of the framebuffer.
     driver_->clear();
-    driver_->set_blend_policy(gfx::Blend_Policy::Transparency);
+
+    // Blending / transparency doesn't work here.
     driver_->blending(false);
 
     active_ = true;
   }
   void Deferred_Shading::finish()
   {
-    // Reset draw buffers and unbind the framebuffer
-    unbind_framebuffer();
-
-    Draw_Buffer buf;
-    buf.type = Draw_Buffer_Type::Back_Left;
-    set_draw_buffers(1, &buf);
+    driver_->use_default_draw_buffers();
 
     active_ = false;
   }
@@ -188,25 +169,28 @@ namespace redc { namespace gfx
     // This is super stupid and contrived because we only support an interface
     // that goes position, normal, then color. If we could generate the glsl on
     // the fly there would be no problem.
-    Param_Bind pos_bind = shade_->get_tag_bind("position");
-    Param_Bind norm_bind = shade_->get_tag_bind("normal");
-    Param_Bind color_bind = shade_->get_tag_bind("color");
 
-    // Use the textures in the order they were put in the texs_ vector, this
-    // should be the same order they were declared in the output interface and
-    // therefore the fragment shader. Everything has to stay in the same order.
-    // In this case that order is position, normal, color
+    // Use the textures in the order they
+    // were put in the texs_ vector, this should be the same order they were
+    // declared in the output interface and therefore the fragment shader.
+    // Everything has to stay in the same order. In this case that order is
+    // position, normal, color
 
-    int texture_slot = 0;
-    set_parameter(pos_bind, Param_Type::Sampler2D, params_[0], texture_slot, texs_);
-    set_parameter(norm_bind, Param_Type::Sampler2D, params_[1], texture_slot, texs_);
-    set_parameter(color_bind, Param_Type::Sampler2D, params_[2], texture_slot, texs_);
+    std::array<std::string, 3> names = {"position", "normal", "color"};
+    for(std::size_t texture_i = 0; texture_i < texs_.size(); ++texture_i)
+    {
+      driver_->active_texture(texture_i);
+      driver_->bind_texture(*texs_[texture_i], Texture_Target::Tex_2D);
+
+      shade_->set_integer(names[texture_i], texture_i);
+    }
+
+    // Time to render the fullscreen quad.
 
     driver_->face_culling(false);
 
-    driver_->blending(false);
+    // We need additive blending
     driver_->set_blend_policy(gfx::Blend_Policy::Additive);
-    driver_->depth_test(true);
 
     for(Light const& light : lights)
     {
@@ -217,14 +201,7 @@ namespace redc { namespace gfx
 
       // We need to forcefully do this since we rendering using the new
       // interface, which doesn't go through the driver.
-      driver_->bind_mesh(*quad_, true);
       quad_->draw_arrays(0, 6);
-
-      // This has the effect of disabling blending for the first light.
-      driver_->blending(true);
     }
-
-    driver_->face_culling(true);
   }
-
 } }

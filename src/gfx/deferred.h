@@ -9,7 +9,6 @@
 
 #include "../common/vec.h"
 
-#include "types.h"
 #include "idriver.h"
 #include "imesh.h"
 #include "camera.h"
@@ -33,7 +32,7 @@ namespace redc { namespace gfx
     Deferred_Shading(IDriver& driver);
     ~Deferred_Shading();
 
-    void init(Vec<int> fb_size, Output_Interface const& interface);
+    void init(Vec<std::size_t> fb_size, Output_Interface const& interface);
     void uninit();
 
     // Returns true between calls to use() and finish(). After finish() and
@@ -49,15 +48,14 @@ namespace redc { namespace gfx
 
     bool active_;
 
-    std::unique_ptr<gfx::Shader> shade_;
+    std::unique_ptr<IBuffer> quad_buf_;
     std::unique_ptr<IMesh> quad_;
+    std::unique_ptr<IShader> shade_;
 
-    bool fbo_inited_;
-    Framebuffer_Repr fbo_;
+    std::unique_ptr<IFramebuffer> fbo_;
 
-    std::vector<Param_Value> params_;
-    std::vector<Texture_Repr> texs_;
-    std::vector<Renderbuffer_Repr> rbs_;
+    std::vector<std::unique_ptr<ITexture> > texs_;
+    std::vector<std::unique_ptr<IRenderbuffer> > rbs_;
 
     std::vector<Draw_Buffer> draw_buffers_;
   };

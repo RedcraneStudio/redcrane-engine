@@ -5,7 +5,7 @@
 #include "scoped_shader_lock.h"
 namespace redc { namespace gfx
 {
-  Shader_Push_Lock::Shader_Push_Lock(Shader& shader, IDriver& driver) noexcept
+  Shader_Push_Lock::Shader_Push_Lock(IShader& shader, IDriver& driver) noexcept
     : driver_(&driver)
   {
     old_shader_ = driver_->active_shader();

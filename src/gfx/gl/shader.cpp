@@ -4,10 +4,9 @@
  */
 #include "shader.h"
 
+#include <array>
 #include <string>
 #include "glad/glad.h"
-
-#include <glm/gtc/type_ptr.hpp>
 
 #include "../../common/log.h"
 #include "driver.h"
@@ -17,8 +16,10 @@
 // If we are debugging this will cause a crash, and just in case we return
 // should the macro be deactivated
 #define LOC_BAIL(location) \
-  //REDC_ASSERT_MSG(location != -1, "Bad uniform location in shader");  \
   if(location == -1) return
+
+// We used to assert and crash in the above macro like this.
+//REDC_ASSERT_MSG(location != -1, "Bad uniform location in shader");
 
 #include <boost/filesystem.hpp>
 #define ASSERT_FILE(filepath) \
@@ -26,6 +27,9 @@
                   " doesn't exist", filepath)
 
 #define USE_THIS_SHADER() driver_->use_shader(*this)
+
+// TODO @ Update to OpenGL 4.x: Use the new functions for setting uniforms
+// that don't require a state change.
 
 namespace redc { namespace gfx { namespace gl
 {
@@ -75,14 +79,32 @@ namespace redc { namespace gfx { namespace gl
   }
   GL_Shader::GL_Shader(Driver& d) : driver_(&d)
   {
-    prog_ = glCreateProgram();
+    allocate_shader_();
   }
   GL_Shader::~GL_Shader()
   {
+    unallocate_shader_();
+  }
+
+  void GL_Shader::allocate_shader_()
+  {
+    prog_ = glCreateProgram();
+  }
+  void GL_Shader::unallocate_shader_()
+  {
+    linked_ = false;
+    tags.clear();
+
     if(prog_) glDeleteProgram(prog_);
     if(g_shade_) glDeleteShader(g_shade_);
     if(f_shade_) glDeleteShader(f_shade_);
     if(v_shade_) glDeleteShader(v_shade_);
+  }
+
+  void GL_Shader::reinitialize()
+  {
+    unallocate_shader_();
+    allocate_shader_();
   }
 
   void GL_Shader::load_part(shader_source_t const& source, std::string name,
@@ -175,80 +197,145 @@ namespace redc { namespace gfx { namespace gl
     if(tags.count(tag)) tags.at(tag) = loc;
     else tags.insert({tag, loc});
   }
-  Param_Bind GL_Shader::get_tag_bind(tag_t tag)
+
+  // Functions to set uniforms given a bind point
+  void GL_Shader::set_vec2(Param_Bind bind, float const* vals)
   {
-    Param_Bind ret;
-    ret.loc = get_location_from_tag(tag);
-    return ret;
-  }
-
-  // Functions to set uniforms given a tag
-
-  void GL_Shader::set_mat4(tag_t tag, glm::mat4 const& mat)
-  {
-    auto loc = get_location_from_tag(tag);
-    LOC_BAIL(loc);
-
     USE_THIS_SHADER();
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+    glUniform2fv(bind, 1, vals);
   }
-  void GL_Shader::set_mat3(tag_t tag, glm::mat3 const& mat)
+  void GL_Shader::set_vec2(Param_Bind bind, glm::vec2 const& vec)
   {
-    auto loc = get_location_from_tag(tag);
-    LOC_BAIL(loc);
-
     USE_THIS_SHADER();
-    glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+    glUniform2f(bind, vec.x, vec.y);
   }
-
-  void GL_Shader::set_integer(tag_t tag, int i)
+  void GL_Shader::set_vec3(Param_Bind bind, float const* vals)
   {
-    auto loc = get_location_from_tag(tag);
-    LOC_BAIL(loc);
-
     USE_THIS_SHADER();
-    glUniform1i(loc, i);
+    glUniform3fv(bind, 1, vals);
   }
-
-  void GL_Shader::set_vec2(tag_t tag, glm::vec2 const& v)
+  void GL_Shader::set_vec3(Param_Bind bind, glm::vec3 const& vec)
   {
-    auto loc = get_location_from_tag(tag);
-    LOC_BAIL(loc);
-
     USE_THIS_SHADER();
-    glUniform2fv(loc, 1, &v[0]);
+    glUniform3f(bind, vec.x, vec.y, vec.z);
   }
-  void GL_Shader::set_vec3(tag_t tag, glm::vec3 const& v)
+  void GL_Shader::set_vec4(Param_Bind bind, float const* vals)
   {
-    auto loc = get_location_from_tag(tag);
-    LOC_BAIL(loc);
-
     USE_THIS_SHADER();
-    glUniform3fv(loc, 1, &v[0]);
+    glUniform4fv(bind, 1, vals);
   }
-  void GL_Shader::set_vec4(tag_t tag, glm::vec4 const& v)
+  void GL_Shader::set_vec4(Param_Bind bind, glm::vec4 const& vec)
   {
-    auto loc = get_location_from_tag(tag);
-    LOC_BAIL(loc);
-
     USE_THIS_SHADER();
-    glUniform4fv(loc, 1, &v[0]);
+    glUniform4f(bind, vec.x, vec.y, vec.z, vec.w);
   }
-  void GL_Shader::set_float(tag_t tag, float f)
+  void GL_Shader::set_ivec2(Param_Bind bind, int const* vals)
   {
-    auto loc = get_location_from_tag(tag);
-    LOC_BAIL(loc);
-
     USE_THIS_SHADER();
-    glUniform1f(loc, f);
+    glUniform2iv(bind, 1, vals);
   }
+  void GL_Shader::set_ivec2(Param_Bind bind, glm::ivec2 const& vec)
+  {
+    USE_THIS_SHADER();
+    glUniform2i(bind, vec.x, vec.y);
+  }
+  void GL_Shader::set_ivec3(Param_Bind bind, int const* vals)
+  {
+    USE_THIS_SHADER();
+    glUniform3iv(bind, 1, vals);
+  }
+  void GL_Shader::set_ivec3(Param_Bind bind, glm::ivec3 const& vec)
+  {
+    USE_THIS_SHADER();
+    glUniform3i(bind, vec.x, vec.y, vec.z);
+  }
+  void GL_Shader::set_ivec4(Param_Bind bind, int const* vals)
+  {
+    USE_THIS_SHADER();
+    glUniform4iv(bind, 1, vals);
+  }
+  void GL_Shader::set_ivec4(Param_Bind bind, glm::ivec4 const& vec)
+  {
+    USE_THIS_SHADER();
+    glUniform4i(bind, vec.x, vec.y, vec.z, vec.w);
+  }
+  void GL_Shader::set_bvec2(Param_Bind bind, bool const* vals)
+  {
+    USE_THIS_SHADER();
+
+    std::array<int, 2> arr;
+    std::copy(vals, vals + 2, arr.begin());
+    glUniform2iv(bind, 1, &arr[0]);
+  }
+  void GL_Shader::set_bvec2(Param_Bind bind, glm::bvec2 const& vec)
+  {
+    USE_THIS_SHADER();
+    glUniform2i(bind, vec.x, vec.y);
+  }
+  void GL_Shader::set_bvec3(Param_Bind bind, bool const* vals)
+  {
+    USE_THIS_SHADER();
+
+    std::array<int, 3> arr;
+    std::copy(vals, vals + 3, arr.begin());
+    glUniform3iv(bind, 1, &arr[0]);
+  }
+  void GL_Shader::set_bvec3(Param_Bind bind, glm::bvec3 const& vec)
+  {
+    USE_THIS_SHADER();
+    glUniform3i(bind, vec.x, vec.y, vec.z);
+  }
+  void GL_Shader::set_bvec4(Param_Bind bind, bool const* vals)
+  {
+    USE_THIS_SHADER();
+
+    std::array<int, 4> arr;
+    std::copy(vals, vals + 4, arr.begin());
+    glUniform4iv(bind, 1, &arr[0]);
+  }
+  void GL_Shader::set_bvec4(Param_Bind bind, glm::bvec4 const& vec)
+  {
+    USE_THIS_SHADER();
+    glUniform4i(bind, vec.x, vec.y, vec.z, vec.w);
+  }
+  void GL_Shader::set_mat2(Param_Bind bind, float const* vals)
+  {
+    USE_THIS_SHADER();
+    glUniformMatrix2fv(bind, 1, GL_FALSE, vals);
+  }
+  void GL_Shader::set_mat3(Param_Bind bind, float const* vals)
+  {
+    USE_THIS_SHADER();
+    glUniformMatrix3fv(bind, 1, GL_FALSE, vals);
+  }
+  void GL_Shader::set_mat4(Param_Bind bind, float const* vals)
+  {
+    USE_THIS_SHADER();
+    glUniformMatrix4fv(bind, 1, GL_FALSE, vals);
+  }
+  void GL_Shader::set_float(Param_Bind bind, float val)
+  {
+    USE_THIS_SHADER();
+    glUniform1f(bind, val);
+  }
+  void GL_Shader::set_integer(Param_Bind bind, int val)
+  {
+    USE_THIS_SHADER();
+    glUniform1i(bind, val);
+  }
+  void GL_Shader::set_bool(Param_Bind bind, bool val)
+  {
+    USE_THIS_SHADER();
+    glUniform1i(bind, val);
+  }
+
   void GL_Shader::use()
   {
     REDC_ASSERT_MSG(linked_, "Cannot activate a non-linked shader program");
     glUseProgram(prog_);
   }
 
-  GLint GL_Shader::get_location_from_tag(tag_t tag)
+  GLint GL_Shader::get_location_from_tag(tag_t tag) const
   {
     if(tags.count(tag))
     {
@@ -256,8 +343,23 @@ namespace redc { namespace gfx { namespace gl
       return tags.at(tag);
     }
     // Otherwise we the tag isn't valid, return a bad location
-    return 0;
+    return bad_attrib_bind();
   }
+
+  Attrib_Bind GL_Shader::get_attrib_bind(std::string attrib) const
+  {
+    return glGetAttribLocation(prog_, attrib.c_str());
+  }
+  Param_Bind GL_Shader::get_param_bind(std::string param) const
+  {
+    return glGetUniformLocation(prog_, param.c_str());
+  }
+  Param_Bind GL_Shader::get_tag_param_bind(std::string tag) const
+  {
+    return (Param_Bind) get_location_from_tag(tag);
+  }
+
+
 } } }
 
 #undef LOC_BAIL

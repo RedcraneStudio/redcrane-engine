@@ -19,4 +19,4 @@ add_executable(run_all_tests main.cpp ${REDC_TEST_FILES})
 target_include_directories(run_all_tests PUBLIC ${CMAKE_SOURCE_DIR}
                            ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 target_link_libraries(run_all_tests PUBLIC commonlib opensimplex
-                                           gfxlib gfxsupportlib)
+                                           gfxlib gfxextralib)

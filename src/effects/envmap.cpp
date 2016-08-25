@@ -62,15 +62,20 @@ namespace redc { namespace effects
     };
 
     mesh_ = driver.make_mesh_repr();
-    auto data_buf =
-      mesh_->allocate_buffer(cube_data.size() * sizeof(float),
-                             Usage_Hint::Draw, Upload_Hint::Static);
-    mesh_->format_buffer(data_buf, 0, 3, Data_Type::Float, 0,
-                               0);
-    mesh_->enable_vertex_attrib(0);
-    mesh_->set_primitive_type(Primitive_Type::Triangle);
-    mesh_->buffer_data(data_buf, 0, sizeof(float) * cube_data.size(),
-                       &cube_data[0]);
+
+    pos_buf_ = driver.make_buffer_repr();
+    pos_buf_->allocate(gfx::Buffer_Target::Array,
+                       cube_data.size() * sizeof(float),
+                       &cube_data[0], gfx::Usage_Hint::Draw,
+                       gfx::Upload_Hint::Static);
+
+
+    gfx::Attrib_Bind bind = 0;
+    mesh_->format_buffer(*pos_buf_, bind, gfx::Attrib_Type::Vec3,
+                         gfx::Data_Type::Float, 0, 0);
+    mesh_->enable_attrib_bind(bind);
+
+    mesh_->set_primitive_type(gfx::Primitive_Type::Triangles);
 
     shader_ = driver.make_shader_repr();
     load_vertex_file(*shader_, "../assets/shader/envmap/vs.glsl");
@@ -92,7 +97,8 @@ namespace redc { namespace effects
     driver.use_shader(*shader_);
 
     // Bind the texture
-    driver.bind_texture(*envmap_, 0);
+    driver.active_texture(0);
+    driver.bind_texture(*envmap_, gfx::Texture_Target::Cube_Map);
 
     glm::mat4 env_camera_mat = camera_view_matrix(cam);
     // Zero out the translation

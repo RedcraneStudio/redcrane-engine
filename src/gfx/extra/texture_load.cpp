@@ -6,11 +6,11 @@
 #include "../../common/log.h"
 #include <png.h>
 #include <cstring>
-namespace redc
+namespace redc { namespace gfx
 {
-  void error_fn(void*) noexcept {}
+  void error_fn(void*) {}
 
-  Image load_png_data(std::string filename) noexcept
+  Image load_png_data(std::string filename)
   {
     Image image;
 
@@ -86,11 +86,11 @@ namespace redc
     }
 
     image.data.reserve(image.extents.x * image.extents.y);
-    for(int i = 0; i < image.extents.y * image.extents.x; ++i)
+    for(std::size_t i = 0; i < image.extents.y * image.extents.x; ++i)
     {
       // Find out our position.
-      int x = i % image.extents.x;
-      int y = i / image.extents.y;
+      std::size_t x = i % image.extents.x;
+      std::size_t y = i / image.extents.y;
 
       // Find where we are in png's data.
       auto dst_ptr = *(png_data + y);
@@ -120,27 +120,27 @@ namespace redc
 
     return image;
   }
-  void blit_image(Texture& t, Image const& img) noexcept
+  void blit_image(ITexture& t, Image const& img)
   {
     static_assert(sizeof(Color) == sizeof(unsigned char) * 4,
                   "Color structs must be stored contigously");
 
     t.allocate(img.extents, Texture_Format::Rgba, Texture_Target::Tex_2D);
 
-    t.blit_tex2d_data(vol_from_extents(img.extents),
+    t.blit_tex2d_data(vol_from_extents(img.extents), Texture_Format::Rgba,
                       Data_Type::UByte, &img.data[0]);
   }
-  void allocate_cube_map(Texture& t, Image const& img) noexcept
+  void allocate_cube_map(ITexture& t, Vec<std::size_t> const& extents)
   {
-    t.allocate(img.extents, Texture_Format::Rgba, Texture_Target::Cube_Map);
+    t.allocate(extents, Texture_Format::Rgba, Texture_Target::Cube_Map);
   }
-  void blit_cube_map_face(Texture& t, Cube_Map_Texture const& side,
-                          Image const& img) noexcept
+  void blit_cube_map_face(ITexture& t, Cube_Map_Texture const& side,
+                          Image const& img)
   {
     static_assert(sizeof(Color) == sizeof(unsigned char) * 4,
                   "Color structs must be stored contigously");
 
-    t.blit_cube_data(side, vol_from_extents(img.extents), Data_Type::UByte,
-                     &img.data[0]);
+    t.blit_cube_data(side, vol_from_extents(img.extents), Texture_Format::Rgba,
+                     Data_Type::UByte, &img.data[0]);
   }
-}
+} }

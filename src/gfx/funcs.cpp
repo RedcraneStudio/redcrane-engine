@@ -58,7 +58,7 @@ namespace redc
 
   void set_pixel_store_unpack_alignment(int align)
   {
-    glPixelStorei(GL_UNPACK_ALIGNMENT, align);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   }
 
   void upload_image(Texture_Repr tex, std::vector<uint8_t> const& data,
@@ -315,12 +315,12 @@ namespace redc
 #endif
   }
 
-  void draw_elements(std::size_t count, Data_Type type, Render_Mode mode,
+  void draw_elements(std::size_t count, Data_Type type, Primitive_Type mode,
                      std::size_t offset)
   {
     glDrawElements((GLenum) mode, count, (GLenum) type, (GLvoid*) offset);
   }
-  void draw_arrays(std::size_t count, Render_Mode mode)
+  void draw_arrays(std::size_t count, Primitive_Type mode)
   {
     glDrawArrays((GLenum) mode, 0, count);
   }

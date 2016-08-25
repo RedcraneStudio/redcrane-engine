@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 #pragma once
+#include "../gfx/imesh.h"
 #include "../use/effect.h"
 namespace redc { namespace effects
 {
@@ -12,8 +13,9 @@ namespace redc { namespace effects
     void render(gfx::IDriver& driver, gfx::Camera const& cam) noexcept;
   private:
     std::size_t elements_ = 0;
-    std::unique_ptr<IMesh> mesh_;
-    std::unique_ptr<Texture> envmap_;
-    std::unique_ptr<gfx::Shader> shader_;
+    std::unique_ptr<gfx::IBuffer> pos_buf_;
+    std::unique_ptr<gfx::IMesh> mesh_;
+    std::unique_ptr<gfx::ITexture> envmap_;
+    std::unique_ptr<gfx::IShader> shader_;
   };
 } }

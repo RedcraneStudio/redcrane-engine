@@ -10,9 +10,6 @@
 
 #include "redcrane.hpp"
 
-#include "../gfx/support/load_wavefront.h"
-#include "../gfx/support/mesh_conversion.h"
-
 #include "../common/log.h"
 
 using namespace redc;

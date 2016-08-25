@@ -17,14 +17,14 @@ extern "C"
 {
   struct Shader_Builder
   {
-    gfx::Shader::shader_source_t vertex_shader;
-    gfx::Shader::shader_source_t fragment_shader;
-    gfx::Shader::shader_source_t geometry_shader;
+    gfx::IShader::shader_source_t vertex_shader;
+    gfx::IShader::shader_source_t fragment_shader;
+    gfx::IShader::shader_source_t geometry_shader;
 
     // This is a hashmap of tags to variables
     std::unordered_map<std::string, std::string> tags;
 
-    Peer_Ptr<gfx::Shader> shader;
+    Peer_Ptr<gfx::IShader> shader;
 
     std::string name;
   };
@@ -133,14 +133,14 @@ extern "C"
     redc_unmake_shader_builder(builder);
 
     // Make a new peer on the heap for lua
-    auto ret = new Peer_Ptr<gfx::Shader>(std::move(shader));
+    auto ret = new Peer_Ptr<gfx::IShader>(std::move(shader));
 
     return ret;
   }
 
   void redc_shader_destroy(void *shader)
   {
-    auto ptr = (Peer_Ptr<gfx::Shader>*) shader;
+    auto ptr = (Peer_Ptr<gfx::IShader>*) shader;
     delete ptr;
   }
 

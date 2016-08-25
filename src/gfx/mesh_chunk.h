@@ -4,6 +4,7 @@
  */
 #pragma once
 #include "imesh.h"
+#include "ibuffer.h"
 #include "../common/maybe_owned.hpp"
 #include <boost/optional.hpp>
 namespace redc { namespace gfx
@@ -13,8 +14,9 @@ namespace redc { namespace gfx
     unsigned int start;
     unsigned int count;
 
-    Primitive_Type type = Primitive_Type::Triangle;
+    Primitive_Type type = Primitive_Type::Triangles;
 
+    std::vector<Maybe_Owned<IBuffer> > buffers;
     Maybe_Owned<IMesh> mesh;
 
     boost::optional<int> base_vertex;

@@ -3,4 +3,4 @@
 # All rights reserved.
 
 add_library(uselib mesh.cpp mesh_cache.cpp texture.cpp)
-target_link_libraries(uselib PUBLIC commonlib gfxlib gfxsupportlib assetslib)
+target_link_libraries(uselib PUBLIC commonlib gfxlib gfxextralib assetslib)

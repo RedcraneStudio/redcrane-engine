@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 #include "immediate_renderer.h"
-#include "support/scoped_shader_lock.h"
+#include "extra/scoped_shader_lock.h"
 namespace redc { namespace gfx
 {
   Immediate_Renderer::Immediate_Renderer(IDriver& d) noexcept : d_(&d)
@@ -27,12 +27,14 @@ namespace redc { namespace gfx
 
     // Make our mesh
     mesh_ = d_->make_mesh_repr();
+    pos_buf_ = d_->make_buffer_repr();
 
     buf_size_ = 50000;
-    pos_buf_ = mesh_->allocate_buffer(buf_size_, Usage_Hint::Draw,
-                                      Upload_Hint::Stream);
-    mesh_->format_buffer(pos_buf_, 0, 3, Data_Type::Float, 0, 0);
-    mesh_->enable_vertex_attrib(0);
+    pos_buf_->allocate(Buffer_Target::Array, buf_size_, nullptr,
+                       Usage_Hint::Draw, Upload_Hint::Stream);
+
+    mesh_->format_buffer(*pos_buf_, 0, Attrib_Type::Vec3, Data_Type::Float,0,0);
+    mesh_->enable_attrib_bind(0);
 
     mesh_->set_primitive_type(Primitive_Type::Line);
 
@@ -94,7 +96,7 @@ namespace redc { namespace gfx
 
     if(buf_size_ < offset + count) return; // Overflow!
 
-    mesh_->buffer_data(pos_buf_, offset, count, &positions[0]);
+    pos_buf_->update(offset, count, &positions[0]);
     pos_pos_ += 24;
   }
   void Immediate_Renderer::draw_line(glm::vec3 const& pt1,
@@ -111,7 +113,7 @@ namespace redc { namespace gfx
 
     if(buf_size_ < offset + count) return; // Overflow!
 
-    mesh_->buffer_data(pos_buf_, offset, count, &positions[0]);
+    pos_buf_->update(offset, count, &positions[0]);
     pos_pos_ += 2;
   }
 

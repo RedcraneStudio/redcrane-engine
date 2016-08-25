@@ -86,7 +86,7 @@
         "model_view": "model_view",
         "normal_matrix": "normal_matrix",
         "proj_matrix": "proj_matrix",
-        "lightmap": "tex"
+        "tex": "lightmap"
       },
       "parameters": {
         "position": {

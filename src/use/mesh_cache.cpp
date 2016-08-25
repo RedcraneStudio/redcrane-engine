@@ -4,11 +4,12 @@
  */
 #include "mesh_cache.h"
 #include "../common/debugging.h"
-#include "../gfx/support/load_wavefront.h"
-#include "../gfx/support/mesh_conversion.h"
-#include "../gfx/support/allocate.h"
-#include "../gfx/support/format.h"
-#include "../gfx/support/write_data_to_mesh.h"
+#include "../gfx/mesh_data.h"
+#include "../gfx/extra/load_wavefront.h"
+#include "../gfx/extra/mesh_conversion.h"
+#include "../gfx/extra/allocate.h"
+#include "../gfx/extra/format.h"
+#include "../gfx/extra/write_data_to_mesh.h"
 
 namespace redc { namespace gfx
 {
@@ -56,4 +57,3 @@ namespace redc { namespace gfx
     msgpack::pack(str, msh);
   }
 } }
-

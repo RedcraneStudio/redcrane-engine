@@ -38,8 +38,9 @@ extern "C"
                                              "../assets/tex/crosshair.png");
 
     {
-      // Set up the mesh shader
+      // Set up the mesh, buffer, shader
       sc->get()->ch_mesh = engine->client->driver->make_mesh_repr();
+      sc->get()->ch_buf = engine->client->driver->make_buffer_repr();
 
       // Initialize mesh data
       std::array<float, 24> crosshair_data = {
@@ -53,21 +54,28 @@ extern "C"
       };
 
       auto sz = sizeof(float) * crosshair_data.size();
-      auto buf =sc->get()->ch_mesh->allocate_buffer(sz, Usage_Hint::Draw,
-                                                           Upload_Hint::Static);
-      sc->get()->ch_mesh->buffer_data(buf, 0, sz, &crosshair_data[0]);
+      sc->get()->ch_buf->allocate(gfx::Buffer_Target::Array, sz,
+                                  &crosshair_data[0], gfx::Usage_Hint::Draw,
+                                  gfx::Upload_Hint::Static);
+
       // 2D Positions
-      sc->get()->ch_mesh->format_buffer(buf, 0, 2, Data_Type::Float,
-                                               4 * sizeof(float), 0);
-      sc->get()->ch_mesh->enable_vertex_attrib(0);
+      gfx::Attrib_Bind bind = 0;
+      sc->get()->ch_mesh->format_buffer(*sc->get()->ch_buf, bind,
+                                        gfx::Attrib_Type::Vec2,
+                                        gfx::Data_Type::Float,
+                                        4 * sizeof(float), 0);
+      sc->get()->ch_mesh->enable_attrib_bind(bind);
 
       // UV coordinates
-      sc->get()->ch_mesh->format_buffer(buf, 1, 2, Data_Type::Float,
-                                               4 * sizeof(float),
-                                               2 * sizeof(float));
-      sc->get()->ch_mesh->enable_vertex_attrib(1);
+      ++bind;
+      sc->get()->ch_mesh->format_buffer(*sc->get()->ch_buf, bind,
+                                        gfx::Attrib_Type::Vec2,
+                                        gfx::Data_Type::Float,
+                                        4 * sizeof(float),
+                                        2 * sizeof(float));
+      sc->get()->ch_mesh->enable_attrib_bind(bind);
 
-      sc->get()->ch_mesh->set_primitive_type(Primitive_Type::Triangle);
+      sc->get()->ch_mesh->set_primitive_type(gfx::Primitive_Type::Triangles);
 
       // Set up the HUD shader
       sc->get()->ch_shader = engine->client->driver->make_shader_repr();
@@ -218,7 +226,7 @@ extern "C"
     }
     else
     {
-      auto texture = (Peer_Ptr<Texture>*) tex;
+      auto texture = (Peer_Ptr<gfx::ITexture>*) tex;
       boost::get<Mesh_Object>(object.obj).texture = texture->lock();
     }
   }
@@ -330,6 +338,8 @@ extern "C"
             boost::get<Cam_Object>(at_id(scene->objs,
                                          scene->active_camera).obj);
 
+    scene->engine->client->driver->face_culling(true);
+
     // Render the environment map
     scene->envmap.render(*scene->engine->client->driver, active_camera.cam);
 
@@ -350,6 +360,11 @@ extern "C"
     scene->render_state.driver = scene->engine->client->driver.get();
     render_asset(scene->active_map->render->asset, active_camera.cam,
                  scene->render_state);
+
+    scene->engine->client->driver->blending(true);
+    scene->engine->client->driver->set_blend_policy(
+      gfx::Blend_Policy::Transparency
+    );
 
     // i is the loop counter, id is our current id.
     // Loop however many times as we have ids.
@@ -420,7 +435,9 @@ extern "C"
     scene->engine->client->driver->write_depth(false);
     scene->engine->client->driver->depth_test(false);
     scene->engine->client->driver->use_shader(*scene->ch_shader);
-    scene->engine->client->driver->bind_texture(*scene->crosshair, 0);
+    scene->engine->client->driver->active_texture(0);
+    scene->engine->client->driver->bind_texture(*scene->crosshair,
+                                                gfx::Texture_Target::Tex_2D);
     scene->ch_mesh->draw_arrays(0, 6);
     scene->engine->client->driver->blending(false);
     scene->engine->client->driver->write_depth(true);

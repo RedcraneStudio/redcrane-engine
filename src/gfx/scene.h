@@ -8,6 +8,10 @@
 #include "camera.h"
 
 #include "idriver.h"
+#include "ishader.h"
+#include "imesh.h"
+#include "itexture.h"
+#include "ibuffer.h"
 #include "deferred.h"
 
 #include <vector>
@@ -16,10 +20,9 @@
 #include <boost/optional.hpp>
 #include "../../gltf/tiny_gltf_loader.h"
 
-#include "enums.h"
-#include "types.h"
+#include "common.h"
 
-namespace redc
+namespace redc { namespace gfx
 {
   struct Buffer
   {
@@ -27,8 +30,8 @@ namespace redc
     Buffer_Target target;
     // Cached (if GPU target) or actual data (if CPU buf target)
     std::vector<uint8_t> data;
-    // Buffer representation
-    boost::optional<Buf_Repr> repr;
+    // Optional GPU buffer representation
+    std::unique_ptr<IBuffer> repr;
   };
 
   // Represents a semantic uniform
@@ -82,7 +85,7 @@ namespace redc
   {
     // A program owns its representation and they are not shared with other
     // programs.
-    Program_Repr repr;
+    std::unique_ptr<IShader> repr;
 
     // Maps attribute names to bind locations. We look them up once at creation
     // time with glGetAttribLocation.
@@ -92,6 +95,7 @@ namespace redc
   using Program_Ref = std::size_t;
 
   using Node_Ref = std::size_t;
+
   struct Param_Decl
   {
     // Optional node to take transformation from
@@ -100,17 +104,21 @@ namespace redc
     // Must be one for attributes
     int count;
 
-    // Value and type of the parameter. I chose not to put a Parameter here and
-    // instead use both a type and value explicitely because the value here is
-    // optional I think, whereas type is not. This is distinct from a value
+    // Value and type of the parameter. I chose not to put a Typed_Value here
+    // and instead use both a type and value explicitely because the value here
+    // is optional I think, whereas type is not. This is distinct from a value
     // provided in material.values.
-    Param_Type type;
-    boost::optional<Param_Value> default_value;
+    Value_Type type;
+    boost::optional<Value> default_value;
 
-    // Optional semantic meaning
-    boost::optional<boost::variant<Param_Semantic, Attrib_Semantic> > semantic;
-    // Either a parameter (uniform) or an attribute (input variable).
-    boost::variant<Param_Bind, Attrib_Bind> bind;
+    boost::optional<Param_Semantic> semantic;
+    Param_Bind bind;
+  };
+  struct Attrib_Decl
+  {
+    Value_Type type;
+    boost::optional<Attrib_Semantic> semantic;
+    Attrib_Bind bind;
   };
 
   struct Technique
@@ -121,6 +129,7 @@ namespace redc
 
     // This includes name, type and bind information.
     std::unordered_map<std::string, Param_Decl> parameters;
+    std::unordered_map<std::string, Attrib_Decl> attributes;
 
     bool is_deferred;
   };
@@ -139,7 +148,7 @@ namespace redc
     // by technique then by material. Because we store a bind, we give up the
     // ability to switch the technique of a material at runtime, but that's okay
     // because we a primitive can still switch to a new material at runtime.
-    std::vector<std::pair<Param_Bind, Parameter> > parameters;
+    std::vector<std::pair<Param_Bind, Typed_Value> > parameters;
   };
 
   // Because the material of a primitive is not going to change, we can
@@ -155,7 +164,7 @@ namespace redc
     Attrib_Semantic_Map<Accessor_Ref> attributes;
     boost::optional<Accessor_Ref> indices;
     Material_Ref mat_i;
-    Render_Mode mode;
+    Primitive_Type mode;
   };
 
   struct Mesh
@@ -163,7 +172,7 @@ namespace redc
     // A mesh will own its representation so that in the best case (only one set
     // of primitives) we don't have to constantly reformat the vertex array
     // object.
-    Mesh_Repr repr;
+    std::unique_ptr<IMesh> repr;
 
     // A mesh does own its own primitives though.
     std::vector<Primitive> primitives;
@@ -192,11 +201,10 @@ namespace redc
     Asset& operator=(Asset&&) = default;
 
     std::vector<Buffer> buffers;
-    std::vector<Texture_Repr> textures;
+    std::vector<std::unique_ptr<ITexture> > textures;
 
     std::vector<Accessor> accessors;
 
-    std::vector<Shader> shaders;
     std::vector<Program> programs;
     std::vector<Technique> techniques;
 
@@ -220,15 +228,15 @@ namespace redc
     std::vector<std::string> node_names;
   };
 
-  Asset load_asset(tinygltf::Scene const& scene);
-  void append_to_asset(Asset& asset, tinygltf::Scene const& scene);
+  Asset load_asset(IDriver& driver, tinygltf::Scene const& scene);
+  void append_to_asset(IDriver& driver, Asset& ret, tinygltf::Scene const& scene);
 
   struct Param_Override
   {
     Param_Override(std::string const& name) : name(name) {}
 
     std::string name;
-    Param_Value value;
+    Value value;
   };
 
   struct Rendering_State
@@ -244,4 +252,4 @@ namespace redc
 
   void render_asset(Asset const& asset, gfx::Camera const& camera,
                     Rendering_State& cur_rendering_state);
-}
+} }

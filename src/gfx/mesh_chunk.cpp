@@ -14,6 +14,11 @@ namespace redc { namespace gfx
 
     ret.type = orig.type;
 
+    // Reference the buffers of the original.
+    for(Maybe_Owned<IBuffer> const& buf : orig.buffers)
+    {
+      ret.buffers.push_back(ref_mo(buf));
+    }
     ret.mesh = ref_mo(orig.mesh);
 
     ret.base_vertex = orig.base_vertex;
@@ -29,6 +34,7 @@ namespace redc { namespace gfx
 
     ret.type = orig.type;
 
+    ret.buffers = std::move(orig.buffers);
     ret.mesh = std::move(orig.mesh);
 
     ret.base_vertex = orig.base_vertex;

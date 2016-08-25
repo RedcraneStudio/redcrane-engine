@@ -5,6 +5,7 @@
 #include <chrono>
 #include "sdl_helper.h"
 #include "gfx/scene.h"
+#include "gfx/gl/driver.h"
 #include "assets/minigltf.h"
 #include "common/log.h"
 int main(int argc, char** argv)
@@ -47,16 +48,23 @@ int main(int argc, char** argv)
   // Initialize OpenGL context
   auto sdl_init = init_sdl("glTF viewer", redc::Vec<int>{1000, 1000}, false,
                            false);
+  int x, y;
+  SDL_GetWindowSize(sdl_init.window, &x, &y);
+
+  redc::gfx::gl::Driver driver(redc::Vec<int>{x, y});
 
   // Compile one large asset from all the scenes
-  redc::Asset asset;
+  redc::gfx::Asset asset;
   for(tinygltf::Scene const& scene : scenes)
   {
-    redc::append_to_asset(asset, scene);
+    redc::gfx::append_to_asset(driver, asset, scene);
   }
 
   // Render
-  redc::Rendering_State cur_rendering_state;
+  redc::gfx::Rendering_State cur_rendering_state;
+
+  // TODO: Put a pointer to the driver in the asset
+  cur_rendering_state.driver = &driver;
 
   redc::gfx::Camera cam = redc::gfx::make_fps_camera({1000,1000});
 
@@ -93,7 +101,7 @@ int main(int argc, char** argv)
       }
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    driver.clear();
 
     render_asset(asset, cam, cur_rendering_state);
 

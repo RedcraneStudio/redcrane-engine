@@ -11,9 +11,11 @@
 #include <boost/optional.hpp>
 #include "../common/glm_vec_serialize.h"
 #include <msgpack.hpp>
-#include "primitive_type.h"
+#include "common.h"
 
-namespace redc
+MSGPACK_ADD_ENUM(redc::gfx::Primitive_Type);
+
+namespace redc { namespace gfx
 {
   struct Vertex
   {
@@ -62,16 +64,14 @@ namespace redc
     std::vector<Vertex> vertices;
     std::vector<unsigned int> elements;
 
-    Primitive_Type primitive = Primitive_Type::Triangle;
-
+    Primitive_Type primitive = Primitive_Type::Triangles;
     MSGPACK_DEFINE(vertices, elements, primitive);
   };
 
   struct Ordered_Mesh_Data
   {
     std::vector<Vertex> vertices;
-
-    Primitive_Type primitive = Primitive_Type::Triangle;
+    Primitive_Type primitive = Primitive_Type::Triangles;
 
     MSGPACK_DEFINE(vertices, primitive);
   };
@@ -84,7 +84,7 @@ namespace redc
 
     std::vector<Vert_Ref> indices;
 
-    Primitive_Type primitive = Primitive_Type::Triangle;
+    Primitive_Type primitive = Primitive_Type::Triangles;
   };
 
   struct Ordered_Split_Mesh_Data
@@ -93,6 +93,6 @@ namespace redc
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> tex_coords;
 
-    Primitive_Type primitive = Primitive_Type::Triangle;
+    Primitive_Type primitive = Primitive_Type::Triangles;
   };
-}
+} }

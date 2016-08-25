@@ -6,46 +6,48 @@
 #include <set>
 #include <functional>
 #include <algorithm>
-namespace redc
+namespace redc { namespace gfx
 {
-  struct Buf_Search
+  Attribute::Attribute() : size(0), format(Data_Type::Float) {}
+
+  bool IMesh::is_compatible(VS_Interface const& in_vs)
   {
-    Buf_Search(IMesh::buf_t buf) noexcept : buf_(buf) {}
-    bool operator()(std::tuple<IMesh::buf_t, unsigned int> const& tup)
+    std::size_t in_size = in_vs.attributes.size();
+    std::size_t our_size = vs_.attributes.size();
+    // If the client is requesting more attributes then we have we are
+    // definitely incompatible
+    if(in_size > our_size)
     {
-      return std::get<0>(tup) == buf_;
+      // Get outta here
+      return false;
     }
-  private:
-    IMesh::buf_t buf_;
-  };
 
-  unsigned int IMesh::get_num_allocated_buffers() noexcept
-  {
-    return bufs_.size();
-  }
-  IMesh::buf_t IMesh::get_buffer(unsigned int index) noexcept
-  {
-    return std::get<0>(bufs_[index]);
-  }
-  unsigned int IMesh::get_buffer_size(buf_t buf) noexcept
-  {
-    auto find_iter = std::find_if(bufs_.begin(), bufs_.end(), Buf_Search{buf});
-    if(find_iter != bufs_.end()) return std::get<1>(*find_iter);
-    return 0;
-  }
+    // The other way around may work:
 
-  void IMesh::push_buffer_(buf_t buf, unsigned int bytes) noexcept
-  {
-    bufs_.emplace_back(buf, bytes);
+    std::size_t common_size = std::min(in_size, our_size);
+    for(std::size_t i = 0; i < common_size; ++i)
+    {
+      if(vs_.attributes[i] != in_vs.attributes[i])
+      {
+        // Incompatible!
+        return false;
+      }
+    }
+    // If we got this far they are compatible. We purposely ignore any
+    // additional parameters on our side, because we can always disable those.
+    return true;
   }
-  void IMesh::erase_buffer_(buf_t buf) noexcept
+  void IMesh::set_attribute(std::size_t offset, unsigned short size,
+                            Data_Type format)
   {
-    auto find_iter = std::find_if(bufs_.begin(), bufs_.end(), Buf_Search{buf});
-    if(find_iter != bufs_.end()) bufs_.erase(find_iter);
+    // Add room if necessary
+    if(vs_.attributes.size() <= offset)
+    {
+      vs_.attributes.resize(offset+1);
+    }
+
+    // Initialize size and format
+    vs_.attributes[offset].size = size;
+    vs_.attributes[offset].format = format;
   }
-  void IMesh::set_buffer_size_(buf_t buf, unsigned int bytes) noexcept
-  {
-    auto find_iter = std::find_if(bufs_.begin(), bufs_.end(), Buf_Search{buf});
-    if(find_iter != bufs_.end()) std::get<1>(*find_iter) = bytes;
-  }
-}
+} }

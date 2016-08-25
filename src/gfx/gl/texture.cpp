@@ -5,87 +5,126 @@
 #include "texture.h"
 #include <cstring>
 
+#include "common.h"
+
 #include "../../common/debugging.h"
 namespace redc { namespace gfx { namespace gl
 {
-  void GL_Texture::uninit() noexcept
+  GL_Texture::GL_Texture(Driver& driver) : tex(0), driver_(&driver)
   {
-    if(tex_id) glDeleteTextures(1, &tex_id);
+    allocate_tex_();
   }
-  GL_Texture::~GL_Texture() noexcept
+  GL_Texture::~GL_Texture()
   {
-    uninit();
+    unallocate_tex_();
   }
-  void GL_Texture::allocate_(Vec<int> const& extents,
+  void GL_Texture::reinitialize()
+  {
+    allocate_tex_();
+    unallocate_tex_();
+  }
+
+  void GL_Texture::allocate_tex_()
+  {
+    glGenTextures(1, &tex);
+  }
+  void GL_Texture::unallocate_tex_()
+  {
+    glDeleteTextures(1, &tex);
+  }
+
+  void GL_Texture::bind(GLenum target)
+  {
+    // Bind to some target
+    glBindTexture(target, tex);
+  }
+
+  void GL_Texture::set_mag_filter(Texture_Filter filter)
+  {
+    // Bind ourselves to the target we were allocated with.
+    driver_->bind_texture(*this, this->gl_target);
+
+    GLenum mag_filter = to_gl_texture_filter(filter);
+    glTexParameteri(this->gl_target, GL_TEXTURE_MAG_FILTER, mag_filter);
+  }
+  void GL_Texture::set_min_filter(Texture_Filter filter)
+  {
+    driver_->bind_texture(*this, this->gl_target);
+
+    GLenum min_filter = to_gl_texture_filter(filter);
+    glTexParameteri(this->gl_target, GL_TEXTURE_MIN_FILTER, min_filter);
+  }
+  void GL_Texture::set_wrap_s(Texture_Wrap wrap)
+  {
+    set_wrap_(GL_TEXTURE_WRAP_S, wrap);
+  }
+  void GL_Texture::set_wrap_t(Texture_Wrap wrap)
+  {
+    set_wrap_(GL_TEXTURE_WRAP_T, wrap);
+  }
+  void GL_Texture::set_wrap_r(Texture_Wrap wrap)
+  {
+    set_wrap_(GL_TEXTURE_WRAP_R, wrap);
+  }
+  void GL_Texture::set_wrap_(GLenum coord, Texture_Wrap wrap)
+  {
+    driver_->bind_texture(*this, this->gl_target);
+    GLenum glwrap = to_gl_texture_wrap(wrap);
+    glTexParameteri(this->gl_target, coord, glwrap);
+  }
+
+  void GL_Texture::set_mipmap_level(unsigned int level)
+  {
+    driver_->bind_texture(*this, this->gl_target);
+    glTexParameteri(this->gl_target, GL_TEXTURE_MAX_LEVEL, level);
+  }
+
+  void GL_Texture::allocate_(Vec<std::size_t> const& extents,
                              Texture_Format form,
-                             Texture_Target target) noexcept
+                             Texture_Target target)
   {
-    uninit();
-    glGenTextures(1, &tex_id);
+    // Find the gl target now so we don't do it twice
+    this->gl_target = to_gl_texture_target(target);
+    driver_->bind_texture(*this, gl_target);
 
-    // TODO: Figure something out, this is unexpected.
-    glActiveTexture(GL_TEXTURE0);
+    // Save the format for later
+    format = form;
 
-    glBindTexture((GLenum) target, tex_id);
+    // Find the OpenGL internal format we should use.
+    GLenum iformat = to_gl_texture_format(form);
 
     // Remember the last three fields of glTexImage2D aren't significant in our
     // case because we have no data to copy over, we are just allocating room.
 
     if(target == Texture_Target::Tex_2D)
     {
-      glTexImage2D((GLenum) target, 0, (GLenum) form, extents.x, extents.y,
+      glTexImage2D(gl_target, 0, iformat, extents.x, extents.y,
                    0, GL_RGBA, GL_FLOAT, NULL);
     }
     else if(target == Texture_Target::Cube_Map)
     {
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, (GLenum) form, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, iformat, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, (GLenum) form, extents.x,
-                   extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, (GLenum) form, extents.x,
-                   extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, (GLenum) form, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, iformat, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, (GLenum) form, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, iformat, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, (GLenum) form, extents.x,
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, iformat, extents.x,
+                   extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, iformat, extents.x,
+                   extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, iformat, extents.x,
                    extents.y, 0, GL_RGBA, GL_FLOAT, NULL);
     }
-
-    if(target == Texture_Target::Tex_2D)
-    {
-      glTexParameteri((GLenum) target, GL_TEXTURE_MIN_FILTER,
-                      GL_NEAREST_MIPMAP_NEAREST);
-      glTexParameteri((GLenum) target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-      // These are actually set to their respective values by default anyway,
-      // but this is more clear.
-      glTexParameteri((GLenum) target, GL_TEXTURE_BASE_LEVEL, 0);
-      glTexParameteri((GLenum) target, GL_TEXTURE_MAX_LEVEL, 5);
-
-      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_R, GL_REPEAT);
-    }
-    else if(target == Texture_Target::Cube_Map)
-    {
-      glTexParameteri((GLenum) target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri((GLenum) target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri((GLenum) target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    }
-
-    // Save the format for later.
-    format_ = form;
-    target_ = target;
   }
-  void GL_Texture::blit_tex2d_data(Volume<int> const& vol, Data_Type data_type,
-                                   void const* in_data) noexcept
+  void GL_Texture::blit_tex2d_data(Volume<std::size_t> const& vol,
+                                   Texture_Format data_format,
+                                   Data_Type data_type,
+                                   void const* in_data)
   {
-    if(target_ != Texture_Target::Tex_2D)
+    if(gl_target != GL_TEXTURE_2D)
     {
       log_d("Trying to blit 2D data to non-2d texture");
       return;
@@ -99,58 +138,16 @@ namespace redc { namespace gfx { namespace gl
       return;
     }
 
-    std::size_t type_size;
+    std::size_t type_size = data_type_size(data_type);
+    std::size_t comps = texture_format_num_components(format);
 
-    switch(data_type)
-    {
-    case Data_Type::Float:
-      type_size = sizeof(float);
-      break;
-    case Data_Type::UByte:
-      type_size = sizeof(uint8_t);
-      break;
-    default:
-      REDC_UNREACHABLE_MSG("Unsupported data type for texture data");
-      return;
-    }
-
-    // Row size in bytes
-    std::size_t row_size;
-    GLenum data_format;
-
-    switch(format_)
-    {
-    case Texture_Format::Rgba:
-      row_size = type_size * 4 * vol.width;
-      data_format = GL_RGBA;
-      break;
-    case Texture_Format::Rgb:
-      row_size = type_size * 3 * vol.width;
-      data_format = GL_RGB;
-      break;
-    case Texture_Format::Alpha:
-      row_size = type_size * vol.width;
-      data_format = GL_ALPHA;
-      break;
-    case Texture_Format::Depth:
-      row_size = type_size * vol.width;
-      data_format = GL_DEPTH_COMPONENT32F;
-      break;
-    case Texture_Format::Depth_Stencil:
-      row_size = type_size * vol.width;
-      data_format = GL_DEPTH32F_STENCIL8;
-      break;
-    case Texture_Format::Stencil:
-      row_size = type_size * vol.width;
-      data_format = GL_STENCIL_INDEX8;
-      break;
-    }
+    std::size_t row_size = type_size * comps * vol.width;
 
     // Allocate our data
     uint8_t* out_data = new uint8_t[row_size * vol.height];
 
     // Go backwards by row.
-    for(int i = 0; i < vol.height; ++i)
+    for(std::size_t i = 0; i < vol.height; ++i)
     {
       // dest: output data starting from first row
       // src: input data starting from the bottom row
@@ -164,22 +161,26 @@ namespace redc { namespace gfx { namespace gl
     // bottom to top, but we need to figure out our sub-region on the opengl
     // texture.
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, vol.pos.x,
+    GLenum gl_data_type = to_gl_data_type(data_type);
+    GLenum gl_image_format = to_gl_texture_format(data_format);
+
+    driver_->bind_texture(*this, gl_target);
+    glTexSubImage2D(gl_target, 0, vol.pos.x,
                     allocated_extents().y - vol.pos.y - vol.height,
-                    vol.width, vol.height, data_format, (GLenum) data_type,
+                    vol.width, vol.height, gl_image_format, gl_data_type,
                     &out_data[0]);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glGenerateMipmap(gl_target);
 
     delete[] out_data;
   }
 
   void GL_Texture::blit_cube_data(Cube_Map_Texture const& side,
-                                  Volume<int> const& vol, Data_Type data_type,
-                                  void const* in_data) noexcept
+                                  Volume<std::size_t> const& vol,
+                                  Texture_Format data_format,
+                                  Data_Type data_type,
+                                  void const* in_data)
   {
-    if(target_ != Texture_Target::Cube_Map)
+    if(gl_target != GL_TEXTURE_CUBE_MAP)
     {
       log_d("Trying to blit cube map to a texture that is not a cube map");
       return;
@@ -191,9 +192,6 @@ namespace redc { namespace gfx { namespace gl
     }
 
     // No need to flip data for cube maps.
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, tex_id);
 
     GLenum cubemap_side;
     switch(side)
@@ -218,16 +216,12 @@ namespace redc { namespace gfx { namespace gl
         break;
     }
 
-    glTexSubImage2D(cubemap_side, 0, vol.pos.x,
-                    allocated_extents().y - vol.pos.y - vol.height,
-                    vol.width, vol.height, (GLenum) format_, (GLenum) data_type,
-                    in_data);
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-  }
+    GLenum gl_data_type = to_gl_data_type(data_type);
+    GLenum gl_image_format = to_gl_texture_format(data_format);
 
-  void GL_Texture::bind(unsigned int loc) const noexcept
-  {
-    glActiveTexture(GL_TEXTURE0 + loc);
-    glBindTexture((GLenum) target_, tex_id);
+    driver_->bind_texture(*this, gl_target);
+    glTexSubImage2D(cubemap_side, 0, vol.pos.x,
+                    allocated_extents().y - vol.pos.y - vol.height, vol.width,
+                    vol.height, gl_image_format, gl_data_type, in_data);
   }
 } } }

@@ -4,11 +4,11 @@
  */
 #include "mesh.h"
 
-#include "../gfx/support/mesh_conversion.h"
-#include "../gfx/support/load_wavefront.h"
-#include "../gfx/support/allocate.h"
-#include "../gfx/support/format.h"
-#include "../gfx/support/write_data_to_mesh.h"
+#include "../gfx/extra/mesh_conversion.h"
+#include "../gfx/extra/allocate.h"
+#include "../gfx/extra/format.h"
+#include "../gfx/extra/write_data_to_mesh.h"
+#include "../gfx/extra/load_wavefront.h"
 
 #include "mesh_cache.h"
 
@@ -16,16 +16,24 @@ namespace redc { namespace gfx
 {
   Mesh_Result package_mesh(IDriver& d, Indexed_Mesh_Data&& data, bool keep_msh)
   {
-    auto mesh_repr = d.make_mesh_repr();
+    std::unique_ptr<IMesh> mesh = d.make_mesh_repr();
+
+    // Index 0: Position
+    // Index 1: Normal
+    // Index 2: UV
+    std::vector<std::unique_ptr<IBuffer> > buffers(4);
+    d.make_buffers(buffers.size(), &buffers[0]);
+
     allocate_standard_mesh_buffers(data.vertices.size(),
                                    data.elements.size(),
-                                   *mesh_repr,
+                                   buffers,
                                    Usage_Hint::Draw,
                                    Upload_Hint::Static);
-    format_standard_mesh_buffers(*mesh_repr);
+    format_standard_mesh_buffers(*mesh, buffers);
 
     Mesh_Result ret;
-    ret.chunk = write_data_to_mesh(data, std::move(mesh_repr), 0, 0);
+    ret.chunk = write_standard_data_to_mesh_buffers(data, std::move(mesh),
+                                                    std::move(buffers), 0, 0);
 
     if(keep_msh) ret.data = std::move(data);
     return ret;
