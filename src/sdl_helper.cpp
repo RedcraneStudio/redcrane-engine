@@ -90,6 +90,8 @@ namespace redc
     SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 
     ret.gl_context = SDL_GL_CreateContext(ret.window);
+
+    bool nvidia_fix = false;
     if(ret.gl_context == NULL)
     {
       log_e("Failed to create OpenGL context: %", SDL_GetError());
@@ -106,7 +108,10 @@ namespace redc
 
       SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
       SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+
       ret.gl_context = SDL_GL_CreateContext(ret.window);
+      nvidia_fix = true;
+
       if(ret.gl_context == NULL)
       {
         REDC_UNREACHABLE_MSG("Failed to make OpenGL context");
@@ -140,6 +145,10 @@ namespace redc
     {
     case GL_LINEAR:
       framebuf_string = "RGB";
+      if(nvidia_fix)
+      {
+        framebuf_string = "sRGB (probably; NVIDIA bug)";
+      }
       break;
     case GL_SRGB:
       framebuf_string = "sRGB";
