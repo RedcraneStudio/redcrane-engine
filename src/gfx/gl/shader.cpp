@@ -60,17 +60,21 @@ namespace redc { namespace gfx { namespace gl
     // Check the info log for any messages
     GLint info_log_length = 0;
     glGetShaderiv(shade, GL_INFO_LOG_LENGTH, &info_log_length);
-    if(info_log_length != 0)
+    if(info_log_length > 0)
     {
+      GLint read_length = 0;
       std::string info_log(info_log_length, 0x00);
-      glGetShaderInfoLog(shade, info_log_length, NULL, &info_log[0]);
-      log(severity, "Shader info log of '%' (info log):\n%", filename,
-          info_log);
+      glGetShaderInfoLog(shade, info_log_length, &read_length, &info_log[0]);
+      if(read_length > 0)
+      {
+        log(severity, "Shader info log of '%' (info log):\n%", filename,
+            info_log);
+      }
     }
     else
     {
-      // By default, the no shader info log message has info severity.
-      auto no_info_sev = Log_Severity::Info;
+      // By default, the no shader info log message has debug severity.
+      auto no_info_sev = Log_Severity::Debug;
       // But a compile failure makes this important
       if(!compiled) no_info_sev = Log_Severity::Error;
       // Now do the log
