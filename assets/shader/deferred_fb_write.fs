@@ -15,6 +15,10 @@ uniform vec3 u_light_specular_color;
 
 uniform mat4 u_view;
 
+uniform vec3 u_fog_color;
+uniform float u_fog_start;
+uniform float u_fog_end;
+
 float fresnel(float n2, float theta)
 {
   float r0 = pow(((1.0f - n2) / (1.0f + n2)), 2.0f);
@@ -32,7 +36,9 @@ void main()
 
   // Find normals and position
   vec4 position = texture(u_position, uv);
-  vec3 normal = vec3(texture(u_normal, uv));
+  vec4 normal_sample = texture(u_normal, uv);
+  vec3 normal = vec3(normal_sample);
+  float w_coord = normal_sample.w;
 
   // Idea, instead of rendering to the default framebuffer just render onto the
   // diffuse buffer and use blending as we use here, then do a single pass to
@@ -55,13 +61,20 @@ void main()
   float spec_angle = max(dot(halfway, normal), 0.0f);
   float specular = pow(spec_angle, shininess);
 
-  o_dst = vec4(u_light_diffuse_color * lambertian, 1.0f) +
-    vec4(u_light_specular_color * specular, 1.0f);
+  o_dst = vec4(diffuse.rgb, 1.0);
 
-  o_dst.rgb *= u_light_power;
+  specular = 0.0;
+
+  vec3 light_contrib = vec3(u_light_diffuse_color * lambertian) +
+                       vec3(u_light_specular_color * specular);
+  o_dst.rgb *= light_contrib * u_light_power;
 
   // Use the right depth so we get depth testing
   gl_FragDepth = position.w;
 
   // TODO: More post-processing
+  float fog_coord = position.w / w_coord;
+  float fog_factor = (u_fog_end - fog_coord) / (u_fog_end - u_fog_start);
+  fog_factor = 1.0f - clamp(fog_factor, 0.0f, 1.0f);
+  o_dst = mix(o_dst, vec4(u_fog_color, 1.0f), fog_factor);
 }

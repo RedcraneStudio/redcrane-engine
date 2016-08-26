@@ -36,6 +36,14 @@ namespace redc { namespace gfx
 
     shade_->set_var_tag(gfx::tags::view_tag, "u_view");
 
+    shade_->set_var_tag("fog_color", "u_fog_color");
+    shade_->set_var_tag("fog_start", "u_fog_start");
+    shade_->set_var_tag("fog_end", "u_fog_end");
+
+    shade_->set_vec3("fog_color", glm::vec3(0.5f, 0.5f, 0.5f));
+    shade_->set_float("fog_start", 5.0f);
+    shade_->set_float("fog_end", 70.0f);
+
     shade_->set_vec4("viewport",
                      glm::vec4(0.0f,0.0f, (float) fb_size.x,(float) fb_size.y));
     shade_->set_integer("position", 0);

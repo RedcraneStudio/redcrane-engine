@@ -86,7 +86,10 @@
         "model_view": "model_view",
         "normal_matrix": "normal_matrix",
         "proj_matrix": "proj_matrix",
-        "tex": "lightmap"
+        "tex": "lightmap",
+        "fog_color": "fog_color",
+        "fog_start": "fog_start",
+        "fog_end": "fog_end"
       },
       "parameters": {
         "position": {
@@ -115,6 +118,18 @@
         },
         "lightmap": {
           "type": 35678
+        },
+        "fog_color": {
+          "type": 35665,
+          "value": [0.5, 0.5, 0.5]
+        },
+        "fog_start": {
+          "type": 5126,
+          "value": 5.0
+        },
+        "fog_end": {
+          "type": 5126,
+          "value": 70.0
         }
       }
     }

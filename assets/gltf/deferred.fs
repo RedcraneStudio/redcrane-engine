@@ -14,6 +14,6 @@ void main()
   // Record the post-projection-space depth so we can easily write it to the
   // depth buffer later.
   pos = vec4(position_world, gl_FragCoord.z);
-  normal = vec4(normal_world, 1.0);
+  normal = vec4(normal_world, gl_FragCoord.w);
   color = vec4(diffuse, shininess);
 }
