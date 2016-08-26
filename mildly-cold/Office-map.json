@@ -1,6 +1,6 @@
 {
-    "name": "Library",
-    "asset": "../../Library-converted/out.gltf",
+    "name": "Office",
+    "asset": "../../office/Office.gltf",
     "players": 1,
     "spawn": {
         "positions": [

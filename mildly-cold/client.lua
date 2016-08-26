@@ -5,7 +5,7 @@
 local rc = redcrane
 
 local decl = {
-    map = "Library-map",
+    map = "Office-map",
     properties = "properties",
     skin = "default_skin"
 }
