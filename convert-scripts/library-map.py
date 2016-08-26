@@ -366,10 +366,10 @@ if __name__ == '__main__':
         "Chandelier":  "Chandelier_Lightmap",
         "LibraryCore": "CoreLibrary_Lightmap",
         "Misc":        "ExtraRoom_Lightmap",
-        "Desks":       "ReadingDesks_Lightmap",
+        #"Desks":       "ReadingDesks_Lightmap",
         "SecondLvl":   "SecondLevel_Lightmap",
         "Vents":       "Vents_Lightmap",
-        "Cupboards":   "Cupboards_Lightmap",
+        #"Cupboards":   "Cupboards_Lightmap",
 
         "FloorBot1":      "FloorBot1_Lightmap",
         "FloorBot2":      "FloorBot2_Lightmap",
