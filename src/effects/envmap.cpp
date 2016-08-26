@@ -16,6 +16,9 @@ namespace redc { namespace effects
                                 "../assets/tex/envmap/up.png",
                                 "../assets/tex/envmap/down.png");
 
+    envmap_->set_mag_filter(gfx::Texture_Filter::Linear);
+    envmap_->set_min_filter(gfx::Texture_Filter::Linear);
+
     std::vector<float> cube_data =
     {
       -1.0f, +1.0f, -1.0f,
