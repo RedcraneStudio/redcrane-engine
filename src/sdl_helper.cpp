@@ -108,10 +108,9 @@ namespace redc
 
     gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress);
 
-    int opengl_maj, opengl_min;
-    glGetIntegerv(GL_MAJOR_VERSION, &opengl_maj);
-    glGetIntegerv(GL_MINOR_VERSION, &opengl_min);
-    log_i("OpenGL core profile %.%", opengl_maj, opengl_min);
+    log_i("OpenGL: %, GLSL: %, Vendor: %, Renderer: %",
+          glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION),
+          glGetString(GL_VENDOR), glGetString(GL_RENDERER));
 
     GLint front_type = 0;
     glGetFramebufferAttachmentParameteriv(
