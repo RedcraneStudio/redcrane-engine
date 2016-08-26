@@ -1453,6 +1453,7 @@ namespace redc { namespace gfx
             if(!cur_rendering_state.deferred->is_active())
             {
               cur_rendering_state.deferred->use();
+              ran_deferred = true;
             }
           }
           else
@@ -1463,7 +1464,6 @@ namespace redc { namespace gfx
             {
               // Disable and render
               cur_rendering_state.deferred->finish();
-              ran_deferred = true;
             }
 
             // Continue doing forward rendering.
