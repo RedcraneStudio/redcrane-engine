@@ -6,6 +6,7 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <cstring>
 #include "utility.h"
 namespace redc
 {
@@ -21,6 +22,12 @@ namespace redc
 
   inline std::string to_string_helper(char const* const str) noexcept
   { return str; }
+  inline std::string to_string_helper(unsigned char const* const str) noexcept
+  {
+    char const* c_str = (char const*) str;
+    std::size_t str_len = std::strlen(c_str);
+    return std::string(c_str, c_str + str_len);
+  }
   inline std::string to_string_helper(char* str) noexcept
   { return str; }
 
