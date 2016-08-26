@@ -32,6 +32,8 @@ namespace redc
         glViewport(0, 0, size.x, size.y);
         set_blend_policy(Blend_Policy::Transparency);
 
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
         glEnable(GL_FRAMEBUFFER_SRGB);
         glDepthFunc(GL_LESS);
 
