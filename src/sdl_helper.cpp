@@ -93,6 +93,24 @@ namespace redc
     if(ret.gl_context == NULL)
     {
       log_e("Failed to create OpenGL context: %", SDL_GetError());
+      log_i("Trying a new configuration... (NVIDIA fix)");
+      SDL_GL_ResetAttributes();
+
+      SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+      SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+      SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+      SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+
+      SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+      SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
+
+      SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+      SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+      ret.gl_context = SDL_GL_CreateContext(ret.window);
+      if(ret.gl_context == NULL)
+      {
+        REDC_UNREACHABLE_MSG("Failed to make OpenGL context");
+      }
     }
 
     SDL_GL_MakeCurrent(ret.window, ret.gl_context);
