@@ -2,7 +2,7 @@
  * Copyright (C) 2016 Luke San Antonio
  * All rights reserved.
  */
-#version 330
+#version 330 core
 
 in vec2 uv;
 
