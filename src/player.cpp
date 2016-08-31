@@ -49,8 +49,7 @@ namespace redc
 {
   Player_Controller::Player_Controller()
     : inited_(false), ghost_(), shape_(PLAYER_RADIUS, PLAYER_CAPSULE_HEIGHT),
-      crouch_shape_(PLAYER_RADIUS, CROUCHED_CAPSULE_HEIGHT),
-      jump_velocity_()
+      crouch_shape_(PLAYER_RADIUS, CROUCHED_CAPSULE_HEIGHT), jump_velocity_()
   {
     server = nullptr;
 
