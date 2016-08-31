@@ -121,6 +121,8 @@ namespace redc
     std::vector<uint8_t>* vertex_data;
     std::vector<uint8_t>* index_data;
 
+    std::vector<std::unique_ptr<btCollisionShape> > click_shapes;
+    std::vector<std::unique_ptr<btRigidBody> > click_objects;
   private:
     Server* server_;
   };
@@ -129,6 +131,13 @@ namespace redc
   {
     // Remove the map body from the world when we are destructed.
     server_->bt_world->removeRigidBody(this->body.get());
+
+    // Remove the other physics click objects from the world
+    for(auto body_iter = this->click_objects.begin();
+        body_iter != this->click_objects.end(); ++body_iter)
+    {
+      server_->bt_world->removeRigidBody(body_iter->get());
+    }
 
     delete vertex_data;
     delete index_data;
@@ -241,11 +250,62 @@ namespace redc
 
     server_->bt_world->addRigidBody(collision->body.get());
 
-    event.map->collision = std::move(collision);
+    // Add physics event shapes
+    for(auto iter = map->physics_events.begin();
+        iter != map->physics_events.end(); ++iter)
+    {
+      std::unique_ptr<btCollisionShape> bt_shape;
+      Shape const& shape = iter->shape;
+      switch(shape.type)
+      {
+      case Shape_Type::Sphere:
+        bt_shape = std::make_unique<btSphereShape>(shape.sphere.radius);
+        break;
+      default:
+        REDC_UNREACHABLE_MSG("Unknown physics event shape type");
+      }
+      collision->click_shapes.push_back(std::move(bt_shape));
+    }
+    // Now build rigid bodies for each shape.
+    for(std::size_t i = 0; i < map->physics_events.size(); ++i)
+    {
+      Physics_Event_Decl const& event = map->physics_events[i];
+
+      // Use the index to find the corrosponding shape, this could probably be
+      // improved for cases where the same shape is used in multiple "events."
+      btRigidBody::btRigidBodyConstructionInfo info {
+        0.0f, nullptr, collision->click_shapes[i].get()
+      };
+
+      // Don't forget world transform, since we aren't using a motion state.
+      btTransform transform;
+      transform.setIdentity();
+      transform.setOrigin(btVector3(event.position.x, event.position.y,
+                                    event.position.z));
+      info.m_startWorldTransform = transform;
+
+      std::unique_ptr<btRigidBody> body = std::make_unique<btRigidBody>(info);
+
+      // Link the body to the event itself. This allows us to signal the right
+      // event when the time comes.
+      body->setUserPointer(&map->physics_events[i]);
+
+      // Add the (static) rigid body.
+      server_->bt_world->addRigidBody(body.get());
+      // Add the body to this vector so the memory isn't deallocated.
+      collision->click_objects.push_back(std::move(body));
+    }
+
+    map->physics = std::move(collision);
   }
   void Server::process_event(event_t const& event)
   {
     boost::apply_visitor(Server_Event_Visitor{*this}, event);
+  }
+  void Server::signal_physics_click(btCollisionObject const* obj)
+  {
+    Physics_Event_Decl* ptr = (Physics_Event_Decl*) body->getUserPointer();
+    REDC_UNREACHABLE_MSG("Not implemented yet");
   }
 
   Server::Server(Engine& eng) : engine_(&eng)

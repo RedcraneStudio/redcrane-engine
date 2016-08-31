@@ -165,6 +165,7 @@ namespace redc
     std::vector<std::unique_ptr<Map> > maps;
 
     void process_event(event_t const& event) override;
+    void signal_physics_click(btCollisionObject const* object);
 
   private:
     Engine* engine_;
