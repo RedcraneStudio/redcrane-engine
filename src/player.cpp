@@ -198,7 +198,7 @@ namespace redc
       end_pos.setY(start_pos.getY() - props.shoe_size);
 
       // Redundancy whhyyyyy
-      btCollisionWorld::ClosestRayResultCallback ground_ray(start_pos, end_pos);
+      Closest_Result_Ignore_Player ground_ray(ghost_, start_pos, end_pos);
       world->rayTest(start_pos, end_pos, ground_ray);
 
       if(ground_ray.hasHit())
@@ -304,7 +304,7 @@ namespace redc
         to.setY(to.getY() + PLAYER_CROUCH_HEIGHT_DELTA + PLAYER_HEIGHT / 2.0f);
 
         // Go back to normal, but first make sure nothing will be in our way.
-        btCollisionWorld::ClosestRayResultCallback ray_cb(pos, to);
+        Closest_Result_Ignore_Player ray_cb(ghost_, pos, to);
         world->rayTest(pos, to, ray_cb);
 
         if(!ray_cb.hasHit())
@@ -395,7 +395,7 @@ namespace redc
         // Cast a ray from the character's position to the position plus the
         // movement vector. This is obviously where the player is trying to go.
         auto end_pt = pos + movement.normalized() * props.radius * 4.5f;
-        btCollisionWorld::ClosestRayResultCallback move_ray(pos, end_pt);
+        Closest_Result_Ignore_Player move_ray(ghost_, pos, end_pt);
         world->rayTest(pos, end_pt, move_ray);
 
         if(move_ray.hasHit())
