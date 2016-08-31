@@ -62,12 +62,51 @@ namespace redc
 
       // Parse each element as a vector
       glm::vec3 pos;
-      pos.x = (float) (*iter)[0].GetDouble();
-      pos.y = (float) (*iter)[1].GetDouble();
-      pos.z = (float) (*iter)[2].GetDouble();
+      if(!load_js_vec3(*iter, pos, err))
+      {
+        return false;
+      }
 
       // This is our position
       spawns.positions.push_back(pos);
+    }
+
+    return true;
+  }
+
+  bool load_physics_events(std::vector<Physics_Event_Decl>& physics,
+                           rapidjson::Value const& val, std::string* err)
+  {
+    physics.clear();
+
+    rapidjson::Value::ConstValueIterator iter = val.Begin();
+    rapidjson::Value::ConstValueIterator end_iter = val.End();
+    for(; iter != end_iter; ++iter)
+    {
+      Physics_Event_Decl decl;
+
+      if(!load_js_vec3((*iter)["pos"], decl.position, err))
+      {
+        return false;
+      }
+
+      decl.event_name = (*iter)["event"].GetString();
+
+      rapidjson::Value const& shape = (*iter)["shape"];
+      std::string shape_type = shape["type"].GetString();
+      if(shape_type == "sphere")
+      {
+        if(!shape.HasMember("radius"))
+        {
+          if(err) (*err) = "Shape sphere must have a radius";
+          return false;
+        }
+
+        decl.shape.type = Shape_Type::Sphere;
+        decl.shape.sphere.radius = shape["radius"].GetDouble();
+      }
+
+      physics.push_back(decl);
     }
 
     return true;
@@ -141,6 +180,11 @@ namespace redc
       }
 
       map.physics.gravity = vec3_from_js_array(gravity_val);
+    }
+
+    if(!load_physics_events(map.physics_events, doc["physics_events"], err))
+    {
+      return false;
     }
 
     return true;

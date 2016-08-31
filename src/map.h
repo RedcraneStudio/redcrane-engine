@@ -44,6 +44,33 @@ namespace redc
     std::vector<glm::vec3> positions;
   };
 
+  enum class Shape_Type
+  {
+    Sphere
+  };
+
+  struct Sphere
+  {
+    float radius;
+  };
+
+  struct Shape
+  {
+    Shape_Type type;
+
+    union
+    {
+      Sphere sphere;
+    };
+  };
+
+  struct Physics_Event_Decl
+  {
+    std::string event_name;
+    glm::vec3 position;
+    Shape shape;
+  };
+
   struct Physics_Decl
   {
     glm::vec3 gravity;
@@ -63,6 +90,7 @@ namespace redc
     std::string collision_indices_source;
 
     Physics_Decl physics;
+    std::vector<Physics_Event_Decl> physics_events;
 
     // Initialized later, if necessary.
     std::unique_ptr<Rendering_Component> render;
