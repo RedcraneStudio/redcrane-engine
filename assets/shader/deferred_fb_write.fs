@@ -13,6 +13,8 @@ uniform float u_light_power;
 uniform vec3 u_light_diffuse_color;
 uniform vec3 u_light_specular_color;
 
+uniform float u_ambient;
+
 uniform mat4 u_view;
 
 uniform vec3 u_fog_color;
@@ -61,13 +63,13 @@ void main()
   float spec_angle = max(dot(halfway, normal), 0.0f);
   float specular = pow(spec_angle, shininess);
 
-  o_dst = vec4(diffuse.rgb, 1.0);
+  o_dst = vec4(diffuse.rgb * u_ambient, 1.0);
 
   specular = 0.0;
 
   vec3 light_contrib = vec3(u_light_diffuse_color * lambertian) +
                        vec3(u_light_specular_color * specular);
-  o_dst.rgb *= light_contrib * u_light_power;
+  o_dst.rgb += light_contrib * u_light_power;
 
   // Use the right depth so we get depth testing
   gl_FragDepth = position.w;

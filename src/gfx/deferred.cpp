@@ -36,6 +36,8 @@ namespace redc { namespace gfx
 
     shade_->set_var_tag(gfx::tags::view_tag, "u_view");
 
+    shade_->set_var_tag("ambient", "u_ambient");
+
     shade_->set_var_tag("fog_color", "u_fog_color");
     shade_->set_var_tag("fog_start", "u_fog_start");
     shade_->set_var_tag("fog_end", "u_fog_end");
@@ -200,6 +202,7 @@ namespace redc { namespace gfx
     // We need additive blending
     driver_->set_blend_policy(gfx::Blend_Policy::Additive);
 
+    shade_->set_float("ambient", 0.1f);
     for(Light const& light : lights)
     {
       shade_->set_vec3("light_pos", light.pos);
@@ -210,6 +213,8 @@ namespace redc { namespace gfx
       // We need to forcefully do this since we rendering using the new
       // interface, which doesn't go through the driver.
       quad_->draw_arrays(0, 6);
+
+      shade_->set_float("ambient", 0.0f);
     }
   }
 } }
