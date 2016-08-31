@@ -168,7 +168,7 @@ namespace redc
     map.collision_indices_source = (*val)["indices"].GetString();
 
     // Use earth gravity by default.
-    map.physics.gravity = glm::vec3(0.0f, -9.81, 0.0f);
+    map.physics_decl.gravity = glm::vec3(0.0f, -9.81, 0.0f);
     val = &doc["physics"];
     if(val->HasMember("gravity"))
     {
@@ -179,7 +179,7 @@ namespace redc
         return false;
       }
 
-      map.physics.gravity = vec3_from_js_array(gravity_val);
+      map.physics_decl.gravity = vec3_from_js_array(gravity_val);
     }
 
     if(!load_physics_events(map.physics_events, doc["physics_events"], err))

@@ -89,12 +89,12 @@ namespace redc
     std::string collision_vertices_source;
     std::string collision_indices_source;
 
-    Physics_Decl physics;
+    Physics_Decl physics_decl;
     std::vector<Physics_Event_Decl> physics_events;
 
     // Initialized later, if necessary.
     std::unique_ptr<Rendering_Component> render;
-    std::unique_ptr<Physics_Component> collision;
+    std::unique_ptr<Physics_Component> physics;
 
   };
 
