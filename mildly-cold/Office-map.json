@@ -20,9 +20,9 @@
             "event": "desk_lamp_toggle",
             "shape": {
                 "type": "sphere",
-                "radius": 0.2
+                "radius": 0.053
             },
-            "pos": [-3.03, 0.73, 0.12],
+            "pos": [-3.25361, 0.68112, -0.40716],
             "desc": "Desk lamp switch"
         }
     ]
