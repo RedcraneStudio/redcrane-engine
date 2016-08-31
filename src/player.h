@@ -24,7 +24,7 @@ namespace redc
 
   enum class Player_State
   {
-    Grounded, Jumping, Flying
+    Grounded, Jumping
   };
 
   // The player is made up of shoes, half a sphere, a cylinder and another
@@ -62,9 +62,12 @@ namespace redc
     } type;
   };
 
+  struct Server;
   struct Player_Controller : public btActionInterface
   {
     Player_Controller();
+
+    Server* server;
 
     inline void reset() { inited_ = false; }
 
@@ -109,7 +112,6 @@ namespace redc
     btVector3 last_normal_;
 
     btQuaternion pitch_;
-    btVector3 gun_target_;
 
     float target_height_;
 

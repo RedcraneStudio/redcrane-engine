@@ -1,12 +1,17 @@
 #include "player.h"
 
+// For Server
+#include "cwrap/redcrane.hpp"
+
 #include "common/log.h"
 
 // All of this is in meters
 // My own height, slightly smaller radius
 #define PLAYER_HEIGHT 1.63f
 #define PLAYER_RADIUS 0.24f
-
+// This value is a little bit larger then my own measured length from the tip of
+// the finger to the middle of the head.
+#define PLAYER_REACH  1.0f
 // Height of things the player can step over easily, this is the size of the ray
 // and is part of the player's total height.
 #define PLAYER_SHOE_SIZE 0.15f
@@ -43,6 +48,8 @@ namespace redc
       crouch_shape_(PLAYER_RADIUS, CROUCHED_CAPSULE_HEIGHT),
       jump_velocity_()
   {
+    server = nullptr;
+
     // Initialize velocity and impulse to zero
     jump_velocity_.setZero();
 
@@ -105,6 +112,30 @@ namespace redc
     player_props_.is_crouched = true;
   }
 
+
+  struct Closest_Result_Ignore_Player : public btCollisionWorld::ClosestRayResultCallback
+  {
+    Closest_Result_Ignore_Player(btCollisionObject& me, btVector3 const& from,
+                                 btVector3 const& to)
+      : btCollisionWorld::ClosestRayResultCallback(from, to), me(&me) {}
+
+    btScalar addSingleResult(btCollisionWorld::LocalRayResult& res,
+                             bool normal_in_world_space);
+
+    btCollisionObject* me;
+  };
+  btScalar Closest_Result_Ignore_Player::addSingleResult(
+    btCollisionWorld::LocalRayResult& res,
+    bool normal_in_world_space
+  )
+  {
+    // If that's us, ignore it.
+    if(res.m_collisionObject == me)
+      return 1.0f;
+
+    // Otherwise proceed as normal.
+    return ClosestRayResultCallback::addSingleResult(res, normal_in_world_space);
+  }
   // They are expected to add the action to the dynamics world and then this
   // will be called, then we init then we start
   void Player_Controller::updateAction(btCollisionWorld* world, btScalar dt)
@@ -314,13 +345,6 @@ namespace redc
         jump_velocity_ = btVector3(0.0f, 2.943f, 0.0f);
         state = Player_State::Jumping;
       }
-      else if(input_ref_->jump && state == Player_State::Flying)
-      {
-        // If we were in the air, just release the player from the grappling
-        // hook (ie go into jumping mode, where gravity will be applied).
-        // Velocity will not be zero'd so it should be interesting.
-        state = Player_State::Jumping;
-      }
 
       // The active normal is the normal of the ground beneath us, when we are
       // not on the ground it's just the y axis. This is the normal the player
@@ -398,7 +422,7 @@ namespace redc
     }
 
     // ===
-    // Grappling-gun physics!
+    // Clicking on objects
     // ===
     {
       if(input_ref_->primary_attack)
@@ -409,23 +433,34 @@ namespace redc
         // TODO: Can we do this so willy-nilly?
         ray_rot *= pitch_;
 
-        // Rotate a forward vector by our pithc and yaw to find where the gun is
+        // Rotate a forward vector by our pitch and yaw to find where the gun is
         // pointing.
         auto forward = btMatrix3x3(ray_rot) * btVector3(0.0f, 0.0f, -1.0f);
 
+        glm::vec3 floor_pos = get_player_pos();
+
         // Do a raycast from the player's head along the forward vector
-        // TODO: Inspect this use of total height, it looks suspicious
-        auto head_pos = pos + btVector3(0.0f, props.total_height / 2, 0.0f);
-        auto ray_end = head_pos + forward.normalized() * 1000.0f;
+        auto head_pos = btVector3(floor_pos.x, floor_pos.y + props.total_height,
+                                  floor_pos.z);
+        auto ray_end = head_pos + forward.normalized() * PLAYER_REACH;
 
-        btCollisionWorld::ClosestRayResultCallback gun_ray(head_pos, ray_end);
-        world->rayTest(head_pos, ray_end, gun_ray);
+        Closest_Result_Ignore_Player click_ray(ghost_, head_pos, ray_end);
+        world->rayTest(head_pos, ray_end, click_ray);
 
-        if(gun_ray.hasHit())
+        // Random comment before I forget: Let it be known that world hit
+        // position can be found using the hit fraction with linear
+        // interpolation. A value of 1.0 is right on the ray end point and 0.0
+        // is right at the ray beginning point.
+
+        if(click_ray.hasHit())
         {
-          // Apply some acceleration in the direction of the ray hit
-          gun_target_ = gun_ray.m_hitPointWorld;
-          state = Player_State::Flying;
+          // If we just hit ourselves,
+          // Check the object and give it to the server so the event can be
+          // processed.
+          if(server)
+          {
+            server->signal_physics_click(click_ray.m_collisionObject);
+          }
         }
       }
     }
@@ -438,13 +473,8 @@ namespace redc
     if(state == Player_State::Jumping)
     {
       // Adjust the air velocity of the player
-      jump_velocity_ += btVector3(0.0f, -9.81f, 0.0f) * dt;
-    }
-    else if(state == Player_State::Flying)
-    {
-      // Only when we are flying
-      jump_velocity_ += (gun_target_ - pos).normalized() * 20.0f * dt;
-      jump_velocity_ += btVector3(0.0f, -9.81f, 0.0f) * dt;
+      btVector3 gravity = ((btDynamicsWorld*) world)->getGravity();
+      jump_velocity_ += gravity * dt;
     }
     else
     {
@@ -565,11 +595,6 @@ namespace redc
 
     if(penetration)
     {
-      if(state == Player_State::Flying)
-      {
-        jump_velocity_.setZero();
-        state = Player_State::Jumping;
-      }
       update_ghost_transform_();
     }
   }
