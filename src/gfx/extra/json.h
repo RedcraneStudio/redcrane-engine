@@ -15,4 +15,23 @@ namespace redc
   {
     return glm::vec3{v[0].GetDouble(),v[1].GetDouble(),v[2].GetDouble()};
   }
+  inline bool load_js_vec3(rapidjson::Value const& v, glm::vec3& vec,
+                           std::string* err)
+  {
+    if(v.IsArray())
+    {
+      vec = vec3_from_js_array(v);
+      return true;
+    }
+    else if(v.IsObject())
+    {
+      vec = vec3_from_js_object(v);
+      return true;
+    }
+    else
+    {
+      if(err) (*err) = "Invalid JSON; expected Vec3 (object or array)";
+      return false;
+    }
+  }
 }
