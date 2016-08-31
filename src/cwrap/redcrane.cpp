@@ -289,6 +289,7 @@ namespace redc
       // Link the body to the event itself. This allows us to signal the right
       // event when the time comes.
       body->setUserPointer(&map->physics_events[i]);
+      body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
       // Add the (static) rigid body.
       server_->bt_world->addRigidBody(body.get());
