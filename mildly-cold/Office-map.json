@@ -14,5 +14,16 @@
     },
     "physics": {
         "gravity": [0.0, -9.81, 0.0]
-    }
+    },
+    "physics_events": [
+        {
+            "event": "desk_lamp_toggle",
+            "shape": {
+                "type": "sphere",
+                "radius": 0.2
+            },
+            "pos": [-3.03, 0.73, 0.12],
+            "desc": "Desk lamp switch"
+        }
+    ]
 }
