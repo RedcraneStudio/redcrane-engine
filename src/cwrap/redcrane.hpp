@@ -140,6 +140,10 @@ namespace redc
     void process_event(event_t const& event) override;
   };
 
+  struct Server_Event
+  {
+    Physics_Event_Decl* decl;
+  };
   struct Server : public Server_Base
   {
     Server(Engine& eng);
@@ -165,10 +169,14 @@ namespace redc
     std::vector<std::unique_ptr<Map> > maps;
 
     void process_event(event_t const& event) override;
-    void signal_physics_click(btCollisionObject const* object);
+    void on_physics_click(btCollisionObject const* object);
 
+    // Server events are distinctly different from engine standard events.
+    bool poll_physics_event(Server_Event& event);
   private:
     Engine* engine_;
+
+    Queue_Event_Source<Server_Event> event_queue_;
   };
 
   struct Mesh_Object

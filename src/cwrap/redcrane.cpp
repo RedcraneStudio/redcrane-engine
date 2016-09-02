@@ -303,10 +303,24 @@ namespace redc
   {
     boost::apply_visitor(Server_Event_Visitor{*this}, event);
   }
-  void Server::signal_physics_click(btCollisionObject const* obj)
+  void Server::on_physics_click(btCollisionObject const* obj)
   {
-    Physics_Event_Decl* ptr = (Physics_Event_Decl*) body->getUserPointer();
-    REDC_UNREACHABLE_MSG("Not implemented yet");
+    Physics_Event_Decl* ptr =
+      static_cast<Physics_Event_Decl*>(obj->getUserPointer());
+    if(ptr)
+    {
+      // Fire an event because we have a valid physics event.
+      Server_Event event;
+      event.decl = ptr;
+      event_queue_.push_outgoing_event(event);
+
+      // Also debug log it
+      log_d("enqueued event: %", ptr->event_name);
+    }
+  }
+  bool Server::poll_physics_event(Server_Event& event)
+  {
+    return event_queue_.poll_event(event);
   }
 
   Server::Server(Engine& eng) : engine_(&eng)

@@ -462,7 +462,7 @@ namespace redc
           // processed.
           if(server)
           {
-            server->signal_physics_click(click_ray.m_collisionObject);
+            server->on_physics_click(click_ray.m_collisionObject);
           }
         }
       }
