@@ -12,10 +12,13 @@
 
 using namespace redc;
 
-void redc_server_req_player(void *eng)
+extern "C"
 {
-  auto rce = (Engine*) eng;
-  REDC_ASSERT_HAS_SERVER(rce);
+  void redc_server_req_player(void *eng)
+  {
+    auto rce = (Engine*) eng;
+    REDC_ASSERT_HAS_SERVER(rce);
 
-  rce->server->req_player();
+    rce->server->req_player();
+  }
 }
