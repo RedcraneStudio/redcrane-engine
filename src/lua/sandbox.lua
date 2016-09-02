@@ -26,41 +26,7 @@ return function()
     local sandbox = require("config_sandbox")()
 
     if include_redcrane == true then
-
-        sandbox.redcrane = {
-            engine = rc.engine,
-            config = rc.config,
-
-            step = rc.step,
-            running = rc.running,
-            swap_window = rc.swap_window,
-            asset_path = rc.asset_path,
-
-            step_server = rc.step_server,
-
-            load_map = rc.load_map,
-
-            scene = {
-                make_scene = rc.scene.make_scene
-            },
-            mesh = {
-                load_mesh = rc.mesh.load_mesh
-            },
-            texture = {
-               load_texture = rc.texture.load_texture
-            },
-            shader = {
-                load_shader = rc.shader.load_shader
-            },
-            server = {
-                req_player = rc.server.req_player
-            },
-
-            log_d = rc.log_d,
-            log_i = rc.log_i,
-            log_w = rc.log_w,
-            log_e = rc.log_e
-        }
+        sandbox.redcrane = rc
     end
 
     return sandbox
