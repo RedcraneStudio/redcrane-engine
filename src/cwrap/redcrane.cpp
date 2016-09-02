@@ -344,7 +344,9 @@ namespace redc
     auto id = this->index_gen.get();
 
     // Be careful about reusing the memory for the player controller here.
-    at_id(this->players, id).controller.reset();
+    Player& player = at_id(this->players, id);
+    player.controller.reset();
+    player.controller.server = this;
 
     // New player, notify anyone who cares
     engine_->push_outgoing_event(New_Player_Event{id, true});
