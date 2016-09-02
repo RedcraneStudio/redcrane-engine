@@ -115,3 +115,9 @@ void redc_map_load(void* eng, const char* file);
 // See cwrap/server.cpp
 
 void redc_server_req_player(void *eng);
+
+typedef struct
+{
+  const char *name;
+} Redc_Event;
+int redc_server_poll_event(void *eng, Redc_Event *event);

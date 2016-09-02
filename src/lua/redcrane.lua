@@ -68,6 +68,20 @@ function rc:load_game_set(set)
     end
 end
 
+function rc:events()
+    event_data = ffi.new("Redc_Event")
+    return function()
+        if ffi.C.redc_server_poll_event(self.engine, event_data) ~= 0 then
+            -- @ Optimization: If somehow the string copying becomes a
+            -- bottleneck, have a function to only iterate over events with a
+            -- specific type and do the string comparison in C++ code.
+            return { name = ffi.string(event_data.name) }
+        else
+            return nil
+        end
+    end
+end
+
 -- Logging functions
 function stringify(str, ...)
     for n=1,select('#', ...) do
