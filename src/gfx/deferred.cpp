@@ -164,8 +164,8 @@ namespace redc { namespace gfx
 
     active_ = false;
   }
-  void Deferred_Shading::render(gfx::Camera const& cam,
-                                std::vector<Light> const& lights)
+  void Deferred_Shading::render(gfx::Camera const& cam, std::size_t num_lights,
+                                Light* lights)
   {
     if(is_active())
     {
@@ -203,8 +203,10 @@ namespace redc { namespace gfx
     driver_->set_blend_policy(gfx::Blend_Policy::Additive);
 
     shade_->set_float("ambient", 0.1f);
-    for(Light const& light : lights)
+    for(std::size_t i = 0; i < num_lights; ++i)
     {
+      Light const& light = lights[i];
+
       shade_->set_vec3("light_pos", light.pos);
       shade_->set_float("light_power", light.power);
       shade_->set_vec3("light_diffuse_color", light.diffuse_color);

@@ -41,7 +41,7 @@ namespace redc { namespace gfx
 
     void use();
     void finish();
-    void render(gfx::Camera const& cam, std::vector<Light> const& lights);
+    void render(gfx::Camera const& cam, std::size_t num_lights, Light* lights);
 
   private:
     IDriver* driver_;

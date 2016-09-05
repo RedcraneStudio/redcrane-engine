@@ -173,7 +173,7 @@ int main(int argc, char** argv)
     driver.clear();
     driver.set_blend_policy(gfx::Blend_Policy::Transparency);
     envmap.render(driver, cam);
-    deferred.render(cam, lights);
+    deferred.render(cam, lights.size(), &lights[0]);
 
     SDL_GL_SwapWindow(sdl_window);
   }

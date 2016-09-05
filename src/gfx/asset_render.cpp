@@ -510,7 +510,7 @@ namespace redc { namespace gfx
       light.diffuse_color = glm::vec3(1.0f, 1.0f, 1.0f);
       light.specular_color = glm::vec3(1.0f, 1.0f, 1.0f);
 
-      cur_rendering_state.deferred->render(camera, std::vector<gfx::Light>{light});
+      cur_rendering_state.deferred->render(camera, 1, &light);
     }
   }
 } }
