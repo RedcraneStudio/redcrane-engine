@@ -26,6 +26,7 @@
 #include "../gfx/camera.h"
 #include "../gfx/mesh_chunk.h"
 #include "../gfx/itexture.h"
+#include "../gfx/asset_render.h"
 
 #include "../common/cache.h"
 

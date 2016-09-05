@@ -5,6 +5,7 @@
 #include <chrono>
 #include "sdl_helper.h"
 #include "gfx/scene.h"
+#include "gfx/asset_render.h"
 #include "gfx/gl/driver.h"
 #include "assets/minigltf.h"
 #include "common/log.h"

@@ -231,25 +231,9 @@ namespace redc { namespace gfx
   Asset load_asset(IDriver& driver, tinygltf::Scene const& scene);
   void append_to_asset(IDriver& driver, Asset& ret, tinygltf::Scene const& scene);
 
-  struct Param_Override
-  {
-    Param_Override(std::string const& name) : name(name) {}
+  Attrib_Bind get_attrib_semantic_bind(Technique const& tech,
+                                       Attrib_Semantic attrib_semantic);
 
-    std::string name;
-    Value value;
-  };
-
-  struct Rendering_State
-  {
-    Technique_Ref cur_technique_i = -1;
-    Material_Ref cur_material_i = -1;
-
-    std::vector<Param_Override> overrides;
-
-    gfx::IDriver* driver;
-    std::unique_ptr<gfx::Deferred_Shading> deferred;
-  };
-
-  void render_asset(Asset const& asset, gfx::Camera const& camera,
-                    Rendering_State& cur_rendering_state);
+  Param_Bind get_param_semantic_bind(Technique const& tech,
+                                     Param_Semantic param_semantic);
 } }

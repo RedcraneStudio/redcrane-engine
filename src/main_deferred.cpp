@@ -10,6 +10,7 @@
 #include "common/log.h"
 #include "use/mesh.h"
 #include "gfx/scene.h"
+#include "gfx/asset_render.h"
 #include "gfx/deferred.h"
 #include "effects/envmap.h"
 #include "glm/gtc/matrix_transform.hpp"
