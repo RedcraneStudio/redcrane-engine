@@ -509,25 +509,22 @@ namespace redc { namespace gfx
     }
   }
 
-  void load_nodes_given_names(Asset& asset, std::size_t node_offset,
-                              tinygltf::Scene const& scene)
+  void load_nodes(Asset& asset, tinygltf::Scene const& scene)
   {
-    asset.nodes.reserve(asset.nodes.size() + asset.node_names.size() -
-                        node_offset);
+    // Don't reserve any space because light nodes go somewhere else.
 
-    // This maps names to indexes into the nodes array parameter.
+    // This maps names to indexes into the nodes array parameter. We use it
+    // later when parenting comes into play.
     std::unordered_map<std::string, std::size_t> node_indices;
 
-    // Start at a given offset in the node names vector
-    auto name_iter = asset.node_names.begin() + node_offset;
-    auto name_iter_end = asset.node_names.end();
-    for(; name_iter != name_iter_end; ++name_iter)
+    for(auto const& node_pair : scene.nodes)
     {
-      std::string const& name = *name_iter;
+      std::string const& name = node_pair.first;
+      asset.node_names.push_back(name);
 
-      auto node_find = scene.nodes.find(name);
-      REDC_ASSERT(node_find != scene.nodes.end());
-      auto const& in_node = node_find->second;
+      tinygltf::Node const& in_node = node_pair.second;
+
+      // @ Refactor: If we aren't dealing with a mesh node, ignore it
 
       Node node;
 
@@ -800,14 +797,18 @@ namespace redc { namespace gfx
     }
   }
 
-  void load_meshes(IDriver& driver, Asset& asset, tinygltf::Scene const& scene)
+  void load_meshes_given_names(IDriver& driver, Asset& asset, std::size_t off,
+                               tinygltf::Scene const& scene)
   {
     asset.meshes.reserve(asset.meshes.size() + scene.meshes.size());
-    asset.mesh_names.reserve(asset.mesh_names.size() + scene.meshes.size());
 
-    for(auto mesh_pair : scene.meshes)
+    auto mesh_name_iter = asset.mesh_names.begin() + off;
+    auto mesh_name_end = asset.mesh_names.end();
+    for(; mesh_name_iter != mesh_name_end; ++mesh_name_iter)
     {
-      asset.mesh_names.push_back(mesh_pair.first);
+      std::string const& mesh_name = *mesh_name_iter;
+
+      tinygltf::Mesh const& their_mesh = scene.meshes.at(mesh_name);
 
       Mesh our_mesh;
 
@@ -815,7 +816,7 @@ namespace redc { namespace gfx
       our_mesh.repr = driver.make_mesh_repr();
 
       Attrib_Bind max_bind = 0;
-      for(auto& in_prim : mesh_pair.second.primitives)
+      for(auto& in_prim : their_mesh.primitives)
       {
         Primitive prim;
 
@@ -825,7 +826,7 @@ namespace redc { namespace gfx
         prim.mat_i =
           find_string_index(asset.material_names, in_prim.material,
                             "Primitive of mesh '%' references invalid material"
-                            " name '%'", mesh_pair.first, in_prim.material);
+                            " name '%'", mesh_name, in_prim.material);
 
         // Add references to any accessors and their semantics.
         for(auto accessor_pair : in_prim.attributes)
@@ -1066,12 +1067,12 @@ namespace redc { namespace gfx
     }
   }
 
-  std::size_t load_node_names(Asset& asset, tinygltf::Scene const& scene)
+  std::size_t load_mesh_names(Asset& asset, tinygltf::Scene const& scene)
   {
-    std::size_t initial_offset = asset.node_names.size();
-    for(auto node_pair : scene.nodes)
+    std::size_t initial_offset = asset.mesh_names.size();
+    for(auto mesh_pair : scene.meshes)
     {
-      asset.node_names.push_back(node_pair.first);
+      asset.mesh_names.push_back(mesh_pair.first);
     }
     return initial_offset;
   }
@@ -1092,15 +1093,16 @@ namespace redc { namespace gfx
 
     load_programs(driver, ret, scene);
 
-    std::size_t node_off = load_node_names(ret, scene);
+    // Load the names of meshes so we can reference them
+    std::size_t mesh_off = load_mesh_names(ret, scene);
+
+    // Load nodes (and possibly lights)
+    load_nodes(ret, scene);
 
     load_techniques(ret, scene);
 
     load_materials(ret, scene);
 
-    load_meshes(driver, ret, scene);
-
-    // Load nodes
-    load_nodes_given_names(ret, node_off, scene);
+    load_meshes_given_names(driver, ret, mesh_off, scene);
   }
 } }
