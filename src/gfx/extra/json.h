@@ -34,4 +34,33 @@ namespace redc
       return false;
     }
   }
+  inline glm::vec3 vec3_from_js_object(picojson::value::object const& v) noexcept
+  {
+    return glm::vec3(v.at("x").get<double>(),
+                     v.at("y").get<double>(),
+                     v.at("z").get<double>());
+  }
+  inline glm::vec3 vec3_from_js_array(picojson::value::array const& v) noexcept
+  {
+    return glm::vec3{v[0].get<double>(),v[1].get<double>(),v[2].get<double>()};
+  }
+  inline bool load_js_vec3(picojson::value const& v, glm::vec3& vec,
+                           std::string* err)
+  {
+    if(v.is<picojson::value::array>())
+    {
+      vec = vec3_from_js_array(v.get<picojson::value::array>());
+      return true;
+    }
+    else if(v.is<picojson::value::object>())
+    {
+      vec = vec3_from_js_object(v.get<picojson::value::object>());
+      return true;
+    }
+    else
+    {
+      if(err) (*err) = "Invalid JSON; expected Vec3 (object or array)";
+      return false;
+    }
+  }
 }
