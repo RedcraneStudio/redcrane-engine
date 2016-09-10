@@ -569,6 +569,30 @@ int main(int argc, char* argv[])
   set_out_log_level((Log_Severity) vm["out-log-level"].as<unsigned int>());
   set_file_log_level((Log_Severity) vm["file-log-level"].as<unsigned int>());
 
+  // Check for config file
+  if(!vm.count("config-file"))
+  {
+    log_e("No config file specified");
+    return EXIT_FAILURE;
+  }
+
+  namespace fs = boost::filesystem;
+
+  // Check to make sure it exists
+  auto cfg_path = fs::path(vm["config-file"].as<std::string>());
+  if(!fs::exists(cfg_path))
+  {
+    log_e("Config % doesn't exist", cfg_path.string());
+    return EXIT_FAILURE;
+  }
+
+  // Make the configuration path absolute so we can be sure that it will still
+  // point to a valid filename after switching directories.
+  cfg_path = absolute(cfg_path);
+
+  // Switch to its directory
+  current_path(cfg_path.parent_path());
+
   // Initialize LuaJIT
   lua::Scoped_Lua_Init lua_init_raii_lock{};
   auto lua = lua_init_raii_lock.lua;
@@ -585,30 +609,6 @@ int main(int argc, char* argv[])
   {
     return EXIT_FAILURE;
   }
-
-  namespace fs = boost::filesystem;
-
-  // Check for config file
-  if(!vm.count("config-file"))
-  {
-    log_e("No config file specified");
-    return EXIT_FAILURE;
-  }
-
-  // Check to make sure it exists
-  auto cfg_path = fs::path(vm["config-file"].as<std::string>());
-  if(!fs::exists(cfg_path))
-  {
-    log_e("Config % doesn't exist", cfg_path.string());
-    return EXIT_FAILURE;
-  }
-
-  // Make the configuration path absolute so we can be sure that it will still
-  // point to a valid filename after switching directories.
-  cfg_path = absolute(cfg_path);
-
-  // Switch to its directory
-  current_path(cfg_path.parent_path());
 
   // If there is no error, we should have the engine on the top of the lua
   // stack now.
