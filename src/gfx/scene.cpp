@@ -3,8 +3,9 @@
  * All rights reserved.
  */
 #include "scene.h"
+#include "deferred.h"
+#include "extra/json.h"
 #include "../common/debugging.h"
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <boost/variant/get.hpp>
@@ -524,9 +525,30 @@ namespace redc { namespace gfx
 
       tinygltf::Node const& in_node = node_pair.second;
 
-      // @ Refactor: If we aren't dealing with a mesh node, ignore it
-
       Node node;
+
+      // Add any references to meshes.
+      for(auto req_mesh : in_node.meshes)
+      {
+        auto mesh_index = find_string_index(asset.mesh_names, req_mesh,
+                                            "Node references invalid mesh '%'",
+                                            req_mesh);
+        node.meshes.push_back(mesh_index);
+      }
+
+
+      // Add any references to lights.
+      auto light_id_find = in_node.extras.find("light");
+      if(light_id_find != in_node.extras.end())
+      {
+        // We have a light node on our hands.
+        std::string light_name = light_id_find->second.get<std::string>();
+        node.lights.push_back(
+          find_string_index(asset.light_names, light_name,
+                            "Node '%' references invalid light '%'",
+                            name, light_name)
+        );
+      }
 
       // Load in local transformation
       if(in_node.rotation.size())
@@ -553,15 +575,6 @@ namespace redc { namespace gfx
         node.matrix = std::array<float, 16>{};
         std::copy(in_node.matrix.begin(), in_node.matrix.end(),
                   node.matrix->begin());
-      }
-
-      // Add any references to meshes
-      for(auto req_mesh : in_node.meshes)
-      {
-        auto mesh_index = find_string_index(asset.mesh_names, req_mesh,
-                                            "Node references invalid mesh '%'",
-                                            req_mesh);
-        node.meshes.push_back(mesh_index);
       }
 
       // Add this node to the main vector of nodes
@@ -1067,6 +1080,75 @@ namespace redc { namespace gfx
     }
   }
 
+  void load_lights(Asset& asset, const tinygltf::Scene& scene)
+  {
+    auto lights_find = scene.extras.find("lights");
+    if(lights_find == scene.extras.end())
+    {
+      // No lights :(
+      return;
+    }
+
+    if(!lights_find->second.is<picojson::value::object>())
+    {
+      // Bad object, no lights :(
+      log_w("Lights must be given as an object, unknown value given");
+      return;
+    }
+
+    // Map from strings to picojson::values
+    auto const& lights = lights_find->second.get<picojson::value::object>();
+    for(auto const& light_pair : lights)
+    {
+      std::string light_name = light_pair.first;
+      auto const& light_obj = light_pair.second.get<picojson::value::object>();
+
+      Light light;
+      light.is_active = true;
+      light.intensity = 1.0f;
+
+      // Find type of light
+      std::string type = light_obj.at("type").get<std::string>();
+      if(type == "spot")
+      {
+        // Spot lamp, get those properties.
+        auto const& spot_obj = light_obj.at("spot").get<picojson::value::object>();
+
+        light.type = Light_Type::Spot;
+
+        light.constant_attenuation =
+          spot_obj.at("constantAttenuation").get<double>();
+        light.linear_attenuation =
+          spot_obj.at("linearAttenuation").get<double>();
+        light.quadratic_attenuation =
+          spot_obj.at("quadraticAttenuation").get<double>();
+
+        // Distance is not exported currently, we also don't use it
+        light.distance = 0.1f;
+        //light.distance = spot_obj.at("distance").get<double>();
+
+        light.fall_off_exponent = spot_obj.at("fallOffExponent").get<double>();
+        light.fall_off_angle = spot_obj.at("fallOffAngle").get<double>();
+
+        std::string err;
+        if(!load_js_vec3(spot_obj.at("color"), light.color, &err))
+        {
+          REDC_UNREACHABLE_MSG("Failed to parse light '%' color: %",
+                               light_name, err);
+        }
+      }
+      else
+      {
+        // Bad light type; ignore
+        //REDC_UNREACHABLE("Cannot handle '%' type of lamp '%'", type,
+        //                 light_name);
+      }
+
+      asset.light_names.push_back(light_name);
+      asset.lights.push_back(light);
+    }
+  }
+
   std::size_t load_mesh_names(Asset& asset, tinygltf::Scene const& scene)
   {
     std::size_t initial_offset = asset.mesh_names.size();
@@ -1092,6 +1174,8 @@ namespace redc { namespace gfx
     load_textures(driver, ret, scene);
 
     load_programs(driver, ret, scene);
+
+    load_lights(ret, scene);
 
     // Load the names of meshes so we can reference them
     std::size_t mesh_off = load_mesh_names(ret, scene);

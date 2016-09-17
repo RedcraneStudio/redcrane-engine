@@ -12,7 +12,6 @@
 #include "imesh.h"
 #include "itexture.h"
 #include "ibuffer.h"
-#include "deferred.h"
 
 #include <vector>
 #include <unordered_map>
@@ -178,10 +177,41 @@ namespace redc { namespace gfx
     std::vector<Primitive> primitives;
   };
 
+  enum class Light_Type
+  {
+    Ambient, Directional, Point, Spot,
+  };
+  struct Light
+  {
+    Light_Type type;
+
+    glm::vec3 color;
+
+    float intensity;
+    float distance;
+
+    float constant_attenuation;
+    float linear_attenuation;
+    float quadratic_attenuation;
+
+    float fall_off_angle;
+    float fall_off_exponent;
+
+    bool is_active;
+  };
+
+  struct Transformed_Light
+  {
+    Light light;
+    glm::mat4 model;
+  };
+
   using Mesh_Ref = std::size_t;
+  using Light_Ref = std::size_t;
   struct Node
   {
     std::vector<Mesh_Ref> meshes;
+    std::vector<Light_Ref> lights;
 
     std::vector<Node_Ref> children;
     boost::optional<Node_Ref> parent;
@@ -213,6 +243,8 @@ namespace redc { namespace gfx
     std::vector<Mesh> meshes;
     std::vector<Node> nodes;
 
+    std::vector<Light> lights;
+
     std::vector<std::string> buf_names;
     std::vector<std::string> texture_names;
 
@@ -226,6 +258,8 @@ namespace redc { namespace gfx
 
     std::vector<std::string> mesh_names;
     std::vector<std::string> node_names;
+
+    std::vector<std::string> light_names;
   };
 
   Asset load_asset(IDriver& driver, tinygltf::Scene const& scene);

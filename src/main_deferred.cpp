@@ -112,28 +112,21 @@ int main(int argc, char** argv)
 
   driver.face_culling(true);
 
-  std::vector<gfx::Light> lights;
+  gfx::Transformed_Light light0;
+  light0.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.5f, 0.0f));
 
-  gfx::Light light0;
-  light0.pos = glm::vec3(0.0f, 1.5f, 0.0f);
-  light0.power = 1.0f;
-  light0.diffuse_color = glm::vec3(1.0f, 0.0f, 0.0f);
-  light0.specular_color = glm::vec3(1.0f, 0.5f, 0.5f);
-  lights.push_back(light0);
+  light0.light.type = gfx::Light_Type::Spot;
+  light0.light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 
-  gfx::Light light1;
-  light1.pos = glm::vec3(1.5f, 1.5f, 0.0f);
-  light1.power = 0.75f;
-  light1.diffuse_color = glm::vec3(0.0f, 0.0f, 1.0f);
-  light1.specular_color = glm::vec3(0.5f, 0.5f, 1.0f);
-  lights.push_back(light1);
+  light0.light.intensity = 1.0f;
+  light0.light.distance = 1.0f;
 
-  gfx::Light light2;
-  light2.pos = glm::vec3(0.0f, 1.5f, 1.5f);
-  light2.power = 0.75f;
-  light2.diffuse_color = glm::vec3(1.0f, 1.0f, 0.0f);
-  light2.specular_color = glm::vec3(1.0f, 1.0f, 0.5f);
-  lights.push_back(light2);
+  light0.light.constant_attenuation = 0.0f;
+  light0.light.linear_attenuation = 1.0f;
+  light0.light.quadratic_attenuation = 0.0f;
+
+  light0.light.fall_off_angle = REDC_PI / 2.0f;
+  light0.light.fall_off_exponent = 1.0f;
 
   bool running = true;
   while(running)
@@ -173,7 +166,7 @@ int main(int argc, char** argv)
     driver.clear();
     driver.set_blend_policy(gfx::Blend_Policy::Transparency);
     envmap.render(driver, cam);
-    deferred.render(cam, lights.size(), &lights[0]);
+    deferred.render(cam, 1, &light0);
 
     SDL_GL_SwapWindow(sdl_window);
   }

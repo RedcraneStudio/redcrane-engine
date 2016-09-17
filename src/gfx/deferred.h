@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../common/vec.h"
+#include "scene.h"
 
 #include "idriver.h"
 #include "imesh.h"
@@ -17,14 +18,6 @@ namespace redc { namespace gfx
   struct Output_Interface
   {
     std::vector<Attachment> attachments;
-  };
-
-  struct Light
-  {
-    glm::vec3 pos;
-    float power;
-    glm::vec3 diffuse_color;
-    glm::vec3 specular_color;
   };
 
   struct Deferred_Shading
@@ -41,7 +34,8 @@ namespace redc { namespace gfx
 
     void use();
     void finish();
-    void render(gfx::Camera const& cam, std::size_t num_lights, Light* lights);
+    void render(gfx::Camera const& cam, std::size_t num_lights,
+                Transformed_Light* lights);
 
   private:
     IDriver* driver_;

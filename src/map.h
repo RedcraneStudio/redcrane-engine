@@ -22,6 +22,7 @@ namespace redc
   {
     virtual ~Rendering_Component() {}
 
+    std::vector<gfx::Light> lights;
     gfx::Asset asset;
   };
 

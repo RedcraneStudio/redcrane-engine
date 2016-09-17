@@ -29,10 +29,19 @@ namespace redc { namespace gfx
     shade_->set_var_tag("color", "u_color");
     shade_->set_var_tag("viewport", "u_viewport");
 
-    shade_->set_var_tag("light_pos", "u_light_pos");
-    shade_->set_var_tag("light_power", "u_light_power");
-    shade_->set_var_tag("light_diffuse_color", "u_light_diffuse_color");
-    shade_->set_var_tag("light_specular_color", "u_light_specular_color");
+    shade_->set_var_tag("light_model", "u_cur_light.model");
+    shade_->set_var_tag("light_color", "u_cur_light.color");
+    shade_->set_var_tag("light_intensity", "u_cur_light.intensity");
+    shade_->set_var_tag("light_distance", "u_cur_light.dist");
+    shade_->set_var_tag("light_constant_attenuation",
+                        "u_cur_light.constant_attenuation");
+    shade_->set_var_tag("light_linear_attenuation",
+                        "u_cur_light.linear_attenuation");
+    shade_->set_var_tag("light_quadratic_attenuation",
+                        "u_cur_light.quadratic_attenuation");
+    shade_->set_var_tag("light_fall_off_angle", "u_cur_light.fall_off_angle");
+    shade_->set_var_tag("light_fall_off_exponent",
+                        "u_cur_light.fall_off_exponent");
 
     shade_->set_var_tag(gfx::tags::view_tag, "u_view");
 
@@ -42,9 +51,9 @@ namespace redc { namespace gfx
     shade_->set_var_tag("fog_start", "u_fog_start");
     shade_->set_var_tag("fog_end", "u_fog_end");
 
-    shade_->set_vec3("fog_color", glm::vec3(0.5f, 0.5f, 0.5f));
-    shade_->set_float("fog_start", 5.0f);
-    shade_->set_float("fog_end", 70.0f);
+    shade_->set_vec3("fog_color", glm::vec3(0.0f, 0.0f, 0.0f));
+    shade_->set_float("fog_start", 1.0f);
+    shade_->set_float("fog_end", 15.0f);
 
     shade_->set_vec4("viewport",
                      glm::vec4(0.0f,0.0f, (float) fb_size.x,(float) fb_size.y));
@@ -165,7 +174,7 @@ namespace redc { namespace gfx
     active_ = false;
   }
   void Deferred_Shading::render(gfx::Camera const& cam, std::size_t num_lights,
-                                Light* lights)
+                                Transformed_Light* lights)
   {
     if(is_active())
     {
@@ -205,17 +214,37 @@ namespace redc { namespace gfx
     shade_->set_float("ambient", 0.1f);
     for(std::size_t i = 0; i < num_lights; ++i)
     {
-      Light const& light = lights[i];
+      Transformed_Light const& light = lights[i];
 
-      shade_->set_vec3("light_pos", light.pos);
-      shade_->set_float("light_power", light.power);
-      shade_->set_vec3("light_diffuse_color", light.diffuse_color);
-      shade_->set_vec3("light_specular_color", light.specular_color);
+      shade_->set_mat4("light_model", light.model);
+      shade_->set_vec3("light_color", light.light.color);
+      shade_->set_float("light_intensity", light.light.intensity);
+      shade_->set_float("light_distance", light.light.distance);
+      shade_->set_float("light_constant_attenuation",
+                        light.light.constant_attenuation);
+      shade_->set_float("light_linear_attenuation",
+                        light.light.linear_attenuation);
+      shade_->set_float("light_quadratic_attenuation",
+                        light.light.quadratic_attenuation);
+
+      if(light.light.type == Light_Type::Spot)
+      {
+        shade_->set_float("light_fall_off_angle", light.light.fall_off_angle);
+        shade_->set_float("light_fall_off_exponent",
+                          light.light.fall_off_exponent);
+      }
+      else
+      {
+        // 180 degrees, should always pass, I think.
+        shade_->set_float("light_fall_off_angle", REDC_PI);
+        shade_->set_float("light_fall_off_exponent", 1.0f);
+      }
 
       // We need to forcefully do this since we rendering using the new
       // interface, which doesn't go through the driver.
       quad_->draw_arrays(0, 6);
 
+      // Turn off ambient lighting.
       shade_->set_float("ambient", 0.0f);
     }
   }

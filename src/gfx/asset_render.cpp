@@ -504,13 +504,28 @@ namespace redc { namespace gfx
 
     if(ran_deferred)
     {
-      gfx::Light light;
-      light.pos = glm::vec3(0.0f, 0.0f, 0.0f);
-      light.power = 1.0f;
-      light.diffuse_color = glm::vec3(1.0f, 1.0f, 1.0f);
-      light.specular_color = glm::vec3(1.0f, 1.0f, 1.0f);
+      std::vector<Transformed_Light> lights;
+      for(Node_Ref node_i = 0; node_i < asset.nodes.size(); ++node_i)
+      {
+        Node const& node = asset.nodes[node_i];
 
-      cur_rendering_state.deferred->render(camera, 1, &light);
+        // Find light nodes and see if they are active.
+        if(!node.lights.size()) continue;
+
+        // Find light
+        Light const& light = asset.lights[node.lights[0]];
+
+        if(light.is_active)
+        {
+          Transformed_Light light_with_pos;
+          light_with_pos.light = light;
+          light_with_pos.model = model_transformation(asset.nodes, node_i);
+
+          lights.push_back(light_with_pos);
+        }
+      }
+
+      cur_rendering_state.deferred->render(camera, lights.size(), &lights[0]);
     }
   }
 } }
