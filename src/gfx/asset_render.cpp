@@ -51,7 +51,7 @@ namespace redc { namespace gfx
     {
       Node const& node = nodes[cur_node.value()];
 
-      cur_model = cur_model * local_transformation(node);
+      cur_model = local_transformation(node) * cur_model;
       cur_node = node.parent;
     }
 
