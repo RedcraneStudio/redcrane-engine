@@ -608,7 +608,9 @@ namespace redc { namespace gfx
       {
         // Find the index of the child
         auto const& child_index_iter = node_indices.find(child_name);
-        REDC_ASSERT(child_index_iter != node_indices.end());
+        REDC_ASSERT_MSG(child_index_iter != node_indices.end(),
+                        "Node '%' references invalid child '%'",
+                        name, child_name);
 
         std::size_t child_index = child_index_iter->second;
 
