@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   deferred.init(Vec<int>{x, y}, fb_out);
 
   tinygltf::Scene deferred_gltf;
-  if(!load_gltf_file(deferred_gltf, "../assets/gltf/deferred.gltf"))
+  if(!load_gltf_file(deferred_gltf, "../assets/gltf/library-pre.gltf"))
   {
     log_e("Failed to load deferred gltf");
     return EXIT_FAILURE;
@@ -128,6 +128,9 @@ int main(int argc, char** argv)
   light0.light.fall_off_angle = REDC_PI / 2.0f;
   light0.light.fall_off_exponent = 1.0f;
 
+  gfx::Rendering_State render_state;
+  render_state.driver = &driver;
+
   bool running = true;
   while(running)
   {
@@ -155,18 +158,14 @@ int main(int argc, char** argv)
       }
     }
 
-    deferred.use();
-
-    driver.clear();
-    gfx::Rendering_State state;
-    render_asset(asset, cam, state);
-
-    deferred.finish();
-
+    // Render envmap
     driver.clear();
     driver.set_blend_policy(gfx::Blend_Policy::Transparency);
     envmap.render(driver, cam);
-    deferred.render(cam, 1, &light0);
+
+    render_state.cur_technique_i = -1;
+    render_state.cur_material_i = -1;
+    render_asset(asset, cam, render_state);
 
     SDL_GL_SwapWindow(sdl_window);
   }
