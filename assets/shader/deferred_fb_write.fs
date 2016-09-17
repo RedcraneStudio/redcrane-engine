@@ -152,7 +152,6 @@ void main()
   //o_dst.rgb += light_contrib;
 
   // TODO: More post-processing
-  float fog_coord = position.w / w_coord;
   float fog_factor = (u_fog_end - fog_coord) / (u_fog_end - u_fog_start);
   fog_factor = 1.0f - clamp(fog_factor, 0.0f, 1.0f);
   o_dst = mix(o_dst, vec4(u_fog_color, 1.0f), fog_factor);

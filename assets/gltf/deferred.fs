@@ -12,8 +12,8 @@ uniform float shininess;
 void main()
 {
   // Record the post-projection-space depth so we can easily write it to the
-  // depth buffer later.
+  // depth buffer later. Also calculate the fog coordinate here.
   pos = vec4(position_cam, gl_FragCoord.z);
-  normal = vec4(normal_cam, gl_FragCoord.w);
+  normal = vec4(normal_cam, gl_FragCoord.z / gl_FragCoord.w);
   color = vec4(diffuse, shininess);
 }
