@@ -7,6 +7,8 @@ import base64
 import struct
 import pdb
 
+import numpy as np
+
 RGB_FORMAT = 6407
 RGB_ALPHA_FORMAT = 6408
 
@@ -51,15 +53,40 @@ def get_buffer_view(gltf, buffer_view_name):
 
     return data[buf_offset:buf_offset + buf_length]
 
-def set_fake_mesh(gltf, obj_name, mesh, vertices, indices):
+def set_fake_mesh(gltf, obj_name, vertices, indices):
 
-    # Remove the object
-    obj = gltf[OBJECTS_NAME].pop(obj_name)
+    # Build the transformation matrix of this mesh
+    node_mat = np.identity(4)
 
-    node_mat = obj['matrix']
+    # For each node in our hiearchy, basically.
+    this_node = obj_name
+    while this_node != "":
+        # Build the total transformation matrix
+        obj = gltf[OBJECTS_NAME][this_node]
+
+        # Although the matrix is technically stored in column major order, numpy
+        # expects row-major so just role with it, inverting the order of all
+        # transformations.
+        local_mat = np.array(obj['matrix']).reshape((4,4))
+
+        node_mat = np.dot(node_mat, local_mat)
+
+        # Find this node's parent
+        parent_node = ""
+        for node_name, node_obj in gltf[OBJECTS_NAME].items():
+            if this_node in node_obj['children']:
+                # We have our parent
+                parent_node = node_name
+
+        this_node = parent_node
+
+    obj = gltf[OBJECTS_NAME][obj_name]
+
+    # Find the mesh that this node (sorta) contains.
+    mesh_name = obj['meshes'][0]
 
     # Remove the mesh
-    old_mesh = gltf[MESHES_NAME].pop(mesh)
+    old_mesh = gltf[MESHES_NAME].pop(mesh_name)
 
     if len(old_mesh['primitives']) > 1:
         raise RuntimeError(("Fake mesh {} must only have one primitive, does"
@@ -103,34 +130,12 @@ def set_fake_mesh(gltf, obj_name, mesh, vertices, indices):
         # Get the vertex data
         x, y, z = struct.unpack_from('<fff', vertices_data, i * stride)
 
-        # Do matrix multiplication
-        # It's stored in the array like this
-        # Matrix:               Vector:
-        #####################     #######
-        #    #    #    #    #     #     #
-        #  0 #  4 #  8 # 12 #     #  0  #
-        #    #    #    #    #     #     #
-        #####################     #######
-        #    #    #    #    #     #     #
-        #  1 #  5 #  9 # 13 #     #  1  #
-        #    #    #    #    #     #     #
-        #####################  *  #######
-        #    #    #    #    #     #     #
-        #  2 #  6 # 10 # 14 #     #  2  #
-        #    #    #    #    #     #     #
-        #####################     #######
-        #    #    #    #    #     #     #
-        #  3 #  7 # 11 # 15 #     #  3  #
-        #    #    #    #    #     #     #
-        #####################     #######
-
-        # Don't bother calculating w
-        new_x = node_mat[0] * x + node_mat[4] * y + node_mat[8] * z + node_mat[12]
-        new_y = node_mat[1] * x + node_mat[5] * y + node_mat[9] * z + node_mat[13]
-        new_z = node_mat[2] * x + node_mat[6] * y + node_mat[10] * z + node_mat[14]
+        # Transform
+        new_pt = np.dot(np.array([x, y, z, 1.0]), node_mat)
 
         # Repack
-        struct.pack_into('<fff', out_vertices_data, i * 3 * 4, new_x, new_y, new_z)
+        struct.pack_into('<fff', out_vertices_data, i * 3 * 4, new_pt[0],
+                         new_pt[1], new_pt[2])
 
     # Make a new buffer for CPU data, make a new buffer view and finally have
     # the new vertices accessor reference the buffer view.
@@ -148,6 +153,15 @@ def set_fake_mesh(gltf, obj_name, mesh, vertices, indices):
     gltf[ACCESSORS_NAME][vertices]['bufferView'] = buffer_view_name
     gltf[ACCESSORS_NAME][vertices]['byteOffset'] = 0
     gltf[ACCESSORS_NAME][vertices]['byteStride'] = 3 * 4
+
+
+    # Remove the object
+    gltf[OBJECTS_NAME].pop(obj_name)
+
+    # And all references to it!
+    for node_name, node in gltf[OBJECTS_NAME].items():
+        if obj_name in node['children']:
+            node['children'].remove(obj_name)
 
 def remove_unused_accessors(gltf, save_these = []):
     used_accessors = []
@@ -349,8 +363,7 @@ if __name__ == '__main__':
     with open(sys.argv[1]) as f:
         gltf = json.load(f)
 
-    set_fake_mesh(gltf, 'Room', 'Room_Mesh', 'Collision_Vertices',
-                  'Collision_Indices')
+    set_fake_mesh(gltf, 'Room', 'Collision_Vertices', 'Collision_Indices')
 
     for obj_name, obj in gltf[OBJECTS_NAME].items():
         try:
