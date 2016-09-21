@@ -17,8 +17,6 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     obj/cube.obj
                     obj/sphere.obj
 
-                    obj/character/hands.obj
-
                     obj/monkey.obj
 
                     obj/library.obj

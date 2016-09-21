@@ -31,12 +31,9 @@ function scene.make_scene()
         -- this function is mostly a suggestion to get things moving).
         rc.server:req_player()
 
-        local hand_mesh = rc.mesh:load_mesh("character/hands")
         local player = {
-            hands = self:add_mesh(hand_mesh);
             camera = self:add_camera("fps")
         }
-        self:set_parent(player.hands, player.camera)
 
         -- Figure the camera will follow the player whoever that be.
         self:camera_set_follow_player(player.camera, true)
