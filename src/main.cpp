@@ -44,6 +44,13 @@
 // Temporary disable SDL_main - TODO: link SDLmain in, instead of this hack
 #undef main
 
+// Change default log level depending on build type
+#ifdef REDC_DEBUGGING_ENABLED
+#define REDC_DEFAULT_LOG_LEVEL 0
+#else
+#define REDC_DEFAULT_LOG_LEVEL 2
+#endif
+
 namespace po = boost::program_options;
 
 enum class Server_Mode : int
@@ -74,7 +81,8 @@ po::options_description command_options_desc() noexcept
   po::options_description general_opt("General");
   general_opt.add_options()
           ("help", "display help")
-          ("out-log-level", po::value<unsigned int>()->default_value(2),
+          ("out-log-level", po::value<unsigned int>()->default_value(
+            REDC_DEFAULT_LOG_LEVEL),
           "set minimum log level to stdout")
           ("log-file", po::value<std::string>(), "set log file")
           ("file-log-level", po::value<unsigned int>()->default_value(0),
