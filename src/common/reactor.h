@@ -23,6 +23,7 @@ namespace redc
     bool poll_event(event_t& event);
 
     void push_outgoing_event(event_t event);
+    void push(event_t event) { push_outgoing_event(event); }
   private:
     // Hide the implementation because we may want to add some sort of locking
     // later.
