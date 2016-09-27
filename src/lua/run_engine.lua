@@ -18,7 +18,10 @@ elseif server_mode == "local" then
   rc:init_server()
 
   -- Pass control to the user client script
-  local client = loadfile(rc.config.client_entry)
+  local client, err = loadfile(rc.config.client_entry)
+  if client == nil then
+      error(err)
+  end
   setfenv(client, sandbox)
   return client()
 else
