@@ -47,7 +47,33 @@ function rc:asset_path()
 end
 
 function rc:load_map(filename)
-    return ffi.C.redc_map_load(self.engine, filename)
+    ffi.C.redc_map_load(self.engine, filename)
+
+    local map = {}
+    -- A map doesn't exist yet
+    map.ptr_ = nil
+    function map:get_light_state(light)
+        if self.ptr_ == nil then
+            error("Map doesn't exist yet")
+        end
+        return ffi.C.redc_map_get_light_state(self.ptr_, light)
+    end
+    function map:set_light_state(light, state)
+        if self.ptr_ == nil then
+            error("Map doesn't exist yet")
+        end
+        local res = ffi.C.redc_map_set_light_state(self.ptr_, light, state)
+        -- TODO: error code?
+    end
+    function map:check_loaded(event)
+        if event.type == "map_loaded" then
+            self.ptr_ = event.data
+            return true
+        else
+            return false
+        end
+    end
+    return map
 end
 function rc:load_hud(filename)
     return ffi.C.redc_hud_load(self.engine, filename)
@@ -75,7 +101,9 @@ function rc:events()
             -- @ Optimization: If somehow the string copying becomes a
             -- bottleneck, have a function to only iterate over events with a
             -- specific type and do the string comparison in C++ code.
-            return { name = ffi.string(event_data.name) }
+            return { type = ffi.string(event_data.type),
+                     name = ffi.string(event_data.name),
+                     data = event_data.data}
         else
             return nil
         end

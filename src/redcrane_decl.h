@@ -112,12 +112,22 @@ void redc_shader_destroy(void *shader);
 
 void redc_map_load(void* eng, const char* file);
 
+typedef struct
+{
+  bool on;
+} Redc_Light_State;
+Redc_Light_State redc_map_get_light_state(void *map, const char *light);
+int redc_map_set_light_state(void *map, const char *light,
+                             Redc_Light_State state);
+
 // See cwrap/server.cpp
 
 void redc_server_req_player(void *eng);
 
 typedef struct
 {
+  const char *type;
   const char *name;
+  void *data;
 } Redc_Event;
 int redc_server_poll_event(void *eng, Redc_Event *event);

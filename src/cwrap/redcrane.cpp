@@ -298,6 +298,13 @@ namespace redc
     }
 
     map->physics = std::move(collision);
+
+    // The map was successfully loaded, notify Lua
+    Lua_Event map_loaded_lua_event;
+    map_loaded_lua_event.type = Lua_Event::Map_Loaded;
+    map_loaded_lua_event.map = map.get();
+    server_->push_lua_event(map_loaded_lua_event);
+
   }
   void Server::process_event(event_t const& event)
   {
@@ -310,17 +317,18 @@ namespace redc
     if(ptr)
     {
       // Fire an event because we have a valid physics event.
-      Server_Event event;
-      event.decl = ptr;
-      event_queue_.push_outgoing_event(event);
+      Lua_Event event;
+      event.type = Lua_Event::Physics;
+      event.physics_decl = ptr;
+      lua_event_queue_.push_outgoing_event(event);
 
       // Also debug log it
       log_d("enqueued event: %", ptr->event_name);
     }
   }
-  bool Server::poll_physics_event(Server_Event& event)
+  bool Server::poll_lua_event(Lua_Event& event)
   {
-    return event_queue_.poll_event(event);
+    return lua_event_queue_.poll_event(event);
   }
 
   Server::Server(Engine& eng) : engine_(&eng)

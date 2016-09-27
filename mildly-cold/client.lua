@@ -22,8 +22,13 @@ while rc:running() do
     scene:step()
 
     for event in rc:events() do
-        if event.name == "desk_lamp_toggle" then
-            rc:log_i("Desk Lamp toggle ", event)
+        if not map:check_loaded(event) then
+            rc:log_i("event", event.type, event.name, event.data)
+            if event.type == "physics" and event.name == "desk_lamp_toggle" then
+                local state = map:get_light_state("Spot")
+                rc:log_i("Physics event")
+                map:set_light_state("Spot", { on = not state.on })
+             end
         end
     end
 

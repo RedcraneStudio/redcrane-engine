@@ -27,12 +27,21 @@ extern "C"
     auto rce = (Engine*) eng;
     REDC_ASSERT_HAS_SERVER(rce);
 
-    Server_Event server_event;
-    if(rce->server->poll_physics_event(server_event))
+    Lua_Event lua_event;
+    if(rce->server->poll_lua_event(lua_event))
     {
-      if(server_event.decl)
+      if(lua_event.type == Lua_Event::Physics)
       {
-        event->name = server_event.decl->event_name.c_str();
+        event->type = "physics";
+        event->name = lua_event.physics_decl->event_name.c_str();
+        event->data = NULL;
+        return true;
+      }
+      if(lua_event.type == Lua_Event::Map_Loaded)
+      {
+        event->type = "map_loaded";
+        event->name = "";
+        event->data = (void*) lua_event.map;
         return true;
       }
     }

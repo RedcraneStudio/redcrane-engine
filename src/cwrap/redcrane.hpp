@@ -141,9 +141,18 @@ namespace redc
     void process_event(event_t const& event) override;
   };
 
-  struct Server_Event
+  struct Lua_Event
   {
-    Physics_Event_Decl* decl;
+    enum
+    {
+      Physics,
+      Map_Loaded
+    } type;
+    union
+    {
+      Physics_Event_Decl* physics_decl;
+      Map* map;
+    };
   };
   struct Server : public Server_Base
   {
@@ -173,11 +182,12 @@ namespace redc
     void on_physics_click(btCollisionObject const* object);
 
     // Server events are distinctly different from engine standard events.
-    bool poll_physics_event(Server_Event& event);
+    bool poll_lua_event(Lua_Event& event);
+    void push_lua_event(Lua_Event event) { lua_event_queue_.push(event); }
   private:
     Engine* engine_;
 
-    Queue_Event_Source<Server_Event> event_queue_;
+    Queue_Event_Source<Lua_Event> lua_event_queue_;
   };
 
   struct Mesh_Object
