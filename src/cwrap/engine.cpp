@@ -15,6 +15,9 @@
 #include "../assets/load_dir.h"
 #include "../gfx/gl/driver.h"
 
+#include <thread>
+#include <chrono>
+
 using namespace redc;
 
 namespace
@@ -44,6 +47,11 @@ extern "C"
   void redc_log_e(const char* str)
   {
     redc_lua_log(Log_Severity::Error, str);
+  }
+
+  void redc_ms_sleep(unsigned long ms)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
   }
 
   void* redc_init_engine(Redc_Config cfg)

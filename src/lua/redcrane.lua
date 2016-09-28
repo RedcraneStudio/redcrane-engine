@@ -148,4 +148,10 @@ function rc:log_e(str, ...)
     rc.internal:log_e(prefix, str, ...)
 end
 
+-- Find a better place for this function, right now we take a reference to self,
+-- even though we don't need it
+function rc:ms_sleep(ms)
+    ffi.C.redc_ms_sleep(ms)
+end
+
 return rc
