@@ -320,10 +320,7 @@ namespace redc
       Lua_Event event;
       event.type = Lua_Event::Physics;
       event.physics_decl = ptr;
-      lua_event_queue_.push_outgoing_event(event);
-
-      // Also debug log it
-      log_d("enqueued event: %", ptr->event_name);
+      push_lua_event(event);
     }
   }
   bool Server::poll_lua_event(Lua_Event& event)

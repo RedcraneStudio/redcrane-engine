@@ -23,10 +23,9 @@ while rc:running() do
 
     for event in rc:events() do
         if not map:check_loaded(event) then
-            rc:log_i("event", event.type, event.name, event.data)
+            rc:log_d("event (type:", event.type, "name:", event.name, "data:", event.data)
             if event.type == "physics" and event.name == "desk_lamp_toggle" then
                 local state = map:get_light_state("Spot")
-                rc:log_i("Physics event")
                 map:set_light_state("Spot", { on = not state.on })
              end
         end
@@ -35,6 +34,7 @@ while rc:running() do
     scene:render()
     rc:swap_window()
 
+    rc:ms_sleep(2)
 end
 
 return 0
