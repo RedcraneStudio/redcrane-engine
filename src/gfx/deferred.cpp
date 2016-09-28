@@ -211,6 +211,28 @@ namespace redc { namespace gfx
     // We need additive blending
     driver_->set_blend_policy(gfx::Blend_Policy::Additive);
 
+    // If there are no lights, make one that is off
+    Transformed_Light null_light;
+    if(num_lights == 0)
+    {
+      // TODO: This is kind of a hack; make a shader specifically for the case
+      // where there are no lights.
+
+      null_light.model = glm::mat4(1.0f);
+
+      null_light.light.type = Light_Type::Point;
+      null_light.light.color = glm::vec3(1.0f, 1.0f, 1.0f);
+      null_light.light.intensity = 0.0f;
+      null_light.light.distance = 1.0f;
+      null_light.light.constant_attenuation = 1.0f;
+      null_light.light.linear_attenuation = 0.0f;
+      null_light.light.quadratic_attenuation = 0.0f;
+      null_light.light.is_active = true;
+
+      lights = &null_light;
+      num_lights = 1;
+    }
+
     shade_->set_float("ambient", 0.1f);
     for(std::size_t i = 0; i < num_lights; ++i)
     {
