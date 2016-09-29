@@ -41,4 +41,6 @@ namespace redc
   {
     this->time_before_ = Clock_Type::now();
   }
+
+  using FloatSeconds = std::chrono::duration<float>;
 }
