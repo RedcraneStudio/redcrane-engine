@@ -90,6 +90,8 @@ namespace redc
         return false;
       }
 
+      decl.timeout = (*iter)["timeout"].GetDouble();
+
       decl.event_name = (*iter)["event"].GetString();
 
       rapidjson::Value const& shape = (*iter)["shape"];

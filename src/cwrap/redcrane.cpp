@@ -316,11 +316,16 @@ namespace redc
       static_cast<Physics_Event_Decl*>(obj->getUserPointer());
     if(ptr)
     {
-      // Fire an event because we have a valid physics event.
-      Lua_Event event;
-      event.type = Lua_Event::Physics;
-      event.physics_decl = ptr;
-      push_lua_event(event);
+      // Check to see if we've past the time out for this event yet
+      if(ptr->last_trigger.has_been(FloatSeconds(ptr->timeout)))
+      {
+        ptr->last_trigger.reset();
+        // Fire an event because we have a valid physics event.
+        Lua_Event event;
+        event.type = Lua_Event::Physics;
+        event.physics_decl = ptr;
+        push_lua_event(event);
+      }
     }
   }
   bool Server::poll_lua_event(Lua_Event& event)

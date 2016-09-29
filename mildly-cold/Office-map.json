@@ -23,7 +23,8 @@
                 "radius": 0.053
             },
             "pos": [-3.35938, 0.67717, -0.42103],
-            "desc": "Desk lamp switch"
+            "desc": "Desk lamp switch",
+            "timeout": 0.5
         }
     ]
 }

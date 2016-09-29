@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "common/observer_ptr.hpp"
+#include "common/timer.hpp"
 
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/document.h"
@@ -70,6 +71,9 @@ namespace redc
     std::string event_name;
     glm::vec3 position;
     Shape shape;
+
+    Timer<> last_trigger;
+    double timeout;
   };
 
   struct Physics_Decl
