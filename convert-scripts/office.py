@@ -33,6 +33,7 @@ SAMPLERS_NAME = 'samplers'
 MATERIALS_NAME = 'materials'
 BUFFER_VIEWS_NAME = 'bufferViews'
 BUFFERS_NAME = 'buffers'
+LAMPS_NAME = 'lights'
 
 BASE64_DATA_HEADER = 'data:text/plain;base64,'
 
@@ -353,6 +354,17 @@ def remove_unmaterialed_meshes(gltf):
         for prim_i in rm_prims:
             del mesh['primitives'][prim_i]
 
+def set_lamps_state(gltf, lamps, state):
+    for key, lamp in gltf['extras'][LAMPS_NAME].items():
+        if key in lamps:
+            lamp['active'] = state
+
+def turn_lamps_off(gltf, lamps):
+    set_lamps_state(gltf, lamps, False)
+
+def turn_lamps_on(gltf, lamps):
+    set_lamps_state(gltf, lamps, True)
+
 if __name__ == '__main__':
 
     if len(sys.argv) < 3:
@@ -384,6 +396,9 @@ if __name__ == '__main__':
 
     remove_unused_materials(gltf)
     remove_unmaterialed_meshes(gltf)
+
+    turn_lamps_off(gltf, ['Left_Lamp_Spot', 'Night_Light', 'Right_Lamp_Spot'])
+    turn_lamps_on(gltf, ['Desk_Lamp'])
 
     #remove_unused_data(gltf, ['Collision_Vertices', 'Collision_Indices'])
 

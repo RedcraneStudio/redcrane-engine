@@ -1095,8 +1095,9 @@ namespace redc { namespace gfx
       auto const& light_obj = light_pair.second.get<picojson::value::object>();
 
       Light light;
-      light.is_active = true;
-      light.intensity = 1.0f;
+
+
+      light.is_active = light_obj.at("active").get<bool>();
 
       // Find type of light
       std::string type = light_obj.at("type").get<std::string>();
@@ -1119,7 +1120,9 @@ namespace redc { namespace gfx
         //light.distance = spot_obj.at("distance").get<double>();
 
         light.fall_off_exponent = spot_obj.at("fallOffExponent").get<double>();
-        light.fall_off_angle = spot_obj.at("fallOffAngle").get<double>();
+        light.fall_off_angle = spot_obj.at("fallOffAngle").get<double>() / 2.0f;
+
+        light.intensity = spot_obj.at("energy").get<double>();
 
         std::string err;
         if(!load_js_vec3(spot_obj.at("color"), light.color, &err))
