@@ -64,18 +64,19 @@ namespace redc { namespace lua
                           luaJIT_BC_init_engine_SIZE, "init_engine");
     RET_ON_ERR(err);
 
-    // Load our mod config
+    // Load the mod config script
     err = luaL_loadfile(L, cfg_path.string().c_str());
     RET_ON_ERR(err);
 
-    // Use a sandbox for the mod config
+    // Use a sandbox (without redcrane / engine functionality for the time
+    // being) to run the mod config
     set_sandbox_env(L, -1, false);
 
-    // Run it
+    // Run the mod config script, we expect a table back.
     err = lua_pcall(L, 0, 1, 0);
     RET_ON_ERR(err);
 
-    // We now have a table, pass it to our init code and that's it
+    // Use the table on a stack as a parameter to our internal init code.
     err = lua_pcall(L, 1, 0, 0);
 
     return err;
