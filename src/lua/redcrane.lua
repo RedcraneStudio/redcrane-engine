@@ -16,6 +16,8 @@ function rc:init(config)
     self.shader = require("shader")
     self.server = require("server")
 
+    self.timers = {}
+
     return self.engine
 end
 
@@ -27,6 +29,12 @@ function rc:init_server()
 end
 
 function rc:step()
+
+    -- Check timers and activate callback if necessary
+    for _, timer in pairs(self.timers) do
+        timer:_check_done()
+    end
+
     return ffi.C.redc_step_engine(self.engine)
 end
 
@@ -152,6 +160,65 @@ end
 -- even though we don't need it
 function rc:ms_sleep(ms)
     ffi.C.redc_ms_sleep(ms)
+end
+
+function rc:cur_time()
+    return ffi.C.redc_cur_time()
+end
+
+function rc:make_timer()
+    local T = {
+        min = 1.0,
+        max = 1.0,
+        last_reset = rc:cur_time(),
+        cur_duration = 1.0,
+        running = true,
+        callback = function() end
+    }
+
+    function T:set_random_timeout(min, max)
+        self.min = min
+        self.max = max
+        self:_calc_duration()
+    end
+    function T:set_steady_timeout(sec)
+        self.min = sec
+        self.max = sec
+        self:_calc_duration()
+    end
+
+    function T:set_callback(fn)
+        self.callback = fn
+    end
+
+    function T:reset()
+        self.running = true
+        self.last_reset = rc:cur_time()
+
+        self:_calc_duration()
+    end
+
+    function T:_calc_duration()
+        if self.min == self.max then
+            self.cur_duration = self.min
+        end
+
+        -- If it's random, come up with something on the spot
+        self.cur_duration = math.random() * (self.max - self.min) + self.min
+    end
+
+
+    function T:_check_done()
+        local now = rc:cur_time()
+        if now - self.last_reset > self.cur_duration and self.running then
+            -- Stop before the callback as it may reset the timer
+            self.running = false
+            self.callback(self)
+        end
+    end
+
+    table.insert(self.timers, T)
+    return T
 end
 
 return rc
