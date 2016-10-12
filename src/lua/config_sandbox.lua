@@ -10,6 +10,7 @@
 
 -- Return a function that builds the sandbox
 return function ()
+    local require_cache = {}
     return {
         ipairs = ipairs,
         error = error,
@@ -86,6 +87,19 @@ return function ()
             clock = os.clock,
             difftime = os.difftime,
             time = os.time
-        }
+        },
+        require = function(name)
+            -- Cache the file
+            filename = name..".lua"
+            if require_cache[filename] == nil then
+                local func, err = loadfile(filename)
+                if func == nil then
+                    error(err)
+                else
+                    require_cache[filename] = func()
+                end
+            end
+            return require_cache[filename]
+        end
     }
 end
