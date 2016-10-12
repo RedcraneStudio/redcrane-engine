@@ -54,6 +54,11 @@ extern "C"
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
   }
 
+  float redc_cur_time()
+  {
+    return SDL_GetTicks() / 1000.0f;
+  }
+
   void* redc_init_engine(Redc_Config cfg)
   {
     // Switch into the current working directory requested by the mod

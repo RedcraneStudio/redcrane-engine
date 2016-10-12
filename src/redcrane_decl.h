@@ -21,6 +21,8 @@ void redc_log_e(const char* str);
 
 void redc_ms_sleep(unsigned long ms);
 
+float redc_cur_time();
+
 void* redc_init_engine(Redc_Config cfg);
 void redc_init_client(void* eng);
 void redc_init_server(void* eng);
