@@ -1097,7 +1097,18 @@ namespace redc { namespace gfx
       Light light;
 
 
-      light.is_active = light_obj.at("active").get<bool>();
+      if(light_obj.count("active"))
+      {
+        light.is_active = light_obj.at("active").get<bool>();
+      }
+      else
+      {
+        light.is_active = false;
+      }
+
+      // Intensity is not part of the (material extension) standard, but is
+      // important for controlling the light quickly (to flicker the light).
+      light.intensity = 1.0f;
 
       // Find type of light
       std::string type = light_obj.at("type").get<std::string>();
@@ -1115,14 +1126,10 @@ namespace redc { namespace gfx
         light.quadratic_attenuation =
           spot_obj.at("quadraticAttenuation").get<double>();
 
-        // Distance is not exported currently, we also don't use it
-        light.distance = 0.1f;
-        //light.distance = spot_obj.at("distance").get<double>();
+        light.distance = spot_obj.at("distance").get<double>();
 
         light.fall_off_exponent = spot_obj.at("fallOffExponent").get<double>();
         light.fall_off_angle = spot_obj.at("fallOffAngle").get<double>() / 2.0f;
-
-        light.intensity = spot_obj.at("energy").get<double>();
 
         std::string err;
         if(!load_js_vec3(spot_obj.at("color"), light.color, &err))
