@@ -77,6 +77,7 @@ return function ()
             pow = math.pow,
             rad = math.rad,
             random = math.random,
+            randomseed = math.randomseed,
             sin = math.sin,
             sinh = math.sinh,
             sqrt = math.sqrt,
