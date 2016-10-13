@@ -3,6 +3,15 @@ local noise = require("lj_noise")
 
 local M = {}
 
+local function triangle_fn(x, y)
+    local freq = 5.0
+    return (8.0 / math.pi) * (math.sin(2 * math.pi * freq * x) - 1.0 / 9.0 * math.sin(6 * math.pi * freq * x) + 1.0 / 25.0 * math.sin(10 * math.pi * freq *x))
+end
+
+local function noise_fn(x, y)
+    return noise.Simplex2D(x, y)
+end
+
 --- Returns a generator / iterator function to generate load values for the
 --- generator.
 -- @param base_load How overloaded the engine is passively, in the
@@ -35,7 +44,7 @@ function M.varying_load_fn(base_load, vary_fac)
                 -- We're sorta exploring parallel lines of noise, the more lines
                 -- we check, the more likely we can use one to make the engine
                 -- feel more unstable.
-                local noise_res = noise.Simplex2D(accum_time, try_i)
+                local noise_res = triangle_fn(accum_time, try_i)
                 if noise_res > value then
                     value = noise_res
                     line_i = try_i
@@ -53,7 +62,7 @@ function M.varying_load_fn(base_load, vary_fac)
             -- Get the current value on the current line, if it's below the base
             -- level we return the base level and go back to searching each
             -- line.
-            local noise_res = noise.Simplex2D(accum_time, cur_line)
+            local noise_res = triangle_fn(accum_time, try_i)
             if noise_res < base_load then
                 -- Forget about this line and return to the base load.
                 cur_line = -1
