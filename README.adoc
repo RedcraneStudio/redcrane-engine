@@ -78,6 +78,9 @@ Oh, and the main (Office.gltf) asset for the mildly-cold game is not currently
 version controlled. That will come soon, for now have fun in blender making your
 own office!
 
+This being said, these are game files and I can't guarantee they will stay
+publicly accessible.
+
 First use https://github.com/lukesanantonio/blendergltf[blendergltf] (sorry, my
 changes have not been merged upstream yet). Once you have a glTF file from
 blender, use my python script to make it compatible with the engine.
