@@ -49,6 +49,9 @@
 #include "soloud_wav.h"
 #include "soloud_wavstream.h"
 
+#define REDC_TRUE 1
+#define REDC_FALSE 0
+
 #ifndef REDC_REDCRANE_DECL_H
 #define REDC_REDCRANE_DECL_H
 extern "C"
