@@ -116,11 +116,18 @@ void redc_shader_destroy(void *shader);
 
 void redc_map_load(void* eng, const char* file);
 
+size_t redc_map_get_num_lights(void *map_ptr);
+
 typedef struct
 {
-  bool on;
+  float power;
 } Redc_Light_State;
+
+Redc_Light_State redc_map_get_light_i_state(void *map_ptr, size_t ref);
 Redc_Light_State redc_map_get_light_state(void *map, const char *light);
+
+int redc_map_set_light_i_state(void *map_ptr, size_t ref,
+                               Redc_Light_State state);
 int redc_map_set_light_state(void *map, const char *light,
                              Redc_Light_State state);
 

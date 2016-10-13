@@ -60,18 +60,37 @@ function rc:load_map(filename)
     local map = {}
     -- A map doesn't exist yet
     map.ptr_ = nil
-    function map:get_light_state(light)
+
+    function map:_check_loaded()
         if self.ptr_ == nil then
             error("Map doesn't exist yet")
         end
-        return ffi.C.redc_map_get_light_state(self.ptr_, light)
+    end
+    function map:get_num_lights()
+        self:_check_loaded()
+        return tonumber(ffi.C.redc_map_get_num_lights(self.ptr_))
+    end
+
+    function map:get_light_state(light)
+        self:_check_loaded()
+        if type(light) == "string" then
+            return ffi.C.redc_map_get_light_state(self.ptr_, light)
+        else
+            return ffi.C.redc_map_get_light_i_state(self.ptr_, light)
+        end
     end
     function map:set_light_state(light, state)
-        if self.ptr_ == nil then
-            error("Map doesn't exist yet")
+        self:_check_loaded()
+        local res
+        if type(light) == "string" then
+            res = ffi.C.redc_map_set_light_state(self.ptr_, light, state)
+        else
+            res = ffi.C.redc_map_set_light_i_state(self.ptr_, light, state)
         end
-        local res = ffi.C.redc_map_set_light_state(self.ptr_, light, state)
         -- TODO: error code?
+        if res == 0 then
+            error("Failed to set state of light '"..light.."'")
+        end
     end
     function map:check_loaded(event)
         if event.type == "map_loaded" then

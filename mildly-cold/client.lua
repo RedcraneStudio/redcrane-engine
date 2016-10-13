@@ -26,7 +26,14 @@ while rc:running() do
             rc:log_d("event (type:", event.type, "name:", event.name, "data:", event.data)
             if event.type == "physics" and event.name == "desk_lamp_toggle" then
                 local state = map:get_light_state("Desk_Lamp")
-                map:set_light_state("Desk_Lamp", { on = not state.on })
+
+                -- Toggle the light
+                if state.power < 0.5 then
+                    state.power = 1.0
+                else
+                    state.power = 0.0
+                end
+                map:set_light_state("Desk_Lamp", state)
              end
         end
     end
