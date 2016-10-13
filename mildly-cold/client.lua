@@ -15,7 +15,79 @@ player = scene:add_player()
 
 map = rc:load_map(decl.map)
 
+-- Seed the random number generator
+math.randomseed(os.time())
+
+local GENERATOR_LOADS = {
+    [1] = {
+        base_load = 0.00,
+        vary_fac = 0.0,
+    },
+    [2] = {
+        base_load = 0.05,
+        vary_fac = 0.05,
+    },
+    [3] = {
+        base_load = 0.10,
+        vary_fac = 0.07,
+    },
+    [4] = {
+        base_load = 0.15,
+        vary_fac = 0.10,
+    },
+    [5] = {
+        base_load = 0.20,
+        vary_fac = 0.1,
+    },
+    [6] = {
+        base_load = 0.25,
+        vary_fac = 0.2,
+    },
+    [7] = {
+        base_load = 0.30,
+        vary_fac = 0.3,
+    },
+    [8] = {
+        base_load = 0.35,
+        vary_fac = 0.3,
+    },
+    [9] = {
+        base_load = 0.40,
+        vary_fac = 0.3,
+    },
+    [10]= {
+        base_load = 0.45,
+        vary_fac = 0.4,
+    },
+    [11]= {
+        base_load = 0.5,
+        vary_fac = 0.5,
+    },
+    [11]= {
+        base_load = 1.0,
+        vary_fac = 1.0,
+    },
+}
+
+local gen = require('generator')
+generator = gen.load_controller(GENERATOR_LOADS, 1, rc:cur_time())
+
+local step_timer = rc:make_timer()
+step_timer:set_steady_timeout(1)
+step_timer:set_callback(function (timer)
+        generator:inc_load()
+        timer:reset()
+end)
+step_timer:reset()
+
 rc:log_i("Done initializing")
+
+function power_at_load(load_val)
+    -- The (input) value can be greater than one but not smaller than zero.
+    -- Handle the case where we get a negative number (we can't have a negative
+    -- light intensity, so just use zero).
+    return math.max(0.0, 1.0 - load_val)
+end
 
 while rc:running() do
     rc:step()
@@ -36,6 +108,15 @@ while rc:running() do
                 map:set_light_state("Desk_Lamp", state)
              end
         end
+    end
+
+    for light_i = 0, map:get_num_lights() - 1 do
+        local light_state = map:get_light_state(light_i)
+
+        local cur_load = generator:current_load(rc:cur_time())
+        light_state.power = power_at_load(cur_load)
+
+        map:set_light_state(light_i, light_state)
     end
 
     scene:render()

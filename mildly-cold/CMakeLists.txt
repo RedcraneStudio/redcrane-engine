@@ -6,4 +6,6 @@ add_data(mildly-cold ALL share/${PROJECT_NAME}/mildly-cold
   client.lua
   config.lua
   server.lua
+  lj_noise.lua
+  generator.lua
   Office-map.json)
