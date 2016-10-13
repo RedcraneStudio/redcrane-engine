@@ -1,0 +1,93 @@
+= Red Crane Engine
+Luke San Antonio Bialecki <lukesanantonio@gmail.com>
+October 12th, 2016
+
+A highly-WIP C++ game engine that focuses on nothing in particular. Games are
+considered "mods" to the engine and are written in Lua
+
+== Setup
+
+* Linux
+** Arch Linux
+*** Arch is my daily driver, so everything should work once dependencies are installed.
+** Ubuntu/Debian
+*** See below; because these distributions tend to have old (well, just not
+    insanely new) packages, there might be a build error or five. That being
+    said, if you have a problem I would like to fix it, so report it anyway,
+    just know these things might come up.
+* Windows and Mac
+** If it doesn't compile or work, file a bug. I compile it on Windows from time
+   to time to fix build errors but I've never actually run the engine to see if
+   it works.
+
+=== Installing dependencies for Debian/Ubuntu (Old)
+
+
+Install the following packages through apt:
+
+    libpng-dev
+    libmsgpack-dev
+    libluajit-5.1-dev
+    g++
+    gcc
+    libenet-dev
+    libsdl2-dev
+    libfreetype6-dev
+    libbullet-dev
+
+
+You must also build the following libraries from source because the version in
+apt is probably too old.
+
+* Cmake: https://cmake.org/files/v3.5/cmake-3.5.0-rc3-Linux-x86_64.tar.gz
+* libuv-dev: http://dist.libuv.org/dist/v1.8.0/
+* boost: http://sourceforge.net/projects/boost/files/boost/1.60.0/
+* libglm-dev: http://glm.g-truc.net/0.9.7/index.html
+* ImageMagick: https://www.imagemagick.org/script/index.php
+
+=== Cloning and building
+
+    git clone https://bitbucket.org/lukesanantonio/redcrane-engine.git
+    mkdir build
+    cd build
+    cmake ../redcrane-engine -D CMAKE_BUILD_TYPE=Debug -G Ninja
+    make
+
+That is only if you are planning to actually do development on the engine.
+
+If you only want to start making your AAA game, you'll probably want to just do
+a release build.
+
+    cmake ../redcrane-engine -D CMAKE_BUILD_TYPE=Release
+    make
+
+== The Game
+
+=== Running
+
+Currently, a puzzle / story game is being developed alongside the engine. The
+code is located in the mildly-cold folder. The survival folder is the remnants
+of an old game.
+
+    ./src/redc --config-file=mildly-cold/config.lua --out-log-level=0
+
+The default log level for debug builds is 0, but for a release build you have to
+specify.
+
+Oh, and the main (Office.gltf) asset for the mildly-cold game is not currently
+version controlled. That will come soon, for now have fun in blender making your
+own office!
+
+First use https://github.com/lukesanantonio/blendergltf[blendergltf] (sorry, my
+changes have not been merged upstream yet). Once you have a glTF file from
+blender, use my python script to make it compatible with the engine.
+
+     python engine/convert-scripts/office.py ./Office-pre.gltf ./Office.gltf
+
+Put the Office.gltf in the right place (check mildly-cold/Office-map.json) and
+then you should be good to go. Oh and don't forget a collision mesh, otherwise
+you'll fall through the floor, and your game won't be any fun.
+
+That is all.
+
+(Try to figure out why we call it mildly-cold).
