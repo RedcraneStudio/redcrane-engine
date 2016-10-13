@@ -5,6 +5,14 @@ October 12th, 2016
 A highly-WIP C++ game engine that focuses on nothing in particular. Games are
 considered "mods" to the engine and are written in Lua
 
+== Developing the engine
+
+If you want to contribute, start by reading link:engine.adoc[this document]. It
+goes over important structures, engine architecture and most important of all,
+coding style.
+
+Thank you and good luck ;)
+
 == Setup
 
 * Linux
