@@ -3,24 +3,6 @@
 # All rights reserved.
 
 add_data(assets ALL "share/${PROJECT_NAME}"
-                    mat/plane.json mat/house.json obj/plane.obj obj/yurt.obj
-                    obj/govnm_building.obj obj/fps_terrain.obj
-                    obj/vertical_log.obj obj/map.obj obj/boat.obj
-                    obj/projectile.obj
-
-                    obj/guns/cannon.obj
-                    obj/guns/gattlinggun.obj
-                    obj/hulls/sailhull.obj
-                    obj/rudders/rudder.obj
-                    obj/sails/sail.obj
-
-                    obj/cube.obj
-                    obj/sphere.obj
-
-                    obj/monkey.obj
-
-                    obj/library.obj
-
                     snd/walk_variation_0.wav
                     snd/walk_variation_1.wav
                     snd/walk_variation_2.wav
@@ -32,11 +14,7 @@ add_data(assets ALL "share/${PROJECT_NAME}"
 
                     gltf/deferred.gltf gltf/deferred.vs gltf/deferred.fs
 
-                    gltf/library-pre.gltf
-
                     shader/deferred_fb_write.vs shader/deferred_fb_write.fs
-
-                    scene/default.json structure/structures.json
 
                     shader/basic/fs.glsl shader/basic/vs.glsl
                     shader/hud/fs.glsl shader/hud/vs.glsl
@@ -55,20 +33,4 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     tex/envmap/left.png
                     tex/envmap/right.png
 
-                    tex/sand.png
-
-                    tex/crosshair.png
-
-                    tex/Floor_Light.png
-
-                    cfg.ini
-
-                    tex/cracked_soil.png tex/grass.png tex/topdown_terrain.png
-                    tex/bark.png
-                    ui/hud.json obj/terrain.obj mat/terrain.json
-                    map/default.png scene/fps.json tex/yurt_skin.png
-                    tex/combined_building_textures.png)
-
-include(convert_files)
-
-convert_to_png(assets ui build_icon.svg build_icon.png)
+                    tex/crosshair.png)
