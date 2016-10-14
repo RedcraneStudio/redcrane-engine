@@ -11,7 +11,7 @@ If you want to contribute, start by reading link:doc/engine.adoc[this document].
 goes over important structures, engine architecture and most important of all,
 coding style.
 
-Thank you and good luck ;)
+Love you all and good luck ;)
 
 == Setup
 
