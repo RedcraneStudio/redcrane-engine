@@ -7,7 +7,7 @@ considered "mods" to the engine and are written in Lua
 
 == Developing the engine
 
-If you want to contribute, start by reading link:engine.adoc[this document]. It
+If you want to contribute, start by reading link:doc/engine.adoc[this document]. It
 goes over important structures, engine architecture and most important of all,
 coding style.
 
