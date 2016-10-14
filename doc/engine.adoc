@@ -362,8 +362,7 @@ int game()
         break;
       case Player_State::Jumping:
       {
-        // Usually I try to make these comments a full sentence, end them with a
-        period, and add a space after the '//'.
+        // Usually, I try to make these comments a full sentence, spaced as such.
         break;
       }
       case Player_State::Grappling:
