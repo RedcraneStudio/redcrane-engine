@@ -1,6 +1,6 @@
-= Red Crane Engine
-Luke San Antonio Bialecki <lukesanantonio@gmail.com>
-October 12th, 2016
+:imagesdir: doc/images
+
+image::banner.png[]
 
 A highly-WIP C++ game engine that focuses on nothing in particular. Games are
 considered "mods" to the engine and are written in Lua
