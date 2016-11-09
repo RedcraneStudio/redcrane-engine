@@ -92,6 +92,7 @@ namespace redc { namespace gfx { namespace gl
 
     // Hash map of tags of strings => uniform locations
     std::unordered_map<tag_t, GLint> tags;
+    std::unordered_map<tag_t, std::string> tag_vars_;
 
     void load_part(shader_source_t const& source, std::string name,
                    GLenum part, GLuint& shade_obj);
