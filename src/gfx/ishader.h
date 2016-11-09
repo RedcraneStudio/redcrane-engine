@@ -5,11 +5,13 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <istream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../common/color.h"
+#include "../assets/live_file.h"
 
 #include "common.h"
 #include "ihandle.h"
@@ -157,10 +159,27 @@ namespace redc
       virtual Attrib_Bind get_attrib_bind(std::string attrib) const = 0;
       virtual Param_Bind get_param_bind(std::string param) const = 0;
       virtual Param_Bind get_tag_param_bind(std::string tag) const = 0;
+    };
 
+    struct Live_Shader
+    {
+      Live_Shader(std::unique_ptr<IShader> shade) : shader_(std::move(shade)) {}
+
+      void set_vertex_file(std::string const& filename);
+      void set_fragment_file(std::string const& filename);
+      void set_geometry_file(std::string const& filename);
+
+      void update_sources();
+    private:
+      std::unique_ptr<IShader> shader_;
+
+      std::unique_ptr<Live_File> vertex_file_;
+      std::unique_ptr<Live_File> fragment_file_;
+      std::unique_ptr<Live_File> geometry_file_;
     };
 
     // Load shader source from file
+    IShader::shader_source_t load_stream(std::istream& stream);
     IShader::shader_source_t load_file(std::string filename);
 
     // Load contents of a file into the respective shader part of a given shader

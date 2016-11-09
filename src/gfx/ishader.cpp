@@ -165,18 +165,66 @@ namespace redc { namespace gfx
     v.a = c.a / (float) 0xff;
     set_vec4(tag, v);
   }
-  std::string load_stream(std::istream& stream)
+
+  void Live_Shader::set_vertex_file(std::string const& filename)
   {
-    std::string ret;
+    vertex_file_ = std::make_unique<Live_File>(filename);
+  }
+
+  void Live_Shader::set_fragment_file(std::string const& filename)
+  {
+    fragment_file_ = std::make_unique<Live_File>(filename);
+  }
+  void Live_Shader::set_geometry_file(std::string const& filename)
+  {
+    geometry_file_ = std::make_unique<Live_File>(filename);
+  }
+
+  void Live_Shader::update_sources()
+  {
+    bool needs_link = false;
+    if(vertex_file_->changed_on_disk())
+    {
+      std::ifstream stream = vertex_file_->open_ifstream();
+      shader_->load_vertex_part(load_stream(stream),
+                                vertex_file_->filename());
+      needs_link = true;
+    }
+    if(fragment_file_->changed_on_disk())
+    {
+      std::ifstream stream = fragment_file_->open_ifstream();
+      shader_->load_fragment_part(load_stream(stream),
+                                  fragment_file_->filename());
+      needs_link = true;
+    }
+    if(geometry_file_->changed_on_disk())
+    {
+      std::ifstream stream = geometry_file_->open_ifstream();
+      shader_->load_geometry_part(load_stream(stream),
+                                  geometry_file_->filename());
+      needs_link = true;
+    }
+    if(needs_link)
+    {
+      shader_->link();
+    }
+  }
+
+  // Consumes the stream
+  IShader::shader_source_t load_stream(std::istream& stream)
+  {
+    std::string source_str;
     while(!stream.eof() && stream.good())
     {
       auto c = stream.get();
       if(std::istream::traits_type::not_eof(c))
       {
-        ret.push_back(c);
+        source_str.push_back(c);
       }
     }
-    return ret;
+    // Convert to a vector of characters
+    using std::begin; using std::end;
+    return std::vector<char>(begin(source_str), end(source_str));
   }
 
   IShader::shader_source_t load_file(std::string filename)
@@ -188,11 +236,7 @@ namespace redc { namespace gfx
       log_e("Failed to open: '%'", filename);
     }
     // Load the contents
-    auto source_str = load_stream(file_st);
-
-    // Convert to a vector of characters
-    using std::begin; using std::end;
-    return std::vector<char>(begin(source_str), end(source_str));
+    return load_stream(file_st);
   }
 
   void load_vertex_file(IShader& shade, std::string filename)
