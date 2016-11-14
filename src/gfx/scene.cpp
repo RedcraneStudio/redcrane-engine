@@ -1103,7 +1103,8 @@ namespace redc { namespace gfx
       }
       else
       {
-        light.is_active = false;
+        // Every light should be activated by default.
+        light.is_active = true;
       }
 
       // Intensity is not part of the (material extension) standard, but is
