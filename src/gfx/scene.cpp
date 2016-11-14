@@ -1111,6 +1111,10 @@ namespace redc { namespace gfx
       // important for controlling the light quickly (to flicker the light).
       light.intensity = 1.0f;
 
+      // Casts shadow is also something non-standard, but it makes sense for it
+      // to be enabled by default.
+      light.casts_shadow = true;
+
       // Find type of light
       std::string type = light_obj.at("type").get<std::string>();
       if(type == "spot")

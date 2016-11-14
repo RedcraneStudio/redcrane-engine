@@ -198,6 +198,11 @@ namespace redc { namespace gfx
     float fall_off_exponent;
 
     bool is_active;
+
+    bool casts_shadow;
+
+    std::shared_ptr<ITexture> shadow_map;
+    std::shared_ptr<IFramebuffer> shadow_fb;
   };
 
   struct Transformed_Light
