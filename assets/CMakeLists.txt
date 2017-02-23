@@ -3,6 +3,9 @@
 # All rights reserved.
 
 add_data(assets ALL "share/${PROJECT_NAME}"
+
+                    cfg.ini
+
                     snd/walk_variation_0.wav
                     snd/walk_variation_1.wav
                     snd/walk_variation_2.wav
@@ -13,6 +16,7 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     gltf/cel_texture.vs gltf/cel_texture.fs
 
                     gltf/deferred.gltf gltf/deferred.vs gltf/deferred.fs
+                    gltf/library-pre.gltf
 
                     shader/deferred_fb_write.vs shader/deferred_fb_write.fs
 
