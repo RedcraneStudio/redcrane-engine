@@ -150,10 +150,6 @@ namespace redc { namespace gfx { namespace gl
     REDC_ASSERT_MSG(v_shade_, "OpenGL shader program must have vertex shader");
     REDC_ASSERT_MSG(f_shade_, "OpenGL shader program must have fragment shader");
 
-    // The tags are going to be invalid after a new link. Technically if the
-    // shaders haven't changed the tags don't need to be invalidated.
-    tags.clear();
-
     // Attempt the link
     glLinkProgram(prog_);
 
@@ -183,6 +179,14 @@ namespace redc { namespace gfx { namespace gl
       linked_ = true;
     }
 
+    // The tags are going to be invalid after a new link.
+    tags.clear();
+    for(auto tag_var_pair : tag_vars_)
+    {
+      // Try adding it again
+      set_var_tag(tag_var_pair.first, tag_var_pair.second);
+    }
+
     return linked_;
   }
 
@@ -200,6 +204,10 @@ namespace redc { namespace gfx { namespace gl
     // so this will have to do.
     if(tags.count(tag)) tags.at(tag) = loc;
     else tags.insert({tag, loc});
+
+    // Don't forget the original variable name
+    if(tag_vars_.count(tag)) tag_vars_.at(tag) = var_name;
+    else tag_vars_.insert({tag, var_name});
   }
 
   // Functions to set uniforms given a bind point

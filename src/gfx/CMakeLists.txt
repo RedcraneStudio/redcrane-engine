@@ -23,7 +23,7 @@ add_library(gfxlib STATIC ${RED_CRANE_GFX_GL_SOURCES} camera.cpp ishader.cpp
                           deferred.cpp asset_render.cpp)
 
 # Link to our extension loader (glad).
-target_link_libraries(gfxlib engine_gl commonlib ${GLFW_LIBRARY}
+target_link_libraries(gfxlib engine_gl commonlib assetslib ${GLFW_LIBRARY}
                              ${Boost_SYSTEM_LIBRARY}
                              ${Boost_FILESYSTEM_LIBRARY})
 
