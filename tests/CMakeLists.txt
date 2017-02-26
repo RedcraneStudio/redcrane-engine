@@ -10,7 +10,7 @@ endmacro()
 
 add_tests(common algorithm.cpp cache.cpp circle.cpp grid_iterator.cpp
                  id_gen.cpp maybe_owned.cpp tree.cpp utility.cpp value_map.cpp
-                 vec.cpp volume.cpp peer_ptr.cpp)
+                 vec.cpp volume.cpp peer_ptr.cpp timed_text_test.cpp)
 
 add_tests(gfx mesh.cpp)
 

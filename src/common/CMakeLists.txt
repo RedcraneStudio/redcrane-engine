@@ -3,7 +3,8 @@
 # All rights reserved.
 
 add_library(commonlib STATIC aabb.cpp animation.cpp json.cpp
-                             log.cpp noise.cpp translate.cpp tree.cpp task.cpp)
+                             log.cpp noise.cpp translate.cpp tree.cpp task.cpp
+                             timed_text.cpp)
 target_link_libraries(commonlib PUBLIC ${LIBUV_LIBRARIES} opensimplex)
 target_include_directories(commonlib PUBLIC ${LIBUV_INCLUDE_DIRS}
                                             ${GLM_INCLUDE_DIR}
