@@ -1,10 +1,19 @@
 /*
  * Copyright (C) 2017 Luke San Antonio
  * All rights reserved.
+ *
+ * This file implements an ongoing stream of text that should eventually
+ * disappear, fade-out, etc. This can be used for chat windows, in-game
+ * dialogue, etc.
+ *
+ * The implementation supports a polling interface and an observer interface
+ * for watching changes. This is basically just the glue code so that the
+ * timing is managed currently. Rendering and transitions are left to client
+ * code.
  */
 
-#ifndef RED_CRANE_ENGINE_DIALOGUE_H
-#define RED_CRANE_ENGINE_DIALOGUE_H
+#ifndef RED_CRANE_ENGINE_TIMED_TEXT_H
+#define RED_CRANE_ENGINE_TIMED_TEXT_H
 
 #include <string>
 #include <memory>
@@ -57,4 +66,4 @@ namespace redc
   };
 }
 
-#endif //RED_CRANE_ENGINE_DIALOGUE_H
+#endif //RED_CRANE_ENGINE_TIMED_TEXT_H
