@@ -14,9 +14,6 @@ set(RED_CRANE_GFX_GL_SOURCES
   gl/common.cpp
   gl/framebuffer.cpp)
 
-# These are all the null implementations of the ABCs.
-set(RED_CRANE_GFX_NULL_SOURCES null/driver.cpp null/mesh.cpp)
-
 add_library(gfxlib STATIC ${RED_CRANE_GFX_GL_SOURCES} camera.cpp ishader.cpp
                           imesh.cpp itexture.cpp mesh_chunk.cpp common.cpp
                           mesh_data.cpp immediate_renderer.cpp scene.cpp
