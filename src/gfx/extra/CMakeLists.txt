@@ -3,16 +3,16 @@
 # All rights reserved.
 
 add_library(gfxextralib STATIC
-  load_wavefront.cpp
-  mesh_conversion.cpp
-  allocate.cpp
-  format.cpp
-  texture_load.cpp
-  write_data_to_mesh.cpp
-  scoped_shader_lock.cpp
-  generate_aabb.cpp
-  render_normals.cpp
-  proj_grid.cpp)
+        load_wavefront.cpp
+        mesh_conversion.cpp
+        allocate.cpp
+        format.cpp
+        texture_load.cpp
+        write_data_to_mesh.cpp
+        scoped_shader_lock.cpp
+        generate_aabb.cpp
+        render_normals.cpp
+        proj_grid.cpp)
 
 target_link_libraries(gfxextralib gfxlib commonlib)
 
