@@ -113,6 +113,7 @@ target_include_directories(redc PUBLIC ${LuaJIT_INCLUDE_DIR})
 target_compile_options(redc PUBLIC ${LuaJIT_COMPILE_OPTIONS})
 
 add_dependencies(redc survival)
+add_dependencies(redc broomgame)
 add_dependencies(redc assets)
 
 add_executable(test_cel main_cel.cpp sdl_helper.cpp)

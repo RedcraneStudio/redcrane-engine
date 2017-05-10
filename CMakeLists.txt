@@ -37,6 +37,7 @@ add_subdirectory(mods)
 add_subdirectory(assets)
 add_subdirectory(survival)
 add_subdirectory(mildly-cold)
+add_subdirectory(broomgame)
 add_subdirectory(src)
 add_subdirectory(tests)
 
