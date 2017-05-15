@@ -8,6 +8,7 @@
 
 # CLion files
 .idea/
+cmake-build-debug/
 
 # **(Make up ya damn mind)**
 
