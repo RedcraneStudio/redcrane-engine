@@ -31,7 +31,7 @@ namespace redc { namespace gfx
 
   enum class Texture_Format
   {
-    Alpha, Rgb, Rgba, Srgb, Srgb_Alpha, Depth, Depth_Stencil, Stencil, R8,
+    Alpha, Rgb, Rgba, Srgb, Srgb_Alpha, Depth, Depth_Stencil, Stencil, Red,
     Rgba32F
   };
   enum class Texture_Target

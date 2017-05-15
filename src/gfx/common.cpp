@@ -36,7 +36,7 @@ namespace redc { namespace gfx
     case Texture_Format::Alpha:
     case Texture_Format::Depth:
     case Texture_Format::Stencil:
-    case Texture_Format::R8:
+    case Texture_Format::Red:
       return 1;
     case Texture_Format::Depth_Stencil:
       return 2;

@@ -91,8 +91,8 @@ namespace redc { namespace gfx { namespace gl
       return GL_DEPTH_STENCIL;
     case Texture_Format::Stencil:
       return GL_STENCIL;
-    case Texture_Format::R8:
-      return GL_R8;
+    case Texture_Format::Red:
+      return GL_RED;
     case Texture_Format::Rgba32F:
       return GL_RGBA32F;
     default:
