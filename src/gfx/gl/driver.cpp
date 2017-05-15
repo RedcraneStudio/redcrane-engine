@@ -35,7 +35,7 @@ namespace redc
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
         glEnable(GL_FRAMEBUFFER_SRGB);
-        glDepthFunc(GL_LESS);
+        glDepthFunc(GL_LEQUAL);
 
         // This solves bad texture upload with non-power-of-two sized textures.
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
