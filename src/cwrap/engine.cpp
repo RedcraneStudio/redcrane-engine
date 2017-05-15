@@ -100,6 +100,7 @@ extern "C"
 
     rce->client = std::make_unique<Client>(std::move(sdl_init_raii_lock));
 
+    // Capture the mouse
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
     int x, y;
