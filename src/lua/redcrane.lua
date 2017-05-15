@@ -15,6 +15,7 @@ function rc:init(config)
     self.texture = require("texture")
     self.shader = require("shader")
     self.server = require("server")
+    self.text = require('text')
 
     self.timers = {}
 

@@ -142,3 +142,19 @@ typedef struct
   void *data;
 } Redc_Event;
 int redc_server_poll_event(void *eng, Redc_Event *event);
+
+// See cwrap/text.cpp
+
+void redc_text_draw(void *eng, const char *text);
+
+// Init dialogue, load font, etc.
+void redc_dialogue_init(void *eng,
+                        const char *default_font,
+                        int default_size,
+                        int default_timeout,
+                        char *default_color);
+
+// Add a new line.
+void redc_dialogue_push_line(void *eng, const char *text);
+// Add text to the end of the current line.
+void redc_dialogue_push_text(void *eng, const char *text);

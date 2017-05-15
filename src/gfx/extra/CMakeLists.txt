@@ -12,7 +12,8 @@ add_library(gfxextralib STATIC
         scoped_shader_lock.cpp
         generate_aabb.cpp
         render_normals.cpp
-        proj_grid.cpp)
+        proj_grid.cpp
+        text_render.cpp)
 
 target_link_libraries(gfxextralib gfxlib commonlib)
 

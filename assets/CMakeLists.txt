@@ -27,6 +27,7 @@ add_data(assets ALL "share/${PROJECT_NAME}"
                     shader/water/vs.glsl shader/water/fs.glsl
                     shader/envmap/vs.glsl shader/envmap/fs.glsl
                     shader/cel/vs.glsl shader/cel/fs.glsl
+                    shader/text/vs.glsl shader/text/fs.glsl
 
                     shader/basic.lua shader/hud.lua
 

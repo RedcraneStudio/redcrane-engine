@@ -47,7 +47,7 @@ endfunction()
 # These are the lua files we want to compile and link into the executable, for
 # access by luajit. The file name will the module name put in package.preload
 set(REDC_LUAJIT_COMPILED_BYTECODE lua/mesh.obj lua/texture.obj lua/redcrane.obj
-        lua/scene.obj lua/shader.obj lua/server.obj
+        lua/scene.obj lua/shader.obj lua/server.obj lua/text.obj
         lua/config_sandbox.obj)
 
 # This directory isn't automatically made for us
@@ -80,7 +80,7 @@ lua_compile_header(redc_ffi)
 
 add_executable(redc main.cpp minilua.cpp sdl_helper.cpp player.cpp
         cwrap/engine.cpp cwrap/mesh.cpp cwrap/scene.cpp
-        cwrap/shader.cpp cwrap/redcrane.cpp cwrap/map.cpp
+        cwrap/shader.cpp cwrap/redcrane.cpp cwrap/map.cpp cwrap/text.cpp
         cwrap/server.cpp cwrap/texture.cpp map.cpp common/timed_text.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_config_sandbox_BYTECODE}
         ${CMAKE_CURRENT_BINARY_DIR}/${REDC_LUA_sandbox_BYTECODE}
@@ -103,6 +103,7 @@ target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
 target_link_libraries(redc PUBLIC
         commonlib gfxlib gfxextralib uselib
         fpslib inputlib effectslib SoloudStatic
+        freetype-gl
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}

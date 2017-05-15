@@ -122,3 +122,4 @@ add_library(freetype-gl STATIC
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
 )
+target_link_libraries(freetype-gl PUBLIC ${FREETYPE_LIBRARY_RELEASE})

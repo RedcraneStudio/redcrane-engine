@@ -27,6 +27,7 @@
 #include "../gfx/mesh_chunk.h"
 #include "../gfx/itexture.h"
 #include "../gfx/asset_render.h"
+#include "../gfx/extra/text_render.h"
 
 #include "../common/cache.h"
 
@@ -136,6 +137,8 @@ namespace redc
     // The default shader scenes should use when an object doesn't have a
     // specific shader.
     std::unique_ptr<gfx::IShader> default_shader;
+
+    std::unique_ptr<Text_Render_Ctx> text_render;
 
     // TODO: Maybe keep track of every scene so lua doesn't have to deal with it
     // We should reserve some amount of memory for each scene so that we can

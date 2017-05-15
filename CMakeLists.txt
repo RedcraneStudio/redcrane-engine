@@ -25,6 +25,9 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_FIND_FRAMEWORK LAST)
 
+# Build freetype-gl
+add_subdirectory(freetype-gl)
+
 include(data_target)
 
 find_package(Threads REQUIRED)

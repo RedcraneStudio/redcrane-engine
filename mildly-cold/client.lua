@@ -120,6 +120,7 @@ while rc:running() do
     end
 
     scene:render()
+    rc.text.draw("Hello, sailer")
     rc:swap_window()
 
     rc:ms_sleep(2)
