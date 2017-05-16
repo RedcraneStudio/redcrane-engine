@@ -68,9 +68,6 @@ namespace redc
                                &mkup, text.c_str(),
                                text.length());
 
-    mkup.foreground_color.r = 0.0f;
-    ftgl::text_buffer_add_char(textbuf, &pt, &mkup, "!", "r");
-
     if(!atlas_tex_)
     {
       atlas_tex_ = driver.make_texture_repr();
