@@ -69,6 +69,10 @@ local GENERATOR_LOADS = {
     },
 }
 
+local tk = rc:make_timekeeper()
+local message_stream = rc.text.make_text_stream(2.0)
+tk:add(message_stream)
+
 local gen = require('generator')
 generator = gen.load_controller(GENERATOR_LOADS, 1, rc:cur_time())
 
@@ -89,9 +93,11 @@ function power_at_load(load_val)
     return math.max(0.0, 1.0 - load_val)
 end
 
+
 while rc:running() do
     rc:step()
     scene:step()
+    tk:step()
 
     for event in rc:events() do
         if not map:check_loaded(event) then
@@ -106,7 +112,9 @@ while rc:running() do
                     state.power = 0.0
                 end
                 map:set_light_state("Desk_Lamp", state)
-             end
+
+                message_stream:push_string("power: "..state.power)
+            end
         end
     end
 
@@ -119,10 +127,13 @@ while rc:running() do
         map:set_light_state(light_i, light_state)
     end
 
+    -- render the scene
     scene:render()
-    rc.text.draw("Hello, sailer")
-    rc:swap_window()
 
+    -- draw the hud
+    rc.text.draw(message_stream:full_text())
+
+    rc:swap_window()
     rc:ms_sleep(2)
 end
 

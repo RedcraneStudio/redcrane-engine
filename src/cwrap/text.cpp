@@ -1,3 +1,4 @@
+#include "../common/timed_text.h"
 #include "redcrane.hpp"
 
 using namespace redc;
@@ -12,5 +13,30 @@ extern "C"
     rce->client->text_render->render_text(
             *rce->client->driver, std::string{text}, {0.0f, 0.0f}
     );
+  }
+
+  void *redc_text_stream_new(void *eng, float timeout)
+  {
+    auto stream = new Timed_Text_Stream(timeout);
+    return stream;
+  }
+  void redc_text_stream_delete(void *stream)
+  {
+    delete (Timed_Text_Stream*) stream;
+  }
+  void redc_text_stream_push_string(void *stream, const char *text)
+  {
+    auto text_stream = (Timed_Text_Stream*) stream;
+    text_stream->push_line(text);
+  }
+  const char* redc_text_stream_full_text(void *stream)
+  {
+    auto text_stream = (Timed_Text_Stream*) stream;
+    return strdup(text_stream->full_text().c_str());
+  }
+  void redc_text_stream_step(void *stream, float dt)
+  {
+    auto text_stream = (Timed_Text_Stream*) stream;
+    text_stream->step(dt);
   }
 }

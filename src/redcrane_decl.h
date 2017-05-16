@@ -5,6 +5,9 @@
 
 // See cwrap/engine.cpp
 
+// We need this on the lua side.
+void free(void *ptr);
+
 typedef struct
 {
   const char* cwd;
@@ -146,6 +149,13 @@ int redc_server_poll_event(void *eng, Redc_Event *event);
 // See cwrap/text.cpp
 
 void redc_text_draw(void *eng, const char *text);
+
+void *redc_text_stream_new(void *eng, float timeout);
+void redc_text_stream_delete(void *stream);
+
+void redc_text_stream_push_string(void *stream, const char *text);
+const char* redc_text_stream_full_text(void *stream);
+void redc_text_stream_step(void *stream, float dt);
 
 // Init dialogue, load font, etc.
 void redc_dialogue_init(void *eng,
