@@ -241,4 +241,30 @@ function rc:make_timer()
     return T
 end
 
+function rc:make_timekeeper()
+    local rc = self
+
+    local tbl = {}
+    tbl.prev_time = nil
+    tbl.things = {}
+    function tbl:add(thing)
+        table.insert(self.things, thing)
+    end
+
+    function tbl:step()
+        local cur_time = rc:cur_time()
+        if self.prev_time == nil then
+            self.prev_time = cur_time
+        end
+
+        local dt = cur_time - self.prev_time
+        for _, thing in ipairs(self.things) do
+            thing:step(dt)
+        end
+        self.prev_time = cur_time
+    end
+
+    return tbl
+end
+
 return rc
