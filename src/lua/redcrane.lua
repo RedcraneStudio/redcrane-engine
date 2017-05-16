@@ -123,7 +123,7 @@ function rc:load_game_set(set)
 end
 
 function rc:events()
-    event_data = ffi.new("Redc_Event")
+    local event_data = ffi.new("Redc_Event")
     return function()
         if ffi.C.redc_server_poll_event(self.engine, event_data) ~= 0 then
             -- @ Optimization: If somehow the string copying becomes a
