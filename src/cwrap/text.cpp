@@ -5,13 +5,13 @@ using namespace redc;
 
 extern "C"
 {
-  void redc_text_draw(void *eng, const char *text)
+  void redc_text_draw(void *eng, const char *text, float x, float y)
   {
     auto rce = (redc::Engine*) eng;
     REDC_ASSERT_HAS_CLIENT(rce);
 
     rce->client->text_render->render_text(
-            *rce->client->driver, std::string{text}, {0.0f, 0.0f}
+            *rce->client->driver, std::string{text}, {x, y}
     );
   }
 

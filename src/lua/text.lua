@@ -5,7 +5,8 @@ local rc = require('redcrane')
 local M = {}
 
 function M.draw(text, pt)
-    return ffi.C.redc_text_draw(rc.engine, text)
+    pt = pt or {x = 0.0, y = 0.0}
+    return ffi.C.redc_text_draw(rc.engine, text, pt.x, pt.y)
 end
 
 function M.make_text_stream(timeout)
