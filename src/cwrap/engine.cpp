@@ -198,6 +198,23 @@ extern "C"
     }
   }
 
+  Redc_Vec2 redc_window_extents(void* eng)
+  {
+    Redc_Vec2 ret;
+    ret.x = 0.0f;
+    ret.y = 0.0f;
+
+    auto engine = (Engine*) eng;
+    if(engine->client)
+    {
+      auto window_extents = engine->client->driver->window_extents();
+      ret.x = window_extents.x;
+      ret.y = window_extents.y;
+    }
+    return ret;
+  }
+
+
   void redc_gc(void* eng)
   {
     auto rce = (Engine*) eng;

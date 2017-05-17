@@ -38,6 +38,13 @@ bool redc_running(void *eng);
 const char* redc_get_asset_path(void* eng);
 void redc_window_swap(void* eng);
 
+typedef struct {
+  float x;
+  float y;
+} Redc_Vec2;
+
+Redc_Vec2 redc_window_extents(void* eng);
+
 void redc_gc(void* eng);
 
 // See cwrap/mesh.cpp
@@ -148,7 +155,7 @@ int redc_server_poll_event(void *eng, Redc_Event *event);
 
 // See cwrap/text.cpp
 
-void redc_text_draw(void *eng, const char *text);
+void redc_text_draw(void *eng, const char *text, float x, float y);
 
 void *redc_text_stream_new(void *eng, float timeout);
 void redc_text_stream_delete(void *stream);

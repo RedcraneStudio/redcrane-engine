@@ -29,6 +29,10 @@ function rc:init_server()
     ffi.C.redc_init_server(self.engine)
 end
 
+function rc:window_extents()
+    return ffi.C.redc_window_extents(self.engine)
+end
+
 function rc:step()
 
     -- Check timers and activate callback if necessary
