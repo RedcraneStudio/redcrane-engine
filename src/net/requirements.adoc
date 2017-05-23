@@ -1,0 +1,26 @@
+= Planning
+Luke San Antonio Bialecki <lukesanantonio@gmail.com>
+May 22nd, 2017
+
+== Problem
+Synchronization of boats and projectiles across the network.
+
+== Requirements
+Boats [.line-through]#and projectiles# need to be able to shoot projectiles
+
+== Non-requirements
+Boat bouyancy and other visual effects can be derived from a shared seed and
+simulated locally by each client in the network.
+
+== Other
+
+Each boat and projectile should be represented as some sort of entity
+
+Entities should have position and speed while acceleration is done on the
+server using client input or just physics, in the case of projectiles.
+
+== Connection Protocol
+
+See
+https://github.com/RedcraneStudio/redcrane-engine/blob/master/src/net/client.h[net/client.h]
+for a description of the protocol

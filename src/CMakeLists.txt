@@ -12,6 +12,11 @@ find_package(LibUV REQUIRED)
 find_package(GLM REQUIRED)
 add_subdirectory(common)
 
+add_subdirectory(io)
+
+find_package(ENet)
+add_subdirectory(net)
+
 find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
 add_subdirectory(gfx)
@@ -101,7 +106,7 @@ add_dependencies(redc ffi_decl_header)
 target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
         ${BULLET_INCLUDE_DIRS})
 target_link_libraries(redc PUBLIC
-        commonlib gfxlib gfxextralib uselib
+        commonlib gfxlib gfxextralib uselib iolib netlib
         fpslib inputlib effectslib SoloudStatic
         freetype-gl
         ${Boost_SYSTEM_LIBRARY}
