@@ -106,7 +106,8 @@ namespace redc { namespace lua
       // We are either getting a string that is a valid integer, or something
       // completely ridiculous. This is not an valid issue to crash, but still
       // is incorrect.
-      log_w("Mod must return an integer return code");
+      log_w("Mod must return an integer return code (type found: %)",
+            lua_type(L, -1));
     }
 
     // Now get the return value as an integer and return that
