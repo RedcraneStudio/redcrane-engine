@@ -148,6 +148,24 @@ namespace redc { namespace net
         break;
       }
       case Client_State::Playing:
+      {
+        if(event)
+        {
+          if(event->type == ENET_EVENT_TYPE_RECEIVE)
+          {
+            // Receive game packets
+            receive_data(ctx.cur_update, event->packet);
+          }
+        }
+        else
+        {
+          // No event given
+
+          // Send latest client input with some index so that inputs with the
+          // same id can be idempotent.
+          send_data(ctx.cur_input, ctx.server_peer);
+        }
+      }
       case Client_State::Bad_Version:
         break;
     }

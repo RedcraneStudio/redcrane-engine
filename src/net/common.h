@@ -7,6 +7,7 @@
 #define REDC_ENGINE_COMMON_H
 #include <cstdint>
 #include <msgpack.hpp>
+#include "../input/input.h"
 namespace redc
 {
   constexpr static uint16_t PROTOCOL_VERSION = 1;
@@ -38,5 +39,13 @@ namespace redc
   using team_id = uint16_t;
 
   using player_id = uint16_t;
+
+  struct Input_Update
+  {
+    uint8_t index;
+    Input input;
+
+    MSGPACK_DEFINE(index, input);
+  };
 }
 #endif //RED_CRANE_ENGINE_COMMON_H

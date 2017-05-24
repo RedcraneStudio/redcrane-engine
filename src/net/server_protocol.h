@@ -50,7 +50,8 @@ namespace redc { namespace net
     boost::optional<Player_Info> player_info;
 
     // Somehow limit this to a certain amount? Circular buffer?
-    std::vector<Input> inputs;
+    std::size_t cur_input_i = 0;
+    std::array<Input, 256> inputs;
   };
 
   struct Server_Context

@@ -136,6 +136,8 @@ namespace redc { namespace net
     Player_Info player_info;
     // Spawn
     Spawn spawn;
+    // Playing
+    Input_Update cur_input;
   };
 
   /*!

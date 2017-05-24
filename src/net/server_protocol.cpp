@@ -147,16 +147,12 @@ namespace redc { namespace net
       }
       case Remote_Client_State::Playing:
       {
-        Input cur_input;
-        if(!receive_data(cur_input, event.packet))
+        Input_Update input;
+        if(receive_data(input, event.packet))
         {
-          // Possibly handle other types of packets.
+          client.inputs[input.index] = input.input;
+          client.cur_input_i = input.index;
         }
-        else
-        {
-          client.inputs.push_back(cur_input);
-        }
-
         break;
       }
     }
