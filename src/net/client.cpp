@@ -65,7 +65,7 @@ namespace redc { namespace net
           // Serialize versions
 
           // Send both
-          Version_Info version{CLIENT_PROTOCOL_VERSION, ctx.client_version};
+          Version_Info version{PROTOCOL_VERSION, ctx.client_version};
           send_data(version, ctx.server_peer);
 
           // Now we are waiting for a response
@@ -93,7 +93,7 @@ namespace redc { namespace net
           if(!version_okay.protocol)
           {
             log_e("Server rejected client protocol version: %",
-                  CLIENT_PROTOCOL_VERSION);
+                  PROTOCOL_VERSION);
           }
           if(!version_okay.client)
           {

@@ -65,7 +65,7 @@ namespace redc { namespace net
         // Make sure the version is correct
         Version_Okay versions_okay;
         versions_okay.protocol =
-          client.version.protocol_version == CLIENT_PROTOCOL_VERSION;
+          client.version.protocol_version == PROTOCOL_VERSION;
         versions_okay.client = client.version.client_version == 1;
 
         // How do we stand in terms of compatibility?

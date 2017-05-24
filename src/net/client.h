@@ -12,10 +12,9 @@
 #include "../common/glm_vec_serialize.h"
 
 #include "net_io.h"
+#include "common.h"
 namespace redc { namespace net
 {
-
-#define CLIENT_PROTOCOL_VERSION 1
   // 1. Client initiates a connection to the server, sends a packet with:
   //    - Highest client and protocol version that it supports.
   //    - Client identification (not sure how we'll do this yet).
