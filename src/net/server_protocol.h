@@ -4,6 +4,8 @@
  */
 #pragma once
 #include <boost/optional.hpp>
+
+#include "common.h"
 #include "client.h"
 
 #include "../common/id_map.hpp"
