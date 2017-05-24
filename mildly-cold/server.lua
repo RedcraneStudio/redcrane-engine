@@ -1,3 +1,3 @@
-local server = {}
-
-return server
+local client = ...
+local err, ret = coroutine.resume(client)
+return ret

@@ -27,6 +27,7 @@ return function ()
         coroutine = {
             create = coroutine.create,
             resume = coroutine.resume,
+            yield = coroutine.yield,
             running = coroutine.running,
             status = coroutine.status,
             wrap = coroutine.wrap

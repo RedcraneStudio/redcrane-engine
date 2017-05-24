@@ -137,4 +137,4 @@ while rc:running() do
     rc:ms_sleep(2)
 end
 
-return 0
+coroutine.yield(0)
