@@ -14,8 +14,12 @@ add_subdirectory(common)
 
 add_subdirectory(io)
 
-find_package(ENet)
-add_subdirectory(net)
+#find_package(ENet)
+#add_subdirectory(net)
+
+find_package(Sodium)
+find_package(mbed)
+find_package(Yojimbo)
 
 find_package(Boost REQUIRED COMPONENTS system program_options filesystem)
 
@@ -103,12 +107,18 @@ set_target_properties(redc PROPERTIES LINKER_LANGUAGE C)
 add_data(ffi_decl_header ALL share/${PROJECT_NAME}/src redcrane_decl.h)
 add_dependencies(redc ffi_decl_header)
 
-target_include_directories(redc PUBLIC ${SDL2_INCLUDE_DIRS}
+target_include_directories(redc PUBLIC
+        ${Yojimbo_INCLUDE_DIR}
+        ${SDL2_INCLUDE_DIRS}
         ${BULLET_INCLUDE_DIRS})
 target_link_libraries(redc PUBLIC
-        commonlib gfxlib gfxextralib uselib iolib netlib
+        commonlib gfxlib gfxextralib uselib iolib
         fpslib inputlib effectslib SoloudStatic
         freetype-gl
+        ${Yojimbo_LIBRARY}
+        ${Sodium_LIBRARY}
+        ${mbedcrypto_LIBRARY}
+        ${mbedtls_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
