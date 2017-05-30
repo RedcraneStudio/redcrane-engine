@@ -138,3 +138,4 @@ while rc:running() do
 end
 
 coroutine.yield(0)
+return 0
