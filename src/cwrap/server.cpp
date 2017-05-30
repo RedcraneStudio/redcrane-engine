@@ -14,6 +14,38 @@ using namespace redc;
 
 extern "C"
 {
+  int redc_server_running(void *eng)
+  {
+    auto rce = (Engine*) eng;
+    if(rce->server)
+    {
+      return rce->server->yj_server->IsRunning();
+    }
+
+    return false;
+  }
+
+  int redc_server_start(void *eng, int max_clients)
+  {
+    auto rce = (Engine*) eng;
+    REDC_ASSERT_HAS_SERVER(rce);
+
+    log_i("Starting server for % clients", max_clients);
+    rce->server->yj_server->Start(max_clients);
+    return rce->server->yj_server->IsRunning();
+  }
+
+  void redc_server_step(void *eng)
+  {
+    auto rce = (Engine*) eng;
+    REDC_ASSERT_HAS_SERVER(rce);
+
+    rce->server->yj_server->AdvanceTime(redc_cur_time());
+
+    rce->server->yj_server->ReceivePackets();
+    rce->server->yj_server->SendPackets();
+  }
+
   void redc_server_req_player(void *eng)
   {
     auto rce = (Engine*) eng;

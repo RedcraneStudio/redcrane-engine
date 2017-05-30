@@ -190,7 +190,7 @@ extern "C"
             REDC_PROTOCOL_VERSION,
             cur_time
     );
-    rce->server->yj_server = std::make_unique<yojimbo::Server>(
+    rce->server->yj_server = std::make_unique<Net_Server>(
             yojimbo::GetDefaultAllocator(), *rce->server->yj_transport,
             yojimbo::ClientServerConfig(),
             cur_time

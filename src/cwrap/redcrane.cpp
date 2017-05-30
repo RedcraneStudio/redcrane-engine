@@ -348,6 +348,22 @@ namespace redc
     bt_world->setGravity(btVector3(0.0f, -9.81f, 0.0f));
   }
 
+  Net_Server::Net_Server(yojimbo::Allocator& allocator,
+                         yojimbo::Transport& transport,
+                         yojimbo::ClientServerConfig const& csconfig,
+                         double time)
+          : Server(allocator, transport, csconfig, time)
+  {
+
+  }
+  yojimbo::MessageFactory* Net_Server::CreateMessageFactory(
+          yojimbo::Allocator& allocator,
+          yojimbo::ServerResourceType type,
+          int client_index)
+  {
+    return YOJIMBO_NEW(allocator, Net_Message_Factory);
+  }
+
   void Server::req_player()
   {
     // New id

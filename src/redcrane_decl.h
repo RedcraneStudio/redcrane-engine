@@ -143,6 +143,9 @@ int redc_map_set_light_state(void *map, const char *light,
 
 // See cwrap/server.cpp
 
+int redc_server_running(void *eng);
+int redc_server_start(void *eng, int max_clients);
+void redc_server_step(void *eng);
 void redc_server_req_player(void *eng);
 
 typedef struct
