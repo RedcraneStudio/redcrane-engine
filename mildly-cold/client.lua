@@ -135,6 +135,7 @@ while rc:running() do
 
     rc:swap_window()
     rc:ms_sleep(2)
+    coroutine.yield(1)
 end
 
 coroutine.yield(0)
