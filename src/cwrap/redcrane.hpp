@@ -166,6 +166,7 @@ namespace redc
   struct Server : public Server_Base
   {
     Server(Engine& eng);
+    virtual ~Server();
 
     void req_player() override;
     Player& player(player_id id) override;

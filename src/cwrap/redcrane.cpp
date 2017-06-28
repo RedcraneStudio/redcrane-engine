@@ -348,6 +348,11 @@ namespace redc
     bt_world->setGravity(btVector3(0.0f, -9.81f, 0.0f));
   }
 
+  Server::~Server()
+  {
+    yj_server->Stop();
+  }
+
   Net_Server::Net_Server(yojimbo::Allocator& allocator,
                          yojimbo::Transport& transport,
                          yojimbo::ClientServerConfig const& csconfig,
