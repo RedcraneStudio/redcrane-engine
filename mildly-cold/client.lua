@@ -131,7 +131,9 @@ while rc:running() do
     scene:render()
 
     -- draw the hud
-    rc.text.draw(message_stream:full_text())
+    rc.text.draw(
+        message_stream:full_text(), {x = 0.0, y = -1.0}, "bottom_center"
+    )
 
     rc:swap_window()
     rc:ms_sleep(2)
