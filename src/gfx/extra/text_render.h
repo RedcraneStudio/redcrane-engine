@@ -18,12 +18,26 @@
 
 namespace redc
 {
+  enum class Reference_Point
+  {
+    Top_Center,
+    Bottom_Center,
+    Left_Center,
+    Right_Center,
+    Center,
+    Top_Left,
+    Top_Right,
+    Bottom_Left,
+    Bottom_Right
+  };
+
   struct Text_Render_Ctx
   {
     explicit Text_Render_Ctx(std::string font_path);
     ~Text_Render_Ctx();
 
-    void render_text(gfx::IDriver& driver, std::string text, glm::vec2 pt);
+    void render_text(gfx::IDriver& driver, std::string text, glm::vec2 pt,
+                     Reference_Point ref_pt);
   private:
     std::unique_ptr<gfx::IShader> shader_;
 

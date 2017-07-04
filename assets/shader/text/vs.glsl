@@ -8,6 +8,7 @@ layout(location = 4) in float agamma;
 
 // x: x, y: y, z: width, w: height
 uniform vec4 viewport;
+uniform vec2 translation;
 
 out vec4 color_fs;
 out vec2 tex_coord_fs;
@@ -16,5 +17,5 @@ void main() {
     color_fs = color;
     tex_coord_fs = tex_coord;
 
-    gl_Position = vec4(vertex.xy / viewport.zw, vertex.z, 1.0f);
+    gl_Position = vec4(translation + (vertex.xy / viewport.zw), vertex.z, 1.0f);
 }

@@ -11,7 +11,8 @@ extern "C"
     REDC_ASSERT_HAS_CLIENT(rce);
 
     rce->client->text_render->render_text(
-            *rce->client->driver, std::string{text}, {x, y}
+            *rce->client->driver, std::string{text}, {x, y},
+            Reference_Point::Top_Left
     );
   }
 
