@@ -158,7 +158,8 @@ int redc_server_poll_event(void *eng, Redc_Event *event);
 
 // See cwrap/text.cpp
 
-void redc_text_draw(void *eng, const char *text, float x, float y);
+void redc_text_draw(void *eng, const char *text, float x, float y,
+                    unsigned int side);
 
 void *redc_text_stream_new(void *eng, float timeout);
 void redc_text_stream_delete(void *stream);

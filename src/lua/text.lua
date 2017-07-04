@@ -4,9 +4,36 @@ local rc = require('redcrane')
 
 local M = {}
 
-function M.draw(text, pt)
-    pt = pt or {x = 0.0, y = 0.0}
-    return ffi.C.redc_text_draw(rc.engine, text, pt.x, pt.y)
+function M.draw(text, pt, ref)
+    pt = pt or {x = 0.0, y = 0.0 }
+
+    -- Keep this in sync with the enum values in text_render.h
+    local side
+    if not ref then
+        side = 0
+    elseif ref == "top_left" then
+        side = 0
+    elseif ref == "top_center" then
+        side = 1
+    elseif ref == "top_right" then
+        side = 2
+    elseif ref == "right_center" then
+        side = 3
+    elseif ref == "bottom_right" then
+        side = 4
+    elseif ref == "bottom_center" then
+        side = 5
+    elseif ref == "bottom_left" then
+        side = 6
+    elseif ref == "left_center" then
+        side = 7
+    elseif ref == "center" then
+        side = 8
+    else
+        side = 0
+    end
+
+    return ffi.C.redc_text_draw(rc.engine, text, pt.x, pt.y, side)
 end
 
 function M.make_text_stream(timeout)

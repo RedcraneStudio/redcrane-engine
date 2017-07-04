@@ -5,14 +5,15 @@ using namespace redc;
 
 extern "C"
 {
-  void redc_text_draw(void *eng, const char *text, float x, float y)
+  void redc_text_draw(void *eng, const char *text, float x, float y,
+                      unsigned int side)
   {
     auto rce = (redc::Engine*) eng;
     REDC_ASSERT_HAS_CLIENT(rce);
 
     rce->client->text_render->render_text(
             *rce->client->driver, std::string{text}, {x, y},
-            Reference_Point::Top_Left
+            static_cast<Reference_Point>(side)
     );
   }
 

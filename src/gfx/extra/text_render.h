@@ -18,17 +18,17 @@
 
 namespace redc
 {
-  enum class Reference_Point
+  enum class Reference_Point : unsigned int
   {
+    Top_Left = 0,
     Top_Center,
-    Bottom_Center,
-    Left_Center,
-    Right_Center,
-    Center,
-    Top_Left,
     Top_Right,
+    Right_Center,
+    Bottom_Right,
+    Bottom_Center,
     Bottom_Left,
-    Bottom_Right
+    Left_Center,
+    Center,
   };
 
   struct Text_Render_Ctx
