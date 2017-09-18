@@ -13,45 +13,13 @@ coding style.
 
 Love you all and good luck ;)
 
-== Setup
+=== Installing dependencies on Ubuntu 17.04
 
-* Linux
-** Arch Linux
-*** Arch is my daily driver, so everything should work once dependencies are installed.
-** Ubuntu/Debian
-*** See below; because these distributions tend to have old (well, just not
-    insanely new) packages, there might be a build error or five. That being
-    said, if you have a problem I would like to fix it, so report it anyway,
-    just know these things might come up.
-* Windows and Mac
-** If it doesn't compile or work, file a bug. I compile it on Windows from time
-   to time to fix build errors but I've never actually run the engine to see if
-   it works.
+    > apt install build-essential cmake libboost-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev libsdl2-dev libfreetype6-dev libbullet-dev luajit libluajit-5.1-dev libglew-dev libglm-dev libmsgpack-dev libuv1-dev imagemagick
 
-=== Installing dependencies for Debian/Ubuntu (Old)
+Other distributions will almost definitely work.
 
-
-Install the following packages through apt:
-
-    libpng-dev
-    libmsgpack-dev
-    libluajit-5.1-dev
-    g++
-    gcc
-    libenet-dev
-    libsdl2-dev
-    libfreetype6-dev
-    libbullet-dev
-
-
-You must also build the following libraries from source because the version in
-apt is probably too old.
-
-* Cmake: https://cmake.org/files/v3.5/cmake-3.5.0-rc3-Linux-x86_64.tar.gz
-* libuv-dev: http://dist.libuv.org/dist/v1.8.0/
-* boost: http://sourceforge.net/projects/boost/files/boost/1.60.0/
-* libglm-dev: http://glm.g-truc.net/0.9.7/index.html
-* ImageMagick: https://www.imagemagick.org/script/index.php
+Windows and Mac should work, but they are untested so who knows!
 
 === Cloning and building
 
