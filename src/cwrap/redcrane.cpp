@@ -350,23 +350,7 @@ namespace redc
 
   Server::~Server()
   {
-    yj_server->Stop();
-  }
-
-  Net_Server::Net_Server(yojimbo::Allocator& allocator,
-                         yojimbo::Transport& transport,
-                         yojimbo::ClientServerConfig const& csconfig,
-                         double time)
-          : Server(allocator, transport, csconfig, time)
-  {
-
-  }
-  yojimbo::MessageFactory* Net_Server::CreateMessageFactory(
-          yojimbo::Allocator& allocator,
-          yojimbo::ServerResourceType type,
-          int client_index)
-  {
-    return YOJIMBO_NEW(allocator, Net_Message_Factory);
+    // Stop server
   }
 
   void Server::req_player()

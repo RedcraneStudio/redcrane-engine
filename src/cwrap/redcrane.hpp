@@ -68,9 +68,6 @@ REDC_ASSERT_MSG(rce->client != nullptr, "Client must be initialized")
 #define REDC_ASSERT_HAS_SERVER(rce) \
 REDC_ASSERT_MSG(rce->server != nullptr, "Server must be initialized")
 
-#include <yojimbo_server.h>
-#include <yojimbo_message.h>
-
 namespace redc
 {
   template <class T>
@@ -194,32 +191,10 @@ namespace redc
     // Server events are distinctly different from engine standard events.
     bool poll_lua_event(Lua_Event& event);
     void push_lua_event(Lua_Event event) { lua_event_queue_.push(event); }
-
-    std::unique_ptr<yojimbo::NetworkTransport> yj_transport;
-    std::unique_ptr<yojimbo::Server> yj_server;
   private:
     Engine* engine_;
 
     Queue_Event_Source<Lua_Event> lua_event_queue_;
-  };
-
-  YOJIMBO_MESSAGE_FACTORY_START(Net_Message_Factory,
-                                yojimbo::MessageFactory, 0);
-  YOJIMBO_MESSAGE_FACTORY_FINISH();
-
-  struct Net_Server : public yojimbo::Server
-  {
-    Net_Server(yojimbo::Allocator& allocator,
-               yojimbo::Transport& transport,
-               yojimbo::ClientServerConfig const& csconfig,
-               double time);
-    virtual ~Net_Server() {}
-
-    yojimbo::MessageFactory* CreateMessageFactory(
-            yojimbo::Allocator& allocator,
-            yojimbo::ServerResourceType type,
-            int client_index
-    ) override;
   };
 
   struct Mesh_Object

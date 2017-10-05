@@ -15,8 +15,6 @@
 #include "../assets/load_dir.h"
 #include "../gfx/gl/driver.h"
 
-#include <yojimbo.h>
-
 #include <thread>
 #include <chrono>
 
@@ -92,7 +90,7 @@ extern "C"
     eng->start_time = std::chrono::high_resolution_clock::now();
     eng->last_frame = eng->start_time;
 
-    bool success = InitializeYojimbo();
+    bool success = /*InitializeYojimbo();*/ false;
     if(!success)
     {
       log_w("Unable to initialize Yojimbo; only local play will be available");
@@ -166,36 +164,6 @@ extern "C"
     auto rce = (Engine*) eng;
     rce->server = std::make_unique<Server>(*rce);
 
-    REDC_ASSERT_MSG(yojimbo::IsNetworkInitialized(), "Yojimbo must be "
-            "initialized for server functionality");
-
-    // Find out our network
-    yojimbo::Address addr[5];
-    int num_interfaces = 0;
-    yojimbo::GetNetworkAddresses(addr, num_interfaces, 5);
-    REDC_ASSERT_MSG(num_interfaces > 0, "Network interfaces must be present");
-
-    for(int i = 0; i < num_interfaces; ++i)
-    {
-      char addr_str[yojimbo::MaxAddressLength];
-      addr[0].ToString(addr_str, yojimbo::MaxAddressLength);
-      log_d("Address #%: %", i+1, addr_str);
-    }
-    log_d("Binding to address #1");
-
-    auto cur_time = redc_cur_time();
-    rce->server->yj_transport = std::make_unique<yojimbo::NetworkTransport>(
-            yojimbo::GetDefaultAllocator(),
-            addr[0],
-            REDC_PROTOCOL_VERSION,
-            cur_time
-    );
-    rce->server->yj_server = std::make_unique<Net_Server>(
-            yojimbo::GetDefaultAllocator(), *rce->server->yj_transport,
-            yojimbo::ClientServerConfig(),
-            cur_time
-    );
-
     log_i("Initializing server subsystem ... Successful");
   }
   void redc_uninit_engine(void* eng)
@@ -205,7 +173,7 @@ extern "C"
     delete rce;
 
     // Shutdown Yojimbo
-    ShutdownYojimbo();
+    //ShutdownYojimbo();
   }
 
   void redc_step_engine(void* eng)
