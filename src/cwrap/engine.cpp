@@ -154,7 +154,8 @@ extern "C"
     rce->client->step_sounds[4].load("../assets/snd/walk_variation_4.wav");
 
     rce->client->text_render = std::make_unique<Text_Render_Ctx>(
-            "/usr/share/fonts/TTF/Hack-Regular.ttf"
+            // TODO Provide configuration for the location of this file
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
     );
 
     log_i("Initializing client subsystem ... Successful");
