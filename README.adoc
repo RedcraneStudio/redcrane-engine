@@ -21,6 +21,12 @@ Other distributions will almost definitely work.
 
 Windows and Mac should work, but they are untested so who knows!
 
+=== Installing on Arch Linux
+
+Redcrane Engine link:https://aur.archlinux.org/packages/redcrane-engine-git[is available from] the Arch Linux User Repository (AUR).
+
+Packages in the AUR are community maintained - there is no official support for this package.
+
 === Cloning and building
 
     git clone https://bitbucket.org/lukesanantonio/redcrane-engine.git
