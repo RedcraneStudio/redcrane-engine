@@ -7,8 +7,10 @@
 #include "common/debugging.h"
 namespace redc
 {
-  SDL_Init_Lock::SDL_Init_Lock(SDL_Init_Lock&& l) : window(l.window),
-                                                    gl_context(l.gl_context)
+  SDL_Init_Lock::SDL_Init_Lock(SDL_Init_Lock&& l)
+          : window(l.window),
+            gl_context(l.gl_context),
+            properties(l.properties)
   {
     l.window = nullptr;
     l.gl_context = nullptr;
@@ -18,6 +20,7 @@ namespace redc
   {
     window = l.window;
     gl_context = l.gl_context;
+    l.properties = l.properties;
 
     l.window = nullptr;
     l.gl_context = nullptr;
@@ -87,8 +90,6 @@ namespace redc
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
-
     ret.gl_context = SDL_GL_CreateContext(ret.window);
 
     bool nvidia_fix = false;
@@ -108,6 +109,9 @@ namespace redc
 
       SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
       SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+
+      // Don't request an sRGB context right away, just check later and do gamma
+      // correction ourselves if necessary.
 
       ret.gl_context = SDL_GL_CreateContext(ret.window);
       nvidia_fix = true;
@@ -145,13 +149,16 @@ namespace redc
     {
     case GL_LINEAR:
       framebuf_string = "RGB";
+      ret.properties.srgb = false;
       if(nvidia_fix)
       {
         framebuf_string = "sRGB (probably; NVIDIA bug)";
+        ret.properties.srgb = true;
       }
       break;
     case GL_SRGB:
       framebuf_string = "sRGB";
+      ret.properties.srgb = true;
       break;
     default:
       REDC_UNREACHABLE_MSG("Invalid framebuffer type");
