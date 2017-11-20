@@ -3,5 +3,5 @@
 -- All rights reserved.
 
 return {
-    window_title = "Feels Good Man",
+    mod_name = "Feels Good Man",
 }

@@ -11,104 +11,62 @@ local cfg = ...
 
 local rc = require("redcrane")
 
-local options = {
+local config_spec = {
     cwd = {
         desc = "Current working directory",
         expected_type = "string",
         default = ".",
-        runtime = false,
     },
     mod_name = {
         desc = "Mod name",
         expected_type = "string",
         default = "Redcrane Engine Game",
-        runtime = false,
     },
     default_port = {
         desc = "Default port",
         expected_type = "number",
         default = 28222,
-        runtime = false,
     },
     client_entry = {
         desc = "Client entry file",
         expected_type = "string",
         default = "client.lua",
-        runtime = false,
     },
     server_entry = {
         desc = "Server entry file",
         expected_type = "string",
         default = "server.lua",
-        runtime = false,
     },
 }
 
+-- Verifies the type of a given value.
 function checktype(var, expect, name)
     assert(type(var) == expect, name.." must be a "..expect)
 end
 
--- Put each option in a new config
-local newcfg = {}
-local engcfg = {}
-for key, option in pairs(options) do
-
-    -- Use default if the user didn't provide one
+-- Build one config for C interface / engine consumption and the other for
+-- access in the mod.
+local modcfg = {}
+for key, option in pairs(config_spec) do
+    -- Get the value or default
     local option_value = cfg[key] or option.default
-
-    -- Make sure it isn't nil
+    -- If there is no default, make sure the value is given.
     assert(option_value ~= nil, "Value for option '"..key.."' not given")
 
     -- Make sure it is the correct type
     checktype(option_value, option.expected_type, option.desc)
 
-    local get_fn
-    local set_fn
-    if option.runtime then
-        -- Use the provided get function
-        get_fn = function(self)
-            return option.get_fn()
-        end
-
-        -- Verify type and use setter
-        set_fn = function(self, value)
-            checktype(value, option.expected_type, option.desc)
-            -- Use a closure here so we don't have to expose the C function
-            -- directly, they have to go through us and the type checking.
-            return option.set_fn(value)
-        end
-    else
-        -- Just return the provided value
-        get_fn = function(self)
-            return self.value
-        end
-
-        -- Fail
-        set_fn = function(self, value)
-            error("Config option '"..self.desc.. "' read-only during runtime")
-        end
-    end
-
-    -- Put it in the new config
-    newcfg[key] = {
-        desc = option.desc,
-        value = option_value,
-        get = get_fn,
-        set = set_fn
-    }
-    -- Use this config to initialize the engine
-    engcfg[key] = option_value
+    -- Add sanitized and checked value/default to the main config.
+    modcfg[key] = option_value
 end
-rc.config = setmetatable({config_ = newcfg}, {
-    __index = function(table, key)
-        -- Call the individual get function for this particular option with
-        -- itself as the parameter.
-        return table.config_[key]:get()
-    end,
+
+-- Build a read-only table for config access in the mod's lua code
+rc.config = setmetatable({}, {
+    __index = modcfg,
     __newindex = function(table, key, value)
-        local option = table.config_[key]
-        option.value = option:set(value)
-    end
+        error("Config option '"..self.desc.. "' is read-only during runtime")
+    end,
+    __metatable = false,
 })
 
-rc:init(engcfg)
+rc:init(modcfg)
