@@ -128,8 +128,7 @@ int main(int argc, char** argv)
   light0.light.fall_off_angle = REDC_PI / 2.0f;
   light0.light.fall_off_exponent = 1.0f;
 
-  gfx::Rendering_State render_state;
-  render_state.driver = &driver;
+  std::unique_ptr<gfx::Deferred_Shading> deferred;
 
   bool running = true;
   while(running)
@@ -163,9 +162,7 @@ int main(int argc, char** argv)
     driver.set_blend_policy(gfx::Blend_Policy::Transparency);
     envmap.render(driver, cam);
 
-    render_state.cur_technique_i = -1;
-    render_state.cur_material_i = -1;
-    render_asset(asset, cam, render_state);
+    render_asset(asset, cam, driver, deferred);
 
     SDL_GL_SwapWindow(sdl_window);
   }

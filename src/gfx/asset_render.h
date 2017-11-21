@@ -20,17 +20,7 @@ namespace redc { namespace gfx
     Value value;
   };
 
-  struct Rendering_State
-  {
-    Technique_Ref cur_technique_i = -1;
-    Material_Ref cur_material_i = -1;
-
-    std::vector<Param_Override> overrides;
-
-    IDriver* driver;
-    std::unique_ptr<Deferred_Shading> deferred;
-  };
-
   void render_asset(Asset const& asset, Camera const& camera,
-                    Rendering_State& cur_rendering_state);
+                    IDriver& driver,
+                    std::unique_ptr<Deferred_Shading>& deferred);
 } }

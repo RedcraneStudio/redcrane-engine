@@ -260,9 +260,7 @@ namespace redc
     Timer<> frame_timer;
 #endif
 
-    // Use for the rendering the map, and ideally everything, so that it works
-    // properly.
-    gfx::Rendering_State render_state;
+    std::unique_ptr<gfx::Deferred_Shading> deferred;
 
     // Maps are completely referenced in the engine, so we don't need peer locks
     // here.

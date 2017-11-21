@@ -223,10 +223,20 @@ namespace redc { namespace gfx
       break;
     }
   }
-  void render_asset(Asset const& asset, gfx::Camera const& camera,
-                    Rendering_State& cur_rendering_state)
+
+  struct Rendering_State
   {
-    IDriver& driver = *cur_rendering_state.driver;
+    Technique_Ref cur_technique_i = -1;
+    Material_Ref cur_material_i = -1;
+
+    std::vector<Param_Override> overrides;
+  };
+
+  void render_asset(Asset const& asset, Camera const& camera, IDriver& driver,
+                    std::unique_ptr<Deferred_Shading>& deferred)
+  {
+    Rendering_State cur_rendering_state;
+
     // Figure out all the models of every mesh.
     // TODO: This can be cached!
     std::vector<Render_Params> render_params;
@@ -248,7 +258,7 @@ namespace redc { namespace gfx
           render.primitive = &primitive;
           render.model = model;
           render.local = local_mat;
-          render_params.push_back(std::move(render));
+          render_params.push_back(render);
         }
       }
 
@@ -293,7 +303,6 @@ namespace redc { namespace gfx
         // Just sort by technique, since both either use forward or deferred.
         return lhmat.technique_i < rhmat.technique_i;
       }
-
     });
 
     // Render each set of parameters!
@@ -319,12 +328,9 @@ namespace redc { namespace gfx
 
           if(technique.is_deferred)
           {
-            if(!cur_rendering_state.deferred)
+            if(!deferred)
             {
-              cur_rendering_state.deferred =
-                std::make_unique<gfx::Deferred_Shading>(
-                  *cur_rendering_state.driver
-                  );
+              deferred = std::make_unique<gfx::Deferred_Shading>(driver);
 
               gfx::Output_Interface oi;
 
@@ -349,24 +355,22 @@ namespace redc { namespace gfx
               oi.attachments.push_back(color);
               oi.attachments.push_back(depth);
 
-              gfx::IDriver& driver = *cur_rendering_state.driver;
-              cur_rendering_state.deferred->init(driver.window_extents(), oi);
+              deferred->init(driver.window_extents(), oi);
             }
 
-            if(!cur_rendering_state.deferred->is_active())
+            if(!deferred->is_active())
             {
-              cur_rendering_state.deferred->use();
+              deferred->use();
               ran_deferred = true;
             }
           }
           else
           {
             // We need to do forward rendering
-            if(cur_rendering_state.deferred &&
-               cur_rendering_state.deferred->is_active())
+            if(deferred && deferred->is_active())
             {
               // Disable and render
-              cur_rendering_state.deferred->finish();
+              deferred->finish();
             }
 
             // Continue doing forward rendering.
@@ -525,7 +529,7 @@ namespace redc { namespace gfx
         }
       }
 
-      cur_rendering_state.deferred->render(camera, lights.size(), &lights[0]);
+      deferred->render(camera, lights.size(), &lights[0]);
     }
   }
 } }

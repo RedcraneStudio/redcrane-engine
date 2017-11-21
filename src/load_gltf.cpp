@@ -62,10 +62,7 @@ int main(int argc, char** argv)
   }
 
   // Render
-  redc::gfx::Rendering_State cur_rendering_state;
-
-  // TODO: Put a pointer to the driver in the asset
-  cur_rendering_state.driver = &driver;
+  std::unique_ptr<redc::gfx::Deferred_Shading> deferred;
 
   redc::gfx::Camera cam = redc::gfx::make_fps_camera({1000,1000});
 
@@ -104,7 +101,7 @@ int main(int argc, char** argv)
 
     driver.clear();
 
-    render_asset(asset, cam, cur_rendering_state);
+    render_asset(asset, cam, driver, deferred);
 
     SDL_GL_SwapWindow(sdl_init.window);
   }
