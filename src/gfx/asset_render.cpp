@@ -58,8 +58,7 @@ namespace redc { namespace gfx
     return cur_model;
   }
 
-  // TODO: This is a bad name
-  struct Render_Params
+  struct Render_Bundle
   {
     IMesh* mesh;
     Primitive const* primitive;
@@ -68,24 +67,24 @@ namespace redc { namespace gfx
   };
 
   glm::mat4 get_local(Param_Decl param, Asset const& asset,
-                      Render_Params const& cur_render)
+                      Render_Bundle const& render_bundle)
   {
     // If the semantic mentions a particular node, use its model, otherwise use
     // the model from the render params
     if(param.node)
       return local_transformation(asset.nodes[param.node.value()]);
 
-    return cur_render.local;
+    return render_bundle.local;
   }
   glm::mat4 get_model(Param_Decl param, Asset const& asset,
-                      Render_Params const& cur_render)
+                      Render_Bundle const& render_bundle)
   {
     // If the semantic mentions a particular node, use its model, otherwise use
     // the model from the render params
     if(param.node)
       return model_transformation(asset.nodes, param.node.value());
 
-    return cur_render.model;
+    return render_bundle.model;
   }
   glm::mat4 get_view(gfx::Camera const& cam)
   {
@@ -101,7 +100,7 @@ namespace redc { namespace gfx
   // because of the copying between matrices / arrays.
   void set_semantic_value(IShader& shader, Param_Decl param,
                           Asset const& asset,
-                          Render_Params const& cur_render,
+                          Render_Bundle const& cur_render,
                           gfx::Camera const& cam)
   {
     // We must be dealing with semantic *parameters*
@@ -239,7 +238,7 @@ namespace redc { namespace gfx
 
     // Figure out all the models of every mesh.
     // TODO: This can be cached!
-    std::vector<Render_Params> render_params;
+    std::vector<Render_Bundle> render_params;
 
     std::size_t node_i = 0;
     for(auto node : asset.nodes)
@@ -253,7 +252,7 @@ namespace redc { namespace gfx
         Mesh const& mesh = asset.meshes[mesh_ref];
         for(Primitive const& primitive : asset.meshes[mesh_ref].primitives)
         {
-          Render_Params render;
+          Render_Bundle render;
           render.mesh = mesh.repr.get();
           render.primitive = &primitive;
           render.model = model;
