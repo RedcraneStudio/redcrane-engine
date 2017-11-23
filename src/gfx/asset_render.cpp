@@ -8,6 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 namespace redc { namespace gfx
 {
+  /*
+   * \brief Return the local transformation assigned to this node, only.
+   */
   glm::mat4 local_transformation(Node const& node)
   {
       // Find the model of the current node and then go up a level
@@ -42,6 +45,11 @@ namespace redc { namespace gfx
 
       return this_model;
   }
+  /*
+   * \brief Return the transformation from model to world space.
+   *
+   * Uses the transformations of the entire node hierarchy.
+   */
   glm::mat4 model_transformation(std::vector<Node> const& nodes, Node_Ref child)
   {
     boost::optional<Node_Ref> cur_node = child;
