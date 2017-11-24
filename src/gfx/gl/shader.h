@@ -69,9 +69,9 @@ namespace redc { namespace gfx { namespace gl
     // Get the actual location of a given tag / uniform
     GLint get_location_from_tag(tag_t) const;
 
-    Attrib_Bind get_attrib_bind(std::string attrib) const;
-    Param_Bind get_param_bind(std::string param) const;
-    Param_Bind get_tag_param_bind(std::string tag) const;
+    Attrib_Bind get_attrib_bind(std::string attrib) const override;
+    Param_Bind get_param_bind(std::string param) const override;
+    Param_Bind get_tag_param_bind(std::string tag) const override;
 
   private:
     Driver* driver_;
